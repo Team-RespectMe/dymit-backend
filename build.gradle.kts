@@ -8,6 +8,7 @@ plugins {
 group = "net.noti-me.dymit"
 version = "0.0.1-SNAPSHOT"
 val kotestVersion = "5.9.1"
+val springDocVersion = "2.8.9"
 
 java {
 	toolchain {
@@ -24,10 +25,12 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}")
+	implementation("org.springdoc:springdoc-openapi-starter-common:${springDocVersion}")
 
-	
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
 	// testImplementation("io.kotest:kotest-extensions-htmlreporter:5.9.1")
