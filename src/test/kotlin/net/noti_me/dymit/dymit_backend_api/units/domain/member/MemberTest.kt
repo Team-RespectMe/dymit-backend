@@ -63,7 +63,7 @@ internal class MemberTest : BehaviorSpec() {
         given("프로필 사진 관리 기능") {
             val profileImage = MemberProfileImageVo(
                 filePath = "path/to/image.jpg",
-                cdnUrl = "https://cdn.example.com/image.jpg",
+                url = "https://cdn.example.com/image.jpg",
                 fileSize = 1024L,
                 width = 100,
                 height = 100
