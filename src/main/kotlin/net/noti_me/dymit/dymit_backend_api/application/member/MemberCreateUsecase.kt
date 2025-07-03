@@ -6,4 +6,6 @@ import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCo
 interface MemberCreateUsecase {
 
     fun createMember(request: MemberCreateCommand): MemberCreateResult
+
+    fun isDuplicatedNickname(nickname: String)
 }

@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
+import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl.JwtAuthService
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateResult
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Service
 class MemberCreateUsecaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
-    private val oidcAuthenticationProviders: List<OidcAuthenticationProvider>
+    private val oidcAuthenticationProviders: List<OidcAuthenticationProvider>,
+    private val jwtAuthService: JwtAuthService
 ) : MemberCreateUsecase {
 
     override fun createMember(command: MemberCreateCommand): MemberCreateResult {
@@ -27,7 +29,7 @@ class MemberCreateUsecaseImpl(
 
         val payload = oidcAuthenticationProvider.getPayload(command.idToken)
         loadMemberPort.loadByOidcIdentity(OidcIdentity(provider = command.oidcProvider.name, subject = payload.sub))
-            ?.let{ throw ConflictException("이미 회원가입이 된 계정입니다.") }
+            ?.let{ throw ConflictException(message= "이미 회원가입이 된 계정입니다.") }
 
         var member = Member(
             nickname = command.nickname,
@@ -41,10 +43,15 @@ class MemberCreateUsecaseImpl(
 
         return MemberCreateResult.from(
             member = MemberDto.fromEntity(member),
-            loginResult = LoginResult(
-                accessToken = payload.sub,
-                refreshToken = payload.sub
+            loginResult = jwtAuthService.login(
+                provider = command.oidcProvider,
+                idToken = command.idToken
             )
         )
+    }
+
+    override fun isDuplicatedNickname(nickname: String) {
+        loadMemberPort.loadByNickname(nickname)
+            ?.let { throw ConflictException(message = "이미 사용 중인 닉네임입니다.") }
     }
 }
