@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import org.springframework.data.mongodb.core.mapping.Field
 import java.security.Permission
 
 
@@ -38,7 +39,17 @@ class StudyGroup(
     name: String = "",
     description: String = "",
     profile: GroupProfileImageVo? = null,
-): BaseAggregateRoot<StudyGroup>(id) {
+): BaseAggregateRoot<StudyGroup>() {
+
+//    override fun getId(): String? {
+//        return studyGroupId ?: this.id
+//    }
+
+    var id : String? = id
+        private set
+
+    val identifier: String
+        get() = id ?: throw IllegalStateException("StudyGroup ID is not set")
 
     var description: String = description
         private set
@@ -117,7 +128,7 @@ class StudyGroup(
         }
         
         this.ownerId = newOwnerId
-        val event = StudyGroupOwnerChangedEvent(this.identifier, requesterId, newOwnerId, this)
+        val event = StudyGroupOwnerChangedEvent(this.id!!, requesterId, newOwnerId, this)
         this.registerEvent(event)
     }
 
@@ -147,7 +158,7 @@ class StudyGroup(
             return;
         }
         this.profileImage = null
-        val event = StudyGroupProfileImageDeleteEvent(this.identifier, profileImage, this)
+        val event = StudyGroupProfileImageDeleteEvent(this.id!!, profileImage, this)
         this.registerEvent(event)
     }
 

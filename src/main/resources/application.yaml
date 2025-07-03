@@ -7,8 +7,8 @@ spring:
       port: ${DYMIT_MONGODB_PORT:27017}
       database: ${DYMIT_MONGODB_DATABASE:dymit}
       username: ${DYMIT_MONGODB_USERNAME:test_admin}
-      password: ${DYMIT_MONGODB_PASSWORD:test_password}
-      authentication-database: ${DYMIT_MONGODB_AUTHENTICATION_DATABASE:admin}
+      password: ${DYMIT_MONGODB_PASSWORD:test1234}
+      authentication-database: ${DYMIT_MONGODB_AUTHENTICATION_DATABASE:dymit}
     
 
 server:

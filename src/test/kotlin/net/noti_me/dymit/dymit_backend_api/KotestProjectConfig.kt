@@ -5,7 +5,7 @@ import io.kotest.core.extensions.Extension
 import io.kotest.extensions.junitxml.JunitXmlReporter
 // import io.kotest.extensions.htmlreporter.HtmlReporter
 
-// class KotestProjectConfig : AbstractProjectConfig() {
+class KotestProjectConfig : AbstractProjectConfig() {
 
     /**
      * 테스트 이름을 생성할 때 부모 컨텍스트(Given, When 등)의 이름을 포함하도록 설정합니다.
@@ -19,16 +19,15 @@ import io.kotest.extensions.junitxml.JunitXmlReporter
         // ),
     // )
 
-    // override fun extensions(): List<Extension> = listOf(
-    //     JunitXmlReporter(
-    //         includeContainers = true, // don't write out status for all tests
-    //         useTestPathAsName = true, // use the full test path (ie, includes parent test names)
-    //         outputDir = "../build/test-results/test/" // include to set output dir for maven
-    //     )
-    //     // HtmlReporter() // Uncomment if you want to use HTML reporter
-    // )
+    override fun extensions(): List<Extension> = listOf(
+        JunitXmlReporter(
+            includeContainers = true, // don't write out status for all tests
+            useTestPathAsName = true, // use the full test path (ie, includes parent test names)
+            // outputDir = "../build/test-results/test/" // include to set output dir for maven
+        )
+        // HtmlReporter() // Uncomment if you want to use HTML reporter
+    )
 
-    // override val displayFullTestPath = true
 
-    // override val testNameAppendTags = true
-// }
+    override val testNameAppendTags = true
+}

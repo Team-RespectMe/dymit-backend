@@ -21,7 +21,7 @@ internal class MemberTest : BehaviorSpec() {
         beforeEach {
             member = Member(
                 nickname = "test-nickname",
-                oidcIdentity = OidcIdentity(provider = "test-provider", subject = "test-subject"),
+                oidcIdentities = mutableSetOf(OidcIdentity(provider = "test-provider", subject = "test-subject"))
             )
         }
 
@@ -63,7 +63,7 @@ internal class MemberTest : BehaviorSpec() {
         given("프로필 사진 관리 기능") {
             val profileImage = MemberProfileImageVo(
                 filePath = "path/to/image.jpg",
-                cdnUrl = "https://cdn.example.com/image.jpg",
+                url = "https://cdn.example.com/image.jpg",
                 fileSize = 1024L,
                 width = 100,
                 height = 100
@@ -113,9 +113,9 @@ internal class MemberTest : BehaviorSpec() {
                     member.refreshTokens shouldContain refreshToken
                 }
                 then("마지막 접근 시간이 갱신된다.") {
-                    val initialLastAccessedAt = member.lastAccessedAt
+                    val initialLastAccessedAt = member.lastAccessAt
                     member.addRefreshToken(refreshToken)
-                    member.lastAccessedAt shouldNotBe initialLastAccessedAt
+                    member.lastAccessAt shouldNotBe initialLastAccessedAt
                 }
             }
 

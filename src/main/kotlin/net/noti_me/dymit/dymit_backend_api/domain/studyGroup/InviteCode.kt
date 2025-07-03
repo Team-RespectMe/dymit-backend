@@ -22,19 +22,19 @@ import java.time.Instant
  * @param id 초대 코드의 고유 식별자 (선택적)
  * @param code 초대 코드 문자열
  */
-@Document(collection = "invite_codes")
-class InviteCode(
-    // 요구사항 6: 코드로 그룹을 찾기 위해 고유 인덱스 설정
-    id: String? = null,
-    @Indexed(unique = true)
-    val code: String,
-    // 이 코드가 속한 스터디 그룹의 ID
-    val studyGroupId: String,
-    // 요구사항 1: 수명 관리
-    val expiresAt: Instant,
-): BaseAggregateRoot<InviteCode>(id) {
-
-    fun isExpired(): Boolean {
-        return Instant.now().isAfter(expiresAt)
-    }
-}
+//@Document(collection = "invite_codes")
+//class InviteCode(
+//    // 요구사항 6: 코드로 그룹을 찾기 위해 고유 인덱스 설정
+//    id: String? = null,
+//    @Indexed(unique = true)
+//    val code: String,
+//    // 이 코드가 속한 스터디 그룹의 ID
+//    val studyGroupId: String,
+//    // 요구사항 1: 수명 관리
+//    val expiresAt: Instant,
+//): BaseAggregateRoot<InviteCode>() {
+//
+//    fun isExpired(): Boolean {
+//        return Instant.now().isAfter(expiresAt)
+//    }
+//}

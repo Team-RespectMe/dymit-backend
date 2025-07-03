@@ -3,21 +3,23 @@ package net.noti_me.dymit.dymit_backend_api.domain
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.data.domain.DomainEvents
+import org.springframework.data.domain.Persistable
+import org.springframework.data.mongodb.core.mapping.Document
+import java.time.Instant
+import java.util.UUID
 
 @Document
 abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
-    id: String? = null
 ) : AbstractAggregateRoot<T>() {
-
-    @Id
-    var id: String? = id
+    @CreatedDate
+    var createdAt: Instant? = null
         protected set
 
-    val identifier: String
-        get() = id ?: throw IllegalStateException("Aggregate ID is not set")
+    @LastModifiedDate
+    var updatedAt: Instant? = null
+        protected set
 
     var isDeleted: Boolean = false
         protected set
@@ -30,14 +32,6 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
     public override fun clearDomainEvents() {
         super.clearDomainEvents()
     }
-
-    @CreatedDate
-    lateinit var createdAt: String
-        protected set
-
-    @LastModifiedDate
-    lateinit var updatedAt: String
-        protected set
 
     fun markAsDeleted() {
         if (isDeleted) {
