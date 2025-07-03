@@ -14,6 +14,9 @@ import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.supports.createJwtConfig
+import net.noti_me.dymit.dymit_backend_api.supports.createJwtService
 
 internal class JwtAuthServiceTest() : BehaviorSpec() {
 
@@ -23,9 +26,15 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
 
     private val loadMemberPort = mockk<LoadMemberPort>()
 
+    private val saveMemberPort = mockk<SaveMemberPort>()
+
+    private val jwtService = createJwtService(createJwtConfig())
+
     private val jwtAuthService = JwtAuthService(
         loadMemberPort = loadMemberPort,
-        oidcAuthenticationProviders = oidcProviders
+        oidcAuthenticationProviders = oidcProviders,
+        saveMemberPort = saveMemberPort,
+        jwtService = jwtService
     )
 
     private val commonOidcIdTokenPayload = CommonOidcIdTokenPayload(
@@ -43,7 +52,9 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
         subject = commonOidcIdTokenPayload.sub
     )
 
-    private val member = Member(
+    private var member = createMember()
+
+    fun createMember() = Member(
         id = "random",
         nickname = "test-nickname",
         oidcIdentities = mutableSetOf(oidcIdentity)
@@ -52,11 +63,12 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
     init {
 
         beforeEach {
+            member = createMember()
             every { oidcProvider.support(any()) } returns true
             every { oidcProvider.getPayload(any()) } returns commonOidcIdTokenPayload
         }
 
-        given("로그인 요청이 주어진다") {
+        given("로그인 요청이 주어진다.") {
             `when`("해당 OIDC 정보로 가입된 사용자가 없으면") {
                 every { loadMemberPort.loadByOidcIdentity(any()) } returns null
                 then("NotFoundException 이 발생한다") {

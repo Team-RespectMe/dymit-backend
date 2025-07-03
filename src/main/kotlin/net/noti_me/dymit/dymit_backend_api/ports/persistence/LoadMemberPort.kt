@@ -17,4 +17,8 @@ interface LoadMemberPort {
         oidcIdentity: OidcIdentity
     ): Member?
 
+    fun existsByNickname(
+        nickname: String
+    ): Boolean
+
 }

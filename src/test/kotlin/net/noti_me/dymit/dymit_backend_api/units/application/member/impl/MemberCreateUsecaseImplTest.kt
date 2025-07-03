@@ -6,6 +6,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
+import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl.JwtAuthService
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberCreateUsecaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
@@ -28,10 +30,13 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
 
     private val providers = listOf(authenticationProvider)
 
+    private val jwtService = mockk<JwtAuthService>()
+
     private val memberCreateUsecase = MemberCreateUsecaseImpl(
         saveMemberPort = saveMemberPort,
         loadMemberPort = loadMemberPort,
-        oidcAuthenticationProviders = providers
+        oidcAuthenticationProviders = providers,
+        jwtAuthService = jwtService
     )
 
     private val commonOidcIdTokenPayload = CommonOidcIdTokenPayload(
@@ -70,14 +75,18 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
             }
 
             `when`("신규 회원이라면") {
+                every { loadMemberPort.loadByOidcIdentity( any() ) } returns null
                 then("회원가입이 성공한다") {
-                    every { loadMemberPort.loadByOidcIdentity( any() ) } returns null
                     every { saveMemberPort.persist(any()) } returns Member(
                         id = "random",
                         nickname = command.nickname,
                         oidcIdentities = mutableSetOf(
                             OidcIdentity(provider = "GOOGLE", subject = commonOidcIdTokenPayload.sub)
                         )
+                    )
+                    every { jwtService.login(any(), any()) } returns LoginResult(
+                        accessToken = "eyJ...",
+                        refreshToken = "eyJ..."
                     )
 
                     val result = memberCreateUsecase.createMember(command)

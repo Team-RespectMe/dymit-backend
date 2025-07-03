@@ -1,19 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.domain.member
 
 import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.annotation.PersistenceCreator
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
-import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.Field
 
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
 class Member(
-//    @Id
     id: String? = null,
     nickname: String = "",
     oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
@@ -21,28 +17,23 @@ class Member(
     lastAccessAt: Instant = Instant.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
     refreshTokens: MutableSet<String> = mutableSetOf(),
-//    @CreatedDate
-//    var createdAt: Instant? = null,
-//    @LastModifiedDate
-//    var updatedAt: Instant? = null,
-//    var isDeleted: Boolean = false
 ) : BaseAggregateRoot<Member>() {
 
 //    override fun getId(): String? {
 //        return memberId
 //    }
+    @Id
     var id: String? = id
         private set
 
     val identifier: String
         get() = id ?: throw IllegalStateException("Member ID is not set")
 
-    var deviceTokens: MutableSet<DeviceToken> = mutableSetOf()
-        private set
+    val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 
-    var refreshTokens: MutableSet<String> = mutableSetOf()
-        private set
+    val refreshTokens: MutableSet<String> = refreshTokens
 
+    @Indexed(unique = true)
     var nickname: String = nickname
         private set
 
@@ -95,17 +86,22 @@ class Member(
         this.deviceTokens.remove(deviceToken)
     }
 
-    fun addRefreshToken(refreshToken: String) {
-        this.refreshTokens.add(refreshToken)
+    fun updateLastAccessedAt() {
+        this.lastAccessAt = Instant.now()
+    }
+
+    fun addRefreshToken(token: String) {
+        if ( refreshTokens.size >= 5 ) {
+            refreshTokens.remove(refreshTokens.first());
+            // 토큰은 5개까지만 생성 가능하므로 무작위로 하나 삭제한다.
+        }
+        refreshTokens.add(token)
         updateLastAccessedAt()
     }
 
-    fun removeRefreshToken(refreshToken: String) {
-        this.refreshTokens.remove(refreshToken)
-    }
-
-    fun updateLastAccessedAt() {
-        this.lastAccessAt = Instant.now()
+    fun removeRefreshToken(token: String) {
+        refreshTokens.remove(token)
+        updateLastAccessedAt()
     }
 
     override fun equals(other: Any?): Boolean {

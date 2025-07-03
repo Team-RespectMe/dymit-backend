@@ -28,4 +28,11 @@ class MongoLoadMemberAdapter(
             Member::class.java
         )
     }
+
+    override fun existsByNickname(nickname: String): Boolean {
+        return mongoTemplate.exists(
+            Query(Criteria.where("nickname").`is`(nickname)),
+            Member::class.java
+        )
+    }
 }
