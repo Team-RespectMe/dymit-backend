@@ -10,6 +10,4 @@ interface JwksProvider {
      * @return OIDC Provider의 공개키
      */
     fun getPublicKey(kid: String): RSAPublicKey
-
-    fun isSupported(provider: String): Boolean
 }

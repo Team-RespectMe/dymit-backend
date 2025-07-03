@@ -19,7 +19,7 @@ import org.springframework.test.context.TestPropertySource
 // @TestPropertySource(properties = ["de.flapdoodle.mongodb.embedded.version=5.3.0"])
 // @TestPropertySource(locations = ["classpath:application.yaml"])
 @DataMongoTest
-class MemberSavePortTest(
+class MongoSaveMemberAdapterTest(
     private val mongoTemplate: MongoTemplate
 ) : AnnotationSpec() {
 
@@ -35,7 +35,7 @@ class MemberSavePortTest(
     fun setUp() {
         existingMember = mongoTemplate.save(Member(
             nickname = "test-nickname",
-            oidcIdentity = OidcIdentity(provider = "test-provider", subject = "test-subject")
+            oidcIdentities = mutableSetOf(OidcIdentity(provider = "test-provider", subject = "test-subject"))
         ))
     }
 
@@ -43,7 +43,7 @@ class MemberSavePortTest(
     fun `신규 멤버 저장 테스트`() {
         val newMember = Member(
             nickname = "new-nickname",
-            oidcIdentity = OidcIdentity(provider = "new-provider", subject = "new-subject")
+            oidcIdentities = mutableSetOf(OidcIdentity(provider = "new-provider", subject = "new-subject"))
         )
 
         val savedMember = saveAdapter.persist(newMember)
@@ -71,7 +71,7 @@ class MemberSavePortTest(
             member.markAsDeleted()
             val isDeleted = saveAdapter.delete(member)
             isDeleted shouldBe true
-            val deletedMember = mongoTemplate.findById(member.identifier, Member::class.java)
+            val deletedMember = mongoTemplate.findById(member.id!!, Member::class.java)
             deletedMember shouldBe null
         }
     }

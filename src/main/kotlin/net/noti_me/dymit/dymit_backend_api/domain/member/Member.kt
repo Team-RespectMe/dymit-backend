@@ -1,44 +1,58 @@
 package net.noti_me.dymit.dymit_backend_api.domain.member
 
+import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.annotation.PersistenceCreator
+import java.time.Instant
+import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
-import java.time.Instant
-import net.noti_me.dymit.dymit_backend_api.domain.BaseEntity
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import org.springframework.data.mongodb.core.mapping.Field
 
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
 class Member(
+//    @Id
     id: String? = null,
     nickname: String = "",
-    oidcIdentity: OidcIdentity = OidcIdentity(
-        provider = "default",
-        subject = "default-subject"
-    ),
-    profile: MemberProfileImageVo? = null,
-    lastAccessedAt: Instant = Instant.now()
-) : BaseAggregateRoot<Member>(id) {
-    
+    oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
+    profileImage: MemberProfileImageVo? = null,
+    lastAccessAt: Instant = Instant.now(),
+    deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
+    refreshTokens: MutableSet<String> = mutableSetOf(),
+//    @CreatedDate
+//    var createdAt: Instant? = null,
+//    @LastModifiedDate
+//    var updatedAt: Instant? = null,
+//    var isDeleted: Boolean = false
+) : BaseAggregateRoot<Member>() {
+
+//    override fun getId(): String? {
+//        return memberId
+//    }
+    var id: String? = id
+        private set
+
+    val identifier: String
+        get() = id ?: throw IllegalStateException("Member ID is not set")
+
+    var deviceTokens: MutableSet<DeviceToken> = mutableSetOf()
+        private set
+
+    var refreshTokens: MutableSet<String> = mutableSetOf()
+        private set
+
     var nickname: String = nickname
         private set
 
-    var lastAccessedAt: Instant = lastAccessedAt
+    var oidcIdentities: MutableSet<OidcIdentity> = oidcIdentities
         private set
 
-    private val _deviceTokens: MutableSet<DeviceToken> = mutableSetOf()
-        val deviceTokens: Set<DeviceToken> get() = _deviceTokens.toSet()
+    var profileImage: MemberProfileImageVo? = profileImage
+        private set
 
-    private val _oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(oidcIdentity)
-        val oidcIdentities: Set<OidcIdentity> get() = _oidcIdentities.toSet()
-
-    private val activeRefreshTokens: MutableSet<String> = mutableSetOf()
-        val refreshTokens: Set<String> get() = activeRefreshTokens.toSet()
-
-    var profileImage: MemberProfileImageVo? = profile
+    var lastAccessAt: Instant = lastAccessAt
         private set
 
     fun changeNickname(newNickname: String) {
@@ -74,24 +88,24 @@ class Member(
     }
 
     fun addDeviceToken(deviceToken: DeviceToken) {
-        this._deviceTokens.add(deviceToken)
+        this.deviceTokens.add(deviceToken)
     }
 
     fun removeDeviceToken(deviceToken: DeviceToken) {
-        this._deviceTokens.remove(deviceToken)
+        this.deviceTokens.remove(deviceToken)
     }
 
     fun addRefreshToken(refreshToken: String) {
-        this.activeRefreshTokens.add(refreshToken)
+        this.refreshTokens.add(refreshToken)
         updateLastAccessedAt()
     }
 
     fun removeRefreshToken(refreshToken: String) {
-        this.activeRefreshTokens.remove(refreshToken)
+        this.refreshTokens.remove(refreshToken)
     }
 
     fun updateLastAccessedAt() {
-        this.lastAccessedAt = Instant.now()
+        this.lastAccessAt = Instant.now()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -99,11 +113,19 @@ class Member(
         if (other !is Member) return false
         other as Member
 
-        return this.identifier == other.identifier
+        if (id == null || other.id == null) return false
+
+        return this.id == other.id
     }
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-}
 
+//    fun markAsDeleted() {
+//        if (isDeleted) {
+//            throw IllegalStateException("Member is already marked as deleted")
+//        }
+//        isDeleted = true
+//    }
+}

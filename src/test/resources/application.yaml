@@ -1,4 +1,19 @@
 spring:
-  mongodb:
-    embedded:
-      version: 5.3.0
+  application:
+    name: dymit-api-test
+#  data:
+#    mongodb:
+#      host: ${DYMIT_MONGODB_HOST:localhost}
+#      port: ${DYMIT_MONGODB_PORT:27017}
+#      database: ${DYMIT_MONGODB_DATABASE:dymit}
+#      username: ${DYMIT_MONGODB_USERNAME:test_admin}
+#      password: ${DYMIT_MONGODB_PASSWORD:test1234}
+#      authentication-database: ${DYMIT_MONGODB_AUTHENTICATION_DATABASE:dymit}
+  data:
+    mongodb:
+      port: 0
+de.flapdoodle.mongodb.embedded.version: 5.0.14
+
+logging:
+  level:
+    root: DEBUG

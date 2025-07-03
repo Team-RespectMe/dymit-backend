@@ -36,4 +36,17 @@ class GoogleOidcIdTokenPayload(
             )
         }
     }
+
+    fun toCommonPayload(): CommonOidcIdTokenPayload {
+        return CommonOidcIdTokenPayload(
+            iss = this.iss,
+            sub = this.sub,
+            aud = this.aud,
+            iat = this.iat,
+            exp = this.exp,
+            email = this.email,
+            name = this.name,
+            profileImageUrl = this.picture
+        )
+    }
 }

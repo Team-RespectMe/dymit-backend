@@ -12,8 +12,6 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.InternalServerError
 
 abstract class AbstractJwksProvider(
     private val webClient: WebClient,
-    private val objectMapper: ObjectMapper,
-    private val providerName: String
 ): JwksProvider {
 
     abstract val jwksUrl: String
@@ -27,14 +25,11 @@ abstract class AbstractJwksProvider(
     private val lock = Any()
 
     override fun getPublicKey(kid: String): RSAPublicKey {
-        val jwtKey = fetchJwks(kid).firstOrNull { it.kid == kid }
+        println("getPublickey called with kid: $kid")
+        val jwtKey = fetchJwks().firstOrNull { it.kid == kid }
             ?: throw InternalServerError("OIDC 로그인 실패, kid에 해당하는 공개키를 찾을 수 없습니다.")
 
         return createPublicKey(jwtKey)
-    }
-
-    override fun isSupported(provider: String): Boolean {
-        return provider.equals(providerName, ignoreCase = true)
     }
 
     private fun createPublicKey(jwkKey: JWKKey): RSAPublicKey {
@@ -46,7 +41,7 @@ abstract class AbstractJwksProvider(
         return KeyFactory.getInstance("RSA").generatePublic(rsaPublicKeySpec) as RSAPublicKey
     }
 
-    private fun fetchJwks(kid: String): List<JWKKey> {
+    private fun fetchJwks(): List<JWKKey> {
         if (!cachedJwks.isEmpty() && System.currentTimeMillis() < cacheExpiryTime) {
             return cachedJwks
         }
@@ -54,6 +49,18 @@ abstract class AbstractJwksProvider(
         synchronized(lock) {
             if (!cachedJwks.isEmpty() && System.currentTimeMillis() < cacheExpiryTime) {
                 return cachedJwks
+            }
+            val response = webClient.get()
+                .uri(jwksUrl)
+                .retrieve()
+                .bodyToMono(JWKList::class.java)
+                .block()
+
+            println("response : ${response.toString()}")
+            println("keys: ${response?.keys.toString()}")
+
+            if (response == null || response.keys.isNullOrEmpty()) {
+                throw InternalServerError("wtf")
             }
 
             return webClient.get()
@@ -65,7 +72,7 @@ abstract class AbstractJwksProvider(
                     cachedJwks = it ?: emptyList()
                     cacheExpiryTime = System.currentTimeMillis() + cacheTTL
                 }
-                ?: throw InternalServerError("OIDC 로그인 실패, JWKS를 가져오는 데 실패했습니다.")
+                ?: throw InternalServerError("FetchJwks 실패, JWKS를 가져오는 데 실패했습니다.")
         }
     }
 }

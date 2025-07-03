@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+	implementation("io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64") // Apple Silicon(M1/M2)
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -36,11 +37,13 @@ dependencies {
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
 	// testImplementation("io.kotest:kotest-extensions-htmlreporter:5.9.1")
-	// testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1")
+//	 testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1")
 	// implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0")
+	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.20.0")
 	testImplementation("io.kotest:kotest-extensions-junitxml:${kotestVersion}")
     testImplementation("io.kotest:kotest-assertions-core-jvm:${kotestVersion}")
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:${kotestVersion}")
+	testImplementation("io.kotest:kotest-assertions-core:${kotestVersion}")
+	testImplementation("io.kotest:kotest-runner-junit5-jvm:${kotestVersion}")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
