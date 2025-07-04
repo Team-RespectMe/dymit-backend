@@ -27,7 +27,7 @@ class MemberController(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("/{memberId}")
-    override fun getMemberProfile(@PathVariable memberId: String): MemberProfileResponse {
+    override fun getMemberProfile(memberId: String): MemberProfileResponse {
         return MemberProfileResponse(
             id = memberId,
             nickname = "SampleNickname",
