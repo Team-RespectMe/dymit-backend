@@ -36,6 +36,10 @@ class MemberCreateUsecaseImpl(
         loadMemberPort.loadByOidcIdentity(OidcIdentity(provider = command.oidcProvider.name, subject = payload.sub))
             ?.let{ throw ConflictException(message= "이미 회원가입이 된 계정입니다.") }
 
+        if ( loadMemberPort.existsByNickname(command.nickname) ) {
+            throw ConflictException("CONFLICT", "이미 사용 중인 닉네임입니다.")
+        }
+
         var member = Member(
             nickname = command.nickname,
             oidcIdentities = mutableSetOf(OidcIdentity(
@@ -56,7 +60,10 @@ class MemberCreateUsecaseImpl(
     }
 
     override fun checkNickname(nickname: String) {
-       loadMemberPort.existsByNickname(nickname)
-            ?.let { throw ConflictException(message = "이미 사용 중인 닉네임입니다.") }
+       val exist = loadMemberPort.existsByNickname(nickname)
+
+        if (exist) {
+            throw ConflictException("CONFLICT", "이미 사용 중인 닉네임입니다.")
+        }
     }
 }

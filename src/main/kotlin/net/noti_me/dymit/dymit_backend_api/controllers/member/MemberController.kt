@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
+import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.HttpStatus
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
@@ -19,14 +20,14 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartRequest
 
 @RestController
-@RequestMapping("/api/v1/members")
+//@RequestMapping("/api/v1/members")
 class MemberController(
     private val memberCreateUsecase: MemberCreateUsecase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @GetMapping("/{memberId}")
+//    @GetMapping("/{memberId}")
     override fun getMemberProfile(memberId: String): MemberProfileResponse {
         return MemberProfileResponse(
             id = memberId,
@@ -36,14 +37,16 @@ class MemberController(
         )
     }
 
-    @PatchMapping("/{memberId}/nickname")
-    override fun patchNickname(memberId: String, request: MemberNicknameUpdateRequest): MemberProfileResponse {
-        TODO("Not yet implemented")
+//    @PatchMapping("/{memberId}/nickname")
+    override fun patchNickname(
+        memberId: String,
+        request: MemberNicknameUpdateRequest)
+    : MemberProfileResponse {
+        TODO("Implement nickname update logic")
     }
 
-
-    @PostMapping
-    override fun createMember(@RequestBody @Valid request: MemberCreateRequest)
+//    @PostMapping
+    override fun createMember(request: MemberCreateRequest)
     : MemberCreateResponse {
         logger.debug("Creating member with request: $request")
         val result = memberCreateUsecase.createMember(
