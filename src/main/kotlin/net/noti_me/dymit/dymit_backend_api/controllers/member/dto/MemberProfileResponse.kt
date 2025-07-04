@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.member.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
+import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
@@ -31,6 +32,21 @@ class MemberProfileResponse(
                     )
                 },
                 oidcIdentities = member.oidcIdentities
+            )
+        }
+
+        fun from(member: MemberQueryDto) : MemberProfileResponse {
+            return MemberProfileResponse(
+                id = member.id,
+                nickname = member.nickname,
+                profileImage = member.profileImageVo?.let {
+                    ProfileImageResponse(
+                        url = it.url,
+                        width = it.width,
+                        height = it.height
+                    )
+                },
+                oidcIdentities = member.oidcInfo
             )
         }
     }

@@ -48,7 +48,6 @@ class MemberCreateUsecaseImpl(
                 email = payload.email
             )),
         )
-
         member = saveMemberPort.persist(member)
 
         return MemberCreateResult.from(
@@ -61,8 +60,7 @@ class MemberCreateUsecaseImpl(
     }
 
     override fun checkNickname(nickname: String) {
-       val exist = loadMemberPort.existsByNickname(nickname)
-
+        val exist = loadMemberPort.existsByNickname(nickname)
         if (exist) {
             throw ConflictException("CONFLICT", "이미 사용 중인 닉네임입니다.")
         }
