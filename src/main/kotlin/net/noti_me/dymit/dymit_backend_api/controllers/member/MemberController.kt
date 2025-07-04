@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.HttpStatus
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
@@ -28,7 +30,10 @@ class MemberController(
     private val logger = LoggerFactory.getLogger(javaClass)
 
 //    @GetMapping("/{memberId}")
-    override fun getMemberProfile(memberId: String): MemberProfileResponse {
+    override fun getMemberProfile(
+        loginMember: MemberInfo,
+        memberId: String
+    ): MemberProfileResponse {
         return MemberProfileResponse(
             id = memberId,
             nickname = "SampleNickname",
@@ -39,6 +44,7 @@ class MemberController(
 
 //    @PatchMapping("/{memberId}/nickname")
     override fun patchNickname(
+        loginMember: MemberInfo,
         memberId: String,
         request: MemberNicknameUpdateRequest)
     : MemberProfileResponse {

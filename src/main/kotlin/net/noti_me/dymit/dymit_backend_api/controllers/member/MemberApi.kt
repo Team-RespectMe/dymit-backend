@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberNicknameUpdateRequest
@@ -46,7 +48,7 @@ interface MemberApi {
     )
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{memberId}")
-    fun getMemberProfile(@PathVariable memberId: String): MemberProfileResponse
+    fun getMemberProfile(@LoginMember loginMember: MemberInfo, @PathVariable memberId: String): MemberProfileResponse
 
 
     @Operation(
@@ -84,6 +86,7 @@ interface MemberApi {
     @PatchMapping("/{memberId}/nickname")
     @ResponseStatus(HttpStatus.OK)
     fun patchNickname(
+        @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
         @RequestBody @Valid request: MemberNicknameUpdateRequest
     ): MemberProfileResponse
