@@ -67,10 +67,6 @@ class SecurityConfig {
                 it.accessDeniedHandler(accessDeniedHandler)
             }
             .authorizeHttpRequests { it ->
-                it.requestMatchers(HttpMethod.POST,
-                    "/api/v1/members",
-                    "/api/v1/auth/oidc/**"
-                ).permitAll()
                 it.requestMatchers(
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
@@ -78,6 +74,12 @@ class SecurityConfig {
                     "/prometheus/**",
                     "/health-check"
                 ).permitAll()
+                it.requestMatchers(HttpMethod.POST,
+                    "/api/v1/members",
+                    "/api/v1/auth/oidc/**"
+                ).permitAll()
+                it.requestMatchers("/api/v1/nicknames/validate")
+                    .permitAll()
                 it.anyRequest().authenticated()
             }
 
