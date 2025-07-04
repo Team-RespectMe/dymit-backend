@@ -29,5 +29,16 @@ data class AppleOidcIdTokenPayload(
                 nonceSupported = decodedJWT.getClaim("nonce_supported").asBoolean()
             )
         }
+
+        fun toCommonPayload(applePayload: AppleOidcIdTokenPayload): CommonOidcIdTokenPayload {
+            return CommonOidcIdTokenPayload(
+                iss = applePayload.iss,
+                sub = applePayload.sub,
+                aud = applePayload.aud,
+                iat = applePayload.iat,
+                exp = applePayload.exp,
+                email = applePayload.email
+            )
+        }
     }
 }

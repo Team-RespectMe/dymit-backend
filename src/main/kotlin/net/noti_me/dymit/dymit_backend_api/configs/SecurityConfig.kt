@@ -17,14 +17,12 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
 
     @Bean
     fun entryPointUnauthorizedHandler(objectMapper: ObjectMapper): JwtEntrypointUnauthorizedHandler {
@@ -76,7 +74,8 @@ class SecurityConfig {
                 ).permitAll()
                 it.requestMatchers(HttpMethod.POST,
                     "/api/v1/members",
-                    "/api/v1/auth/oidc/**"
+                    "/api/v1/auth/oidc/**",
+                    "/api/v1/auth/jwt/**"
                 ).permitAll()
                 it.requestMatchers("/api/v1/nicknames/validate")
                     .permitAll()

@@ -44,7 +44,8 @@ class MemberCreateUsecaseImpl(
             nickname = command.nickname,
             oidcIdentities = mutableSetOf(OidcIdentity(
                 provider = command.oidcProvider.name,
-                subject = payload.sub
+                subject = payload.sub,
+                email = payload.email
             )),
         )
 
