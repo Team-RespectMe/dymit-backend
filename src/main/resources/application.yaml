@@ -21,10 +21,13 @@ jwt:
     expiration: ${DYMIT_JWT_REFRESH_TOKEN_EXPIRATION:2592000000} # milliseconds
 
 
+
 server:
   port: ${DYMIT_SERVER_PORT:8080}
   ## 파일 업로드 시 용량 제한 2MB
   servlet:
+    encoding:
+      force-response: true
     multipart:
       max-file-size: ${DYMIT_SERVER_MAX_FILE_SIZE:2MB}
       max-request-size: ${DYMIT_SERVER_MAX_REQUEST_SIZE:2MB}

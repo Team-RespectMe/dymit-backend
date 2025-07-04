@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -22,11 +23,14 @@ class JwtAuthService(
     private val jwtService: JwtService
 ): JwtAuthUsecase {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun login(provider: OidcProvider, idToken: String): LoginResult {
         val oidcAuthenticationProvider = oidcAuthenticationProviders
             .firstOrNull { it.support(provider.name) }
             ?: throw BadRequestException("지원하지 않는 OIDC 프로바이더 입니다 ${provider.name}")
         val payload = oidcAuthenticationProvider.getPayload(idToken)
+        logger.info("OIDC Login 요청 : ${provider.name}, sub: ${payload.sub}, email: ${payload.email}")
 
         val member = loadMemberPort.loadByOidcIdentity(
             OidcIdentity(
