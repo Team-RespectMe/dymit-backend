@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.units.application.member.impl
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -74,8 +75,19 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
                 }
             }
 
-            `when`("신규 회원이라면") {
+            `when`("닉네임이 중복됐다면") {
+                every { loadMemberPort.loadByOidcIdentity(any()) } returns mockk<Member>()
+                every { loadMemberPort.existsByNickname(command.nickname) } returns true
+                then("ConflictException이 발생한다") {
+                    shouldThrowExactly<ConflictException> {
+                        memberCreateUsecase.createMember(command)
+                    }
+                }
+            }
+
+            `when`("신규 회원이고, 닉네임이 중복돼지 않았다면") {
                 every { loadMemberPort.loadByOidcIdentity( any() ) } returns null
+                every { loadMemberPort.existsByNickname(command.nickname) } returns false
                 then("회원가입이 성공한다") {
                     every { saveMemberPort.persist(any()) } returns Member(
                         id = "random",
@@ -94,6 +106,28 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
                     result.member.oidcIdentities.size shouldBe 1
                     result.member.oidcIdentities.first().provider shouldBe command.oidcProvider.name
                     result.member.oidcIdentities.first().subject shouldBe commonOidcIdTokenPayload.sub
+                }
+            }
+        }
+
+        given("닉네임 중복 검사를 한다") {
+            `when`("이미 사용 중인 닉네임이라면") {
+                every { loadMemberPort.existsByNickname(command.nickname) } returns true
+
+                then("ConflictException이 발생한다") {
+                    shouldThrowExactly<ConflictException> {
+                        memberCreateUsecase.checkNickname(command.nickname)
+                    }
+                }
+            }
+
+            `when`("사용 가능한 닉네임이라면") {
+                every { loadMemberPort.existsByNickname(command.nickname) } returns false
+
+                then("에러없이 동작한다.") {
+                    shouldNotThrowAny {
+                        memberCreateUsecase.checkNickname(command.nickname)
+                    }
                 }
             }
         }

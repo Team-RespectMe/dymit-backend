@@ -5,5 +5,6 @@ import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberNickname
 
 interface MemberUpdateUsecase {
 
-    fun updateNickname(id: String, request: MemberNicknameUpdateCommand): MemberDto
+    fun updateNickname(id: String,
+                       request: MemberNicknameUpdateCommand): MemberDto
 }

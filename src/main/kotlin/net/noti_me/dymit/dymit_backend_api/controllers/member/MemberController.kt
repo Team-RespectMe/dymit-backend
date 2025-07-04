@@ -24,7 +24,8 @@ import org.springframework.web.multipart.MultipartRequest
 @RestController
 //@RequestMapping("/api/v1/members")
 class MemberController(
-    private val memberCreateUsecase: MemberCreateUsecase
+    private val memberCreateUsecase: MemberCreateUsecase,
+    private val memberQueryUsecase: MemberQueryUsecase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -34,11 +35,8 @@ class MemberController(
         loginMember: MemberInfo,
         memberId: String
     ): MemberProfileResponse {
-        return MemberProfileResponse(
-            id = memberId,
-            nickname = "SampleNickname",
-            profileImage = null,
-            oidcIdentities = emptyList()
+        return MemberProfileResponse.from(
+            memberQueryUsecase.getMemberById(loginMember, memberId)
         )
     }
 
