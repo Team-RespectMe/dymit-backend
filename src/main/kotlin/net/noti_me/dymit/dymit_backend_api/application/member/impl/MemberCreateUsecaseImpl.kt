@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,12 +23,16 @@ class MemberCreateUsecaseImpl(
     private val jwtAuthService: JwtAuthService
 ) : MemberCreateUsecase {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun createMember(command: MemberCreateCommand): MemberCreateResult {
         val oidcAuthenticationProvider = oidcAuthenticationProviders
             .firstOrNull { it.support(command.oidcProvider.name) }
             ?: throw IllegalArgumentException("지원하지 않는 OIDC 프로바이더 입니다 ${command.oidcProvider.name}")
 
         val payload = oidcAuthenticationProvider.getPayload(command.idToken)
+
+        logger.debug("회원가입 요청: ${command.oidcProvider.name}, sub: ${payload.sub}, email: ${payload.email}")
         loadMemberPort.loadByOidcIdentity(OidcIdentity(provider = command.oidcProvider.name, subject = payload.sub))
             ?.let{ throw ConflictException(message= "이미 회원가입이 된 계정입니다.") }
 
@@ -50,8 +55,8 @@ class MemberCreateUsecaseImpl(
         )
     }
 
-    override fun isDuplicatedNickname(nickname: String) {
-        loadMemberPort.loadByNickname(nickname)
+    override fun checkNickname(nickname: String) {
+       loadMemberPort.existsByNickname(nickname)
             ?.let { throw ConflictException(message = "이미 사용 중인 닉네임입니다.") }
     }
 }

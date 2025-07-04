@@ -7,5 +7,5 @@ interface MemberCreateUsecase {
 
     fun createMember(request: MemberCreateCommand): MemberCreateResult
 
-    fun isDuplicatedNickname(nickname: String)
+    fun checkNickname(nickname: String)
 }

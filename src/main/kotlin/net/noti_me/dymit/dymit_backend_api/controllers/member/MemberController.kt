@@ -27,14 +27,20 @@ class MemberController(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("/{memberId}")
-    override fun getMemberProfile(memberId: String): MemberProfileResponse {
-        TODO("Not yet implemented")
+    override fun getMemberProfile(@PathVariable memberId: String): MemberProfileResponse {
+        return MemberProfileResponse(
+            id = memberId,
+            nickname = "SampleNickname",
+            profileImage = null,
+            oidcIdentities = emptyList()
+        )
     }
 
     @PatchMapping("/{memberId}/nickname")
     override fun patchNickname(memberId: String, request: MemberNicknameUpdateRequest): MemberProfileResponse {
         TODO("Not yet implemented")
     }
+
 
     @PostMapping
     override fun createMember(@RequestBody @Valid request: MemberCreateRequest)

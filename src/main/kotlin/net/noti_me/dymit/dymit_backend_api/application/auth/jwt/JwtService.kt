@@ -8,7 +8,9 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -16,6 +18,8 @@ import java.time.Instant
 class JwtService(
     private val jwtConfig: JwtConfig,
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val algorithm = Algorithm.HMAC256(
         jwtConfig.secret.toByteArray(Charsets.UTF_8)
@@ -35,6 +39,8 @@ class JwtService(
     fun createAccessToken(member: Member): String {
         val now = Instant.now()
         val expiresAt = now.plusMillis(jwtConfig.accessTokenExpiration)
+        logger.debug("expiry: ${jwtConfig.accessTokenExpiration}")
+        logger.debug("Creating access token for member: ${member.identifier}, expires at: $expiresAt")
         return JWT.create()
             .withIssuer(jwtConfig.issuer)
             .withAudience(jwtConfig.audience)
@@ -42,7 +48,7 @@ class JwtService(
             .withIssuedAt(now)
             .withExpiresAt(expiresAt)
             .withClaim("nickname", member.nickname)
-            .withArrayClaim("roles", arrayOf("ROLE_MEMBER"))
+            .withArrayClaim("roles", arrayOf(MemberRole.ROLE_MEMBER.name))
             .sign(algorithm)
     }
 
@@ -59,19 +65,11 @@ class JwtService(
     }
 
     fun verifyAccessToken(token: String): DecodedJWT {
-        return try {
-            accessTokenVerifier.verify(token)
-        } catch (e: JWTVerificationException) {
-            throw UnauthorizedException("AE-001", "기간이 만료되거나 잘못된 액세스 토큰입니다.")
-        }
+        return accessTokenVerifier.verify(token)
     }
 
     fun verifyRefreshToken(token: String): DecodedJWT {
-        return try {
-            refreshTokenVerifier.verify(token)
-        } catch (e: JWTVerificationException) {
-            throw UnauthorizedException("AE-002", "기간이 만료되거나 잘못된 리프레시 토큰입니다.")
-        }
+        return refreshTokenVerifier.verify(token)
     }
 
     fun decodeToken(token: String): DecodedJWT {

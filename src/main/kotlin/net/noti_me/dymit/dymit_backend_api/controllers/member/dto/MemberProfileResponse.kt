@@ -14,7 +14,7 @@ class MemberProfileResponse(
     val nickname: String,
     @Schema(description = "프로필 이미지 정보")
     val profileImage: ProfileImageResponse? = null,
-    val oidcIdentities: List<OidcIdentity> = emptyList()
+    val oidcIdentities: List<OidcIdentity> = emptyList(),
 ) : BaseResponse() {
 
     companion object {
