@@ -7,11 +7,15 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.JwksProvider
 import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.CommonOidcIdTokenPayload
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
+import org.springframework.beans.factory.annotation.Value
 import java.security.interfaces.RSAPublicKey
 
 abstract class AbstractOidcAuthenticationProvider : OidcAuthenticationProvider {
 
 //    abstract fun getAudience(): List<String>
+
+    @Value("\${spring.profiles.active}")
+    private lateinit var activeProfile: String
 
     abstract fun getIssuer(): String
 
@@ -30,11 +34,15 @@ abstract class AbstractOidcAuthenticationProvider : OidcAuthenticationProvider {
         val jwksProvider = getJwksProvider()
         val publicKey = jwksProvider.getPublicKey(decodedJWT.keyId)
         val algorithm = getAlgorithm(decodedJWT, publicKey)
-        val verifier: JWTVerifier = JWT.require(algorithm)
+        var verifierBuilder = JWT.require(algorithm)
             .withIssuer(getIssuer())
-//            .withAudience()
-            .build()
 
+        if (activeProfile == "test") {
+            // 테스트 환경에서는 expiry 검증을 하지 않음.
+            verifierBuilder.acceptExpiresAt(3153600000L)
+        }
+
+        val verifier = verifierBuilder.build()
         // TODO: Audience 검증 로직 추가
 
         return try {

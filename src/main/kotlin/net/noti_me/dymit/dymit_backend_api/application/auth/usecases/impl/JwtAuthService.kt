@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl
 
+import com.auth0.jwt.exceptions.JWTVerificationException
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
 import net.noti_me.dymit.dymit_backend_api.application.auth.jwt.JwtService
 import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.JwtAuthUsecase
@@ -49,7 +50,11 @@ class JwtAuthService(
     }
 
     override fun reissueAccessToken(refreshToken: String): LoginResult {
-        val decodedToken = jwtService.verifyRefreshToken(refreshToken)
+        val decodedToken = try {
+            jwtService.verifyRefreshToken(refreshToken)
+        } catch(e: JWTVerificationException) {
+            throw UnauthorizedException("AE-001", "유효하지 않은 리프레시 토큰입니다.")
+        }
         val memberId = decodedToken.subject
         val member = loadMemberPort.loadById(memberId)
             ?: throw UnauthorizedException("AE-003", "사용자 정보를 찾을 수 없습니다.")

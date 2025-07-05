@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.member.dto
 
+import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberNicknameUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 
 // import org.jakarta.validation.constraints.NotBlank
@@ -12,4 +13,9 @@ data class MemberNicknameUpdateRequest(
     val nickname: String,
 ) {
 
+    fun toCommand(): MemberNicknameUpdateCommand {
+        return MemberNicknameUpdateCommand(
+            nickname = nickname
+        )
+    }
 }

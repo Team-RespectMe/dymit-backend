@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -18,14 +19,17 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartRequest
 
 @RestController
+@Validated
 //@RequestMapping("/api/v1/members")
 class MemberController(
     private val memberCreateUsecase: MemberCreateUsecase,
-    private val memberQueryUsecase: MemberQueryUsecase
+    private val memberQueryUsecase: MemberQueryUsecase,
+    private val memberUpdateNicknameUsecase: UpdateNicknameUsecase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -46,7 +50,12 @@ class MemberController(
         memberId: String,
         request: MemberNicknameUpdateRequest)
     : MemberProfileResponse {
-        TODO("Implement nickname update logic")
+        val memberDto = memberUpdateNicknameUsecase.updateNickname(
+            loginMember,
+            memberId,
+            request.toCommand()
+        )
+        return MemberProfileResponse.from(memberDto)
     }
 
 //    @PostMapping

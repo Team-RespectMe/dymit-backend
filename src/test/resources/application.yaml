@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: test
   application:
     name: dymit-api-test
 #  data:
@@ -14,6 +16,20 @@ spring:
       port: 0
 de.flapdoodle.mongodb.embedded.version: 5.0.14
 
+test:
+  id-token:
+    google: ${DYMIT_TEST_ID_TOKEN_GOOGLE}
+
+jwt:
+  secret: ${DYMIT_JWT_SECRET:secret}
+  expiration: ${DYMIT_JWT_EXPIRATION:3600} # seconds
+  issuer: ${DYMIT_JWT_ISSUER:https://test.dymit.com}
+  audience: ${DYMIT_JWT_AUDIENCE:https://test.dymit.com}
+  access-token:
+    expiration: ${DYMIT_JWT_ACCESS_TOKEN_EXPIRATION:900000} # milliseconds
+  refresh-token:
+    expiration: ${DYMIT_JWT_REFRESH_TOKEN_EXPIRATION:2592000000} # milliseconds
+
 logging:
   level:
-    root: DEBUG
+    root: INFO

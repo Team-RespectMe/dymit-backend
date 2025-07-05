@@ -116,7 +116,7 @@ class JwtServiceTest() : BehaviorSpec() {
             val accessToken = createExpiredToken()
             `when`("토큰을 검증하면") {
                 then("예외가 발생해야 한다") {
-                    shouldThrow<UnauthorizedException> {
+                    shouldThrow<JWTVerificationException> {
                         jwtService.verifyAccessToken(accessToken)
                     }
                 }
@@ -127,7 +127,7 @@ class JwtServiceTest() : BehaviorSpec() {
             val refreshToken = createExpiredToken()
             `when`("토큰을 검증하면") {
                 then("예외가 발생해야 한다") {
-                    shouldThrow<UnauthorizedException> {
+                    shouldThrow<JWTVerificationException> {
                         jwtService.verifyRefreshToken(refreshToken)
                     }
                 }
