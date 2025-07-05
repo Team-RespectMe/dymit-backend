@@ -4,10 +4,12 @@ import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import org.slf4j.LoggerFactory
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+@Validated
 @RestController
 class NicknameController(
     private val memberCreateUsecase: MemberCreateUsecase

@@ -83,6 +83,7 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
 
             `when`("해당 OIDC 정보로 가입된 사용자가 있으면") {
                 every { loadMemberPort.loadByOidcIdentity(any()) } returns member
+                every { saveMemberPort.persist(any()) } returns member
                 then("로그인 결과가 반환된다") {
                     val loginResult = jwtAuthService.login(
                         provider = OidcProvider.GOOGLE,
