@@ -53,7 +53,6 @@ class Member(
         }
 
         if ( newNickname == this.nickname ) {
-            println("Nickname is already set to $newNickname, no change needed.")
             return
         }
 
@@ -61,7 +60,6 @@ class Member(
             throw IllegalArgumentException("Nickname must be between 3 and 20 characters long")
         }
 
-        println("Changing nickname from $nickname to $newNickname")
         this.nickname = newNickname
         updateLastAccessedAt()
     }
