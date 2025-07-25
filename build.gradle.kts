@@ -1,12 +1,17 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
 	id("org.springframework.boot") version "3.5.3"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("com.bmuschko.docker-remote-api") version "9.4.0"
+
 }
 
-group = "net.noti-me.dymit"
-version = "0.0.1-SNAPSHOT"
+group = "net.noti-me.dymit-backend"
+version = "0.0.4"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 
@@ -69,4 +74,22 @@ tasks.withType<Test>().configureEach {
 		junitXml.required.set(false)
 	}
   	systemProperty("gradle.build.dir", project.buildDir)
+}
+
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+	archiveBaseName.set("${project.group}")
+	archiveVersion.set("latest")
+}
+
+tasks.register<DockerBuildImage>("buildDockerImage") {
+	dependsOn("bootJar")
+	inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
+	images.add("elensar92/dymit-api:${version}")
+	group = "docker"
+}
+
+tasks.register<DockerPushImage>("pushDockerImage") {
+	dependsOn("buildDockerImage")
+	images.add("elensar92/dymit-api:${version}")
+	group = "docker"
 }

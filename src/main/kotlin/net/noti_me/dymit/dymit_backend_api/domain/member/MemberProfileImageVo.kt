@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "멤버 프로필 사진 객체")
 class MemberProfileImageVo(
+    @Schema(description = "프로필 이미지 타입", example = "built_in", allowableValues = ["built_in", "external"])
+    val type: String = "built_in",
     @Schema(description = "프로필 사진 파일 경로", example = "/images/profile/testuser.jpg")
     val filePath: String = "",
     @Schema(description = "프로필 사진 URL", example = "https://example.com/images/profile/testuser.jpg")

@@ -30,6 +30,8 @@ import java.security.Permission
  * @param name 그룹의 이름
  * @param description 그룹의 설명
  * @param profile 그룹의 프로필 이미지 정보 (선택적)
+ * @param memberPreview 그룹의 멤버 미리보기 정보 (최대 8명)
+ * @param schedulePreview 그룹의 최신 일정 미리보기 정보 (선택적)
  */
 @Document("study_groups")
 class StudyGroup(
@@ -39,6 +41,8 @@ class StudyGroup(
     name: String = "",
     description: String = "",
     profile: GroupProfileImageVo? = null,
+    memberPreview: MutableSet<MemberPreview> = mutableSetOf(),
+    schedulePreview: SchedulePreview? = null
 ): BaseAggregateRoot<StudyGroup>() {
 
 //    override fun getId(): String? {
@@ -63,6 +67,12 @@ class StudyGroup(
     var boardId: String = boardId
 
     var profileImage: GroupProfileImageVo? = profile
+        private set
+
+    var memberPreview: MutableSet<MemberPreview> = memberPreview
+        private set
+
+    var schedulePreview: SchedulePreview? = schedulePreview
         private set
 
     /**
@@ -160,6 +170,35 @@ class StudyGroup(
         this.profileImage = null
         val event = StudyGroupProfileImageDeleteEvent(this.id!!, profileImage, this)
         this.registerEvent(event)
+    }
+
+    /**
+     * 그룹 멤버를 추가하는 메서드
+     * 이 메서드는 그룹의 멤버 미리보기에 멤버를 추가합니다.
+     * @param memberPreview 추가할 멤버의 미리보기 정보
+     */
+    fun addMemberPreview(memberPreview: MemberPreview) {
+        if ( this.memberPreview.size >= 8 ) {
+            return; // 최대 8명의 멤버 미리보기만 허용
+        }
+        this.memberPreview.add(memberPreview)
+    }
+
+    /**
+     * 그룹 멤버 미리보기에서 특정 멤버를 제거하는 메서드
+     * 이 메서드는 그룹의 멤버 미리보기에서 특정 멤버를 제거합니다.
+     * @param memberId 제거할 멤버의 ID
+     */
+    fun removeMemberPreview(memberId: String) {
+        this.memberPreview.removeIf { it.memberId == memberId }
+    }
+
+    /**
+     * 그룹의 최신 일정 미리보기를 업데이트 메서드
+     * @param schedulePreview 새로운 일정 미리보기 정보
+     */
+    fun updateSchedulePreview(schedulePreview: SchedulePreview) {
+        this.schedulePreview = schedulePreview
     }
 
     override fun equals(other: Any?): Boolean {

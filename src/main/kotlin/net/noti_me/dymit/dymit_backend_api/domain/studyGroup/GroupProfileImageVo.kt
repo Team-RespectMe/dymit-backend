@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain.studyGroup
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
 
 /**
