@@ -41,6 +41,7 @@ class JwtAuthService(
         ) ?: throw NotFoundException("존재하지 않는 회원입니다. 회원 가입이 필요합니다.")
 
         val result = LoginResult(
+            memberId = member.identifier,
             accessToken = jwtService.createAccessToken(member),
             refreshToken = jwtService.createRefreshToken(member)
         )
@@ -75,6 +76,7 @@ class JwtAuthService(
         }
 
         return LoginResult(
+            memberId = member.identifier,
             accessToken = jwtService.createAccessToken(member),
             refreshToken = newRefreshToken
         )

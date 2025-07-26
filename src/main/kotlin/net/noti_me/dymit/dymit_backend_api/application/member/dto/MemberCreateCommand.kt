@@ -7,6 +7,6 @@ import java.time.Instant
 data class MemberCreateCommand(
     val nickname: String,
     val oidcProvider: OidcProvider,
-    val idToken: String
+    val idToken: String,
 ) {
 }

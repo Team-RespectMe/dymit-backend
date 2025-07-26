@@ -8,7 +8,9 @@ import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
+import net.noti_me.dymit.dymit_backend_api.common.errors.NotImplementedException
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
@@ -48,6 +50,7 @@ class MemberCreateUsecaseImpl(
                 email = payload.email
             )),
         )
+
         member = saveMemberPort.persist(member)
 
         return MemberCreateResult.from(

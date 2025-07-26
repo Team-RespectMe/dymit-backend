@@ -1,0 +1,8 @@
+@startuml
+actor "모바일 앱" as App
+participant "API 서버" as Server
+
+App -> Server : POST /api/v1/auth/oidc \nOIDC 로그인 요청
+Server --> App : 회원 정보 반환
+
+@enduml

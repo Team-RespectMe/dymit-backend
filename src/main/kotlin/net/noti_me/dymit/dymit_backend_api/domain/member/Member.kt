@@ -65,9 +65,6 @@ class Member(
     }
 
     fun updateProfileImage(profileImage: MemberProfileImageVo) {
-        if ( !profileImage.isValid() ) {
-            throw IllegalArgumentException("Invalid profile image data")
-        }
         this.profileImage = profileImage
         updateLastAccessedAt()
     }
