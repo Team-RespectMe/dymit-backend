@@ -77,7 +77,7 @@ class SecurityConfig {
                     "/api/v1/auth/oidc/**",
                     "/api/v1/auth/jwt/**"
                 ).permitAll()
-                it.requestMatchers("/api/v1/nicknames/validate")
+                it.requestMatchers("/api/v1/members/nickname-validation")
                     .permitAll()
                 it.anyRequest().authenticated()
             }

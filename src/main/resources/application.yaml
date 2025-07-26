@@ -37,11 +37,10 @@ server:
       max-request-size: ${DYMIT_SERVER_MAX_REQUEST_SIZE:2MB}
 
 log-reporter:
-  enabled: ${DYMIT_LOG_REPORTER_ENABLED:true}
+  enabled: ${DYMIT_LOG_REPORTER_ENABLED:false}
   discord:
     webhook:
-      url: ${DYMIT_DISCORD_WEBHOOK_URL}
-
+      url: ${DYMIT_DISCORD_WEBHOOK_URL:}
 logging:
   level:
     root: ${DYMIT_SERVER_LOG_LEVEL:DEBUG}

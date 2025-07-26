@@ -67,5 +67,10 @@ class MemberController(
         )
         return MemberCreateResponse.from(result)
     }
+
+    override fun checkNickname(nickname: String) {
+        logger.debug("checkNickname called with nickname: $nickname")
+        return memberCreateUsecase.checkNickname(nickname)
+    }
 }
 
