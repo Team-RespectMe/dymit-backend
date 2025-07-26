@@ -27,6 +27,7 @@ class MemberProfileResponse(
                 profileImage = member.profileImage?.let {
                     ProfileImageResponse(
                         url = it.url,
+                        type = it.type,
                         width = it.width,
                         height = it.height
                     )

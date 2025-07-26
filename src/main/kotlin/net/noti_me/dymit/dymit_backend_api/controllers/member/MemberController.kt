@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
+import net.noti_me.dymit.dymit_backend_api.application.member.MemberImageUploadUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
@@ -15,6 +16,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberNickname
 import net.noti_me.dymit.dymit_backend_api.controllers.member.MemberApi
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import org.slf4j.LoggerFactory
@@ -29,7 +31,8 @@ import org.springframework.web.multipart.MultipartRequest
 class MemberController(
     private val memberCreateUsecase: MemberCreateUsecase,
     private val memberQueryUsecase: MemberQueryUsecase,
-    private val memberUpdateNicknameUsecase: UpdateNicknameUsecase
+    private val memberUpdateNicknameUsecase: UpdateNicknameUsecase,
+    private val memberImageUploadUsecase: MemberImageUploadUsecase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -71,6 +74,26 @@ class MemberController(
     override fun checkNickname(nickname: String) {
         logger.debug("checkNickname called with nickname: $nickname")
         return memberCreateUsecase.checkNickname(nickname)
+    }
+
+    override fun uploadProfileImage(
+        loginMember: MemberInfo,
+        memberId: String,
+        request: ProfileImageUploadRequest
+    ): MemberProfileResponse {
+        val imageFile = request.file
+        val type = request.type
+        val presetNo = request.presetNo
+
+        return MemberProfileResponse.from(
+            memberImageUploadUsecase.uploadImage(
+                loginMember = loginMember,
+                memberId = memberId,
+                type = type,
+                presetNo = presetNo,
+                imageFile = imageFile
+            )
+        )
     }
 }
 
