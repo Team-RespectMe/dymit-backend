@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/members")
 @Tag(name = "닉네임 API", description = "닉네임 관련 API")
 interface NicknameApi {
 
@@ -41,7 +41,7 @@ interface NicknameApi {
             )
         ]
     )
-    @GetMapping("/nicknames/validate")
+    @GetMapping("/nickname-validation")
     @ResponseStatus(HttpStatus.OK)
     @Parameter(name = "nickname", description = "검증할 닉네임", required = true, `in` = ParameterIn.QUERY)
     fun checkNickname(@RequestParam @Valid @Nickname nickname: String): Unit
