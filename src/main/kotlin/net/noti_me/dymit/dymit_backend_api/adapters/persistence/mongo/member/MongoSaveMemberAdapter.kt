@@ -19,11 +19,9 @@ class MongoSaveMemberAdapter(
     }
 
     override fun delete(member: Member): Boolean {
-        return try {
-            mongoTemplate.remove(member)
-            true
-        } catch (e: Exception) {
-            false
-        }
+        member.oidcIdentities.clear();
+        member.markAsDeleted()
+        mongoTemplate.save(member)
+        return true
     }
 }

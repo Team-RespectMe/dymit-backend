@@ -5,6 +5,7 @@ import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberImageUploadUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
@@ -31,6 +32,7 @@ import org.springframework.web.multipart.MultipartRequest
 class MemberController(
     private val memberCreateUsecase: MemberCreateUsecase,
     private val memberQueryUsecase: MemberQueryUsecase,
+    private val memberDeleteUsecase: MemberDeleteUsecase,
     private val memberUpdateNicknameUsecase: UpdateNicknameUsecase,
     private val memberImageUploadUsecase: MemberImageUploadUsecase
 ) : MemberApi {
@@ -93,6 +95,13 @@ class MemberController(
                 presetNo = presetNo,
                 imageFile = imageFile
             )
+        )
+    }
+
+    override fun deleteMember(loginMember: MemberInfo, memberId: String) {
+        return memberDeleteUsecase.deleteMember(
+            loginMember = loginMember,
+            memberId = memberId
         )
     }
 }

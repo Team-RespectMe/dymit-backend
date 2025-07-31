@@ -187,4 +187,17 @@ interface MemberApi {
         @PathVariable memberId: String,
         @ModelAttribute @Valid request: ProfileImageUploadRequest
     ): MemberProfileResponse
+
+    @Operation(summary = "회원 탈퇴 삭제 API", description = "회원을 삭제합니다, 단 소프트 삭제이기 때문에 OIDC 연동 정보만 제거 됩니다.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "회원 탈퇴 성공"),
+    ])
+    @DeleteMapping("/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun deleteMember(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String
+    ): Unit
+
 }

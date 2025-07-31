@@ -17,8 +17,6 @@ class StudyGroupListItemDto(
     val name: String,
     @Schema(description = "스터디 그룹 설명")
     val description: String,
-    @Schema(description = "스터디 그룹 멤버 목록")
-    val members: List<MemberPreview>,
     @Schema(description = "스터디 그룹 스케줄 정보")
     val schedule: SchedulePreview?,
     @Schema(description = "스터디 그룹 개설 일시")
@@ -33,7 +31,6 @@ class StudyGroupListItemDto(
                 owner = dto.owner,
                 name = dto.name,
                 description = dto.description,
-                members = dto.members,
                 schedule = dto.schedule,
                 createdAt = dto.createdAt.toString()
             )
