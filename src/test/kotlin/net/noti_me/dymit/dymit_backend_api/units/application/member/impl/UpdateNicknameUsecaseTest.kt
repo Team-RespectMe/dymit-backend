@@ -11,8 +11,8 @@ import net.noti_me.dymit.dymit_backend_api.application.member.impl.UpdateNicknam
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 

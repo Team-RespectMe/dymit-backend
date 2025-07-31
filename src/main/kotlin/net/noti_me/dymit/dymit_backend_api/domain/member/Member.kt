@@ -5,7 +5,10 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeleteEvent
 import org.springframework.data.annotation.Id
+import java.time.LocalDateTime
+import kotlin.random.Random
 
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
@@ -13,8 +16,15 @@ class Member(
     id: String? = null,
     nickname: String = "",
     oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
-    profileImage: MemberProfileImageVo? = null,
-    lastAccessAt: Instant = Instant.now(),
+    profileImage: MemberProfileImageVo = MemberProfileImageVo(
+        type = "preset",
+        filePath = "",
+        url = "0",
+        fileSize = 0L,
+        width = 0,
+        height = 0
+    ),
+    lastAccessAt: LocalDateTime = LocalDateTime.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
     refreshTokens: MutableSet<String> = mutableSetOf(),
 ) : BaseAggregateRoot<Member>() {
@@ -40,10 +50,10 @@ class Member(
     var oidcIdentities: MutableSet<OidcIdentity> = oidcIdentities
         private set
 
-    var profileImage: MemberProfileImageVo? = profileImage
+    var profileImage: MemberProfileImageVo = profileImage
         private set
 
-    var lastAccessAt: Instant = lastAccessAt
+    var lastAccessAt: LocalDateTime = lastAccessAt
         private set
 
     fun changeNickname(newNickname: String) {
@@ -70,7 +80,21 @@ class Member(
     }
 
     fun deleteProfileImage() {
-        this.profileImage = null
+        if ( this.profileImage.type == "external" ) {
+            val event = MemberProfileImageDeleteEvent(
+                filePath = this.profileImage.filePath,
+                source = this
+            )
+            registerEvent(event)
+        }
+        this.profileImage = MemberProfileImageVo(
+            type = "preset",
+            filePath = "",
+            url = Random.nextInt(0, 6).toString(),
+            fileSize = 0L,
+            width = 0,
+            height = 0
+        )
     }
 
     fun addDeviceToken(deviceToken: DeviceToken) {
@@ -82,7 +106,7 @@ class Member(
     }
 
     fun updateLastAccessedAt() {
-        this.lastAccessAt = Instant.now()
+        this.lastAccessAt = LocalDateTime.now()
     }
 
     fun addRefreshToken(token: String) {

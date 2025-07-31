@@ -13,8 +13,8 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtConfig
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtService
 

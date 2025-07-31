@@ -77,10 +77,10 @@ internal class MemberTest : BehaviorSpec() {
             }
 
             `when`("프로필 사진을 삭제하면") {
-                then("프로필 사진 정보가 null이 된다.") {
+                then("프로필 사진 정보가 프리셋으로 변경 된다.") {
                     member.updateProfileImage(profileImage) // 먼저 이미지를 설정
                     member.deleteProfileImage()
-                    member.profileImage shouldBe null
+                    member.profileImage.type shouldBe "preset"
                 }
             }
         }

@@ -10,8 +10,8 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant

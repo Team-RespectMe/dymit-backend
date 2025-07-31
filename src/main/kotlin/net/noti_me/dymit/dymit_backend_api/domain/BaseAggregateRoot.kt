@@ -8,17 +8,18 @@ import org.springframework.data.domain.DomainEvents
 import org.springframework.data.domain.Persistable
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Document
 abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
 ) : AbstractAggregateRoot<T>() {
     @CreatedDate
-    var createdAt: Instant? = null
+    var createdAt: LocalDateTime? = null
         protected set
 
     @LastModifiedDate
-    var updatedAt: Instant? = null
+    var updatedAt: LocalDateTime? = null
         protected set
 
     var isDeleted: Boolean = false

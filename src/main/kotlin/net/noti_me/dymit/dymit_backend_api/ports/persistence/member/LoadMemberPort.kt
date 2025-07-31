@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.ports.persistence
+package net.noti_me.dymit.dymit_backend_api.ports.persistence.member
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
@@ -16,6 +16,10 @@ interface LoadMemberPort {
     fun loadByOidcIdentity(
         oidcIdentity: OidcIdentity
     ): Member?
+
+    fun loadByIds(
+        ids: List<String>
+    ): List<Member>
 
     fun existsByNickname(
         nickname: String

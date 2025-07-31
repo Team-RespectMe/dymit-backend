@@ -6,6 +6,6 @@ import org.springframework.context.ApplicationEvent
 
 class StudyGroupProfileImageDeleteEvent (
     val studyGroupId: String,
-    val profileImage: GroupProfileImageVo?,
+    val filePath: String,
     source: Any
 ) : ApplicationEvent(source)

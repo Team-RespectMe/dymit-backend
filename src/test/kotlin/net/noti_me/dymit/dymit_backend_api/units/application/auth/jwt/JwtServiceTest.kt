@@ -8,13 +8,10 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
-import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.auth.jwt.JwtService
-import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
 
 class JwtServiceTest() : BehaviorSpec() {
 

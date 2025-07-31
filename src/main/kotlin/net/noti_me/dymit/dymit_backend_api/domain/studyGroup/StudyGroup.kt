@@ -1,5 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.domain.studyGroup
 
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCodeVo
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -13,6 +15,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOw
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import org.springframework.data.mongodb.core.mapping.Field
 import java.security.Permission
+import java.time.LocalDateTime
+import kotlin.random.Random
 
 
 /**
@@ -30,19 +34,17 @@ import java.security.Permission
  * @param name 그룹의 이름
  * @param description 그룹의 설명
  * @param profile 그룹의 프로필 이미지 정보 (선택적)
- * @param memberPreview 그룹의 멤버 미리보기 정보 (최대 8명)
- * @param schedulePreview 그룹의 최신 일정 미리보기 정보 (선택적)
+ * @param inviteCode 그룹의 초대 코드 정보 (선택적)
  */
 @Document("study_groups")
 class StudyGroup(
     id: String? = null,
     ownerId: String = "",
-    boardId: String = "",
     name: String = "",
     description: String = "",
-    profile: GroupProfileImageVo? = null,
-    memberPreview: MutableSet<MemberPreview> = mutableSetOf(),
-    schedulePreview: SchedulePreview? = null
+    memberCount: Int = 0,
+    profileImage: GroupProfileImageVo = GroupProfileImageVo(),
+    inviteCode: InviteCodeVo = InviteCodeVo("")
 ): BaseAggregateRoot<StudyGroup>() {
 
 //    override fun getId(): String? {
@@ -64,15 +66,13 @@ class StudyGroup(
     var ownerId: String = ownerId
         private set
 
-    var boardId: String = boardId
-
-    var profileImage: GroupProfileImageVo? = profile
+    var memberCount : Int = memberCount
         private set
 
-    var memberPreview: MutableSet<MemberPreview> = memberPreview
+    var profileImage: GroupProfileImageVo = profileImage
         private set
 
-    var schedulePreview: SchedulePreview? = schedulePreview
+    var inviteCode: InviteCodeVo = inviteCode
         private set
 
     /**
@@ -136,7 +136,6 @@ class StudyGroup(
         if ( this.ownerId != requesterId ) {
             throw ForbiddenException("그룹 소유자만 소유자를 변경할 수 있습니다.")
         }
-        
         this.ownerId = newOwnerId
         val event = StudyGroupOwnerChangedEvent(this.id!!, requesterId, newOwnerId, this)
         this.registerEvent(event)
@@ -164,41 +163,31 @@ class StudyGroup(
             throw ForbiddenException("그룹 소유자만 프로필 이미지를 삭제할 수 있습니다.")
         }
 
-        if ( this.profileImage == null ) {
-            return;
+        if ( this.profileImage.type == "external" ) {
+            val event = StudyGroupProfileImageDeleteEvent(this.id!!, profileImage.filePath, this)
+            this.registerEvent(event)
         }
-        this.profileImage = null
-        val event = StudyGroupProfileImageDeleteEvent(this.id!!, profileImage, this)
-        this.registerEvent(event)
+
+        this.profileImage = GroupProfileImageVo(
+            filePath = "",
+            type = "preset",
+            url = Random.nextInt(0, 8).toString(),
+        )
     }
 
     /**
-     * 그룹 멤버를 추가하는 메서드
-     * 이 메서드는 그룹의 멤버 미리보기에 멤버를 추가합니다.
-     * @param memberPreview 추가할 멤버의 미리보기 정보
+     * 그룹의 초대 코드를 갱신하는 메서드
      */
-    fun addMemberPreview(memberPreview: MemberPreview) {
-        if ( this.memberPreview.size >= 8 ) {
-            return; // 최대 8명의 멤버 미리보기만 허용
+    fun updateInviteCode(inviteCode: String) {
+        if ( inviteCode.length != 8 ) {
+            throw IllegalStateException("초대 코드는 8자리 숫자여야 합니다.")
         }
-        this.memberPreview.add(memberPreview)
-    }
 
-    /**
-     * 그룹 멤버 미리보기에서 특정 멤버를 제거하는 메서드
-     * 이 메서드는 그룹의 멤버 미리보기에서 특정 멤버를 제거합니다.
-     * @param memberId 제거할 멤버의 ID
-     */
-    fun removeMemberPreview(memberId: String) {
-        this.memberPreview.removeIf { it.memberId == memberId }
-    }
-
-    /**
-     * 그룹의 최신 일정 미리보기를 업데이트 메서드
-     * @param schedulePreview 새로운 일정 미리보기 정보
-     */
-    fun updateSchedulePreview(schedulePreview: SchedulePreview) {
-        this.schedulePreview = schedulePreview
+        this.inviteCode = InviteCodeVo(
+            code = inviteCode,
+            createdAt = LocalDateTime.now(),
+            expireAt = LocalDateTime.now().plusDays(30)
+        )
     }
 
     override fun equals(other: Any?): Boolean {

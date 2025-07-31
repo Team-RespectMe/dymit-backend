@@ -1,6 +1,5 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
 import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl.JwtAuthService
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateResult
@@ -8,12 +7,10 @@ import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
-import net.noti_me.dymit.dymit_backend_api.common.errors.NotImplementedException
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

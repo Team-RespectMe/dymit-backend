@@ -10,7 +10,7 @@ class MemberProfileImageVo(
     @Schema(description = "프로필 사진 파일 경로", example = "/images/profile/testuser.jpg")
     val filePath: String = "",
     @Schema(description = "프로필 사진 URL", example = "https://example.com/images/profile/testuser.jpg")
-    val url: String = "",
+    val url: String = "0",
     @Schema(description = "프로필 사진 파일 크기 (바이트 단위)", example = "123456")
     val fileSize: Long = 0L,
     @Schema(description = "프로필 사진 너비 (픽셀 단위)", example = "200")

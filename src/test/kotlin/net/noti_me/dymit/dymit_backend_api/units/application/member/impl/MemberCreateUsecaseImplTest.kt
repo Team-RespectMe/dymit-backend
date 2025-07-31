@@ -17,8 +17,8 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 
 
 internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
@@ -97,6 +97,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
                         )
                     )
                     every { jwtService.login(any(), any()) } returns LoginResult(
+                        memberId = "memberId",
                         accessToken = "eyJ...",
                         refreshToken = "eyJ..."
                     )

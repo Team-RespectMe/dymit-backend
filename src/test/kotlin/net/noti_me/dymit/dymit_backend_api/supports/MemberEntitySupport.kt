@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.supports
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 
 fun createOidcIdentity(
@@ -26,6 +27,6 @@ fun createMemberEntity(
         id = id,
         nickname = nickname,
         oidcIdentities = oidcIdentities.toMutableSet(),
-        profileImage = null
+        profileImage = MemberProfileImageVo()
     )
 }

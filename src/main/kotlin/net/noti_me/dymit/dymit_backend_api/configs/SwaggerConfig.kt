@@ -36,7 +36,6 @@ class SwaggerConfig(
                         .scheme("bearer")
                         .bearerFormat("JWT")
             ))
-            .addSecurityItem(SecurityRequirement().addList("bearer-jwt"))
             .addServersItem(Server().url("$domain"))
     }
 

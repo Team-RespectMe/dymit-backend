@@ -1,7 +1,7 @@
-package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo
+package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.member
 
 import org.springframework.stereotype.Repository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -32,6 +32,13 @@ class MongoLoadMemberAdapter(
     override fun existsByNickname(nickname: String): Boolean {
         return mongoTemplate.exists(
             Query(Criteria.where("nickname").`is`(nickname)),
+            Member::class.java
+        )
+    }
+
+    override fun loadByIds(ids: List<String>): List<Member> {
+        return mongoTemplate.find(
+            Query(Criteria.where("id").`in`(ids)),
             Member::class.java
         )
     }

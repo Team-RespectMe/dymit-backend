@@ -13,6 +13,7 @@ import org.springframework.data.annotation.Id
  */
 data class GroupProfileImageVo (
     val filePath: String = "",
+    val type: String = "preset", // 프로필 이미지 타입, 기본값은 'preset'
     val url: String = "",
     val fileSize: Long = 0L,
     val width: Int = 0,
