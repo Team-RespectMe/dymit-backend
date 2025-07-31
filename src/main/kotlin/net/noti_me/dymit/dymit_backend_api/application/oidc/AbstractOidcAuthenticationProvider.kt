@@ -25,6 +25,8 @@ abstract class AbstractOidcAuthenticationProvider : OidcAuthenticationProvider {
 
     abstract fun convertIdToken(decodedJWT: DecodedJWT): CommonOidcIdTokenPayload
 
+    abstract fun getAudience(): List<String>
+
     override fun support(providerName: String): Boolean {
         return providerName.equals(getProviderName(), ignoreCase = true)
     }
@@ -43,10 +45,15 @@ abstract class AbstractOidcAuthenticationProvider : OidcAuthenticationProvider {
         }
 
         val verifier = verifierBuilder.build()
-        // TODO: Audience 검증 로직 추가
 
         return try {
             val verifiedJWT: DecodedJWT = verifier.verify(idToken)
+            val aud = verifiedJWT.audience
+            val allowed = getAudience().any { aud.contains(it) }
+            if (!allowed) {
+                throw UnauthorizedException(message="OIDC 인증 실패, ID 토큰의 audience가 허용된 audience 목록에 없습니다.")
+            }
+
             convertIdToken(verifiedJWT)
         } catch (e: Exception) {
             throw UnauthorizedException("OIDC 인증 실패, OIDC ID 토큰 검증에 실패하였습니다. message : ${e.message ?: "Unknown error"}")

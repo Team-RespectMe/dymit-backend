@@ -13,7 +13,7 @@ class NicknameValidator : ConstraintValidator<Nickname, String> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
-        logger.debug("Validating nickname: $value")
+//        logger.debug("Validating nickname: $value")
         if ( value.isNullOrBlank() ) return false
         return regex.matches(value)
     }

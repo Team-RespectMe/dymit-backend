@@ -1,33 +1,40 @@
 package net.noti_me.dymit.dymit_backend_api.application.oidc
 
 import com.auth0.jwt.interfaces.DecodedJWT
+import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.AppleJwksProvider
 import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.GoogleJwksProvider
 import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.JwksProvider
+import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.AppleOidcIdTokenPayload
 import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.CommonOidcIdTokenPayload
 import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.GoogleOidcIdTokenPayload
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 @Component
-class DymitGoogleOidcAuthenticationProvider(
-    private val jwksProvider: GoogleJwksProvider,
-    @Value("\${dymit.oidc.google.audience}")
+class DymitAppleOidcAuthenticationProvider(
+    private val jwksProvider: AppleJwksProvider,
+    @Value("\${dymit.oidc.apple.audience}")
     private val _audience: String
 ) : AbstractOidcAuthenticationProvider() {
 
-    companion object {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
-        private const val ISSUER_NAME = "https://accounts.google.com"
-
-        private const val PROVIDER_NAME = "google"
+    init {
+        logger.info("DymitAppleOidcAuthenticationProvider initialized with audience: {}", _audience)
     }
 
-    override fun getAudience(): List<String> {
-        return _audience.split(",").map{it.trim()}
+    companion object {
+
+        private const val ISSUER_NAME = "https://appleid.apple.com"
+
+        private const val PROVIDER_NAME = "apple"
     }
 
     override fun convertIdToken(decodedJWT: DecodedJWT): CommonOidcIdTokenPayload {
-        return GoogleOidcIdTokenPayload.valueOf(decodedJWT).toCommonPayload()
+        val payload =  AppleOidcIdTokenPayload.valueOf(decodedJWT)
+        return AppleOidcIdTokenPayload.toCommonPayload(payload)
     }
 
     override fun getJwksProvider(): JwksProvider {
@@ -40,5 +47,9 @@ class DymitGoogleOidcAuthenticationProvider(
 
     override fun getProviderName(): String {
         return PROVIDER_NAME
+    }
+
+    override fun getAudience(): List<String> {
+        return _audience.split(",")
     }
 }
