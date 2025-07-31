@@ -2,11 +2,10 @@ package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberQueryDto
-import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import org.springframework.stereotype.Service
 
 @Service

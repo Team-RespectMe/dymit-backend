@@ -3,13 +3,11 @@ package net.noti_me.dymit.dymit_backend_api.application.auth.jwt
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTDecodeException
-import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant

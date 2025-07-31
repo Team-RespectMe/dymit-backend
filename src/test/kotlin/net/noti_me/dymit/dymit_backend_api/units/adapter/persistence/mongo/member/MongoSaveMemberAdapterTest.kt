@@ -1,11 +1,8 @@
-package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo
+package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo.member
 
-import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.MongoSaveMemberAdapter
+import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.member.MongoSaveMemberAdapter
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
 import org.springframework.data.mongodb.core.MongoTemplate
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.core.extensions.Extension
@@ -13,8 +10,6 @@ import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.TestPropertySource
 
 // @TestPropertySource(properties = ["de.flapdoodle.mongodb.embedded.version=5.3.0"])
 // @TestPropertySource(locations = ["classpath:application.yaml"])

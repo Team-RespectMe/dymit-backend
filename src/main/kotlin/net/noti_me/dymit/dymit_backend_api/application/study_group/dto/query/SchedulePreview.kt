@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.domain.studyGroup
+package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query
 
 import java.time.LocalDateTime
 

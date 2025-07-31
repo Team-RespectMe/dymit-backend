@@ -8,8 +8,8 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotImplementedException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -67,7 +67,7 @@ class MemberImageUploadUsecaseImpl(
         return MemberProfileImageVo(
             filePath = "",
             fileSize = 0L,
-            url = "preset-${presetNo}",
+            url = "${presetNo}",
             type = "presets",
             width = 0,
             height = 0,

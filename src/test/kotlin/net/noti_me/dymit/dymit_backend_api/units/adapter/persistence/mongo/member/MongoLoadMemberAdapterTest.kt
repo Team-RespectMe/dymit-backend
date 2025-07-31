@@ -1,11 +1,11 @@
-package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo
+package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo.member
 
 import io.kotest.core.extensions.Extension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.MongoLoadMemberAdapter
+import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.member.MongoLoadMemberAdapter
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity

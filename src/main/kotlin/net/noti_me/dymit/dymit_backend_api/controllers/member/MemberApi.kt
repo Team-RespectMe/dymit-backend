@@ -124,7 +124,6 @@ interface MemberApi {
     )
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    @SecurityRequirement(name = "bearer-jwt")
     fun createMember(@RequestBody @Valid request: MemberCreateRequest): MemberCreateResponse
 
     @Operation(summary = "닉네임 유효성 검사", description = "닉네임 중복체크 및 유효성 검사를 수행합니다.")

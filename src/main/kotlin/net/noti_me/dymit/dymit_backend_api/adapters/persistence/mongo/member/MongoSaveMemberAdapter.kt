@@ -1,10 +1,9 @@
-package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo
+package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.member
 
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import org.springframework.stereotype.Repository
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.update
 
 @Repository
 class MongoSaveMemberAdapter(

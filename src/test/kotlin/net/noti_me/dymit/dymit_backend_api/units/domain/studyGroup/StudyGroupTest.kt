@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import java.util.UUID
 
 
@@ -150,9 +151,7 @@ class StudyGroupTest() : BehaviorSpec() {
             id = "test-group-id",
             name = "Test Study Group",
             description = "This is a test study group.",
-            profile = createProfileImage(),
-            ownerId = "test-owner-id",
-            boardId = "test-board-id"
+            profileImage = createProfileImage(),
         )
     }
 

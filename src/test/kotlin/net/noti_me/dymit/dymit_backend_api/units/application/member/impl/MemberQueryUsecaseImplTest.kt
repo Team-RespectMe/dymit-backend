@@ -1,10 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.units.application.member.impl
 
-import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -14,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 
 class MemberQueryUsecaseImplTest : BehaviorSpec() {
 
