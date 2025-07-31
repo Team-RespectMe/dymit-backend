@@ -25,7 +25,6 @@ abstract class AbstractJwksProvider(
     private val lock = Any()
 
     override fun getPublicKey(kid: String): RSAPublicKey {
-        println("getPublickey called with kid: $kid")
         val jwtKey = fetchJwks().firstOrNull { it.kid == kid }
             ?: throw InternalServerError("OIDC 로그인 실패, kid에 해당하는 공개키를 찾을 수 없습니다.")
 
@@ -56,8 +55,8 @@ abstract class AbstractJwksProvider(
                 .bodyToMono(JWKList::class.java)
                 .block()
 
-            println("response : ${response.toString()}")
-            println("keys: ${response?.keys.toString()}")
+//            println("response : ${response.toString()}")
+//            println("keys: ${response?.keys.toString()}")
 
             if (response == null || response.keys.isNullOrEmpty()) {
                 throw InternalServerError("wtf")
