@@ -1,0 +1,26 @@
+package net.noti_me.dymit.dymit_backend_api.application.member.impl
+
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
+import org.springframework.stereotype.Service
+
+@Service
+class MemberDeleteUsecaseImpl(
+    private val loadMemberPort: LoadMemberPort,
+    private val saveMemberPort: SaveMemberPort
+): MemberDeleteUsecase {
+
+    override fun deleteMember(loginMember: MemberInfo, memberId: String) {
+        if (loginMember.memberId != memberId) {
+            throw ForbiddenException(message = "접근 권한이 없습니다.")
+        }
+
+        val member = loadMemberPort.loadById(memberId)
+            ?: return
+
+        saveMemberPort.delete(member)
+    }
+}

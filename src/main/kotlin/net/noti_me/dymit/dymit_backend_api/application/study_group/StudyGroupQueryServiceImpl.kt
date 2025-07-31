@@ -72,26 +72,26 @@ class StudyGroupQueryServiceImpl(
         }
 
         val studyGroups = loadStudyGroupPort.loadByGroupIds(studyGroupIds)
-        val studyGroupMembers: Map<String, List<MemberPreview>> = getGroupsMemberPreview(studyGroupIds)
         val studyGroupSchedules: Map<String, SchedulePreview?> = getGroupsRecentSchedule(studyGroupIds)
 
         return studyGroups.map { group ->
-            val members = studyGroupMembers[group.identifier] ?: emptyList()
             val recentSchedule = studyGroupSchedules[group.identifier] ?: null
-            val owner = members.find{ it.memberId == group.ownerId }
-                ?: MemberPreview(
-                    memberId = group.ownerId,
-                    nickname = "Unknown",
-                    role = GroupMemberRole.OWNER,
-                    profileImage = MemberProfileImageVo(type = "preset", url = "0")
-                )
+            val owner = loadMemberPort.loadById(group.ownerId) ?: Member(
+                id = group.ownerId,
+                nickname = "Unknown",
+                profileImage = MemberProfileImageVo(type = "preset", url = "0")
+            )
 
             StudyGroupQueryModelDto(
                 id = group.identifier,
                 name = group.name,
                 description = group.description,
-                owner = owner,
-                members = members,
+                owner = MemberPreview(
+                    memberId = owner.identifier,
+                    nickname = owner.nickname,
+                    role = GroupMemberRole.OWNER,
+                    profileImage = owner.profileImage
+                ),
                 schedule = recentSchedule,
                 createdAt = group.createdAt ?: LocalDateTime.now(),
                 profileImage = group.profileImage
@@ -102,19 +102,5 @@ class StudyGroupQueryServiceImpl(
     fun getGroupsRecentSchedule( groupIds: List<String> )
     : Map<String, SchedulePreview?> {
         return emptyMap()
-    }
-
-    fun getGroupsMemberPreview(groupIds: List<String>): Map<String, List<MemberPreview>> {
-        return studyGroupMemberRepository.findByGroupIdsOrderByCreatedAt(groupIds, DEFAULT_MEMBER_PREVIEW_SIZE)
-            .mapValues { (_, members) ->
-                members.map { member ->
-                    MemberPreview(
-                        memberId = member.memberId,
-                        nickname = member.nickname,
-                        role = member.role,
-                        profileImage = member.profileImage
-                    )
-                }
-            }
     }
 }

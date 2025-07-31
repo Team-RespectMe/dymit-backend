@@ -11,7 +11,6 @@ class StudyGroupQueryModelDto(
     val profileImage: GroupProfileImageVo,
     val owner: MemberPreview,
     val description: String,
-    var members: List<MemberPreview> = emptyList(),
     var schedule: SchedulePreview? = null,
     val createdAt: LocalDateTime
 ) {
