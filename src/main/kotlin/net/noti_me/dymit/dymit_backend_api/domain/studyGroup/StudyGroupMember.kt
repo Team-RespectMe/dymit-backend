@@ -2,11 +2,14 @@ package net.noti_me.dymit.dymit_backend_api.domain.studyGroup
 
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import org.bson.types.ObjectId
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document("study_group_members")
 class StudyGroupMember(
-    id: String? = null,
+    @Id
+    val id: ObjectId = ObjectId.get(),
     groupId: String = "",
     memberId: String = "",
     nickname: String = "",
@@ -14,11 +17,8 @@ class StudyGroupMember(
     role: GroupMemberRole = GroupMemberRole.MEMBER,
 ): BaseAggregateRoot<StudyGroupMember>() {
 
-    var id: String? = id
-        private set;
-
     val identifier: String
-        get() = id ?: throw IllegalStateException("Member ID is not set")
+        get() = id.toHexString()
 
     val groupId: String = groupId
 

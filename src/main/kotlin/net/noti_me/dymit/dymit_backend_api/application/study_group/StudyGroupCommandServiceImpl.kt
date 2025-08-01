@@ -38,7 +38,7 @@ class StudyGroupCommandServiceImpl(
         var studyGroup = StudyGroup(
             name = command.name,
             description = command.description,
-            ownerId = memberEntity.identifier
+            ownerId = memberEntity.id,
         )
 
         var inviteCode = (1..8)

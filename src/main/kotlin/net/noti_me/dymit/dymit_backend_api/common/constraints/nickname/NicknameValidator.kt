@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 class NicknameValidator : ConstraintValidator<Nickname, String> {
 
-    private val regex = Regex("^(?! )[A-Za-z0-9가-힣]+( [A-Za-z0-9가-힣]+)*\$")
+    private val regex = Regex("^(?! )[A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]+( [A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]+)*\$")
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

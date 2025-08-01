@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Field
 import java.security.Permission
 import java.time.LocalDateTime
@@ -38,8 +39,9 @@ import kotlin.random.Random
  */
 @Document("study_groups")
 class StudyGroup(
-    id: String? = null,
-    ownerId: String = "",
+    @Id
+    val id: ObjectId = ObjectId.get(),
+    ownerId: ObjectId = ObjectId.get(),
     name: String = "",
     description: String = "",
     memberCount: Int = 0,
@@ -47,15 +49,8 @@ class StudyGroup(
     inviteCode: InviteCodeVo = InviteCodeVo("")
 ): BaseAggregateRoot<StudyGroup>() {
 
-//    override fun getId(): String? {
-//        return studyGroupId ?: this.id
-//    }
-
-    var id : String? = id
-        private set
-
     val identifier: String
-        get() = id ?: throw IllegalStateException("StudyGroup ID is not set")
+        get() = id.toHexString()
 
     var description: String = description
         private set
@@ -63,7 +58,7 @@ class StudyGroup(
     var name: String = name
         private set
 
-    var ownerId: String = ownerId
+    var ownerId: ObjectId = ownerId
         private set
 
     var memberCount : Int = memberCount
@@ -84,7 +79,7 @@ class StudyGroup(
      * @throws ForbiddenException 현재 소유자가 아닌 사용자가 그룹 이름을 변경하려고 할 경우
      */
     fun changeName(requesterId: String, newName: String) {
-        if ( this.ownerId != requesterId ) {
+        if ( this.ownerId != ObjectId(requesterId) ) {
             throw ForbiddenException("그룹 소유자만 그룹 이름을 변경할 수 있습니다.")
         }
 
@@ -109,7 +104,7 @@ class StudyGroup(
      * @throws ForbiddenException 현재 소유자가 아닌 사용자가 그룹 설명을 변경하려고 할 경우
      */
     fun changeDescription(requesterId: String, newDescription: String) {
-        if ( this.ownerId != requesterId ) {
+        if ( this.ownerId != ObjectId(requesterId) ) {
             throw ForbiddenException("그룹 소유자만 그룹 설명을 변경할 수 있습니다.")
         }
 
@@ -133,16 +128,21 @@ class StudyGroup(
      * @param newOwnerId 새로운 소유자 ID
      */
     fun changeOwner(requesterId: String, newOwnerId: String) {
-        if ( this.ownerId != requesterId ) {
+        if ( !this.ownerId.equals(ObjectId(requesterId)) ) {
             throw ForbiddenException("그룹 소유자만 소유자를 변경할 수 있습니다.")
         }
-        this.ownerId = newOwnerId
-        val event = StudyGroupOwnerChangedEvent(this.id!!, requesterId, newOwnerId, this)
+
+        if ( !ObjectId.isValid(newOwnerId) ) {
+            throw BadRequestException("유효하지 않은 ID입니다.")
+        }
+
+        this.ownerId = ObjectId(newOwnerId)
+        val event = StudyGroupOwnerChangedEvent(this.id.toHexString(), requesterId, newOwnerId, this)
         this.registerEvent(event)
     }
 
     fun updateProfileImage(requesterId: String, profileImage: GroupProfileImageVo) {
-        if ( this.ownerId != requesterId ) {
+        if ( this.ownerId != ObjectId(requesterId) ) {
             throw ForbiddenException("그룹 소유자가 설정되어 있지 않습니다.")
         }
 
@@ -159,12 +159,12 @@ class StudyGroup(
      * @param requesterId 요청자의 ID
      */
     fun deleteProfileImage(requesterId: String) {
-        if ( this.ownerId != requesterId ) {
+        if ( this.ownerId != ObjectId(requesterId) ) {
             throw ForbiddenException("그룹 소유자만 프로필 이미지를 삭제할 수 있습니다.")
         }
 
         if ( this.profileImage.type == "external" ) {
-            val event = StudyGroupProfileImageDeleteEvent(this.id!!, profileImage.filePath, this)
+            val event = StudyGroupProfileImageDeleteEvent(this.id.toHexString(), profileImage.filePath, this)
             this.registerEvent(event)
         }
 
@@ -200,6 +200,6 @@ class StudyGroup(
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id.hashCode()
     }   
 }
