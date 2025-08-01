@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
@@ -11,7 +12,7 @@ class StudySchedule(
     id: ObjectId = ObjectId.get(),
     groupId: ObjectId = ObjectId.get(),
     title: String = "",
-    session: Int = 1,
+    val session: Int = 1,
     scheduleAt: LocalDateTime,
     assignments: MutableList<ScheduleAssignment> = mutableListOf(),
     roles: MutableList<ScheduleRole> = mutableListOf()
