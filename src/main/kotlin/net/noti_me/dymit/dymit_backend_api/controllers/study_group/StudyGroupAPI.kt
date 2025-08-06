@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupListItemDto
@@ -98,4 +99,20 @@ interface StudyGroupAPI {
     fun getMyStudyGroups(
         @LoginMember memberInfo: MemberInfo
     ): List<StudyGroupListItemDto>
+
+    /**
+     * 스터디 그룹의 Invite Code를 조회합니다.
+     */
+    @Operation(summary = "스터디 그룹 Invite Code 조회 API", description = "스터디 그룹의 Invite Code를 조회합니다.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "조회 성공"),
+        ApiResponse(responseCode = "404", description = "스터디 그룹을 찾을 수 없는 경우"),
+    ])
+    @GetMapping("/{groupId}/invite-code")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun getStudyGroupInviteCode(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): InviteCodeResponse
 }

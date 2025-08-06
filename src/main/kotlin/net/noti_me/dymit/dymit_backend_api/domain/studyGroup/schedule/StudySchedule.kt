@@ -25,6 +25,7 @@ class StudySchedule(
     val identifier: String
         get() = id.toHexString()
 
+    @Indexed(name = "study_schedule_group_id_idx")
     var groupId: ObjectId = groupId
         private set
 
