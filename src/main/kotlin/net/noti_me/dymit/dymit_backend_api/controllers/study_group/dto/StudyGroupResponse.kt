@@ -44,7 +44,7 @@ class StudyGroupResponse(
                 name = obj.name,
                 description = obj.description,
                 owner = obj.owner.memberId,
-                inviteCodeVo = InviteCodeVo(code="", expireAt = LocalDateTime.MAX, createdAt = LocalDateTime.now()),
+                inviteCodeVo = obj.inviteCode,
                 createdAt = obj.createdAt
             )
         }

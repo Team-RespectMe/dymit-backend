@@ -58,6 +58,11 @@ class StudyGroupQueryServiceImpl(
                 role = GroupMemberRole.OWNER,
                 profileImage = owner.profileImage
             ),
+            inviteCode = InviteCodeVo(
+                code = studyGroup.inviteCode.code,
+                createdAt = studyGroup.inviteCode.createdAt,
+                expireAt = studyGroup.inviteCode.expireAt
+            ),
             description = studyGroup.description,
             membersCount = membersCount,
             createdAt = studyGroup.createdAt?: LocalDateTime.now(),
@@ -127,7 +132,7 @@ class StudyGroupQueryServiceImpl(
             }
 
             studyGroup.updateInviteCode(inviteCode)
-            studyGroup = saveStudyGroupPort.persist(studyGroup)
+            studyGroup = saveStudyGroupPort.update(studyGroup)
         }
 
         return studyGroup.inviteCode

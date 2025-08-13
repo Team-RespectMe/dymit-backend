@@ -12,10 +12,9 @@ class StudySchedule(
     id: ObjectId = ObjectId.get(),
     groupId: ObjectId = ObjectId.get(),
     title: String = "",
+    location: ScheduleLocation = ScheduleLocation(),
     val session: Int = 1,
     scheduleAt: LocalDateTime,
-    assignments: MutableList<ScheduleAssignment> = mutableListOf(),
-    roles: MutableList<ScheduleRole> = mutableListOf()
 ) : BaseAggregateRoot<StudySchedule>() {
 
     @Id
@@ -35,39 +34,8 @@ class StudySchedule(
     var scheduleAt: LocalDateTime = scheduleAt
         private set
 
-    var assignments: MutableList<ScheduleAssignment> = assignments
+    var location: ScheduleLocation = location
         private set
-
-    var roles: MutableList<ScheduleRole> = roles
-        private set
-
-    fun addAssignment(assignment: ScheduleAssignment) {
-        assignments.add(assignment)
-    }
-
-    fun deleteAssignment(assignment: ScheduleAssignment) {
-        if (!assignments.remove(assignment)) {
-            throw IllegalArgumentException("Assignment not found in the schedule")
-        }
-    }
-
-    fun clearAssignments() {
-        assignments.clear()
-    }
-
-    fun addRole(role: ScheduleRole) {
-        roles.add(role)
-    }
-
-    fun deleteRole(role: ScheduleRole) {
-        if (!roles.remove(role)) {
-            throw IllegalArgumentException("Role not found in the schedule")
-        }
-    }
-
-    fun clearRoles() {
-        roles.clear()
-    }
 
     fun changeTitle(newTitle: String) {
         this.title = newTitle
@@ -75,5 +43,9 @@ class StudySchedule(
 
     fun changeScheduleAt(newScheduleAt: LocalDateTime) {
         this.scheduleAt = newScheduleAt
+    }
+
+    fun changeLocation(newLocation: ScheduleLocation) {
+        this.location = newLocation
     }
 }
