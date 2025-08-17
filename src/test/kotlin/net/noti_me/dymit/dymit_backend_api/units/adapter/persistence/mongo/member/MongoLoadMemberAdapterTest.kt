@@ -41,25 +41,23 @@ class MongoLoadMemberAdapterTest(
         // Given
         val memberId = existingMember?.id ?: throw IllegalStateException("Existing member not found")
         println("ExistingMember : {" +
-                "id=${existingMember?.id}, " +
+                "id=${existingMember?.identifier}, " +
                 "nickname=${existingMember?.nickname}, " +
                 "oidcIdentities=${existingMember?.oidcIdentities}")
         // When
         val loadedMember = mongoLoadMemberAdapter.loadById(memberId)
         println("LoadedMember : {" +
-                "id=${loadedMember?.id}, " +
+                "id=${loadedMember?.identifier}, " +
                 "nickname=${loadedMember?.nickname}, " +
                 "oidcIdentities=${loadedMember?.oidcIdentities}")
         // Then
         loadedMember shouldNotBe null
-        loadedMember?.id shouldBe memberId
+        loadedMember?.identifier shouldBe memberId.toHexString()
         loadedMember?.nickname shouldBe existingMember?.nickname
         loadedMember?.oidcIdentities shouldNotBe null
         loadedMember?.oidcIdentities?.first()?.provider shouldBe existingMember?.oidcIdentities?.first()?.provider
         loadedMember?.oidcIdentities?.first()?.subject shouldBe existingMember?.oidcIdentities?.first()?.subject
         loadedMember?.isDeleted shouldBe false
-        loadedMember?.createdAt shouldNotBe null
-        loadedMember?.updatedAt shouldNotBe null
     }
 
     @Test

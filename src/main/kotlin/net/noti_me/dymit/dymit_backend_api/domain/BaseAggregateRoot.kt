@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.data.domain.DomainEvents
 import org.springframework.data.domain.Persistable
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import java.time.LocalDateTime
@@ -35,9 +36,6 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
     }
 
     fun markAsDeleted() {
-        if (isDeleted) {
-            throw IllegalStateException("Aggregate is already marked as deleted")
-        }
         isDeleted = true
     }   
 }

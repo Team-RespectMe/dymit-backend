@@ -87,7 +87,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
             }
 
             `when`("타인의 닉네임을 변경하면") {
-                val other = createMemberEntity(id = "otherMemberId", nickname = "otherNickname")
+                val other = createMemberEntity(nickname = "otherNickname")
                 every { loadMemberPort.loadById(other.identifier) } returns other
                 every { loadMemberPort.existsByNickname(newNickname) } returns false
 

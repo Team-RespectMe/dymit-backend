@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Field
 import java.security.Permission
 import java.time.LocalDateTime
@@ -38,24 +39,20 @@ import kotlin.random.Random
  */
 @Document("study_groups")
 class StudyGroup(
-    id: String? = null,
-    ownerId: String = "",
+    @Id
+    val id: ObjectId = ObjectId.get(),
+    ownerId: ObjectId = ObjectId.get(),
     name: String = "",
     description: String = "",
     memberCount: Int = 0,
     profileImage: GroupProfileImageVo = GroupProfileImageVo(),
-    inviteCode: InviteCodeVo = InviteCodeVo("")
+    inviteCode: InviteCodeVo = InviteCodeVo(""),
+    recentSchedule: RecentScheduleVo? = null,
+    recentPost: RecentPostVo? = null
 ): BaseAggregateRoot<StudyGroup>() {
 
-//    override fun getId(): String? {
-//        return studyGroupId ?: this.id
-//    }
-
-    var id : String? = id
-        private set
-
     val identifier: String
-        get() = id ?: throw IllegalStateException("StudyGroup ID is not set")
+        get() = id.toHexString()
 
     var description: String = description
         private set
@@ -63,7 +60,7 @@ class StudyGroup(
     var name: String = name
         private set
 
-    var ownerId: String = ownerId
+    var ownerId: ObjectId = ownerId
         private set
 
     var memberCount : Int = memberCount
@@ -75,6 +72,12 @@ class StudyGroup(
     var inviteCode: InviteCodeVo = inviteCode
         private set
 
+    var recentSchedule: RecentScheduleVo? = recentSchedule
+        private set
+
+    var recentPost: RecentPostVo? = recentPost
+        private set
+
     /**
      * 그룹 이름을 변경하는 메서드
      * 이 메서드는 현재 그룹 소유자만 호출할 수 있으며, 새로운 그룹 이름이 비어있거나 길이가 3자 이상 30자 이하가 아닐 경우 예외를 발생시킵니다.
@@ -84,16 +87,17 @@ class StudyGroup(
      * @throws ForbiddenException 현재 소유자가 아닌 사용자가 그룹 이름을 변경하려고 할 경우
      */
     fun changeName(requesterId: String, newName: String) {
-        if ( this.ownerId != requesterId ) {
-            throw ForbiddenException("그룹 소유자만 그룹 이름을 변경할 수 있습니다.")
+//        println("requesterId: $requesterId, ownerId: ${this.ownerId.toHexString()}")
+        if ( this.ownerId.toHexString() != requesterId ) {
+            throw ForbiddenException(message="그룹 소유자만 그룹 이름을 변경할 수 있습니다.")
         }
 
         if ( newName.isBlank() ) {
-            throw BadRequestException("그룹 이름은 빈 문자열 일 수 없습니다.")
+            throw BadRequestException(message="그룹 이름은 빈 문자열 일 수 없습니다.")
         }
 
         if ( newName.length < 3 || newName.length > 30 ) {
-            throw BadRequestException("그룹 이름은 3자 이상 30자 이하이어야 합니다.")
+            throw BadRequestException(message="그룹 이름은 3자 이상 30자 이하이어야 합니다.")
         }
 
         this.name = newName
@@ -109,16 +113,16 @@ class StudyGroup(
      * @throws ForbiddenException 현재 소유자가 아닌 사용자가 그룹 설명을 변경하려고 할 경우
      */
     fun changeDescription(requesterId: String, newDescription: String) {
-        if ( this.ownerId != requesterId ) {
-            throw ForbiddenException("그룹 소유자만 그룹 설명을 변경할 수 있습니다.")
+        if ( this.ownerId.toHexString() != requesterId ) {
+            throw ForbiddenException(message="그룹 소유자만 그룹 설명을 변경할 수 있습니다.")
         }
 
         if ( newDescription.isBlank() ) {
-            throw BadRequestException("스터디 그룹의 설명은 빈 문자열 일 수 없습니다.")
+            throw BadRequestException(message="스터디 그룹의 설명은 빈 문자열 일 수 없습니다.")
         }
 
         if ( newDescription.length < 5 || newDescription.length > 500 ) {
-            throw BadRequestException("스터디 그룹의 설명은 5자 이상 500자 이하이어야 합니다.")
+            throw BadRequestException(message="스터디 그룹의 설명은 5자 이상 500자 이하이어야 합니다.")
         }
 
         this.description = newDescription
@@ -133,21 +137,26 @@ class StudyGroup(
      * @param newOwnerId 새로운 소유자 ID
      */
     fun changeOwner(requesterId: String, newOwnerId: String) {
-        if ( this.ownerId != requesterId ) {
-            throw ForbiddenException("그룹 소유자만 소유자를 변경할 수 있습니다.")
+        if ( this.ownerId.toHexString() != requesterId ) {
+            throw ForbiddenException(message="그룹 소유자만 소유자를 변경할 수 있습니다.")
         }
-        this.ownerId = newOwnerId
-        val event = StudyGroupOwnerChangedEvent(this.id!!, requesterId, newOwnerId, this)
+
+        if ( !ObjectId.isValid(newOwnerId) ) {
+            throw BadRequestException(message="유효하지 않은 ID입니다.")
+        }
+
+        this.ownerId = ObjectId(newOwnerId)
+        val event = StudyGroupOwnerChangedEvent(this.id.toHexString(), requesterId, newOwnerId, this)
         this.registerEvent(event)
     }
 
     fun updateProfileImage(requesterId: String, profileImage: GroupProfileImageVo) {
-        if ( this.ownerId != requesterId ) {
-            throw ForbiddenException("그룹 소유자가 설정되어 있지 않습니다.")
+        if ( this.ownerId.toHexString() != requesterId ) {
+            throw ForbiddenException(message="그룹 소유자가 설정되어 있지 않습니다.")
         }
 
         if ( !profileImage.isValid() ) {
-            throw BadRequestException("유효하지 않은 프로필 이미지입니다.")
+            throw BadRequestException(message="유효하지 않은 프로필 이미지입니다.")
         }
         this.profileImage = profileImage
     }
@@ -159,12 +168,12 @@ class StudyGroup(
      * @param requesterId 요청자의 ID
      */
     fun deleteProfileImage(requesterId: String) {
-        if ( this.ownerId != requesterId ) {
-            throw ForbiddenException("그룹 소유자만 프로필 이미지를 삭제할 수 있습니다.")
+        if ( this.ownerId.toHexString() != requesterId)  {
+            throw ForbiddenException(message="그룹 소유자만 프로필 이미지를 삭제할 수 있습니다.")
         }
 
         if ( this.profileImage.type == "external" ) {
-            val event = StudyGroupProfileImageDeleteEvent(this.id!!, profileImage.filePath, this)
+            val event = StudyGroupProfileImageDeleteEvent(this.id.toHexString(), profileImage.filePath, this)
             this.registerEvent(event)
         }
 
@@ -190,6 +199,61 @@ class StudyGroup(
         )
     }
 
+    /**
+     * 최근 스케줄을 업데이트합니다.
+     * 최근 스케줄을 삭제하는 경우 newSchedule을 null 입력합니다.
+     * 현재 최신 스케줄이 null이면 newSchedule 을 바로 대입합니다.
+     * 현재 최신 스케줄이 존재하는 경우, 새로운 스케줄과 현재 날짜의 차이를 비교하여
+     * 더 가까운 날짜의 스케줄을 대입합니다.
+     * @param newSchedule 새로운 최근 스케줄 정보
+     */
+    fun updateRecentSchedule(newSchedule: RecentScheduleVo?) {
+        if (newSchedule == null ) {
+            this.recentSchedule = null
+            return;
+        }
+        if ( this.recentSchedule == null ) {
+            this.recentSchedule = newSchedule
+            return
+        }
+        val now = LocalDateTime.now()
+
+        if (
+            newSchedule!!.scheduleAt.isAfter(now) &&
+            newSchedule!!.scheduleAt.isBefore( recentSchedule!!.scheduleAt )
+        ) {
+            this.recentSchedule = newSchedule
+        }
+    }
+
+    /**
+     * 최근 게시글을 업데이트합니다.
+     * 최근 게시글을 삭제하는 경우 recentPost를 null 입력합니다.
+     * 현재 최신 게시글이 null이면 recentPost 를 바로 대입합니다.
+     * 현재 최신 게시글이 존재하는 경우, 새로운 게시글과 현재 날짜의 차
+     * 이를 비교하여
+     * 더 가까운 날짜의 게시글을 대입합니다.
+     * @param recentPost 새로운 최근 게시글 정보
+     */
+    fun updateRecentPost(recentPost: RecentPostVo?) {
+        if (recentPost == null ) {
+            this.recentPost = null
+            return;
+        }
+        if ( this.recentPost == null ) {
+            this.recentPost = recentPost
+            return
+        }
+        val now = LocalDateTime.now()
+
+        if (
+            recentPost!!.createdAt.isAfter(now) &&
+            recentPost!!.createdAt.isAfter( this.recentPost!!.createdAt )
+        ) {
+            this.recentPost = recentPost
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is StudyGroup) return false
@@ -200,6 +264,6 @@ class StudyGroup(
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id.hashCode()
     }   
 }

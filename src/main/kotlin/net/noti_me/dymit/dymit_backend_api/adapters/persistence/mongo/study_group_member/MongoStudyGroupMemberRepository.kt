@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_gro
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.Document
+import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -17,15 +18,6 @@ class MongoStudyGroupMemberRepository(
     private val mongoTemplate: MongoTemplate
 ): StudyGroupMemberRepository {
 
-    override fun findByGroupIdAndMemberId(groupId: String, memberId: String): StudyGroupMember? {
-        return mongoTemplate.findOne(
-            Query(Criteria("groupId").`is`(groupId)
-                .and("memberId").`is`(memberId)
-            ),
-            StudyGroupMember::class.java
-        )
-    }
-
     override fun persist(member: StudyGroupMember): StudyGroupMember {
         return mongoTemplate.save(member)
     }
@@ -35,47 +27,53 @@ class MongoStudyGroupMemberRepository(
     }
 
     override fun delete(member: StudyGroupMember): Boolean {
-        return mongoTemplate.remove(member).deletedCount > 0
+        val query = Query(Criteria.where("_id").`is`(member.id))
+        return mongoTemplate.remove(query, StudyGroupMember::class.java).deletedCount > 0
     }
 
-    override fun countByGroupId(groupId: String): Long {
-        return mongoTemplate.count(
-            Query(Criteria.where("groupId").`is`(groupId)),
-            StudyGroupMember::class.java
-        )
+    override fun findByGroupIdAndMemberId(
+        groupId: ObjectId,
+        memberId: ObjectId
+    ): StudyGroupMember? {
+        val query = Query(Criteria.where("groupId").`is`(groupId).and("memberId").`is`(memberId))
+        return mongoTemplate.findOne(query, StudyGroupMember::class.java)
+    }
+
+    override fun countByGroupId(groupId: ObjectId): Long {
+        val query = Query(Criteria.where("groupId").`is`(groupId))
+        return mongoTemplate.count(query, StudyGroupMember::class.java)
     }
 
     override fun findByGroupIdsOrderByCreatedAt(
-        groupIds: List<String>,
+        groupIds: List<ObjectId>,
         limit: Int
     ): Map<String, List<StudyGroupMember>> {
-        val matchStage = Aggregation.match(Criteria.where("groupId").`in`(groupIds))
-        val setWindowFieldsStage = AggregationOperation { context ->
-            Document(
-                "\$setWindowFields", Document()
-                    .append("partitionBy", "\$groupId")
-                    .append("sortBy", Document("createdAt", 1))
-                    .append("output", Document("rank", Document("\$documentNumber", Document())))
-            )
-        }
+        val query = Query(Criteria.where("groupId").`in`(groupIds))
+            .with(Sort.by(Sort.Direction.DESC, "createdAt"))
+            .limit(limit)
 
-        val matchRankStage = Aggregation.match(Criteria.where("rank").lte(limit))
+        val members = mongoTemplate.find(query, StudyGroupMember::class.java)
 
-        val aggregation = Aggregation.newAggregation(
-            matchStage,
-            setWindowFieldsStage,
-            matchRankStage
-        )
-        val results = mongoTemplate.aggregate(aggregation, "study_group_members", StudyGroupMember::class.java)
-            .mappedResults
-
-        return results.groupBy { it.groupId }
+        return members.groupBy { it.groupId.toHexString() }
+            .mapValues { it.value.sortedByDescending { member -> member.createdAt } }
     }
 
-    override fun findGroupIdsByMemberId(memberId: String): List<String> {
+    override fun findGroupIdsByMemberId(memberId: ObjectId): List<String> {
+        val query = Query(Criteria.where("memberId").`is`(memberId))
+        return mongoTemplate.find(query, StudyGroupMember::class.java)
+            .map { it.groupId.toHexString() }
+            .distinct()
+    }
+
+    override fun findByGroupIdAndMemberIdsIn(
+        groupId: ObjectId,
+        memberIds: List<ObjectId>
+    ): List<StudyGroupMember> {
         return mongoTemplate.find(
-            Query(Criteria.where("memberId").`is`(memberId)),
+            Query(Criteria.where("groupId").`is`(groupId).and("memberId").`in`(memberIds)),
             StudyGroupMember::class.java
-        ).map { it.groupId }.distinct()
+        )
     }
+
+
 }

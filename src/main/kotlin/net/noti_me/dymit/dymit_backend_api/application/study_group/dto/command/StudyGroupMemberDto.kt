@@ -20,8 +20,8 @@ class StudyGroupMemberDto(
             entity: StudyGroupMember
         ): StudyGroupMemberDto {
             return StudyGroupMemberDto(
-                groupId = entity.groupId,
-                memberId = entity.memberId,
+                groupId = entity.groupId.toHexString(),
+                memberId = entity.memberId.toHexString(),
                 nickname = entity.nickname,
                 profileImageVo = entity.profileImage,
                 role = entity.role,

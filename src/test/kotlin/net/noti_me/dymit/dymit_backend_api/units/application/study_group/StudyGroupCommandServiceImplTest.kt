@@ -16,6 +16,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStu
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
+import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 
 class StudyGroupCommandServiceImplTest : BehaviorSpec({
@@ -38,10 +39,9 @@ class StudyGroupCommandServiceImplTest : BehaviorSpec({
 
     given("스터디 그룹을 생성한다.") {
         val expected = StudyGroup(
-            id = "test-group-id",
             name = "테스트 스터디 그룹",
             description = "테스트 스터디 그룹 설명",
-            ownerId = "ownerId",
+            ownerId = ObjectId.get()
         )
         val command = StudyGroupCreateCommand(
             name = "테스트 스터디 그룹",
@@ -50,10 +50,10 @@ class StudyGroupCommandServiceImplTest : BehaviorSpec({
 
         `when`("그룹 명이 중복되지 않으면") {
             every { saveStudyGroupPort.persist(any()) } returns expected
-            every { loadMemberPort.loadById(any()) } returns member
+            every { loadMemberPort.loadById(member.identifier) } returns member
             then("스터디 그룹이 생성되어야 한다.") {
                 val result = studyGroupCommandService.createStudyGroup(memberInfo, command)
-                result.groupId shouldBe expected.id
+                result.groupId shouldBe expected.identifier
                 result.name shouldBe  command.name
                 result.description shouldBe command.description
             }

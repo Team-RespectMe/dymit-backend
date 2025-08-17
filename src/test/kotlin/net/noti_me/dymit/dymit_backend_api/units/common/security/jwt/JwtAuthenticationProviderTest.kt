@@ -19,7 +19,6 @@ class JwtAuthenticationProviderTest : AnnotationSpec() {
     private val provider = JwtAuthenticationProvider(jwtService)
 
     private val member = Member(
-        id = "memberId",
         nickname = "nickname",
     )
 
@@ -45,7 +44,7 @@ class JwtAuthenticationProviderTest : AnnotationSpec() {
         authentication::class shouldBe JwtAuthenticationToken::class
         authentication.principal::class shouldBe MemberInfo::class
         val principal = authentication.principal as MemberInfo
-        principal.memberId shouldBe member.id
+        principal.memberId shouldBe member.identifier
         principal.nickname shouldBe member.nickname
         principal.roles.size shouldBe 1
     }

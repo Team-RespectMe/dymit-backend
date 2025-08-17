@@ -2,27 +2,27 @@ package net.noti_me.dymit.dymit_backend_api.domain.studyGroup
 
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import org.bson.types.ObjectId
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document("study_group_members")
 class StudyGroupMember(
-    id: String? = null,
-    groupId: String = "",
-    memberId: String = "",
+    @Id
+    val id: ObjectId = ObjectId.get(),
+    groupId: ObjectId = ObjectId.get(),
+    memberId: ObjectId = ObjectId.get(),
     nickname: String = "",
     profileImage: MemberProfileImageVo,
     role: GroupMemberRole = GroupMemberRole.MEMBER,
 ): BaseAggregateRoot<StudyGroupMember>() {
 
-    var id: String? = id
-        private set;
-
     val identifier: String
-        get() = id ?: throw IllegalStateException("Member ID is not set")
+        get() = id.toHexString()
 
-    val groupId: String = groupId
+    val groupId: ObjectId = groupId
 
-    val memberId: String = memberId
+    val memberId: ObjectId = memberId
 
     var nickname: String = nickname
         private set;

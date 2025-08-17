@@ -1,12 +1,22 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query
 
+import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.RecentScheduleVo
 import java.time.LocalDateTime
 
 data class SchedulePreview(
     val title: String,
-    val sessionNumber: Int,
-    val location: String,
+    val session: Long,
     val startAt: LocalDateTime
 ) {
+
+    companion object {
+        fun from(vo: RecentScheduleVo): SchedulePreview {
+            return SchedulePreview(
+                title = vo.title,
+                session = vo.session,
+                startAt = vo.scheduleAt
+            )
+        }
+    }
 
 }

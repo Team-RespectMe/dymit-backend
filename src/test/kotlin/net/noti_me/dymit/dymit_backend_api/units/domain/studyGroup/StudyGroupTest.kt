@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOw
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
+import org.bson.types.ObjectId
 import java.util.UUID
 
 
@@ -31,7 +32,7 @@ class StudyGroupTest() : BehaviorSpec() {
         given("스터디 그룹 이름을 수정한다.") {
             val newName = "New Study Group Name"
             `when`("요청 사용자가 그룹 사용자가 아닐 경우") {
-                val userId = "non-member-id"
+                val userId = ObjectId.get().toHexString()
                 then("ForbiddenException 예외가 발생한다.") {
                     val exception = shouldThrow<ForbiddenException> {
                         studyGroup.changeName(userId, newName)
@@ -40,19 +41,19 @@ class StudyGroupTest() : BehaviorSpec() {
             }
 
             `when`("요청 사용자가 그룹 사용자이고, 새로운 이름이 유효한 경우") {
-                val userId = studyGroup.ownerId
                 then("스터디 그룹 이름이 변경된다.") {
-                    studyGroup.changeName(userId, newName)
+                    val userId = studyGroup.ownerId
+                    studyGroup.changeName(userId.toHexString(), newName)
                     studyGroup.name shouldBe newName
                 }
             }
 
             `when`("요청 사용자가 그룹 사용자이고, 새로운 이름이 유효하지 않은 경우") {
-                val userId = studyGroup.ownerId
                 then("BadRequestException 예외가 발생한다.") {
                     val invalidName = "ab" // 길이가 3자 이상 30자 이하가 아니므로 예외 발생
+                    val userId = studyGroup.ownerId
                     val exception = shouldThrow<BadRequestException> {
-                        studyGroup.changeName(userId, invalidName)
+                        studyGroup.changeName(userId.toHexString(), invalidName)
                     }
                 }
             }
@@ -61,8 +62,8 @@ class StudyGroupTest() : BehaviorSpec() {
         given("스터디 그룹 설명을 변경한다.") {
             val newDescription = "New Study Group Description"
             `when`("요청 사용자가 그룹 사용자가 아닐 경우") {
-                val userId = "non-member-id"
                 then("ForbiddenException 예외가 발생한다.") {
+                    val userId = ObjectId.get().toHexString()
                     val exception = shouldThrow<ForbiddenException> {
                         studyGroup.changeDescription(userId, newDescription)
                     }
@@ -70,29 +71,30 @@ class StudyGroupTest() : BehaviorSpec() {
             }
 
             `when`("요청 사용자가 그룹 사용자이고, 새로운 설명이 유효한 경우") {
-                val userId = studyGroup.ownerId
                 then("스터디 그룹 설명이 변경된다.") {
-                    studyGroup.changeDescription(userId, newDescription)
+                    val userId = studyGroup.ownerId
+                    studyGroup.changeDescription(userId.toHexString(), newDescription)
                     studyGroup.description shouldBe newDescription
                 }
             }
 
             `when`("요청 사용자가 그룹 사용자이고, 새로운 설명이 유효하지 않은 경우") {
-                val userId = studyGroup.ownerId
                 then("BadRequestException 예외가 발생한다.") {
+                    val userId = studyGroup.ownerId
                     val invalidDescription = "ab" // 길이가 5자 이상 500자 이하가 아니므로 예외 발생
                     val exception = shouldThrow<BadRequestException> {
-                        studyGroup.changeDescription(userId, invalidDescription)
+                        studyGroup.changeDescription(userId.toHexString(), invalidDescription)
                     }
                 }
             }
         }
 
         given("스터디 그룹 소유자를 변경한다.") {
-            val newOwnerId = "new-owner-id"
             `when`("요청 사용자가 그룹 소유자가 아닐 경우") {
-                val userId = "non-owner-id"
+
                 then("ForbiddenException 예외가 발생한다.") {
+                    val newOwnerId = ObjectId.get().toHexString()
+                    val userId = ObjectId.get().toHexString()
                     val exception = shouldThrow<ForbiddenException> {
                         studyGroup.changeOwner(userId, newOwnerId)
                     }
@@ -100,10 +102,11 @@ class StudyGroupTest() : BehaviorSpec() {
             }
 
             `when`("요청 사용자가 그룹 소유자이고, 새로운 소유자 ID가 유효한 경우") {
-                val userId = studyGroup.ownerId
                 then("스터디 그룹 소유자가 변경되고, GroupOwnerChangedEvent 이벤트가 발생한다.") {
-                    studyGroup.changeOwner(userId, newOwnerId)
-                    studyGroup.ownerId shouldBe newOwnerId
+                    val userId = studyGroup.ownerId
+                    val newOwnerId = ObjectId.get().toHexString()
+                    studyGroup.changeOwner(userId.toHexString(), newOwnerId)
+                    studyGroup.ownerId.toHexString() shouldBe newOwnerId
                     studyGroup.listDomainEvents().size shouldBe 1
                     val event = studyGroup.listDomainEvents().first()
                     event::class shouldBe StudyGroupOwnerChangedEvent::class
@@ -123,19 +126,19 @@ class StudyGroupTest() : BehaviorSpec() {
             }
 
             `when`("요청 사용자가 그룹 소유자이고, 새로운 프로필 이미지가 유효한 경우") {
-                val userId = studyGroup.ownerId
                 then("프로필 이미지가 변경된다.") {
-                    studyGroup.updateProfileImage(userId, newProfileImage)
+                    val userId = studyGroup.ownerId
+                    studyGroup.updateProfileImage(userId.toHexString(), newProfileImage)
                     studyGroup.profileImage shouldBe newProfileImage
                 }
             }   
 
             `when`("요청 사용자가 그룹 소유자이고, 새로운 프로필 이미지가 유효하지 않은 경우") {
-                val userId = studyGroup.ownerId
                 then("BadRequestException 예외가 발생한다.") {
+                    val userId = studyGroup.ownerId
                     val invalidProfileImage = createProfileImage(fileSize = 0L)
                     val exception = shouldThrow<BadRequestException> {
-                        studyGroup.updateProfileImage(userId, invalidProfileImage)
+                        studyGroup.updateProfileImage(userId.toHexString(), invalidProfileImage)
                     }
                 }
             }
@@ -148,7 +151,6 @@ class StudyGroupTest() : BehaviorSpec() {
 
     fun createStudyGroup(): StudyGroup {
         return StudyGroup(
-            id = "test-group-id",
             name = "Test Study Group",
             description = "This is a test study group.",
             profileImage = createProfileImage(),

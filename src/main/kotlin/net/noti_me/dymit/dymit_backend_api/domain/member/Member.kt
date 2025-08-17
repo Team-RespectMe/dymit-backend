@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeleteEvent
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -13,7 +14,8 @@ import kotlin.random.Random
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
 class Member(
-    id: String? = null,
+    @Id
+    val id: ObjectId = ObjectId.get(),
     nickname: String = "",
     oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
     profileImage: MemberProfileImageVo = MemberProfileImageVo(
@@ -29,15 +31,8 @@ class Member(
     refreshTokens: MutableSet<String> = mutableSetOf(),
 ) : BaseAggregateRoot<Member>() {
 
-//    override fun getId(): String? {
-//        return memberId
-//    }
-    @Id
-    var id: String? = id
-        private set
-
     val identifier: String
-        get() = id ?: throw IllegalStateException("Member ID is not set")
+        get() = id.toHexString()
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 

@@ -21,7 +21,7 @@ class StudyGroupDto(
             return StudyGroupDto(
                 groupId = entity.identifier,
                 profileImage =  entity.profileImage,
-                ownerId = entity.ownerId,
+                ownerId = entity.ownerId.toHexString(),
                 name = entity.name,
                 description = entity.description,
                 inviteCodeVo = entity.inviteCode,

@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member
 
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import org.bson.types.ObjectId
 
 interface StudyGroupMemberRepository {
 
@@ -10,11 +11,13 @@ interface StudyGroupMemberRepository {
 
     fun delete(member: StudyGroupMember): Boolean
 
-    fun findByGroupIdAndMemberId(groupId: String, memberId: String): StudyGroupMember?
+    fun findByGroupIdAndMemberId(groupId: ObjectId, memberId: ObjectId): StudyGroupMember?
 
-    fun countByGroupId(groupId: String): Long
+    fun countByGroupId(groupId: ObjectId): Long
 
-    fun findByGroupIdsOrderByCreatedAt(groupIds: List<String>, limit: Int): Map<String, List<StudyGroupMember>>
+    fun findByGroupIdsOrderByCreatedAt(groupIds: List<ObjectId>, limit: Int): Map<String, List<StudyGroupMember>>
 
-    fun findGroupIdsByMemberId(memberId: String): List<String>
+    fun findGroupIdsByMemberId(memberId: ObjectId): List<String>
+
+    fun findByGroupIdAndMemberIdsIn(groupId: ObjectId, memberIds: List<ObjectId>): List<StudyGroupMember>
 }

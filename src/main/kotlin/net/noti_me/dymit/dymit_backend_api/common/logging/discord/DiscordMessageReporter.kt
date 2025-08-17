@@ -35,7 +35,15 @@ class DiscordMessageReporter(
                     - Remote Address: ${request.remoteAddr}  
                     - User Agent: ${request.getHeader("User-Agent")}
                     - Authorization: ${request.getHeader("Authorization")}
-                    - Request Body : ${request.contentAsByteArray.toString(Charsets.UTF_8)}
+                    - Content-Type: ${request.contentType}
+                    - Request Body : ${if (request.contentType?.startsWith("multipart/form-data") == true)
+                        request.parameterMap.keys.joinToString(", ") { it }
+                            .chunked(40)
+                            .joinToString("\n")
+                    else
+                        request.contentAsByteArray.toString(Charsets.UTF_8)
+                            .chunked(40)
+                            .joinToString("\n")}
                     - Parameters: ${request.queryString}
 ### :outbox_tray:Response
                     - Status: ${response.status}

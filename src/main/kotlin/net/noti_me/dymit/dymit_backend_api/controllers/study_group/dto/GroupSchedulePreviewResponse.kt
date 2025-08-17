@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import java.time.LocalDateTime
 
 @Schema(
@@ -15,5 +16,5 @@ class GroupSchedulePreviewResponse(
     val scheduleAt: LocalDateTime,
     @Schema(description = "스터디 예정 장소")
     val location: String = "",
-) {
+): BaseResponse() {
 }

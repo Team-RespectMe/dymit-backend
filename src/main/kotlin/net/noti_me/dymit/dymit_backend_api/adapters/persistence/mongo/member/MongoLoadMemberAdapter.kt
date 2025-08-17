@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -14,6 +15,10 @@ class MongoLoadMemberAdapter(
 ) : LoadMemberPort {
 
     override fun loadById(id: String): Member? {
+        return mongoTemplate.findById(id, Member::class.java)
+    }
+
+    override fun loadById(id: ObjectId): Member? {
         return mongoTemplate.findById(id, Member::class.java)
     }
 

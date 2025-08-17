@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.ports.persistence.member
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import org.bson.types.ObjectId
 
 /**
  * 멤버 조회 포트
@@ -12,6 +13,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 interface LoadMemberPort {
 
     fun loadById(id: String): Member?
+
+    fun loadById(id: ObjectId): Member?
 
     fun loadByOidcIdentity(
         oidcIdentity: OidcIdentity

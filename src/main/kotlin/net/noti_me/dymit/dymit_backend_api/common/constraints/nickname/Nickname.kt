@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Nickname(
-    val message: String = "닉네임은 한글, 영문, 숫자 그리고 공백 문자만을 허용합니다. 공백 문자는 시작과 끝에 위치할 수 없고, 연속해서 사용할 수 없습니다.",
+    val message: String = "닉네임은 한글, 영문, 숫자 그리고 특수 문자 _을 허용합니다.",
     val groups: Array<KClass<*>> = [],
     val payload: Array<KClass<out Payload>> = []
 )

@@ -19,6 +19,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
+import org.bson.types.ObjectId
 
 
 internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
@@ -90,7 +91,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
                 every { loadMemberPort.existsByNickname(command.nickname) } returns false
                 then("회원가입이 성공한다") {
                     every { saveMemberPort.persist(any()) } returns Member(
-                        id = "random",
+                        id = ObjectId.get(),
                         nickname = command.nickname,
                         oidcIdentities = mutableSetOf(
                             OidcIdentity(provider = "GOOGLE", subject = commonOidcIdTokenPayload.sub)
