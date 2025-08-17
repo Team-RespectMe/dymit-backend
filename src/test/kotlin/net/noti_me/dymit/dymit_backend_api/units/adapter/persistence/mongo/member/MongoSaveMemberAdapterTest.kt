@@ -67,7 +67,7 @@ class MongoSaveMemberAdapterTest(
             val isDeleted = saveAdapter.delete(member)
             isDeleted shouldBe true
             val deletedMember = mongoTemplate.findById(member.id!!, Member::class.java)
-            deletedMember shouldBe null
+            deletedMember?.isDeleted shouldBe true
         }
     }
 }

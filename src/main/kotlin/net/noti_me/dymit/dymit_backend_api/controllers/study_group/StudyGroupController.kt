@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
+import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
@@ -49,9 +50,9 @@ class StudyGroupController(
         return StudyGroupResponse.from(searchResult)
     }
 
-    override fun getMyStudyGroups(memberInfo: MemberInfo): List<StudyGroupListItemDto> {
+    override fun getMyStudyGroups(memberInfo: MemberInfo): ListResponse<StudyGroupListItemDto> {
         val studyGroups = studyGroupQueryService.getMyStudyGroups(memberInfo)
-        return studyGroups.map { StudyGroupListItemDto.from(it) }
+        return ListResponse.from(studyGroups.map { StudyGroupListItemDto.from(it) })
     }
 
     override fun getStudyGroupInviteCode(

@@ -17,6 +17,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtConfig
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtService
+import org.bson.types.ObjectId
 
 internal class JwtAuthServiceTest() : BehaviorSpec() {
 
@@ -55,7 +56,7 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
     private var member = createMember()
 
     fun createMember() = Member(
-        id = "random",
+        id = ObjectId.get(),
         nickname = "test-nickname",
         oidcIdentities = mutableSetOf(oidcIdentity)
     )

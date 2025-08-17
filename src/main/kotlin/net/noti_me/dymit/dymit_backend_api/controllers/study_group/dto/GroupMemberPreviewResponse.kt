@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageResponse
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
@@ -17,5 +18,5 @@ data class GroupMemberPreviewResponse(
     val role: GroupMemberRole,
     @Schema(description = "스터디 그룹 멤버 프로필 이미지")
     val profileImage: ProfileImageResponse
-) {
+): BaseResponse() {
 }

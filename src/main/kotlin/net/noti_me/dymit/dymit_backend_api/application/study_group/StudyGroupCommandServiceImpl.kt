@@ -55,8 +55,8 @@ class StudyGroupCommandServiceImpl(
         studyGroup = saveStudyGroupPort.persist(studyGroup)
 
         val owner = StudyGroupMember(
-            groupId = studyGroup.identifier,
-            memberId = memberEntity.identifier,
+            groupId = studyGroup.id,
+            memberId = memberEntity.id,
             nickname = memberEntity.nickname,
             profileImage = memberEntity.profileImage ?: MemberProfileImageVo(type = "preset", url = "0"),
             role = GroupMemberRole.OWNER
@@ -77,13 +77,16 @@ class StudyGroupCommandServiceImpl(
         val member = loadMemberPort.loadById(memberInfo.memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
-        if (studyGroupMemberRepository.findByGroupIdAndMemberId(command.groupId, member.identifier) != null) {
+        if (studyGroupMemberRepository.findByGroupIdAndMemberId(
+                groupId = group.id,
+                memberId = member.id
+        ) != null) {
             throw ConflictException(message="이미 해당 스터디 그룹에 가입되어 있습니다.")
         }
 
         var newMember = StudyGroupMember(
-            groupId = group.identifier,
-            memberId = member.identifier,
+            groupId = group.id,
+            memberId = member.id,
             nickname = member.nickname,
             profileImage = member.profileImage,
             role = GroupMemberRole.MEMBER,

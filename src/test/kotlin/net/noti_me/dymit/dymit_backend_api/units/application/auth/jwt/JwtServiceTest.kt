@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.application.auth.jwt.JwtService
 import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import org.bson.types.ObjectId
 
 class JwtServiceTest() : BehaviorSpec() {
 
@@ -25,7 +26,7 @@ class JwtServiceTest() : BehaviorSpec() {
 
     private val jwtService = JwtService(jwtConfig)
 
-    private val member = Member( id = "test-id",
+    private val member = Member( id = ObjectId.get(),
         nickname = "test-nickname",
         oidcIdentities = mutableSetOf(OidcIdentity(
             provider = "GOOGLE",
@@ -64,7 +65,7 @@ class JwtServiceTest() : BehaviorSpec() {
                 val decodedToken = jwtService.verifyAccessToken(accessToken)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
-                    decodedToken.subject shouldBe member.id
+                    decodedToken.subject shouldBe member.identifier
                     decodedToken.claims["nickname"]?.asString() shouldBe member.nickname
                 }
             }
@@ -73,7 +74,7 @@ class JwtServiceTest() : BehaviorSpec() {
                 val decodedToken = jwtService.decodeToken(accessToken)
 
                 then("토큰의 subject가 회원 정보와 일치해야 한다") {
-                    decodedToken.subject shouldBe member.id
+                    decodedToken.subject shouldBe member.identifier
                     decodedToken.claims["nickname"]?.asString() shouldBe member.nickname
                 }
             }
@@ -85,7 +86,7 @@ class JwtServiceTest() : BehaviorSpec() {
                 val decodedToken = jwtService.verifyRefreshToken(refreshToken)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
-                    decodedToken.subject shouldBe member.id
+                    decodedToken.subject shouldBe member.identifier
                 }
             }
 
@@ -93,7 +94,7 @@ class JwtServiceTest() : BehaviorSpec() {
                 val decodedToken = jwtService.decodeToken(refreshToken)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
-                    decodedToken.subject shouldBe member.id
+                    decodedToken.subject shouldBe member.identifier
                 }
             }
         }
@@ -104,7 +105,7 @@ class JwtServiceTest() : BehaviorSpec() {
                 val decodedToken = jwtService.decodeToken(refreshToken)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
-                    decodedToken.subject shouldBe member.id
+                    decodedToken.subject shouldBe member.identifier
                 }
             }
         }
@@ -140,7 +141,7 @@ class JwtServiceTest() : BehaviorSpec() {
         val algorithm = Algorithm.HMAC256(jwtConfig.secret)
         return JWT.create()
             .withIssuer(jwtConfig.issuer)
-            .withSubject(member.id)
+            .withSubject(member.id.toHexString())
             .withClaim("nickname", member.nickname)
             .withExpiresAt(java.util.Date(System.currentTimeMillis() - 1000)) // 1초 전으로 설정하여 만료된 토큰 생성
             .sign(algorithm)

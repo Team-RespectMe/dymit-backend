@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
+import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
@@ -98,7 +99,7 @@ interface StudyGroupAPI {
     @SecurityRequirement(name = "bearer-jwt")
     fun getMyStudyGroups(
         @LoginMember memberInfo: MemberInfo
-    ): List<StudyGroupListItemDto>
+    ): ListResponse<StudyGroupListItemDto>
 
     /**
      * 스터디 그룹의 Invite Code를 조회합니다.

@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import org.bson.types.ObjectId
 
 class MemberQueryUsecaseImplTest : BehaviorSpec() {
 
@@ -21,7 +22,7 @@ class MemberQueryUsecaseImplTest : BehaviorSpec() {
     private val memberQueryUsecase = MemberQueryUsecaseImpl(loadMemberPort)
 
     private val member = Member(
-        id = "test-id",
+        id = ObjectId.get(),
         nickname = "test-nickname",
         oidcIdentities = mutableSetOf(OidcIdentity(
             provider = "GOOGLE",

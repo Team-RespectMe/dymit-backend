@@ -36,9 +36,6 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
     }
 
     fun markAsDeleted() {
-        if (isDeleted) {
-            throw IllegalStateException("Aggregate is already marked as deleted")
-        }
         isDeleted = true
     }   
 }

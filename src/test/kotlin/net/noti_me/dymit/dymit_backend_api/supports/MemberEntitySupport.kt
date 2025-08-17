@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.supports
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import org.bson.types.ObjectId
 
 fun createOidcIdentity(
     provider: String = "GOOGLE",
@@ -17,7 +18,7 @@ fun createOidcIdentity(
 }
 
 fun createMemberEntity(
-    id: String = "member-id",
+    id: ObjectId = ObjectId.get(),
     nickname: String = "nickname",
     oidcIdentities: List<OidcIdentity> = listOf(
         createOidcIdentity()

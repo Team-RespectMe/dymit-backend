@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCod
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupSummaryDto
+import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import java.time.LocalDateTime
 
 @Schema(
@@ -23,7 +24,7 @@ class StudyGroupResponse(
     val createdAt: LocalDateTime,
     @Schema(description = "스터디 그룹 초대 코드 정보")
     val inviteCodeVo: InviteCodeVo,
-) {
+): BaseResponse() {
 
     companion object {
 

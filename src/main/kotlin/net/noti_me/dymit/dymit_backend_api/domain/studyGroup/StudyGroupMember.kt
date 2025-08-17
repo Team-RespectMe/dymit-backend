@@ -10,8 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document
 class StudyGroupMember(
     @Id
     val id: ObjectId = ObjectId.get(),
-    groupId: String = "",
-    memberId: String = "",
+    groupId: ObjectId = ObjectId.get(),
+    memberId: ObjectId = ObjectId.get(),
     nickname: String = "",
     profileImage: MemberProfileImageVo,
     role: GroupMemberRole = GroupMemberRole.MEMBER,
@@ -20,9 +20,9 @@ class StudyGroupMember(
     val identifier: String
         get() = id.toHexString()
 
-    val groupId: String = groupId
+    val groupId: ObjectId = groupId
 
-    val memberId: String = memberId
+    val memberId: ObjectId = memberId
 
     var nickname: String = nickname
         private set;
