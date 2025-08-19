@@ -78,7 +78,11 @@ class StudyGroupQueryServiceImpl(
         }
 
         val studyGroups = loadStudyGroupPort.loadByGroupIds(studyGroupIds)
-
+        // TODO : 스터디 그룹의 가장 최근 일정이 변경되어야 하는 경우가 존재함.
+        //        스터디 스케줄에 대한 CUD 작업이 발생하는 경우 업데이트가 되지만,
+        //        그렇지 않고 스터디 그룹의 가장 최근 일정이 변경되어야 하는 경우가 있음.
+        //        예를 들어, 오늘 스터디 그룹의 가장 최근 일정이 수행된 경우, 다음 스터디 일정으로
+        //        넘어 가야한다. (백그라운드 태스크를 이용할지 결정해야함)
         return studyGroups.map { group ->
             val owner = loadMemberPort.loadById(group.ownerId) ?: Member(
                 id = group.ownerId,
@@ -115,6 +119,25 @@ class StudyGroupQueryServiceImpl(
         }
 
         return studyGroup.inviteCode
+    }
+
+    override fun getStudyGroup(memberInfo: MemberInfo, groupId: String): StudyGroupQueryModelDto {
+        val studyGroup = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        val groupMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = ObjectId(groupId),
+            memberId = ObjectId(memberInfo.memberId)
+        ) ?: throw ForbiddenException(message = "해당 스터디 그룹에 가입되어 있지 않습니다.")
+
+        val owner = loadMemberPort.loadById(studyGroup.ownerId)
+            ?: Member(
+                id = studyGroup.ownerId,
+                nickname = "Unknown",
+                profileImage = MemberProfileImageVo(type = "preset", url = "0")
+            )
+
+        return StudyGroupQueryModelDto.from(studyGroup, owner)
     }
 
     private fun isExpiredInviteCode(inviteCode: InviteCodeVo): Boolean {

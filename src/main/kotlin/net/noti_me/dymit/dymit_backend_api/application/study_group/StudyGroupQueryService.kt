@@ -20,4 +20,9 @@ interface StudyGroupQueryService {
         memberInfo: MemberInfo,
         groupId: String
     ): InviteCodeVo
+
+    fun getStudyGroup(
+        memberInfo: MemberInfo,
+        groupId: String
+    ): StudyGroupQueryModelDto
 }
