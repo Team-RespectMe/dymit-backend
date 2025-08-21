@@ -15,6 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupListItemDto
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupMemberResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -116,4 +117,20 @@ interface StudyGroupAPI {
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
     ): InviteCodeResponse
+
+    /**
+     * 스터디 그룹 세부 조회 API
+     */
+    @Operation(summary = "스터디 그룹 세부 조회 API", description = "스터디 그룹의 세부 정보를 조회합니다.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "조회 성공"),
+        ApiResponse(responseCode = "404", description = "스터디 그룹을 찾을 수 없는 경우"),
+    ])
+    @GetMapping("/{groupId}")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun getStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): StudyGroupQueryDetailResponse
 }

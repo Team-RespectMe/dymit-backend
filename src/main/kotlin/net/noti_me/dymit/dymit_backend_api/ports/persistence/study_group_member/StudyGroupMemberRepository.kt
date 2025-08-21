@@ -15,6 +15,8 @@ interface StudyGroupMemberRepository {
 
     fun countByGroupId(groupId: ObjectId): Long
 
+    fun findByGroupId(groupId: ObjectId): List<StudyGroupMember>
+
     fun findByGroupIdsOrderByCreatedAt(groupIds: List<ObjectId>, limit: Int): Map<String, List<StudyGroupMember>>
 
     fun findGroupIdsByMemberId(memberId: ObjectId): List<String>

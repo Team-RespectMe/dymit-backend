@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupListItemDto
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupMemberResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
 import org.springframework.web.bind.annotation.RestController
 
@@ -65,6 +66,13 @@ class StudyGroupController(
             createdAt = inviteCode.createdAt,
             expireAt = inviteCode.expireAt
         )
+    }
 
+    override fun getStudyGroup(memberInfo: MemberInfo, groupId: String)
+    : StudyGroupQueryDetailResponse {
+        val group = studyGroupQueryService.getStudyGroup(memberInfo, groupId)
+        val groupMembers = studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
+
+        return StudyGroupQueryDetailResponse.of(group, groupMembers)
     }
 }

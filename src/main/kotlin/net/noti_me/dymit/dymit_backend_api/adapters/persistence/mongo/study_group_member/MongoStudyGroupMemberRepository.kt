@@ -39,6 +39,13 @@ class MongoStudyGroupMemberRepository(
         return mongoTemplate.findOne(query, StudyGroupMember::class.java)
     }
 
+    override fun findByGroupId(groupId: ObjectId): List<StudyGroupMember> {
+        val query = Query(Criteria.where("groupId").`is`(groupId))
+        // sort by createdAt
+        query.with(Sort.by(Sort.Direction.DESC, "createdAt"))
+        return mongoTemplate.find(query, StudyGroupMember::class.java)
+    }
+
     override fun countByGroupId(groupId: ObjectId): Long {
         val query = Query(Criteria.where("groupId").`is`(groupId))
         return mongoTemplate.count(query, StudyGroupMember::class.java)
@@ -74,6 +81,4 @@ class MongoStudyGroupMemberRepository(
             StudyGroupMember::class.java
         )
     }
-
-
 }

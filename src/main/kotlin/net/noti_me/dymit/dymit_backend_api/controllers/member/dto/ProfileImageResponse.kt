@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.member.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 
 @Schema(description = "프로필 사진 응답 객체(사용자 프로필 또는 그룹 프로필 사진)")
 class ProfileImageResponse(
@@ -14,4 +15,15 @@ class ProfileImageResponse(
     @Schema(description = "프로필 이미지 높이", example = "200")
     val height: Int
 ): BaseResponse() {
+
+    companion object {
+        fun from(image: MemberProfileImageVo) : ProfileImageResponse {
+            return ProfileImageResponse(
+                url = image.url,
+                type = image.type,
+                width = image.width,
+                height = image.height
+            )
+        }
+    }
 }

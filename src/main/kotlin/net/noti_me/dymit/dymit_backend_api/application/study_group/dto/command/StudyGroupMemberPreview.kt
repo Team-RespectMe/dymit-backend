@@ -6,4 +6,5 @@ class StudyGroupMemberPreview(
     val profileImageType : String = "preset",
     val profileImageUrl: String = "0",
 ) {
+
 }
