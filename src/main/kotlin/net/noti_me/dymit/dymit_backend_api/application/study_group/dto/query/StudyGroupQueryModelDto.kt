@@ -17,6 +17,7 @@ class StudyGroupQueryModelDto(
     val description: String,
     var recentPost: PostPreview? = null,
     var recentSchedule: SchedulePreview? = null,
+    val inviteCode: InviteCodeVo = InviteCodeVo(),
     val createdAt: LocalDateTime
 ) {
 
