@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCodeVo
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.SchedulePreview
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupMemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupSummaryDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
@@ -11,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
@@ -138,6 +140,15 @@ class StudyGroupQueryServiceImpl(
             )
 
         return StudyGroupQueryModelDto.from(studyGroup, owner)
+    }
+
+    override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): List<StudyGroupMemberQueryDto> {
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+        val members = studyGroupMemberRepository.findByGroupId(ObjectId(groupId))
+        val loginMember = members.find { it -> it.memberId == ObjectId(memberInfo.memberId) }
+            ?: throw ForbiddenException(message = "해당 스터디 그룹에 가입되어 있지 않습니다.")
+        return members.map { StudyGroupMemberQueryDto.from(it) }
     }
 
     private fun isExpiredInviteCode(inviteCode: InviteCodeVo): Boolean {
