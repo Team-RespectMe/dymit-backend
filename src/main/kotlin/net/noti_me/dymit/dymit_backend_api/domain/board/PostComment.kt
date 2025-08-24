@@ -7,19 +7,20 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document("comments")
-class Comment(
+@Document("post_comments")
+class PostComment(
     @Id
-    val id: ObjectId,
+    val id: ObjectId = ObjectId(),
     val postId: ObjectId,
     val writer: Writer,
     content: String
-) : BaseAggregateRoot<Comment>() {
+) : BaseAggregateRoot<PostComment>() {
 
     var content: String = content
         private set
 
     fun updateContent(requester: String, newContent: String) {
+//        println("requester: $requester, writer: ${writer.id.toHexString()}")
         if (requester != writer.id.toHexString()) {
             throw ForbiddenException(message="본인의 댓글이 아닙니다.")
         }

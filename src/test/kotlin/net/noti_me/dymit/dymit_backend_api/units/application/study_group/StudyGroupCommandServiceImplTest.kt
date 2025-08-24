@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
@@ -26,6 +27,7 @@ class StudyGroupCommandServiceImplTest : BehaviorSpec({
     val saveStudyGroupPort = mockk<SaveStudyGroupPort>(relaxed = true)
     val studyGroupMemberRepository = mockk<StudyGroupMemberRepository>(relaxed = true)
     val applicationEventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
+    val boardService = mockk<BoardService>(relaxed = true)
     val member = createMemberEntity()
     val memberInfo = createMemberInfo(member)
 
@@ -34,6 +36,7 @@ class StudyGroupCommandServiceImplTest : BehaviorSpec({
         loadStudyGroupPort = loadStudyGroupPort,
         saveStudyGroupPort = saveStudyGroupPort,
         studyGroupMemberRepository = studyGroupMemberRepository,
+        boardService = boardService,
         applicationEventPublisher = applicationEventPublisher
     )
 

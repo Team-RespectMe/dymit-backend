@@ -10,11 +10,13 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document("study_group_posts")
 class Post(
     @Id
-    val id: ObjectId,
+    val id: ObjectId = ObjectId(),
     val groupId: ObjectId,
+    val boardId: ObjectId,
     writer: Writer,
     title: String,
     content: String,
+    commentCount: Long = 0,
 ) : BaseAggregateRoot<Post>() {
 
     var writer: Writer = writer
@@ -25,6 +27,16 @@ class Post(
 
     var content = content
         private set
+
+    var commentCount = commentCount
+        private set
+
+    fun setupCommentCount(newCount: Long) {
+        if (newCount < 0) {
+            throw IllegalArgumentException("Comment count cannot be negative")
+        }
+        this.commentCount = newCount
+    }
 
     fun updateTitle(requesterId: String, newTitle: String) {
         if (requesterId != writer.id.toHexString()) {

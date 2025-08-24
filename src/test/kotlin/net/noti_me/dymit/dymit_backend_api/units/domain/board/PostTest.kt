@@ -22,6 +22,7 @@ class PostTest : BehaviorSpec({
         val post = Post(
             id = ObjectId(),
             groupId = ObjectId(),
+            boardId = ObjectId(),
             writer = writer,
             title = "원본 제목",
             content = "원본 내용"
