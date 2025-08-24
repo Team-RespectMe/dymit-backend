@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_grou
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -22,46 +23,47 @@ class StudyGroupMemberRepositoryTest(
 
     private val repository = MongoStudyGroupMemberRepository(mongoTemplate)
 
+    private var existMember : StudyGroupMember? = null
+
     override fun extensions(): List<Extension> {
         return listOf(SpringExtension)
     }
 
     @BeforeEach
     fun setUp() {
-        mongoTemplate.save(
-            StudyGroupMember(
-                groupId = "test-group-id",
-                memberId = "test-member-id",
-                nickname = "Test Member",
-                profileImage = MemberProfileImageVo(
-                    type = "preset",
-                    filePath = "profile.jpg",
-                    fileSize = 0,
-                    url = "http://example.com/profile.jpg",
-                    width = 100,
-                    height = 100
-                )
+        existMember = StudyGroupMember(
+            groupId = ObjectId(),
+            memberId = ObjectId(),
+            nickname = "testNickname",
+            profileImage = MemberProfileImageVo(
+                type = "preset",
+                filePath = "profile.jpg",
+                fileSize = 0,
+                url = "http://example.com/profile.jpg",
+                width = 100,
+                height = 100
             )
         )
+        mongoTemplate.save(existMember!!)
     }
 
     @Test
     fun `신규 회원 저장 테스트`() {
         val member = StudyGroupMember(
-            groupId = "test-group-id",
-            memberId = "test-member-id",
+            groupId = ObjectId(),
+            memberId = ObjectId(),
             nickname = "Test Member",
             profileImage = MemberProfileImageVo(type="preset", url = "1")
         )
         val savedMember = repository.persist(member)
-        savedMember.groupId shouldBe "test-group-id"
-        savedMember.memberId shouldBe "test-member-id"
+        savedMember.groupId shouldBe member.groupId
+        savedMember.memberId shouldBe member.memberId
         savedMember.nickname shouldBe "Test Member"
     }
 
     @Test
     fun `회원 조회 테스트`() {
-        val member = repository.findByGroupIdAndMemberId("test-group-id", "test-member-id")
+        val member = repository.findByGroupIdAndMemberId(existMember!!.groupId, existMember!!.memberId)
         member shouldNotBe  null
         member?.groupId shouldBe "test-group-id"
         member?.memberId shouldBe  "test-member-id"
