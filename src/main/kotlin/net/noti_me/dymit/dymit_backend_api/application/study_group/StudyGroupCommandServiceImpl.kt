@@ -1,5 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
+import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
+import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
+import net.noti_me.dymit.dymit_backend_api.application.board.impl.BoardServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupJoinCommand
@@ -8,6 +11,8 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
+import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
+import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
@@ -26,6 +31,7 @@ class StudyGroupCommandServiceImpl(
     private val loadStudyGroupPort: LoadStudyGroupPort,
     private val saveStudyGroupPort: SaveStudyGroupPort,
     private val studyGroupMemberRepository: StudyGroupMemberRepository,
+    private val boardService: BoardService,
     private val applicationEventPublisher: ApplicationEventPublisher
 ): StudyGroupCommandService {
 
@@ -64,6 +70,8 @@ class StudyGroupCommandServiceImpl(
         studyGroupMemberRepository.persist(owner)
         applicationEventPublisher.publishEvent(StudyGroupCreateEvent(studyGroup.identifier, this))
 
+        createStudyGroupBoard(member, studyGroup, "공지 사항")
+
         return StudyGroupDto
             .fromEntity(studyGroup)
     }
@@ -94,6 +102,44 @@ class StudyGroupCommandServiceImpl(
         newMember = studyGroupMemberRepository.persist(newMember)
 
         return StudyGroupMemberDto.from(newMember)
+    }
+
+    private fun createStudyGroupBoard(
+        memberInfo: MemberInfo,
+        studyGroup: StudyGroup,
+        boardName: String) {
+        val commonActions = listOf(
+            BoardAction.READ_POST,
+            BoardAction.WRITE_COMMENT,
+            BoardAction.READ_COMMENT,
+        )
+        val command = BoardCommand(
+            name = boardName,
+            permissions = listOf(
+                BoardPermission(
+                    role = GroupMemberRole.OWNER,
+                    actions = (commonActions + listOf(
+                        BoardAction.MANAGE_BOARD,
+                        BoardAction.WRITE_POST,
+                        BoardAction.DELETE_POST,
+                        BoardAction.DELETE_COMMENT
+                    )).toMutableList()
+                ),
+                BoardPermission(
+                    role = GroupMemberRole.ADMIN,
+                    actions = (commonActions + listOf(
+                        BoardAction.WRITE_POST,
+                        BoardAction.DELETE_POST,
+                        BoardAction.DELETE_COMMENT
+                    )).toMutableList()
+                ),
+                BoardPermission(
+                    role = GroupMemberRole.MEMBER,
+                    actions = commonActions.toMutableList()
+                )
+            )
+        )
+        boardService.createBoard(memberInfo, studyGroup.identifier, command )
     }
 //
 //    override fun leaveStudyGroup(member: MemberInfo,
