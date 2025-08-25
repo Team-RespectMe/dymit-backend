@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
@@ -18,9 +19,12 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -133,4 +137,36 @@ interface StudyGroupAPI {
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
     ): StudyGroupQueryDetailResponse
+
+    /**
+     * 스터디 그룹 프로필 이미지 업데이트 API
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     * @param StudyGroupImageUpdateRequest 스터디 그룹 이미지 업데이트 요청 정보
+     */
+    @Operation(summary = "스터디 그룹 프로필 이미지 업데이트 API", description = "스터디 그룹의 프로필 이미지를 업데이트합니다.")
+    @ApiResponse(responseCode = "200", description = "프로필 이미지 업데이트 성공")
+    @PutMapping("/{groupId}/profile-image")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun updateStudyGroupProfileImage(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @Valid @ModelAttribute request: ProfileImageUploadRequest // TODO: StudyGroupImageUpdateRequest로 변경
+    ): StudyGroupResponse
+
+    /**
+     * 스터디 그룹 삭제 API
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     */
+    @Operation(summary = "스터디 그룹 삭제 API", description = "스터디 그룹을 삭제합니다.")
+    @ApiResponse(responseCode = "204", description = "스터디 그룹 삭제 성공")
+    @DeleteMapping("/{groupId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun deleteStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    )
 }

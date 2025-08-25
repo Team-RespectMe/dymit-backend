@@ -4,6 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCom
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
@@ -74,5 +75,22 @@ class StudyGroupController(
         val groupMembers = studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
 
         return StudyGroupQueryDetailResponse.of(group, groupMembers)
+    }
+
+    override fun updateStudyGroupProfileImage(
+        memberInfo: MemberInfo,
+        groupId: String,
+        request: ProfileImageUploadRequest
+    ): StudyGroupResponse {
+        val updatedGroup = studyGroupCommandService.updateStudyGroupProfileImage(
+            member = memberInfo,
+            command = request.toGroupProfileUpdateCommand(groupId)
+        )
+
+        return StudyGroupResponse.from(updatedGroup)
+    }
+
+    override fun deleteStudyGroup(memberInfo: MemberInfo, groupId: String) {
+        studyGroupCommandService.deleteStudyGroup(memberInfo, groupId)
     }
 }
