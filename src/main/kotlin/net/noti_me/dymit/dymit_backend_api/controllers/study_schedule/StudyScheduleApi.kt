@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 
-@Tag(name = "Study Schedule API", description = "스터디 그룹 일정 관리 API")
+@Tag(name = "스터디 일정 API", description = "스터디 그룹 일정 관리 API")
 @SecurityRequirement(name = "bearer-jwt")
 @RequestMapping("/api/v1/study-groups/")
 interface StudyScheduleApi {

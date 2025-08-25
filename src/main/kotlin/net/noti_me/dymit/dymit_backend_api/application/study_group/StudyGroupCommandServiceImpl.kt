@@ -5,16 +5,21 @@ import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
 import net.noti_me.dymit.dymit_backend_api.application.board.impl.BoardServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupJoinCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupMemberDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
+import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupCreateEvent
@@ -141,24 +146,58 @@ class StudyGroupCommandServiceImpl(
         )
         boardService.createBoard(memberInfo, studyGroup.identifier, command )
     }
+
+    private fun createImageVo(command: StudyGroupImageUpdateCommand): GroupProfileImageVo {
+        return when (command.type) {
+            "preset" -> {
+                val presetNumber = command.value
+                    ?: throw BadRequestException(message = "잘못된 Preset Value입니다.")
+                if (presetNumber < 0 || presetNumber > 6) {
+                    throw BadRequestException(message = "존재하지 않는 Preset Value입니다.")
+                }
+                GroupProfileImageVo(
+                    type = "preset",
+                    url = presetNumber.toString()
+                )
+            }
+            else -> throw IllegalArgumentException("Invalid image type")
+        }
+    }
+
+    override fun updateStudyGroupProfileImage(
+        member: MemberInfo,
+        command: StudyGroupImageUpdateCommand
+    ): StudyGroupDto {
+        val group = loadStudyGroupPort.loadByGroupId(command.groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        val imageVo = createImageVo(command)
+        group.updateProfileImage(member.memberId, imageVo )
+        val updatedGroup = saveStudyGroupPort.update(group)
+        return StudyGroupDto.fromEntity(updatedGroup)
+    }
+
 //
-//    override fun leaveStudyGroup(member: MemberInfo,
-//                                 groupId: String)
-//    : Boolean {
-        /**
-         * 1. 스터디그룹을 groupId 로 조회하고,
-         * 2. 스터디그룹멤버 엔티티를 groupId와 member.memberId로 조회하고
-         * 3. 스터디 그룹 멤버 엔티티를 삭제하기 전 체크
-         *    - 스터디 그룹의 소유자인지?
-         *      a. 소유자인 경우, 그룹 내 다른 인원이 있다면(memberCount>1) 탈퇴 불가
-         *      b. 소유자가 아니라면 탈퇴 가능
-         *    - 스터디 그룹 멤버 프리뷰에 등록되어있다면 스터디 그룹 엔티티도 조작
-         * 4. 스터디 그룹 멤버 엔티티 삭제
-         * 5. 스터디 그룹 엔티티 저장
-         * note. 어떤 방식이든 락이 필요함.
-         * - 그룹 소유자 변경 로직 수행 중이고, 삭제 대상 멤버가 새로운 그룹 소유자 대상이라면
-         *   그룹 소유자 변경 로직에서 새로운 그룹 소유자 멤버의 존재 여부를 확인한 상태에서 변경 전
-         *   해당 회원이 탈퇴해버리면 탈퇴한 회원이 그룹 소유자인 상태가 될 수 있음.
-         */
-//    }
+    override fun deleteStudyGroup(
+        member: MemberInfo,
+        groupId: String)
+    : Boolean {
+        // 1. 그룹을 먼저 loadStudyGroupPort를 통해 가져온다
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        // 2. 그룹 OwnerId와 현재 사용자 memberId가 동일한지 확인
+        if (group.ownerId.toHexString() != member.memberId) {
+            throw ForbiddenException(message = "스터디 그룹 삭제 권한이 없습니다.")
+        }
+
+        // 3. 스터디 그룹의 전체 회원수가 1명이 아니라면 reject
+        val memberCount = studyGroupMemberRepository.countByGroupId(group.id)
+        if (memberCount != 1L) {
+            throw BadRequestException(message = "스터디 그룹에 다른 멤버가 있어 삭제할 수 없습니다.")
+        }
+
+        // 4. 그 외에는 허용 - 스터디 그룹 삭제
+        return saveStudyGroupPort.delete(group)
+    }
 }

@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupJoinCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupMemberDto
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -28,21 +29,21 @@ interface StudyGroupCommandService {
         command: StudyGroupJoinCommand
     ): StudyGroupMemberDto
 
-//    /**
-//     * 스터디 그룹을 탈퇴합니다.
-//     * @param member 스터디 그룹을 탈퇴할 멤버 정보
-//     * @param groupId 탈퇴할 스터디 그룹의 ID
-//     * @return 탈퇴 성공 여부
-//     */
-//    fun leaveStudyGroup(
-//        member: MemberInfo,
-//        groupId: String
-//    ): Boolean
+    /**
+     * 스터디 그룹을 삭제합니다.
+     * @param member 스터디 그룹을 탈퇴할 멤버 정보
+     * @param groupId 탈퇴할 스터디 그룹의 ID
+     * @return 삭제 성공 여부
+     */
+    fun deleteStudyGroup(
+        member: MemberInfo,
+        groupId: String
+    ): Boolean
 
-//    fun updateStudyGroupProfileImage(
-//        member: MemberInfo,
-//        command: StudyGroupImageUpdateCommand
-//    ): StudyGroupDto
+    fun updateStudyGroupProfileImage(
+        member: MemberInfo,
+        command: StudyGroupImageUpdateCommand
+    ): StudyGroupDto
 
 //    fun updateStudyGroupInfo(
 //        member: MemberInfo,
