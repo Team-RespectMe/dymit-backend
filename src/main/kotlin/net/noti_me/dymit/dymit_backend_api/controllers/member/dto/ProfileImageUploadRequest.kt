@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.member.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberProfileImageCommand
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
 import org.springframework.web.multipart.MultipartFile
 
 @Schema(description = "프로필 이미지 업로드 요청 객체")
@@ -19,6 +20,17 @@ class ProfileImageUploadRequest(
             type = type,
             presetNo = presetNo,
             imageFile = file
+        )
+    }
+
+    fun toGroupProfileUpdateCommand(
+        groupId: String
+    ): StudyGroupImageUpdateCommand {
+        return StudyGroupImageUpdateCommand(
+            groupId = groupId,
+            type = type,
+            value = presetNo,
+            file = file
         )
     }
 }

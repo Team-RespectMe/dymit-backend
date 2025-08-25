@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 
 
 @RequestMapping("/api/v1/")
-@Tag(name = "Auth API", description = "인증 관련 API")
+@Tag(name = "인증 API", description = "인증 관련 API")
 interface AuthApi {
 
     @ApiResponses(
