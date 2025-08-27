@@ -3,11 +3,9 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupMemberQueryDto
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageResponse
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 
 @Schema(
     description = "스터디 그룹 멤버 미리보기 응답 DTO",

@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member
 
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import org.bson.types.ObjectId
 
 interface StudyGroupMemberRepository {

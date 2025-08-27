@@ -4,8 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupMemberDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupMemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import java.time.LocalDateTime
 
 @Schema(description = "스터디 그룹 멤버 응답 DTO")

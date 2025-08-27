@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDetailDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.ScheduleParticipant
 import java.time.LocalDateTime
 
 @Schema(
