@@ -2,7 +2,6 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
-import net.noti_me.dymit.dymit_backend_api.application.board.impl.BoardServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
@@ -10,19 +9,17 @@ import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.S
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupMemberDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupCreateEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupCreateEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort

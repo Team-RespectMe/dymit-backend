@@ -3,7 +3,6 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.ScheduleRoleDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.ScheduleRole
 
 @Schema(
     description = "스터디 그룹 일정 역할 응답",

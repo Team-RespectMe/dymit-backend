@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query
 
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
 
 class PostPreview(
     val postId: String,

@@ -9,9 +9,11 @@ import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationPr
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,7 +21,8 @@ class MemberCreateUsecaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
     private val oidcAuthenticationProviders: List<OidcAuthenticationProvider>,
-    private val jwtAuthService: JwtAuthService
+    private val jwtAuthService: JwtAuthService,
+    private val eventPublisher: ApplicationEventPublisher
 ) : MemberCreateUsecase {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -49,6 +52,7 @@ class MemberCreateUsecaseImpl(
         )
 
         member = saveMemberPort.persist(member)
+        eventPublisher.publishEvent(MemberCreatedEvent(member))
 
         return MemberCreateResult.from(
             member = MemberDto.fromEntity(member),

@@ -8,7 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -23,7 +23,7 @@ class PostServiceImpl(
     private val loadGroupPort: LoadStudyGroupPort,
     private val saveGroupPort: SaveStudyGroupPort,
     private val boardRepository: BoardRepository,
-    private val groupMemberRepository: StudyGroupMemberRepository
+    private val groupMemberRepository: StudyGroupMemberRepository,
 ): PostService {
 
     override fun createPost(
