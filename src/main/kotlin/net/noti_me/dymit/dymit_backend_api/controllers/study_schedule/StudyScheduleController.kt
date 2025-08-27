@@ -8,7 +8,6 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyS
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleCommandResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleListItem
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleResponse
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.ScheduleParticipant
 import org.springframework.web.bind.annotation.RestController
 
 @RestController

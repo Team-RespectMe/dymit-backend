@@ -1,9 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto
 
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
 
 class StudyScheduleParticipantDto(
     val scheduleId: String,

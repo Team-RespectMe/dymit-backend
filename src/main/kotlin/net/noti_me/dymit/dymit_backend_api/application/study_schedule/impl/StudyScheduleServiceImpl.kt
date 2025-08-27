@@ -12,15 +12,17 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.RoleAssignment
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.RecentScheduleVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyScheduleCreatedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.ScheduleLocation
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.ScheduleParticipant
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.ScheduleRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentScheduleVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyRoleAssignedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyScheduleCanceledEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyScheduleCreatedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleParticipant
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
@@ -82,8 +84,7 @@ class StudyScheduleServiceImpl(
 
         val savedSchedule = studyScheduleRepository.save(newStudySchedule)
         saveStudyGroupPort.persist(group)
-        eventPublisher.publishEvent(StudyScheduleCreatedEvent(savedSchedule, this));
-
+        eventPublisher.publishEvent(StudyScheduleCreatedEvent(savedSchedule));
         return StudyScheduleDto.from(savedSchedule)
     }
 
@@ -150,7 +151,7 @@ class StudyScheduleServiceImpl(
             if (group.recentSchedule?.scheduleId?.toHexString() == scheduleId) {
                 updateGroupRecentSchedule(group);
             }
-
+            eventPublisher.publishEvent(StudyScheduleCanceledEvent(group, schedule));
             studyScheduleRepository.delete(schedule)
         } else {
             // 과거의 스케줄이라면 소프트 딜리트
@@ -284,7 +285,7 @@ class StudyScheduleServiceImpl(
             val member = members[role.memberId]
                 ?: throw BadRequestException(message="존재하지 않는 멤버입니다.")
             ScheduleRole(
-                memberId = member.id,
+                memberId = member.memberId,
                 nickname = member.nickname,
                 image = ProfileImageVo(member.profileImage.type, member.profileImage.url),
                 roles = role.roles

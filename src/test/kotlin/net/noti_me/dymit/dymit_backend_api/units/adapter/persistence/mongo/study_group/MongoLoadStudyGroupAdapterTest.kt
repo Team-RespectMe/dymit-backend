@@ -5,8 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import

@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import org.bson.types.ObjectId
 
 class CommentTest : BehaviorSpec({

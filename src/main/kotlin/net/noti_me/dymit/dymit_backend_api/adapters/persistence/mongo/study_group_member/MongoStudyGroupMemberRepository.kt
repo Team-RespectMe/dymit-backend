@@ -1,17 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_group_member
 
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
-import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Repository
-import kotlin.collections.aggregate
 
 @Repository
 class MongoStudyGroupMemberRepository(

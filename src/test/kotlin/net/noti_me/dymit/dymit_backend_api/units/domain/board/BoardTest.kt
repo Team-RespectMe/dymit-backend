@@ -13,8 +13,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import org.bson.types.ObjectId
 
 internal class BoardTest : BehaviorSpec({

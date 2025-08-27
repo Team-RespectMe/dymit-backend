@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query
 
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.RecentScheduleVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentScheduleVo
 import java.time.LocalDateTime
 
 data class SchedulePreview(

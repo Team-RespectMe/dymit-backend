@@ -1,6 +1,5 @@
 package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo.study_group_members
 
-import com.jayway.jsonpath.Criteria
 import io.kotest.core.extensions.Extension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.extensions.spring.SpringExtension
@@ -9,7 +8,7 @@ import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_group_member.MongoStudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import

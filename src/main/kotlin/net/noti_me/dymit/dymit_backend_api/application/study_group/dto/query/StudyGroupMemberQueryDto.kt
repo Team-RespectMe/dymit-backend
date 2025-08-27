@@ -1,8 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import java.time.LocalDateTime
 
 class StudyGroupMemberQueryDto(

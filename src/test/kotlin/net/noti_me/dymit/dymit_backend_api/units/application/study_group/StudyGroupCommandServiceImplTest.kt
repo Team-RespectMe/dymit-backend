@@ -7,10 +7,7 @@ import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort

@@ -1,9 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_group
 
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Repository

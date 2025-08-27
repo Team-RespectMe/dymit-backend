@@ -9,7 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository

@@ -3,14 +3,12 @@ package net.noti_me.dymit.dymit_backend_api.units.domain.studyGroup
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import io.mockk.clearAllMocks
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.GroupProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.studyGroup.events.StudyGroupOwnerChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import org.bson.types.ObjectId
 import java.util.UUID
 
