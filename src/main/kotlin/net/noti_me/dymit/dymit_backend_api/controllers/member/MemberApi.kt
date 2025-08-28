@@ -14,6 +14,7 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import net.noti_me.dymit.dymit_backend_api.common.response.ErrorResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.DeviceTokenCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberNicknameUpdateRequest
@@ -200,4 +201,29 @@ interface MemberApi {
         @PathVariable memberId: String
     ): Unit
 
+    @Operation(summary = "디바이스 토큰 등록 API", description = "디바이스 토큰을 등록합니다.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "201", description = "디바이스 토큰 등록 성공"),
+    ])
+    @PostMapping("/{memberId}/device-tokens")
+    @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun registerDeviceToken(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid request: DeviceTokenCommandRequest
+    ): Unit
+
+    @Operation(summary = "디바이스 토큰 삭제 API", description = "디바이스 토큰을 삭제합니다.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "디바이스 토큰 삭제 성공"),
+    ])
+    @DeleteMapping("/{memberId}/device-tokens" )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun unregisterDeviceToken(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid request: DeviceTokenCommandRequest
+    ): Unit
 }
