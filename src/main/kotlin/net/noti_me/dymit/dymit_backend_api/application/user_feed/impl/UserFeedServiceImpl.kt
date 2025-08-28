@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.application.user_feed.dto.UserFeedDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.userFeed.UserFeedRepository
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.springframework.stereotype.Service
 
 @Service
