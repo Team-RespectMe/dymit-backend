@@ -12,7 +12,9 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStu
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.userFeed.UserFeedRepository
+import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -24,13 +26,13 @@ class StudyScheduleEventHandler(
     private val studyGroupRepository: LoadStudyGroupPort,
     private val participantRepository: ScheduleParticipantRepository,
     private val userFeedRepository: UserFeedRepository,
+    private val eventPublisher: ApplicationEventPublisher
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @EventListener
     fun handleStudyScheduleCreatedEvent(event: StudyScheduleCreatedEvent) {
-        logger.info("스터디 일정 생성 이벤트 처리 시작: ${event.studySchedule.id}")
         val schedule = event.studySchedule
         val groupId = schedule.groupId
         val group = studyGroupRepository.loadByGroupId(groupId.toHexString())
@@ -41,20 +43,7 @@ class StudyScheduleEventHandler(
         val members = studyGroupMemberRepository.findByGroupId(groupId)
 
         members.forEach { member ->
-            val feed = UserFeed(
-                memberId = member.memberId,
-                message = "[${group.name}] 새로운 스터디 일정: ${schedule.title}",
-                associates = listOf(
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP,
-                        resourceId = group.id.toHexString()
-                    ),
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP_SCHEDULE,
-                        resourceId = schedule.id.toHexString()
-                    )
-                )
-            )
+            val feed = event.toUserFeed(group, schedule, member)
             userFeedRepository.save(feed)
         }
 
@@ -77,6 +66,8 @@ class StudyScheduleEventHandler(
             )
             userFeedRepository.save(feed)
         }
+
+        eventPublisher.publishEvent(event.toGroupPushEvent(group))
     }
 
     /**
@@ -95,22 +86,11 @@ class StudyScheduleEventHandler(
         val members = studyGroupMemberRepository.findByGroupId(groupId)
 
         members.forEach { member ->
-            val feed = UserFeed(
-                memberId = member.memberId,
-                message = "[${group.name}] 스터디 일정이 변경되었어요. ${schedule.title}",
-                associates = listOf(
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP,
-                        resourceId = group.id.toHexString()
-                    ),
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP_SCHEDULE,
-                        resourceId = schedule.id.toHexString()
-                    )
-                )
-            )
+            val feed = event.toUserFeed(group, schedule, member)
             userFeedRepository.save(feed)
         }
+
+        eventPublisher.publishEvent(event.toSchedulePushEvent(group))
     }
 
     /**
@@ -119,7 +99,6 @@ class StudyScheduleEventHandler(
     @EventListener
     fun handleStudyScheduleRoleAssignedEvent(event: StudyRoleAssignedEvent) {
         logger.debug("스터디 일정 역할 부여 이벤트 처리 시작: ${event.role}, 일정 ID: ${event.schedule.id}")
-        val role = event.role
         val schedule = event.schedule
         val groupId = schedule.groupId
         val group = studyGroupRepository.loadByGroupId(groupId.toHexString())
@@ -129,20 +108,9 @@ class StudyScheduleEventHandler(
             .toList()
         studyGroupMemberRepository.findByGroupIdAndMemberIdsIn(groupId, memberIds)
             .forEach { groupMember ->
-                val feed = UserFeed(
-                    memberId = groupMember.memberId,
-                    message = "[${group.name}] 에서 회원님에게 스터디 일정에 필요한 역할을 부여했어요.",
-                    associates = listOf(
-                        AssociatedResource(
-                            type = ResourceType.STUDY_GROUP,
-                            resourceId = group.id.toHexString()
-                        ),
-                        AssociatedResource(
-                            type = ResourceType.STUDY_GROUP_SCHEDULE,
-                            resourceId = schedule.id.toHexString()
-                        )
-                    )
-                )
+                val feed = event.toUserFeed(group, schedule, groupMember)
+                userFeedRepository.save(feed)
+                eventPublisher.publishEvent( event.toMemberPushEvent(group) )
             }
     }
 
@@ -158,23 +126,15 @@ class StudyScheduleEventHandler(
             ?.let { group ->
                 participantRepository.getByScheduleId(schedule.id)
                     .forEach { participant ->
-                        val userFeed = UserFeed(
-                            memberId = participant.memberId,
-                            message = "[${group.name}] 스터디 일정이 취소되었어요. ${schedule.title}",
-                            associates = listOf(
-                                AssociatedResource(
-                                    type = ResourceType.STUDY_GROUP,
-                                    resourceId = group.id.toHexString()
-                                ),
-                                AssociatedResource(
-                                    type = ResourceType.STUDY_GROUP_SCHEDULE,
-                                    resourceId = schedule.id.toHexString()
-                                )
-                            )
+                        val userFeed = event.toUserFeed(
+                            group = group,
+                            schedule = schedule,
+                            participant = participant
                         )
                         participantRepository.delete(participant)
                         userFeedRepository.save(userFeed)
                     }
             }
+        eventPublisher.publishEvent(event.toSchedulePushEvent())
     }
 }

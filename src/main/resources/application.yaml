@@ -41,6 +41,10 @@ server:
       max-file-size: ${DYMIT_SERVER_MAX_FILE_SIZE:2MB}
       max-request-size: ${DYMIT_SERVER_MAX_REQUEST_SIZE:2MB}
 
+firebase:
+  config:
+    path: ${DYMIT_FIREBASE_SERVICE_ACCOUNT_PATH}
+
 log-reporter:
   enabled: ${DYMIT_LOG_REPORTER_ENABLED:false}
   discord:

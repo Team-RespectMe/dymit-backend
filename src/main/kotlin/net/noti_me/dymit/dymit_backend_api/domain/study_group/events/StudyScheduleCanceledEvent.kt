@@ -1,7 +1,12 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
 
+import net.noti_me.dymit.dymit_backend_api.application.push_notification.SchedulePushEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import org.springframework.context.ApplicationEvent
 
 /**
@@ -13,4 +18,39 @@ class StudyScheduleCanceledEvent(
     val group: StudyGroup,
     val schedule: StudySchedule
 ) : ApplicationEvent(schedule) {
+
+    fun toUserFeed(
+        group: StudyGroup,
+        schedule: StudySchedule,
+        participant: ScheduleParticipant,
+    ): UserFeed {
+        return UserFeed(
+            memberId = participant.memberId,
+            message = "[${group.name}] ${schedule.session} 회차 일정이 취소되었어요.",
+            associates = listOf(
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP,
+                    resourceId = group.id.toHexString()
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_SCHEDULE,
+                    resourceId = schedule.id.toHexString()
+                )
+            )
+        )
+    }
+
+    fun toSchedulePushEvent(): SchedulePushEvent {
+        return SchedulePushEvent(
+            scheduleId = schedule.id,
+            title = group.name,
+            body = "${schedule.session} 회차 일정이 취소되었어요.",
+            image = null,
+            data = mapOf(
+                "type" to "STUDY_GROUP_SCHEDULE",
+                "groupId" to group.id.toHexString(),
+                "scheduleId" to schedule.id.toHexString()
+            )
+        )
+    }
 }
