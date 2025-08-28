@@ -40,7 +40,7 @@ data class UserFeedResponse(
 
 @Schema(description = "연관 리소스 응답")
 data class AssociatedResourceResponse(
-    @Schema(description = "리소스 타입", example = "POST")
+    @Schema(description = "리소스 타입", example = "STUDY_GROUP")
     val type: ResourceType,
 
     @Schema(description = "리소스 ID", example = "507f1f77bcf86cd799439012")

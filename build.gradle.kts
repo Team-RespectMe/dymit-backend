@@ -37,10 +37,12 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-common:${springDocVersion}")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("com.auth0:java-jwt:4.4.0")
+    implementation("com.google.firebase:firebase-admin:9.3.0")
 
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
-	// testImplementation("io.kotest:kotest-extensions-htmlreporter:5.9.1")
+
+    // testImplementation("io.kotest:kotest-extensions-htmlreporter:5.9.1")
 //	 testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1")
 	// implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.20.0")

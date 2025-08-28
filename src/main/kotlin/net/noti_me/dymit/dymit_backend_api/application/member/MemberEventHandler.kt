@@ -22,19 +22,7 @@ class MemberEventHandler(
     @Async
     fun handleMemberCreatedEvent(event: MemberCreatedEvent) {
         val member = event.source as Member
-        val welcomeFeed = createWelcomeFeed(member)
+        val welcomeFeed = event.toUserFeed(member)
         userFeedRepository.save(welcomeFeed)
-    }
-
-    private fun createWelcomeFeed(member: Member): UserFeed {
-        val message = "${member.nickname} 님, Dymit에 가입하신 것을 환영합니다!"
-        return UserFeed(
-            memberId = member.id,
-            message = message,
-            associates = listOf(AssociatedResource(
-                type = ResourceType.MEMBER,
-                resourceId = member.id.toHexString()
-            ))
-        )
     }
 }
