@@ -28,4 +28,8 @@ interface LoadMemberPort {
         nickname: String
     ): Boolean
 
+    fun loadByDeviceToken(
+        deviceToken: String
+    ): Member?
+
 }

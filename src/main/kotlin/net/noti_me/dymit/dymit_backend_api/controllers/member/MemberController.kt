@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
+import net.noti_me.dymit.dymit_backend_api.application.member.MemberDeviceTokenUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberImageUploadUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberNicknameUpdateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.MemberApi
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.DeviceTokenCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
@@ -34,7 +36,8 @@ class MemberController(
     private val memberQueryUsecase: MemberQueryUsecase,
     private val memberDeleteUsecase: MemberDeleteUsecase,
     private val memberUpdateNicknameUsecase: UpdateNicknameUsecase,
-    private val memberImageUploadUsecase: MemberImageUploadUsecase
+    private val memberImageUploadUsecase: MemberImageUploadUsecase,
+    private val deviceTokenUsecase: MemberDeviceTokenUsecase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -102,6 +105,20 @@ class MemberController(
         return memberDeleteUsecase.deleteMember(
             loginMember = loginMember,
             memberId = memberId
+        )
+    }
+
+    override fun registerDeviceToken(loginMember: MemberInfo, memberId: String, request: DeviceTokenCommandRequest) {
+        deviceTokenUsecase.registerDeviceToken(
+            member = loginMember,
+            deviceToken = request.deviceToken
+        )
+    }
+
+    override fun unregisterDeviceToken(loginMember: MemberInfo, memberId: String, request: DeviceTokenCommandRequest) {
+        deviceTokenUsecase.unregisterDeviceToken(
+            member = loginMember,
+            deviceToken = request.deviceToken
         )
     }
 }
