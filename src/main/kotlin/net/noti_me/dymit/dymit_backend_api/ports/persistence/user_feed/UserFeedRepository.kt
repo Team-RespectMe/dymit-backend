@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.ports.persistence.userFeed
+package net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed
 
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 

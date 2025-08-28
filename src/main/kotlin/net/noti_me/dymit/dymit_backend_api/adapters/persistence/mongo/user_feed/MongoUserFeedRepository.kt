@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.user_feed
 
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.userFeed.UserFeedRepository
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate

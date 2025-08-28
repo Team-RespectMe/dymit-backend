@@ -2,10 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.member
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberCreatedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.userFeed.UserFeedRepository
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
