@@ -14,9 +14,9 @@ class ScheduleRole(
     val memberId: ObjectId,
     val nickname: String,
     val image: ProfileImageVo,
+    val color: Highlight = Highlight(255, 0, 0, 255),
     val roles: List<String>
 ) {
-
     fun isRoleChanged(newRoles: List<String>): Boolean {
         return roles != newRoles
     }

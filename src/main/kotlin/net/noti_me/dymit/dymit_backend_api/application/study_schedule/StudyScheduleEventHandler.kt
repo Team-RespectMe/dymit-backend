@@ -11,8 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.userFeed.UserFeedRepository
-import org.bson.types.ObjectId
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener

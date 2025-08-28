@@ -288,6 +288,7 @@ class StudyScheduleServiceImpl(
                 memberId = member.memberId,
                 nickname = member.nickname,
                 image = ProfileImageVo(member.profileImage.type, member.profileImage.url),
+                color = role.color,
                 roles = role.roles
             )
         }.toMutableSet()

@@ -16,7 +16,7 @@ class StudyScheduleCommandRequest(
     val location: LocationVo,
     @field: Schema(description = "스터디 일정 시작 시간", example = "2030-10-01T10:00:00")
     val scheduleAt: LocalDateTime,
-    @field: Schema(description = "스터디 일정 역할 목록", example = "[{ \"memberId\": \"688c25eb2f3a71dcf291aac9\", \"roles\": [\"자료조사\"] }]")
+    @field: Schema(description = "스터디 일정 역할 목록")
     val scheduleRoles: List<RoleAssignment>,
 ) {
 
