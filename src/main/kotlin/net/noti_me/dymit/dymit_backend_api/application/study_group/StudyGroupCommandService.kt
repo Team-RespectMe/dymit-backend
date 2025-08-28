@@ -45,6 +45,11 @@ interface StudyGroupCommandService {
         command: StudyGroupImageUpdateCommand
     ): StudyGroupDto
 
+    fun leaveStudyGroup(
+        member: MemberInfo,
+        groupId: String
+    ): Unit
+
 //    fun updateStudyGroupInfo(
 //        member: MemberInfo,
 //        command: StudyGroupNicknameUpdateCommand

@@ -24,6 +24,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
@@ -196,5 +197,24 @@ class StudyGroupCommandServiceImpl(
 
         // 4. 그 외에는 허용 - 스터디 그룹 삭제
         return saveStudyGroupPort.delete(group)
+    }
+
+    override fun leaveStudyGroup(
+        member: MemberInfo,
+        groupId: String
+    ): Unit {
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        val membership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(member.memberId)
+        ) ?: throw NotFoundException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
+
+        if ( group.memberCount >= 2 && membership.role == GroupMemberRole.OWNER) {
+            throw ConflictException(message = "스터디 그룹장은 스터디 그룹을 탈퇴할 수 없습니다. 다른 인원을 모두 탈퇴시킨 뒤 다시 시도하세요.")
+        }
+
+        studyGroupMemberRepository.delete(membership)
     }
 }
