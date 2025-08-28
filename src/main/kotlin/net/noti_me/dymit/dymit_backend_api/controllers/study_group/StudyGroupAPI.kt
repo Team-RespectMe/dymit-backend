@@ -169,4 +169,19 @@ interface StudyGroupAPI {
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
     )
+
+    /**
+     * 스터디 그룹 탈퇴 API
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     */
+    @Operation(summary = "스터디 그룹 탈퇴 API", description = "스터디 그룹에서 탈퇴합니다.")
+    @ApiResponse(responseCode = "204", description = "스터디 그룹 탈퇴 성공")
+    @DeleteMapping("/{groupId}/members/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun leaveStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): Unit
 }

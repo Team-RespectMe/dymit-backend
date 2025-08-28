@@ -93,4 +93,8 @@ class StudyGroupController(
     override fun deleteStudyGroup(memberInfo: MemberInfo, groupId: String) {
         studyGroupCommandService.deleteStudyGroup(memberInfo, groupId)
     }
+
+    override fun leaveStudyGroup(memberInfo: MemberInfo, groupId: String) {
+        studyGroupCommandService.leaveStudyGroup(memberInfo, groupId)
+    }
 }
