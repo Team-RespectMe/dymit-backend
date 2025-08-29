@@ -12,6 +12,7 @@ class StudyScheduleRoleResponse(
     val nickname: String,
     val image: String,
     val roles: List<String>,
+    val color: String = "#FF3357"
 ): BaseResponse() {
 
     companion object {
@@ -20,7 +21,8 @@ class StudyScheduleRoleResponse(
                 memberId = dto.memberId,
                 nickname = dto.nickname,
                 image = dto.image.url,
-                roles = dto.roles
+                roles = dto.roles,
+                color = dto.color
             )
         }
     }

@@ -8,7 +8,8 @@ class ScheduleRoleDto(
     val memberId: String = "",
     val nickname: String = "",
     val image: ProfileImageVo = ProfileImageVo(type = "preset", url = "0"),
-    val roles : List<String>
+    val roles : List<String>,
+    val color: String = "#FF3357"
 ) {
 
     fun toDomain(): ScheduleRole {
@@ -16,7 +17,8 @@ class ScheduleRoleDto(
             memberId = ObjectId(memberId),
             nickname = nickname,
             image = image,
-            roles = roles
+            roles = roles,
+            color = color
         )
     }
 
@@ -27,7 +29,8 @@ class ScheduleRoleDto(
                 memberId = role.memberId.toHexString(),
                 nickname = role.nickname,
                 image = role.image,
-                roles = role.roles
+                roles = role.roles,
+                color = role.color
             )
         }
     }
