@@ -183,7 +183,12 @@ class StudyScheduleServiceImpl(
             memberId = ObjectId(memberInfo.memberId)
         ) ?: throw ForbiddenException(message = "가입된 그룹이 아닙니다.")
 
-        val scheduleDetail = StudyScheduleDetailDto.from(schedule)
+        val participant = participantRepository.getByScheduleIdAndMemberId(
+            scheduleId = schedule.id,
+            memberId = ObjectId(memberInfo.memberId)
+        )
+
+        val scheduleDetail = StudyScheduleDetailDto.from(schedule, participant)
         scheduleDetail.participants = getParticipants(schedule)
         return scheduleDetail
     }

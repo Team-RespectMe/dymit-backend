@@ -148,9 +148,6 @@ class StudyGroup(
             throw ForbiddenException(message="그룹 소유자가 설정되어 있지 않습니다.")
         }
 
-        if ( !profileImage.isValid() ) {
-            throw BadRequestException(message="유효하지 않은 프로필 이미지입니다.")
-        }
         this.profileImage = profileImage
     }
 
