@@ -20,5 +20,6 @@ class WriterVo(
                 image = writer.image
             )
         }
+
     }
 }

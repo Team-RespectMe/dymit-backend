@@ -6,8 +6,8 @@ import org.bson.types.ObjectId
 
 class Writer(
     val id: ObjectId,
-    val nickname: String,
-    val image: ProfileImageVo
+    var nickname: String,
+    var image: ProfileImageVo
 ) {
 
     companion object {
