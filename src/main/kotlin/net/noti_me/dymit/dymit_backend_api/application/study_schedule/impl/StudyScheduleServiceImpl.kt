@@ -108,17 +108,23 @@ class StudyScheduleServiceImpl(
             throw ForbiddenException(message = "스터디 그룹의 소유자만 스케줄을 수정할 수 있습니다.")
         }
 
-        schedule.changeScheduleAt(command.scheduleAt)
-        schedule.changeTitle(command.title)
-        schedule.changeDescription(command.description)
+        val groupMember = groupMemberRepository.findByGroupIdAndMemberId(
+            groupId = ObjectId(groupId),
+            memberId = ObjectId(memberInfo.memberId)
+        ) ?: throw ForbiddenException(message = "가입된 그룹이 아닙니다.")
+
+        schedule.changeScheduleAt(requester = groupMember, newScheduleAt = command.scheduleAt)
+        schedule.changeTitle(requester=groupMember,newTitle = command.title)
+        schedule.changeDescription(groupMember, newDescription = command.description)
         schedule.changeLocation(
-            ScheduleLocation(
+            requester = groupMember,
+            newLocation = ScheduleLocation(
                 type = command.location.type,
                 value = command.location.value
             )
         )
         val roles = createScheduleRoles(groupId = ObjectId(groupId), roles=command.roles)
-        schedule.updateRoles(roles)
+        schedule.updateRoles(requester = groupMember, newRoles = roles)
         schedule = studyScheduleRepository.save(schedule)
         group.updateRecentSchedule(RecentScheduleVo(
             scheduleId = schedule.id,

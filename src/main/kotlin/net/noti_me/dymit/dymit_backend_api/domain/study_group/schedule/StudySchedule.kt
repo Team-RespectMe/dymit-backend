@@ -1,6 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule
 
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleTimeChangedEvent
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -50,29 +53,54 @@ class StudySchedule(
     var nrParticipant: Long = nrParticipant
         private set
 
-    fun changeTitle(newTitle: String) {
+    fun changeTitle(
+        requester: StudyGroupMember,
+        newTitle: String
+    ) {
+        checkDefaultPermissions(requester)
+
         if ( title.length > 30 ) {
             throw IllegalArgumentException("Title cannot exceed 30 characters")
         }
+
         this.title = newTitle
     }
 
-    fun changeDescription(newDescription: String) {
+    fun changeDescription(
+        requester: StudyGroupMember,
+        newDescription: String
+    ) {
+        checkDefaultPermissions(requester)
+
         if ( description.length > 100 ) {
             throw IllegalArgumentException("Description cannot exceed 100 characters")
         }
         this.description = newDescription
     }
 
-    fun changeScheduleAt(newScheduleAt: LocalDateTime) {
+    fun changeScheduleAt(
+        requester: StudyGroupMember,
+        newScheduleAt: LocalDateTime
+    ) {
+        checkDefaultPermissions(requester)
+
         if ( newScheduleAt.isBefore(LocalDateTime.now()) ) {
-            throw IllegalArgumentException("Schedule time cannot be in the past")
+            throw IllegalArgumentException("새로운 시간은 현재 시간 이후여야 합니다.")
         }
+
+        if ( scheduleAt.isBefore(LocalDateTime.now()) ) {
+            throw IllegalArgumentException("이미 지나간 일정의 예정 시간은 변경할 수 없습니다.")
+        }
+
         this.scheduleAt = newScheduleAt
         registerEvent(ScheduleTimeChangedEvent(this))
     }
 
-    fun changeLocation(newLocation: ScheduleLocation) {
+    fun changeLocation(
+        requester: StudyGroupMember,
+        newLocation: ScheduleLocation
+    ) {
+        checkDefaultPermissions(requester)
         if ( newLocation.type == this.location.type && newLocation.value == this.location.value ) {
             return // No change
         }
@@ -80,7 +108,12 @@ class StudySchedule(
         registerEvent(ScheduleTimeChangedEvent(this))
     }
 
-    fun updateRoles(newRoles: Set<ScheduleRole>) {
+    fun updateRoles(
+        requester: StudyGroupMember,
+        newRoles: Set<ScheduleRole>
+    ) {
+        checkDefaultPermissions(requester)
+       
         val oldRolesByMember = this.roles.associateBy { it.memberId }
         val newRolesByMember = newRoles.associateBy { it.memberId }
         val updatedRoles = mutableSetOf<ScheduleRole>()
@@ -116,6 +149,17 @@ class StudySchedule(
     fun decreaseParticipantCount() {
         if ( this.nrParticipant > 0 ) {
             this.nrParticipant--
+        }
+    }
+
+    private fun checkDefaultPermissions(requester: StudyGroupMember) {
+        if ( requester.role != GroupMemberRole.OWNER
+            && requester.role != GroupMemberRole.ADMIN  ) {
+            throw ForbiddenException(message = "권한이 없습니다.")
+        }
+
+        if ( requester.groupId != groupId ) {
+            throw ForbiddenException(message = "소속된 그룹이 아닙니다.")
         }
     }
 
