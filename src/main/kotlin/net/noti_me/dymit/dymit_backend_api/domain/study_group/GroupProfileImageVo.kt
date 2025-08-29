@@ -17,14 +17,4 @@ data class GroupProfileImageVo (
     val height: Int = 0,
 ) {
 
-    /**
-     * 프로필 이미지가 유효한지 검사하는 메서드
-     * 유효성 검사 기준:
-     * - fileId, fileName, url은 비어있지 않아야 함
-     * - fileSize는 0보다 커야 함
-     * - width와 height는 0보다 커야 함
-     */
-    fun isValid() : Boolean {
-        return filePath.isNotEmpty() && url.isNotEmpty() && fileSize > 0 && width > 0 && height > 0
-    }
 }

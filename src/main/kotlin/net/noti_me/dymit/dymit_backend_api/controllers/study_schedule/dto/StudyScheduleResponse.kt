@@ -42,6 +42,11 @@ class StudyScheduleResponse(
         description = "일정 참여자 목록",
     )
     val participants: List<ScheduleParticipantResponse>,
+    @field: Schema(
+        description = "내 참여 여부",
+        example = "true"
+    )
+    val attending: Boolean = false
 ): BaseResponse() {
 
     companion object {
@@ -56,7 +61,8 @@ class StudyScheduleResponse(
                 roles = dto.roles.map { StudyScheduleRoleResponse.from(it) },
                 participants = dto.participants.map{
                     ScheduleParticipantResponse.from(it)
-                }
+                },
+                attending = dto.attending
             )
         }
     }

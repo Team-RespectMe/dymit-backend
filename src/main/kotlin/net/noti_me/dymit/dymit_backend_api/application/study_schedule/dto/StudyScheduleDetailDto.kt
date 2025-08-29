@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto
 
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
 import java.time.LocalDateTime
 
@@ -13,12 +14,13 @@ class StudyScheduleDetailDto(
     val location : LocationVo,
     var participants: List<StudyScheduleParticipantDto> = emptyList(),
     val roles: List<ScheduleRoleDto> = emptyList(),
+    var attending: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
 
     companion object {
-        fun from(entity: StudySchedule): StudyScheduleDetailDto {
+        fun from(entity: StudySchedule, participant: ScheduleParticipant? = null): StudyScheduleDetailDto {
             return StudyScheduleDetailDto(
                 id = entity.identifier,
                 session = entity.session,
@@ -27,6 +29,7 @@ class StudyScheduleDetailDto(
                 scheduleAt = entity.scheduleAt,
                 location = LocationVo.from(entity.location),
                 roles = entity.roles.map { ScheduleRoleDto.from(it) },
+                attending = participant?.let{ true } ?: false,
                 createdAt = entity.createdAt?: LocalDateTime.now(),
                 updatedAt = entity.updatedAt?: LocalDateTime.now()
             )
