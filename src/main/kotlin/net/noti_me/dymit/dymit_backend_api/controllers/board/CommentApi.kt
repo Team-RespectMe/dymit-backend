@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 
-@Tag(name = "댓글 API", description = "게시글 댓글 API")
+@Tag(name = "게시글 댓글 API", description = "게시글 댓글 API")
 @RequestMapping("/api/v1/")
 interface CommentApi {
 

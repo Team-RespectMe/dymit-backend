@@ -20,6 +20,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
 
 
 internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
@@ -34,11 +35,14 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
 
     private val jwtService = mockk<JwtAuthService>()
 
+    private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
+
     private val memberCreateUsecase = MemberCreateUsecaseImpl(
         saveMemberPort = saveMemberPort,
         loadMemberPort = loadMemberPort,
         oidcAuthenticationProviders = providers,
-        jwtAuthService = jwtService
+        jwtAuthService = jwtService,
+        eventPublisher = eventPublisher
     )
 
     private val commonOidcIdTokenPayload = CommonOidcIdTokenPayload(
