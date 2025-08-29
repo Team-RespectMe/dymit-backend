@@ -113,7 +113,7 @@ class StudySchedule(
         newRoles: Set<ScheduleRole>
     ) {
         checkDefaultPermissions(requester)
-       
+
         val oldRolesByMember = this.roles.associateBy { it.memberId }
         val newRolesByMember = newRoles.associateBy { it.memberId }
         val updatedRoles = mutableSetOf<ScheduleRole>()

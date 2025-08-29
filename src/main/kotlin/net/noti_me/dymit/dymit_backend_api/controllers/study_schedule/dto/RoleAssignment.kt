@@ -1,7 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.Highlight
+import jakarta.validation.constraints.NotEmpty
+import org.hibernate.validator.constraints.Length
 
 /**
  * 스터디 그룹 일정의 역할 할당 정보
@@ -14,8 +15,10 @@ class RoleAssignment(
     val memberId: String,
     @Schema(description = "할당된 역할 이름", example = "[\"자료조사\", \"초기 디자인\"]")
     val roles: List<String>,
-    @Schema(description = "하이라이트 색상", example = "{\"r\":255,\"g\":0,\"b\":0,\"a\":255}")
-    val color: Highlight
+    @Schema(description = "하이라이트 색상, #으로 시작 반드시 7자", example = "#FF5733")
+    @field:NotEmpty(message = "색상은 비어 있을 수 없습니다.")
+    @field:Length(min = 7, max = 7, message = "색상은 반드시 7자여야 합니다.")
+    val color: String = "#FF3357",
 ) {
 
 }
