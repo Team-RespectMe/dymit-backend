@@ -36,8 +36,8 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
             every { saveMemberPort.update(member ) } returns  member
         }
 
-        given("중복되지 않는 길이 3자 이하의 변경할 닉네임이 주어진다.") {
-            val newNickname = "ab"
+        given("중복되지 않는 길이 1자 미만의 변경할 닉네임이 주어진다.") {
+            val newNickname = ""
             every { loadMemberPort.existsByNickname(newNickname) } returns false
             `when`("자기 자신의 닉네임을 변경하면") {
 
@@ -70,7 +70,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
             }
         }
 
-        given("중복되지 않는 길이 3자 이상 20자 이하의 변경할 닉네임이 주어진다.") {
+        given("중복되지 않는 길이 1자 이상 20자 이하의 변경할 닉네임이 주어진다.") {
             val newNickname = "newNickname"
 
             `when`("자기 자신의 닉네임을 변경하면") {
@@ -99,6 +99,38 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                             command = MemberNicknameUpdateCommand(nickname = newNickname)
                         )
                     }
+                }
+            }
+        }
+
+        given("중복되지 않는 정확히 1자인 닉네임이 주어진다.") {
+            val newNickname = "a"
+            every { loadMemberPort.existsByNickname(newNickname) } returns false
+
+            `when`("자기 자신의 닉네임을 변경하면") {
+                then("변경된 멤버 엔티티가 반환된다.") {
+                    val updatedMember = updateNicknameUsecase.updateNickname(
+                        loginMember = createMemberInfo(member),
+                        memberId = member.identifier,
+                        command = MemberNicknameUpdateCommand(nickname = newNickname)
+                    )
+                    updatedMember.nickname shouldBe newNickname
+                }
+            }
+        }
+
+        given("중복되지 않는 정확히 20자인 닉네임이 주어진다.") {
+            val newNickname = "a".repeat(20)
+            every { loadMemberPort.existsByNickname(newNickname) } returns false
+
+            `when`("자기 자신의 닉네임을 변경하면") {
+                then("변경된 멤버 엔티티가 반환된다.") {
+                    val updatedMember = updateNicknameUsecase.updateNickname(
+                        loginMember = createMemberInfo(member),
+                        memberId = member.identifier,
+                        command = MemberNicknameUpdateCommand(nickname = newNickname)
+                    )
+                    updatedMember.nickname shouldBe newNickname
                 }
             }
         }

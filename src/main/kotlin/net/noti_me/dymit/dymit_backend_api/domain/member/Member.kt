@@ -54,15 +54,15 @@ class Member(
     fun changeNickname(newNickname: String) {
 
         if (newNickname.isBlank()) {
-            throw IllegalArgumentException("Nickname cannot be blank")
+            throw IllegalArgumentException("닉네임은 비워둘 수 없습니다.")
         }
 
         if ( newNickname == this.nickname ) {
             return
         }
 
-        if ( newNickname.length < 3 || newNickname.length > 20 ) {
-            throw IllegalArgumentException("Nickname must be between 3 and 20 characters long")
+        if ( newNickname.length < 1 || newNickname.length > 20 ) {
+            throw IllegalArgumentException("닉네임은 1자 이상 20자 이내로 설정해야 합니다.")
         }
 
         this.nickname = newNickname
@@ -131,11 +131,4 @@ class Member(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-//    fun markAsDeleted() {
-//        if (isDeleted) {
-//            throw IllegalStateException("Member is already marked as deleted")
-//        }
-//        isDeleted = true
-//    }
 }

@@ -89,8 +89,8 @@ class StudyGroup(
             throw BadRequestException(message="그룹 이름은 빈 문자열 일 수 없습니다.")
         }
 
-        if ( newName.length < 3 || newName.length > 30 ) {
-            throw BadRequestException(message="그룹 이름은 3자 이상 30자 이하이어야 합니다.")
+        if ( newName.length < 1 || newName.length > 30 ) {
+            throw BadRequestException(message="그룹 이름은 1자 이상 30자 이하이어야 합니다.")
         }
 
         this.name = newName

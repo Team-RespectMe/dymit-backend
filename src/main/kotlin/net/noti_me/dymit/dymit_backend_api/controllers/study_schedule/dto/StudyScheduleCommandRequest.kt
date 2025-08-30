@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotEmpty
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
@@ -9,6 +10,7 @@ import java.time.LocalDateTime
 @Schema(description = "스터디 그룹 일정 생성 요청")
 class StudyScheduleCommandRequest(
     @field: Schema(description = "스터디 일정 제목", example = "1회차 스터디 모임")
+    @field: NotEmpty(message = "스터디 일정 제목은 비어있을 수 없습니다.")
     val title: String,
     @field: Schema(description = "스터디 일정 설명", example = "이번 주 스터디 모임입니다.")
     val description: String,
