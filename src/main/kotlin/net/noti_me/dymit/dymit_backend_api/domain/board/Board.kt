@@ -15,7 +15,20 @@ class Board(
     val id: ObjectId,
     val groupId: ObjectId,
     name: String,
-    permissions: MutableSet<BoardPermission> = mutableSetOf()
+    permissions: MutableSet<BoardPermission> = mutableSetOf(
+        BoardPermission(
+            role = GroupMemberRole.OWNER,
+            actions = mutableListOf()
+        ),
+        BoardPermission(
+            role = GroupMemberRole.ADMIN,
+            actions = mutableListOf()
+        ),
+        BoardPermission(
+            role = GroupMemberRole.MEMBER,
+            actions = mutableListOf()
+        )
+    )
 ) : BaseAggregateRoot<Board>() {
 
     var name: String = name
@@ -73,14 +86,8 @@ class Board(
             throw ForbiddenException(message = "권한 관리 권한이 없습니다.")
         }
 
-        val permission = permissions.find { it.role == groupMemberRole }
-            ?: throw BadRequestException(message = "해당 역할에 대한 권한이 존재하지 않습니다.")
-
+        val permission = permissions.find { it.role == groupMemberRole }!!
         permission.actions.removeAll(actions)
-
-        if (permission.actions.isEmpty()) {
-            permissions.remove(permission)
-        }
     }
 }
 

@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile
 data class MemberCreateRequest(
     @Schema(description = "사용자 닉네임", required = true, example = "닉네임 입력")
     @field: Nickname
-    @field: Size(min = 3, max = 20, message = "닉네임은 3자 이상 20자 이하로 입력해주세요.")
+    @field: Size(min = 1, max = 20, message = "닉네임은 1자 이상 20자 이하로 입력해주세요.")
     val nickname: String,
     @Schema(description = "OIDC 프로바이더", example = "GOOGLE", required = true)
     val oidcProvider: OidcProvider,

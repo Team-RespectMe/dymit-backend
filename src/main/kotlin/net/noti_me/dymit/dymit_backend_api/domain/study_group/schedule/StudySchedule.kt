@@ -59,8 +59,8 @@ class StudySchedule(
     ) {
         checkDefaultPermissions(requester)
 
-        if ( title.length > 30 ) {
-            throw IllegalArgumentException("Title cannot exceed 30 characters")
+        if ( newTitle.length > 30 ) {
+            throw IllegalArgumentException("제목은 30자 이내로 작성해야 합니다.")
         }
 
         this.title = newTitle
@@ -72,8 +72,8 @@ class StudySchedule(
     ) {
         checkDefaultPermissions(requester)
 
-        if ( description.length > 100 ) {
-            throw IllegalArgumentException("Description cannot exceed 100 characters")
+        if ( newDescription.length > 100 ) {
+            throw IllegalArgumentException("설명은 100자 이내로 작성해야 합니다.")
         }
         this.description = newDescription
     }
