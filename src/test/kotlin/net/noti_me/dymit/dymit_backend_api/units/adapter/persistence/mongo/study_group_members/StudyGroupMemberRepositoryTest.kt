@@ -64,9 +64,9 @@ class StudyGroupMemberRepositoryTest(
     fun `회원 조회 테스트`() {
         val member = repository.findByGroupIdAndMemberId(existMember!!.groupId, existMember!!.memberId)
         member shouldNotBe  null
-        member?.groupId shouldBe "test-group-id"
-        member?.memberId shouldBe  "test-member-id"
-        member?.nickname shouldBe "Test Member"
+        member?.groupId shouldBe existMember?.groupId
+        member?.memberId shouldBe  existMember?.memberId
+        member?.nickname shouldBe existMember?.nickname
     }
 
     @AfterEach

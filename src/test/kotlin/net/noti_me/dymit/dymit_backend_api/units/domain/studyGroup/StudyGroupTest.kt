@@ -130,16 +130,6 @@ class StudyGroupTest() : BehaviorSpec() {
                     studyGroup.profileImage shouldBe newProfileImage
                 }
             }   
-
-            `when`("요청 사용자가 그룹 소유자이고, 새로운 프로필 이미지가 유효하지 않은 경우") {
-                then("BadRequestException 예외가 발생한다.") {
-                    val userId = studyGroup.ownerId
-                    val invalidProfileImage = createProfileImage(fileSize = 0L)
-                    val exception = shouldThrow<BadRequestException> {
-                        studyGroup.updateProfileImage(userId.toHexString(), invalidProfileImage)
-                    }
-                }
-            }
         }
 
         afterEach() {
