@@ -145,7 +145,7 @@ class StudyGroup(
 
     fun updateProfileImage(requesterId: String, profileImage: GroupProfileImageVo) {
         if ( this.ownerId.toHexString() != requesterId ) {
-            throw ForbiddenException(message="그룹 소유자가 설정되어 있지 않습니다.")
+            throw ForbiddenException(message="그룹 소유자가 아닙니다.")
         }
 
         this.profileImage = profileImage

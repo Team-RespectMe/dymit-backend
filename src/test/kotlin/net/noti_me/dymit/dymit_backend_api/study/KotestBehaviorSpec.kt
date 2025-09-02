@@ -4,28 +4,12 @@ import io.kotest.core.spec.style.BehaviorSpec
 
 class KotestBehaviorSpec : BehaviorSpec({
 
-    beforeContainer {
-        println("Before container")
-    }
-
-    afterContainer {
-        println("After container")
-    }
-
     beforeEach {
         println("Before each")
     }
 
     afterEach {
         println("After each")
-    }
-
-    beforeSpec {
-        println("Before spec")
-    }
-
-    afterSpec {
-        println("After spec")
     }
 
     Given("First given") {
