@@ -1,16 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.units.application.board
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.collections.shouldHaveSize
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
 import net.noti_me.dymit.dymit_backend_api.application.board.impl.BoardServiceImpl
+import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -25,302 +24,472 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardReposito
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.types.ObjectId
 
-class BoardServiceImplTest : AnnotationSpec() {
+/**
+ * BoardServiceImpl에 대한 테스트 클래스
+ * 게시판 생성, 수정, 삭제, 조회 기능을 테스트한다.
+ */
+class BoardServiceImplTest : BehaviorSpec({
 
-    private val boardRepository = mockk<BoardRepository>()
-    private val studyGroupMemberRepository = mockk<StudyGroupMemberRepository>()
-    private val boardService = BoardServiceImpl(boardRepository, studyGroupMemberRepository)
+    // Mock 객체 선언
+    val boardRepository = mockk<BoardRepository>()
+    val studyGroupMemberRepository = mockk<StudyGroupMemberRepository>()
+    val boardService = BoardServiceImpl(boardRepository, studyGroupMemberRepository)
 
-    private val testMemberId = ObjectId()
-    private val testGroupId = ObjectId()
-    private val testBoardId = ObjectId()
-    private val memberInfo = MemberInfo(
-        memberId = testMemberId.toHexString(),
-        nickname = "테스트멤버",
-        roles = listOf(MemberRole.ROLE_MEMBER)
-    )
+    // 테스트용 데이터
+    lateinit var memberInfo: MemberInfo
+    lateinit var groupObjectId: ObjectId
+    lateinit var memberObjectId: ObjectId
+    lateinit var boardObjectId: ObjectId
+    lateinit var ownerMember: StudyGroupMember
+    lateinit var regularMember: StudyGroupMember
+    lateinit var board: Board
+    lateinit var boardCommand: BoardCommand
+    lateinit var profileImage: MemberProfileImageVo
 
-    private val testProfileImage = MemberProfileImageVo(
-        type = "presets",
-        filePath = "/images/profile/test.jpg",
-        url = "https://example.com/test.jpg",
-        fileSize = 1024L,
-        width = 200,
-        height = 200
-    )
+    beforeContainer {
+        // 공통 테스트 데이터 초기화
+        groupObjectId = ObjectId()
+        memberObjectId = ObjectId()
+        boardObjectId = ObjectId()
 
-    private val testGroupMember = StudyGroupMember(
-        id = ObjectId(),
-        groupId = testGroupId,
-        memberId = testMemberId,
-        nickname = "테스트 멤버",
-        profileImage = testProfileImage,
-        role = GroupMemberRole.OWNER
-    )
-
-    private val testBoard = Board(
-        id = testBoardId,
-        groupId = testGroupId,
-        name = "테스트 게시판",
-        permissions = mutableSetOf(
-            BoardPermission(GroupMemberRole.OWNER, mutableListOf(BoardAction.MANAGE_BOARD))
-        )
-    )
-
-    private val testBoardCommand = BoardCommand(
-        name = "테스트 게시판",
-        permissions = listOf(
-            BoardPermission(GroupMemberRole.OWNER, mutableListOf(BoardAction.MANAGE_BOARD))
-        )
-    )
-
-    @Test
-    fun `createBoard - 성공적으로 게시판을 생성한다`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.save(any()) } returns testBoard
-
-        // When
-        val result = boardService.createBoard(memberInfo, testGroupId.toHexString(), testBoardCommand)
-        println(result.name)
-        // Then
-        result shouldNotBe null
-        result.name shouldBe testBoardCommand.name
-        result.groupId shouldBe testGroupId.toHexString()
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.save(any()) }
-    }
-
-    @Test
-    fun `createBoard - 그룹 멤버가 아닌 경우 ForbiddenException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns null
-
-        // When & Then
-        shouldThrow<ForbiddenException> {
-            boardService.createBoard(memberInfo, testGroupId.toHexString(), testBoardCommand)
-        }.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify(exactly = 0) { boardRepository.save(any()) }
-    }
-
-    @Test
-    fun `createBoard - 게시판 저장 실패시 RuntimeException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.save(any()) } returns null
-
-        // When & Then
-        shouldThrow<RuntimeException> {
-            boardService.createBoard(memberInfo, testGroupId.toHexString(), testBoardCommand)
-        }.message shouldBe "게시판 생성에 실패했습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.save(any()) }
-    }
-
-    @Test
-    fun `updateBoard - 성공적으로 게시판을 업데이트한다`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.findById(testBoardId) } returns testBoard
-        every { boardRepository.save(testBoard) } returns testBoard
-
-        // When
-        val result = boardService.updateBoard(
-            memberInfo,
-            testGroupId.toHexString(),
-            testBoardId.toHexString(),
-            testBoardCommand
+        memberInfo = MemberInfo(
+            memberId = memberObjectId.toHexString(),
+            nickname = "testUser",
+            roles = listOf(MemberRole.ROLE_MEMBER)
         )
 
-        // Then
-        result shouldNotBe null
-        result.name shouldBe testBoardCommand.name
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.findById(testBoardId) }
-        verify { boardRepository.save(testBoard) }
-    }
-
-    @Test
-    fun `updateBoard - 그룹 멤버가 아닌 경우 ForbiddenException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns null
-
-        // When & Then
-        shouldThrow<ForbiddenException> {
-            boardService.updateBoard(
-                memberInfo,
-                testGroupId.toHexString(),
-                testBoardId.toHexString(),
-                testBoardCommand
-            )
-        }.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify(exactly = 0) { boardRepository.findById(any()) }
-    }
-
-    @Test
-    fun `updateBoard - 게시판이 존재하지 않는 경우 NotFoundException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.findById(testBoardId) } returns null
-
-        // When & Then
-        shouldThrow<NotFoundException> {
-            boardService.updateBoard(
-                memberInfo,
-                testGroupId.toHexString(),
-                testBoardId.toHexString(),
-                testBoardCommand
-            )
-        }.message shouldBe "요청한 리소스를 찾을 수 없습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.findById(testBoardId) }
-    }
-
-    @Test
-    fun `updateBoard - 다른 그룹의 게시판인 경우 ForbiddenException 발생`() {
-        // Given
-        val otherGroupId = ObjectId()
-        val otherGroupBoard = Board(
-            id = testBoardId,
-            groupId = otherGroupId,
-            name = "다른 그룹 게시판",
-            permissions = mutableSetOf()
+        profileImage = MemberProfileImageVo(
+            type = "presets",
+            filePath = "/images/profile/default.jpg",
+            url = "https://example.com/default.jpg",
+            fileSize = 1024L,
+            width = 200,
+            height = 200
         )
 
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.findById(testBoardId) } returns otherGroupBoard
+        // 다양한 권한을 가진 멤버들 생성
+        ownerMember = StudyGroupMember(
+            id = memberObjectId,
+            groupId = groupObjectId,
+            memberId = memberObjectId,
+            nickname = "ownerUser",
+            profileImage = profileImage,
+            role = GroupMemberRole.OWNER
+        )
 
-        // When & Then
-        shouldThrow<ForbiddenException> {
-            boardService.updateBoard(
-                memberInfo,
-                testGroupId.toHexString(),
-                testBoardId.toHexString(),
-                testBoardCommand
-            )
-        }.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.findById(testBoardId) }
-    }
-
-    @Test
-    fun `removeBoard - 성공적으로 게시판을 삭제한다`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.findById(testBoardId) } returns testBoard
-        every { boardRepository.delete(testBoard) } returns true
-
-        // When
-        boardService.removeBoard(memberInfo, testGroupId.toHexString(), testBoardId.toHexString())
-
-        // Then
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.findById(testBoardId) }
-        verify { boardRepository.delete(testBoard) }
-    }
-
-    @Test
-    fun `removeBoard - 그룹 멤버가 아닌 경우 ForbiddenException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns null
-
-        // When & Then
-        shouldThrow<ForbiddenException> {
-            boardService.removeBoard(memberInfo, testGroupId.toHexString(), testBoardId.toHexString())
-        }.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify(exactly = 0) { boardRepository.findById(any()) }
-    }
-
-    @Test
-    fun `removeBoard - 게시판이 존재하지 않는 경우 NotFoundException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.findById(testBoardId) } returns null
-
-        // When & Then
-        shouldThrow<NotFoundException> {
-            boardService.removeBoard(memberInfo, testGroupId.toHexString(), testBoardId.toHexString())
-        }.message shouldBe "요청한 리소스를 찾을 수 없습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.findById(testBoardId) }
-    }
-
-    @Test
-    fun `removeBoard - 삭제 실패시 RuntimeException 발생`() {
-        // Given
-        every { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) } returns testGroupMember
-        every { boardRepository.findById(testBoardId) } returns testBoard
-        every { boardRepository.delete(testBoard) } returns false
-
-        // When & Then
-        shouldThrow<RuntimeException> {
-            boardService.removeBoard(memberInfo, testGroupId.toHexString(), testBoardId.toHexString())
-        }.message shouldBe "게시판 삭제에 실패했습니다."
-
-        verify { studyGroupMemberRepository.findByGroupIdAndMemberId(testGroupId, testMemberId) }
-        verify { boardRepository.findById(testBoardId) }
-        verify { boardRepository.delete(testBoard) }
-    }
-
-    @Test
-    fun `getGroupBoards - 해당 그룹의 게시판 목록을 반환한다`() {
-        // Given
-        val board1 = Board(
+        regularMember = StudyGroupMember(
             id = ObjectId(),
-            groupId = testGroupId,
-            name = "게시판1",
-            permissions = mutableSetOf()
+            groupId = groupObjectId,
+            memberId = ObjectId(),
+            nickname = "regularUser",
+            profileImage = profileImage,
+            role = GroupMemberRole.MEMBER
         )
 
-        val board2 = Board(
-            id = ObjectId(),
-            groupId = testGroupId,
-            name = "게시판2",
-            permissions = mutableSetOf()
+        val permissions = mutableSetOf(
+            BoardPermission(
+                role = GroupMemberRole.OWNER,
+                actions = mutableListOf(BoardAction.MANAGE_BOARD, BoardAction.READ_POST, BoardAction.WRITE_POST)
+            ),
+            BoardPermission(
+                role = GroupMemberRole.ADMIN,
+                actions = mutableListOf(BoardAction.MANAGE_BOARD, BoardAction.READ_POST, BoardAction.WRITE_POST)
+            ),
+            BoardPermission(
+                role = GroupMemberRole.MEMBER,
+                actions = mutableListOf(BoardAction.READ_POST, BoardAction.WRITE_POST)
+            )
         )
 
-        every { boardRepository.findByGroupId(testGroupId) } returns listOf(board1, board2)
+        board = Board(
+            id = boardObjectId,
+            groupId = groupObjectId,
+            name = "testBoard",
+            permissions = permissions
+        )
 
-        // When
-        val result = boardService.getGroupBoards(testGroupId.toHexString())
-
-        // Then
-        result shouldHaveSize 2
-        result[0].name shouldBe "게시판1"
-        result[1].name shouldBe "게시판2"
-        result.all { it.groupId == testGroupId.toHexString() } shouldBe true
-
-        verify { boardRepository.findByGroupId(testGroupId) }
+        boardCommand = BoardCommand(
+            name = "newBoard",
+            permissions = permissions.toList()
+        )
     }
 
-    @Test
-    fun `getGroupBoards - 게시판이 없는 경우 빈 목록을 반환한다`() {
-        // Given
-        every { boardRepository.findByGroupId(testGroupId) } returns emptyList()
+    Given("게시판을 생성할 때") {
+        When("정상적인 요청으로 게시판을 생성하면") {
+            Then("게시판이 성공적으로 생성되어야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.save(any<Board>()) } returns board
 
-        // When
-        val result = boardService.getGroupBoards(testGroupId.toHexString())
+                // When
+                val result = boardService.createBoard(memberInfo, groupObjectId.toHexString(), boardCommand)
 
-        // Then
-        result shouldHaveSize 0
+                // Then
+                result shouldNotBe null
+                result.name shouldBe "testBoard"
+                result.groupId shouldBe groupObjectId.toHexString()
+                verify { boardRepository.save(any<Board>()) }
+            }
+        }
 
-        verify { boardRepository.findByGroupId(testGroupId) }
+        When("해당 그룹의 멤버가 아닌 사용자가 게시판을 생성하려고 하면") {
+            Then("ForbiddenException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns null
+
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.createBoard(memberInfo, groupObjectId.toHexString(), boardCommand)
+                }
+                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
+            }
+        }
+
+        When("게시판 저장에 실패하면") {
+            Then("RuntimeException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.save(any<Board>()) } returns null
+
+                // When & Then
+                val exception = shouldThrow<RuntimeException> {
+                    boardService.createBoard(memberInfo, groupObjectId.toHexString(), boardCommand)
+                }
+                exception.message shouldBe "게시판 생성에 실패했습니다."
+            }
+        }
     }
 
-    @AfterEach
-    fun clear() {
-        clearAllMocks()
+    Given("게시판을 수정할 때") {
+        When("권한이 있는 사용자가 게시판을 수정하면") {
+            Then("게시판이 성공적으로 수정되어야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+                every { boardRepository.save(any<Board>()) } returns board
+
+                // When
+                val result = boardService.updateBoard(
+                    memberInfo,
+                    groupObjectId.toHexString(),
+                    boardObjectId.toHexString(),
+                    boardCommand
+                )
+
+                // Then
+                result shouldNotBe null
+                verify { boardRepository.save(any<Board>()) }
+            }
+        }
+
+        When("해당 그룹의 멤버가 아닌 사용자가 게시판을 수정하려고 하면") {
+            Then("ForbiddenException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns null
+
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        boardCommand
+                    )
+                }
+                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
+            }
+        }
+
+        When("존재하지 않는 게시판을 수정하려고 하면") {
+            Then("NotFoundException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns null
+
+                // When & Then
+                val exception = shouldThrow<NotFoundException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        boardCommand
+                    )
+                }
+                exception.message shouldBe "요청한 리소스를 찾을 수 없습니다."
+            }
+        }
+
+        When("다른 그룹의 게시판을 수정하려고 하면") {
+            Then("ForbiddenException이 발생해야 한다") {
+                // Given
+                val otherGroupBoard = Board(
+                    id = boardObjectId,
+                    groupId = ObjectId(),
+                    name = "otherBoard",
+                    permissions = mutableSetOf()
+                )
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns otherGroupBoard
+
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        boardCommand
+                    )
+                }
+                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
+            }
+        }
+
+        When("권한이 없는 사용자가 게시판을 수정하려고 하면") {
+            Then("ForbiddenException이 발생해야 한다") {
+                // Given
+                val memberWithoutPermission = StudyGroupMember(
+                    id = ObjectId(),
+                    groupId = groupObjectId,
+                    memberId = ObjectId(),
+                    nickname = "regularUser",
+                    profileImage = profileImage,
+                    role = GroupMemberRole.MEMBER
+                )
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns memberWithoutPermission
+                every { boardRepository.findById(boardObjectId) } returns board
+
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        boardCommand
+                    )
+                }
+                exception.message shouldBe "게시판 관리 권한이 없습니다."
+            }
+        }
+
+        When("빈 이름으로 게시판을 수정하려고 하면") {
+            Then("BadRequestException이 발생해야 한다") {
+                // Given
+                val emptyNameCommand = BoardCommand(
+                    name = "",
+                    permissions = boardCommand.permissions
+                )
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+
+                // When & Then
+                val exception = shouldThrow<BadRequestException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        emptyNameCommand
+                    )
+                }
+                exception.message shouldBe "게시판 이름은 비워둘 수 없습니다."
+            }
+        }
+
+        When("50자를 초과하는 이름으로 게시판을 수정하려고 하면") {
+            Then("BadRequestException이 발생해야 한다") {
+                // Given
+                val longNameCommand = BoardCommand(
+                    name = "a".repeat(51),
+                    permissions = boardCommand.permissions
+                )
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+
+                // When & Then
+                val exception = shouldThrow<BadRequestException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        longNameCommand
+                    )
+                }
+                exception.message shouldBe "게시판 이름은 최대 50자까지 입력할 수 있습니다."
+            }
+        }
+
+        When("빈 권한 목록으로 게시판을 수정하려고 하면") {
+            Then("BadRequestException이 발생해야 한다") {
+                // Given
+                val emptyPermissionsCommand = BoardCommand(
+                    name = "validName",
+                    permissions = emptyList()
+                )
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+
+                // When & Then
+                val exception = shouldThrow<BadRequestException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        emptyPermissionsCommand
+                    )
+                }
+                exception.message shouldBe "최소 하나 이상의 권한이 설정되어야 합니다."
+            }
+        }
+
+        When("게시판 저장에 실패하면") {
+            Then("RuntimeException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+                every { boardRepository.save(any<Board>()) } returns null
+
+                // When & Then
+                val exception = shouldThrow<RuntimeException> {
+                    boardService.updateBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString(),
+                        boardCommand
+                    )
+                }
+                exception.message shouldBe "게시판 업데이트에 실패했습니다."
+            }
+        }
     }
-}
+
+    Given("게시판을 삭제할 때") {
+        When("권한이 있는 사용자가 게시판을 삭제하면") {
+            Then("게시판이 성공적으로 삭제되어야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+                every { boardRepository.delete(board) } returns true
+
+                // When
+                boardService.removeBoard(
+                    memberInfo,
+                    groupObjectId.toHexString(),
+                    boardObjectId.toHexString()
+                )
+
+                // Then
+                verify { boardRepository.delete(board) }
+            }
+        }
+
+        When("해당 그룹의 멤버가 아닌 사용자가 게시판을 삭제하려고 하면") {
+            Then("ForbiddenException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns null
+
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.removeBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString()
+                    )
+                }
+                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
+            }
+        }
+
+        When("존재하지 않는 게시판을 삭제하려고 하면") {
+            Then("NotFoundException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns null
+
+                // When & Then
+                val exception = shouldThrow<NotFoundException> {
+                    boardService.removeBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString()
+                    )
+                }
+                exception.message shouldBe "요청한 리소스를 찾을 수 없습니다."
+            }
+        }
+
+        When("다른 그룹의 게시판을 삭제하려고 하면") {
+            Then("ForbiddenException이 발생해야 한다") {
+                // Given
+                val otherGroupBoard = Board(
+                    id = boardObjectId,
+                    groupId = ObjectId(),
+                    name = "otherBoard",
+                    permissions = mutableSetOf()
+                )
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns otherGroupBoard
+
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.removeBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString()
+                    )
+                }
+                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
+            }
+        }
+
+        When("게시판 삭제에 실패하면") {
+            Then("RuntimeException이 발생해야 한다") {
+                // Given
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+                every { boardRepository.findById(boardObjectId) } returns board
+                every { boardRepository.delete(board) } returns false
+
+                // When & Then
+                val exception = shouldThrow<RuntimeException> {
+                    boardService.removeBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString()
+                    )
+                }
+                exception.message shouldBe "게시판 삭제에 실패했습니다."
+            }
+        }
+    }
+
+    Given("그룹의 게시판 목록을 조회할 때") {
+        When("해당 그룹에 게시판이 존재하면") {
+            Then("게시판 목록이 반환되어야 한다") {
+                // Given
+                val boardList = listOf(board)
+                every { boardRepository.findByGroupId(groupObjectId) } returns boardList
+
+                // When
+                val result = boardService.getGroupBoards(groupObjectId.toHexString())
+
+                // Then
+                result shouldNotBe null
+                result.size shouldBe 1
+                result[0].name shouldBe "testBoard"
+                result[0].groupId shouldBe groupObjectId.toHexString()
+            }
+        }
+
+        When("해당 그룹에 게시판이 존재하지 않으면") {
+            Then("빈 목록이 반환되어야 한다") {
+                // Given
+                every { boardRepository.findByGroupId(groupObjectId) } returns emptyList()
+
+                // When
+                val result = boardService.getGroupBoards(groupObjectId.toHexString())
+
+                // Then
+                result shouldNotBe null
+                result.size shouldBe 0
+            }
+        }
+    }
+})

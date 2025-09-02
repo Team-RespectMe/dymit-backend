@@ -13,4 +13,11 @@ import java.util.Optional
 @EnableMongoAuditing
 class MongoConfig {
 
+    @Bean
+    fun auditorProvider(): AuditorAware<String> {
+        return AuditorAware {
+            // Return a fixed auditor for simplicity; in a real application, this would be dynamic
+            Optional.of("system")
+        }
+    }
 }
