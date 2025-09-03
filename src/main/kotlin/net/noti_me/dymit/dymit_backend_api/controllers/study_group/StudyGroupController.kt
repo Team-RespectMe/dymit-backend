@@ -97,4 +97,8 @@ class StudyGroupController(
     override fun leaveStudyGroup(memberInfo: MemberInfo, groupId: String) {
         studyGroupCommandService.leaveStudyGroup(memberInfo, groupId)
     }
+
+//    override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): ListResponse<StudyGroupMemberResponse> {
+//
+//    }
 }

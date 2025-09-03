@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeleteEvent
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -71,6 +72,7 @@ class Member(
 
     fun updateProfileImage(profileImage: MemberProfileImageVo) {
         this.profileImage = profileImage
+        registerEvent(MemberProfileImageChangedEvent(this))
         updateLastAccessedAt()
     }
 
@@ -82,6 +84,7 @@ class Member(
             )
             registerEvent(event)
         }
+
         this.profileImage = MemberProfileImageVo(
             type = "preset",
             filePath = "",
@@ -90,6 +93,8 @@ class Member(
             width = 0,
             height = 0
         )
+
+        registerEvent(MemberProfileImageChangedEvent(this))
     }
 
     fun addDeviceToken(deviceToken: DeviceToken) {

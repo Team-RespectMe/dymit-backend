@@ -1,11 +1,16 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.board
 
+import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
+import org.bson.Document
 import org.bson.types.ObjectId
+import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -17,9 +22,49 @@ class MongoPostCommentRepository(
         return mongoTemplate.save(comment)
     }
 
+    override fun saveAll(comments: List<PostComment>) : List<PostComment> {
+        val ops = mongoTemplate.bulkOps(
+            BulkOperations.BulkMode.UNORDERED,
+            PostComment::class.java
+        )
+
+        comments.forEach { comment ->
+            val query = Query(Criteria.where("id").`is`(comment.id))
+            val update = Update()
+            val doc = mongoTemplate.getConverter()
+                .convertToMongoType(comment) as Document
+            doc.forEach { key, value ->
+                if (key != "_id") {
+                    update.set(key, value)
+                }
+            }
+            ops.upsert(query, update)
+        }
+
+        ops.execute()
+        return comments
+    }
+
     override fun findById(id: String): PostComment? {
         val objectId = ObjectId(id)
         return mongoTemplate.findById(objectId, PostComment::class.java)
+    }
+
+    override fun findByWriterId(
+        writerId: String,
+        lastId: String?,
+        limit: Int
+    ): List<PostComment> {
+        val objectId = ObjectId(writerId)
+        val criteria = Criteria.where("writer.id").`is`(objectId)
+        if (lastId != null) {
+            val lastObjectId = ObjectId(lastId)
+            criteria.andOperator(Criteria.where("_id").lte(lastObjectId))
+        }
+        val query = Query.query(criteria)
+            .limit(limit)
+            .with(Sort.by(Sort.Direction.DESC, "_id"))
+        return mongoTemplate.find(query, PostComment::class.java)
     }
 
     override fun findByPostId(postId: String): List<PostComment> {
