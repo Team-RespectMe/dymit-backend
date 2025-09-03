@@ -2,17 +2,42 @@ package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_gro
 
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 
 @Repository
 class MongoStudyGroupMemberRepository(
     private val mongoTemplate: MongoTemplate
 ): StudyGroupMemberRepository {
+
+    override fun saveAll(members: List<StudyGroupMember>): List<StudyGroupMember> {
+        val ops = mongoTemplate.bulkOps(
+            BulkOperations.BulkMode.UNORDERED,
+            StudyGroupMember::class.java
+        )
+
+        members.forEach { member ->
+            val query = Query(Criteria.where("id").`is`(member.id))
+            val update = Update()
+            val doc = mongoTemplate.getConverter()
+                .convertToMongoType(member) as Document
+            doc.forEach { key, value ->
+                if (key != "_id") {
+                    update.set(key, value)
+                }
+            }
+            ops.upsert(query, update)
+        }
+        ops.execute()
+        return members
+    }
 
     override fun persist(member: StudyGroupMember): StudyGroupMember {
         return mongoTemplate.save(member)
@@ -25,6 +50,21 @@ class MongoStudyGroupMemberRepository(
     override fun delete(member: StudyGroupMember): Boolean {
         val query = Query(Criteria.where("_id").`is`(member.id))
         return mongoTemplate.remove(query, StudyGroupMember::class.java).deletedCount > 0
+    }
+
+    override fun findByMemberId(
+        memberId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<StudyGroupMember> {
+        val criteria = Criteria.where("memberId").`is`(memberId)
+        if (cursor != null) {
+            criteria.and("_id").lte(cursor)
+        }
+        val query = Query(criteria)
+            .with(Sort.by(Sort.Direction.DESC, "_id"))
+            .limit(limit)
+        return mongoTemplate.find(query, StudyGroupMember::class.java)
     }
 
     override fun findByGroupIdAndMemberId(

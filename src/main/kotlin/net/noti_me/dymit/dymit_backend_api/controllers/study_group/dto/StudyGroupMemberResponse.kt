@@ -28,7 +28,7 @@ data class StudyGroupMemberResponse(
                 memberId = dto.memberId,
                 nickname = dto.nickname,
                 role = dto.role,
-                createdAt = dto.createdAt ?: LocalDateTime.now()
+                createdAt = dto.createdAt
             )
         }
 
@@ -38,7 +38,7 @@ data class StudyGroupMemberResponse(
                 memberId = dto.memberId,
                 nickname = dto.nickname,
                 role = dto.role,
-                createdAt = dto.createdAt ?: LocalDateTime.now()
+                createdAt = dto.createdAt
             )
         }
 

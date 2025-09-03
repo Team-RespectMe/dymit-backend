@@ -5,11 +5,15 @@ import org.bson.types.ObjectId
 
 interface StudyGroupMemberRepository {
 
+    fun saveAll(members: List<StudyGroupMember>): List<StudyGroupMember>
+
     fun persist(member: StudyGroupMember): StudyGroupMember
 
     fun update(member: StudyGroupMember): StudyGroupMember
 
     fun delete(member: StudyGroupMember): Boolean
+
+    fun findByMemberId(memberId: ObjectId, cursor: ObjectId?, limit: Int): List<StudyGroupMember>
 
     fun findByGroupIdAndMemberId(groupId: ObjectId, memberId: ObjectId): StudyGroupMember?
 

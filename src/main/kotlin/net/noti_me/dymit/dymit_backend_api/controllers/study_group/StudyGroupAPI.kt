@@ -186,4 +186,22 @@ interface StudyGroupAPI {
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
     ): Unit
+
+//    /**
+//     * 스터디 그룹 멤버 목록 조회 API
+//     * @param memberInfo 로그인한 멤버의 정보
+//     * @param groupId 스터디 그룹 ID
+//     * @return 스터디 그룹 멤버 목록
+//     */
+//    @GetMapping("/{groupId}/members")
+//    @ResponseStatus(HttpStatus.OK)
+//    @SecurityRequirement(name = "bearer-jwt")
+//    @Operation(summary = "스터디 그룹 멤버 목록 조회 API", description = "스터디 그룹의 멤버 목록을 조회합니다.")
+//    @ApiResponses(value = [
+//        ApiResponse(responseCode = "200", description = "멤버 목록 조회 성공"),
+//    )
+//    fun getStudyGroupMembers(
+//        @LoginMember memberInfo: MemberInfo,
+//        @PathVariable groupId: String
+//    ): ListResponse<StudyGroupMemberResponse>
 }

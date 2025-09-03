@@ -6,7 +6,15 @@ interface CommentRepository {
 
     fun save(comment: PostComment): PostComment
 
+    fun saveAll(comments: List<PostComment>): List<PostComment>
+
     fun findById(id: String): PostComment?
+
+    fun findByWriterId(
+        writerId: String,
+        lastId: String?,
+        limit: Int
+    ): List<PostComment>
 
     fun findByPostId(postId: String): List<PostComment>
 
