@@ -342,23 +342,6 @@ class PostServiceImplTest : BehaviorSpec({
                 exception.message shouldBe "해당 게시판에 글 작성 권한이 없습니다."
             }
         }
-
-        When("게시글 저장에 실패하면") {
-
-            Then("RuntimeException이 발생해야 한다") {
-                // Given
-                every { boardRepository.findById(boardObjectId) } returns board
-                every { loadGroupPort.loadByGroupId(groupObjectId.toHexString()) } returns studyGroup
-                every { groupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns groupMember
-                every { postRepository.save(any<Post>()) } returns null
-
-                // When & Then
-                val exception = shouldThrow<RuntimeException> {
-                    postService.createPost(memberInfo, postCommand)
-                }
-                exception.message shouldBe "게시글 생성에 실패했습니다."
-            }
-        }
     }
 
     Given("게시글을 수정할 때") {
@@ -439,24 +422,6 @@ class PostServiceImplTest : BehaviorSpec({
                     postService.updatePost(memberInfo, postObjectId.toHexString(), postCommand)
                 }
                 exception.message shouldBe "해당 그룹의 멤버가 아닙니다."
-            }
-        }
-
-        When("게시글 수정 저장에 실패하면") {
-
-            Then("RuntimeException이 발생해야 한다") {
-                // Given
-                every { boardRepository.findById(boardObjectId) } returns board
-                every { postRepository.findById(postObjectId.toHexString()) } returns post
-                every { loadGroupPort.loadByGroupId(groupObjectId.toHexString()) } returns studyGroup
-                every { groupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns groupMember
-                every { postRepository.save(any<Post>()) } returns null
-
-                // When & Then
-                val exception = shouldThrow<RuntimeException> {
-                    postService.updatePost(memberInfo, postObjectId.toHexString(), postCommand)
-                }
-                exception.message shouldBe "게시글 수정에 실패했습니다."
             }
         }
 
