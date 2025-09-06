@@ -1,15 +1,19 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberBlacklistedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.event.CreateUserFeedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
 @Service
 class StudyGroupEventHandler(
-    private val studyGroupMemberRepository: StudyGroupMemberRepository
+    private val studyGroupMemberRepository: StudyGroupMemberRepository,
+    private val eventPublisher: ApplicationEventPublisher
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -48,5 +52,25 @@ class StudyGroupEventHandler(
                 limit = DEFAULT_BATCH_SIZE + 1
             )
         }
+    }
+
+    @EventListener
+    @Async
+    fun handleGroupMemberBlacklistedEvent(event: GroupMemberBlacklistedEvent) {
+        val blacklisted = event.blacklisted
+        // 블랙리스트에 추가된 멤버가 스터디 그룹에서 탈퇴 처리
+
+        val studyGroupMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId= event.group.id,
+            memberId = blacklisted.memberId
+        ) ?: return
+
+        studyGroupMemberRepository.delete(studyGroupMember)
+        eventPublisher.publishEvent(
+            CreateUserFeedEvent(
+                memberId = studyGroupMember.memberId,
+                content = "${event.group.name} 스터디 그룹에서 강제 탈퇴되었습니다."
+            )
+        )
     }
 }

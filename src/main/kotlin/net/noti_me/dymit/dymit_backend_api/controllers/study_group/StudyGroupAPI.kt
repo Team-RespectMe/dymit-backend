@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListEnlistRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
@@ -186,6 +187,41 @@ interface StudyGroupAPI {
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
     ): Unit
+
+    /**
+     * 스터디 그룹 멤버 퇴장 API
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     * @param memberId 강퇴할 멤버 ID
+     */
+    @Operation(summary = "스터디 그룹 멤버 퇴장 API", description = "스터디 그룹에서 특정 멤버를 퇴장시킵니다. 단 재가입은 가능합니다.")
+    @ApiResponse(responseCode = "204", description = "스터디 그룹 멤버 강퇴 성공")
+    @DeleteMapping("/{groupId}/members/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun removeStudyGroupMember(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable memberId: String
+    ): Unit
+
+    /**
+     * 스터디그룹에서 탈퇴시키고 블랙리스트로 등록합니다.
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     * @param request 블랙리스트 등록 요청 정보
+     */
+    @Operation(summary = "스터디 그룹 멤버 블랙리스트 등록 API", description = "스터디 그룹에서 특정 멤버를 블랙리스트로 등록합니다. 재가입이 불가능합니다.")
+    @ApiResponse(responseCode = "204", description = "스터디 그룹 멤버 블랙리스트 등록 성공")
+    @DeleteMapping("/{groupId}/blacklists")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun addStudyGroupMemberToBlacklist(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid request: BlackListEnlistRequest
+    ): Unit
+
 
 //    /**
 //     * 스터디 그룹 멤버 목록 조회 API

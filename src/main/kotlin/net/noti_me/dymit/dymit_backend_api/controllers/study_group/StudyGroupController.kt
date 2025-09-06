@@ -2,9 +2,11 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListEnlistRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
@@ -96,6 +98,23 @@ class StudyGroupController(
 
     override fun leaveStudyGroup(memberInfo: MemberInfo, groupId: String) {
         studyGroupCommandService.leaveStudyGroup(memberInfo, groupId)
+    }
+
+    override fun removeStudyGroupMember(memberInfo: MemberInfo, groupId: String, memberId: String) {
+        studyGroupCommandService.expelStudyGroupMember(memberInfo, groupId, memberId)
+    }
+
+    override fun addStudyGroupMemberToBlacklist(
+        memberInfo: MemberInfo,
+        groupId: String,
+        request: BlackListEnlistRequest
+    ) {
+        val command = EnlistBlacklistCommand(
+            groupId = groupId,
+            targetMember = request.targetId,
+            reason = request.reason
+        )
+        studyGroupCommandService.enlistBlacklist(memberInfo, command)
     }
 
 //    override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): ListResponse<StudyGroupMemberResponse> {

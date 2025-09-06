@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
@@ -84,6 +85,9 @@ class StudyGroupCommandServiceImpl(
     : StudyGroupMemberDto {
         val group = loadStudyGroupPort.loadByInviteCode(inviteCode = command.inviteCode)
             ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+        if ( group.isBlackListed(memberInfo.memberId) ) {
+            throw ForbiddenException(message = "해당 스터디 그룹에 가입할 수 없습니다.")
+        }
 
         val member = loadMemberPort.loadById(memberInfo.memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
@@ -94,6 +98,7 @@ class StudyGroupCommandServiceImpl(
         ) != null) {
             throw ConflictException(message="이미 해당 스터디 그룹에 가입되어 있습니다.")
         }
+
 
         var newMember = StudyGroupMember(
             groupId = group.id,
@@ -216,5 +221,76 @@ class StudyGroupCommandServiceImpl(
         }
 
         studyGroupMemberRepository.delete(membership)
+    }
+
+    override fun expelStudyGroupMember(
+        loginMember: MemberInfo,
+        groupId: String,
+        targetMemberId: String
+    ) {
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        val loginMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(loginMember.memberId)
+        ) ?: throw NotFoundException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
+
+        val targetMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(targetMemberId)
+        ) ?: throw NotFoundException(message = "강퇴 대상 멤버가 해당 스터디 그룹의 멤버가 아닙니다.")
+
+        if (targetMembership.role == GroupMemberRole.OWNER) {
+            throw BadRequestException(message = "스터디 그룹장은 강퇴할 수 없습니다.")
+        }
+
+        if (loginMembership.role == GroupMemberRole.ADMIN && targetMembership.role == GroupMemberRole.ADMIN) {
+            throw BadRequestException(message = "관리자는 다른 관리자를 강퇴할 수 없습니다.")
+        }
+
+        if ( loginMembership.identifier == targetMembership.identifier ) {
+            throw BadRequestException(message = "본인을 강퇴시킬 수 없습니다.")
+        }
+
+        studyGroupMemberRepository.delete(targetMembership)
+    }
+
+    override fun enlistBlacklist(
+        loginMember: MemberInfo,
+        command: EnlistBlacklistCommand
+    ) {
+        val group = loadStudyGroupPort.loadByGroupId(command.groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+        val loginMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(loginMember.memberId)
+        ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+        val targetMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(command.targetMember)
+        ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+
+        group.addBlackList(
+            requester=loginMember,
+            targetMember= targetMember,
+            reason = command.reason
+        )
+        saveStudyGroupPort.update(group)
+    }
+
+    override fun delistBlacklist(loginMember: MemberInfo, groupId: String, targetMemberId: String) {
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+        val loginMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(loginMember.memberId)
+        ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+
+        group.removeBlackList(
+            requester = loginMember,
+            targetMemberId = targetMemberId
+        )
+        saveStudyGroupPort.update(group)
     }
 }

@@ -8,6 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberBlacklistedEvent
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -41,8 +42,11 @@ class StudyGroup(
     profileImage: GroupProfileImageVo = GroupProfileImageVo(),
     inviteCode: InviteCodeVo = InviteCodeVo(""),
     recentSchedule: RecentScheduleVo? = null,
-    recentPost: RecentPostVo? = null
+    recentPost: RecentPostVo? = null,
+    blacklists: Set<BlackList> = setOf()
 ): BaseAggregateRoot<StudyGroup>() {
+
+    private val blacklists: MutableSet<BlackList> = blacklists.toMutableSet()
 
     val identifier: String
         get() = id.toHexString()
@@ -242,6 +246,68 @@ class StudyGroup(
         ) {
             this.recentPost = recentPost
         }
+    }
+
+    /**
+     * 블랙 리스트에 멤버를 추가합니다.
+     * 이미 블랙리스트에 존재하는 멤버는 추가할 수 없습니다.
+     * @param requester: StudyGroupMember 요청자,
+     * @param targetMember: StudyGroupMember 추가할 멤버,
+     * @param reason: String 추가 사유
+     */
+    fun addBlackList(
+        requester: StudyGroupMember,
+        targetMember: StudyGroupMember,
+        reason: String
+    ) {
+        if ( requester.role != GroupMemberRole.OWNER || targetMember.role == GroupMemberRole.OWNER ) {
+            throw ForbiddenException(message="블랙리스트 추가 권한이 없습니다.")
+        }
+
+        if ( targetMember.identifier == requester.identifier ) {
+            throw BadRequestException(message="본인은 블랙리스트에 추가할 수 없습니다.")
+        }
+
+        val blacklist = BlackList(
+            memberId = targetMember.memberId,
+            nickname = targetMember.nickname,
+            reason = reason
+        )
+        this.blacklists.add(blacklist)
+        registerEvent(GroupMemberBlacklistedEvent(this,blacklist))
+    }
+
+    /**
+     * 블랙 리스트에서 멤버를 제거합니다.
+     * 블랙리스트에 존재하지 않는 멤버는 제거할 수 없습니다.
+     * @param requester: StudyGroupMember 요청자,
+     * @param targetMemberId: String 제거할 멤버 ID
+     */
+    fun removeBlackList(requester: StudyGroupMember, targetMemberId: String) {
+        if ( requester.role != GroupMemberRole.OWNER ) {
+            throw ForbiddenException(message="블랙리스트 제거 권한이 없습니다.")
+        }
+
+        val blacklisted = BlackList(
+            memberId = ObjectId(targetMemberId),
+            nickname = "",
+            reason = ""
+        )
+        this.blacklists.remove(blacklisted)
+    }
+
+    /**
+     * 멤버가 블랙리스트에 존재하는지 확인합니다.
+     * @param memberId: String 확인할 멤버 ID
+     * @return Boolean 블랙리스트에 존재하면 true, 그렇지 않으면 false
+     */
+    fun isBlackListed(memberId: String): Boolean {
+        val blacklisted = BlackList(
+            memberId = ObjectId(memberId),
+            nickname = "",
+            reason = ""
+        )
+        return this.blacklists.contains(blacklisted)
     }
 
     override fun equals(other: Any?): Boolean {
