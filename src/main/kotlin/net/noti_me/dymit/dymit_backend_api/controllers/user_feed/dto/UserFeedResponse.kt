@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.user_feed.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.user_feed.dto.UserFeedDto
+import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import java.time.LocalDateTime
@@ -22,7 +23,7 @@ data class UserFeedResponse(
 
     @Schema(description = "읽음 여부", example = "false")
     val isRead: Boolean
-) {
+): BaseResponse() {
     companion object {
         fun from(dto: UserFeedDto): UserFeedResponse {
             return UserFeedResponse(

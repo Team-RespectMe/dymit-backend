@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.report.dto
 
 import net.noti_me.dymit.dymit_backend_api.application.report.dto.ReportDto
+import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.domain.report.ProcessStatus
 import net.noti_me.dymit.dymit_backend_api.domain.report.ReportedResource
 import java.time.LocalDateTime
@@ -17,7 +18,7 @@ data class ReportResponse(
     val content: String,
     val status: ProcessStatus,
     val createdAt: LocalDateTime
-) {
+): BaseResponse() {
     companion object {
         /**
          * ReportDto를 ReportResponse로 변환합니다.
