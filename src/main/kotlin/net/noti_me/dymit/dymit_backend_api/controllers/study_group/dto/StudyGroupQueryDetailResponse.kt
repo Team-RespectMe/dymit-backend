@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCod
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupMemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
 import java.time.LocalDateTime
 
@@ -16,6 +17,8 @@ class StudyGroupQueryDetailResponse(
     val id: String,
     @field:Schema(description = "스터디 그룹 이름")
     val name: String,
+    @field:Schema(description = "그룹 이미지")
+    val image: ProfileImageVo = ProfileImageVo(),
     @field: Schema(description = "스터디 그룹 설명")
     val description: String,
     @field:Schema(description = "스터디 그룹 소유자 정보")
@@ -37,6 +40,7 @@ class StudyGroupQueryDetailResponse(
             return StudyGroupQueryDetailResponse(
                 id = group.id,
                 name = group.name,
+                image = ProfileImageVo.from(group.profileImage),
                 description = group.description,
                 owner = GroupMemberPreviewResponse.from(group.owner),
                 members = members.map { GroupMemberPreviewResponse.from(it) },
