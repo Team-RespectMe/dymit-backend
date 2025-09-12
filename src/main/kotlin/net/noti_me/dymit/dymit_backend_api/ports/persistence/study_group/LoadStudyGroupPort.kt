@@ -12,5 +12,7 @@ interface LoadStudyGroupPort {
 
     fun loadByGroupIds(groupIds: List<String>): List<StudyGroup>
 
+    fun countByOwnerId(ownerId: String): Long
+
     fun existsByInviteCode(inviteCode: String): Boolean
 }

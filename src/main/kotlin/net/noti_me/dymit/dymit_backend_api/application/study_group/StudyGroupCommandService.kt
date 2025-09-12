@@ -1,11 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.ChangeGroupOwnerCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupJoinCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupMemberDto
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupModifyCommand
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 
 interface StudyGroupCommandService {
@@ -85,9 +87,20 @@ interface StudyGroupCommandService {
         targetMemberId: String
     ): Unit
 
+    /**
+     * 스터디 그룹 소유자를 변경합니다.
+     * @param loginMember 소유자 변경을 수행하는 멤버 정보 (현재 스터디 그룹장이어야 함)
+     * @param command 소유자 변경 커맨드
+     * @return 변경된 스터디 그룹 정보
+     */
+    fun changeStudyGroupOwner(
+        loginMember: MemberInfo,
+        command: ChangeGroupOwnerCommand
+    ): StudyGroupDto
 
-//    fun updateStudyGroupInfo(
-//        member: MemberInfo,
-//        command: StudyGroupNicknameUpdateCommand
-//    ): StudyGroupDto
+
+    fun updateStudyGroupInfo(
+        member: MemberInfo,
+        command: StudyGroupModifyCommand
+    ): StudyGroupDto
 }

@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupListItemDto
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupMemberResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupModifyRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
 import org.springframework.web.bind.annotation.RestController
@@ -115,6 +116,19 @@ class StudyGroupController(
             reason = request.reason
         )
         studyGroupCommandService.enlistBlacklist(memberInfo, command)
+    }
+
+    override fun updateStudyGroup(
+        memberInfo: MemberInfo,
+        groupId: String,
+        request: StudyGroupModifyRequest
+    ): StudyGroupResponse {
+        return StudyGroupResponse.from(
+            studyGroupCommandService.updateStudyGroupInfo(
+                memberInfo,
+                request.toCommand(groupId)
+            )
+        )
     }
 
 //    override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): ListResponse<StudyGroupMemberResponse> {

@@ -26,4 +26,5 @@ interface StudyGroupMemberRepository {
     fun findGroupIdsByMemberId(memberId: ObjectId): List<String>
 
     fun findByGroupIdAndMemberIdsIn(groupId: ObjectId, memberIds: List<ObjectId>): List<StudyGroupMember>
+
 }

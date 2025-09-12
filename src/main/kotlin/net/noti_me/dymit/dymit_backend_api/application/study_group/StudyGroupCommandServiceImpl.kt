@@ -2,12 +2,14 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.ChangeGroupOwnerCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupJoinCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupMemberDto
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupModifyCommand
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
@@ -39,11 +41,19 @@ class StudyGroupCommandServiceImpl(
     private val applicationEventPublisher: ApplicationEventPublisher
 ): StudyGroupCommandService {
 
+    private final val MAX_OWNED_GROUPS = 5L
+
     override fun createStudyGroup(member: MemberInfo,
                                   command: StudyGroupCreateCommand)
     : StudyGroupDto {
         val memberEntity = loadMemberPort.loadById(member.memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+
+        val groupCount = loadStudyGroupPort.countByOwnerId(memberEntity.id.toHexString())
+
+        if ( groupCount > MAX_OWNED_GROUPS ) {
+            throw BadRequestException(message = "하나의 멤버는 최대 $MAX_OWNED_GROUPS 개의 스터디 그룹만 생성할 수 있습니다.")
+        }
 
         var studyGroup = StudyGroup(
             name = command.name,
@@ -68,7 +78,8 @@ class StudyGroupCommandServiceImpl(
             groupId = studyGroup.id,
             memberId = memberEntity.id,
             nickname = memberEntity.nickname,
-            profileImage = memberEntity.profileImage ?: MemberProfileImageVo(type = "preset", url = "0"),
+            profileImage = memberEntity.profileImage
+                ?: MemberProfileImageVo(type = "preset", url = "0"),
             role = GroupMemberRole.OWNER
         )
         studyGroupMemberRepository.persist(owner)
@@ -99,6 +110,9 @@ class StudyGroupCommandServiceImpl(
             throw ConflictException(message="이미 해당 스터디 그룹에 가입되어 있습니다.")
         }
 
+        if ( group.isBlackListed(member.id.toHexString() ) ) {
+            throw ForbiddenException(message = "강제 퇴장 당한 그룹입니다.")
+        }
 
         var newMember = StudyGroupMember(
             groupId = group.id,
@@ -292,5 +306,47 @@ class StudyGroupCommandServiceImpl(
             targetMemberId = targetMemberId
         )
         saveStudyGroupPort.update(group)
+    }
+
+    override fun changeStudyGroupOwner(
+        loginMember: MemberInfo,
+        command: ChangeGroupOwnerCommand
+    ): StudyGroupDto {
+        val group = loadStudyGroupPort.loadByGroupId(command.groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        val loginMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(loginMember.memberId)
+        ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+
+        val targetMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = group.id,
+            memberId = ObjectId(command.newOwnerId)
+        ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+
+        val groupCount = loadStudyGroupPort.countByOwnerId(command.newOwnerId)
+
+        if ( groupCount > MAX_OWNED_GROUPS ) {
+            throw BadRequestException(message = "해당 멤버는 이미 $MAX_OWNED_GROUPS  이상 그룹의 그룹장입니다.")
+        }
+
+        group.changeOwner(requester = loginMembership, newOwner = targetMembership)
+        studyGroupMemberRepository.saveAll(listOf(loginMembership, targetMembership))
+        saveStudyGroupPort.update(group)
+        return StudyGroupDto.fromEntity(group)
+    }
+
+    override fun updateStudyGroupInfo(
+        member: MemberInfo,
+        command: StudyGroupModifyCommand
+    ): StudyGroupDto {
+        val group = loadStudyGroupPort.loadByGroupId(command.groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+
+        group.changeName( member.memberId, command.name )
+        group.changeDescription( member.memberId, command.description )
+        val updatedGroup = saveStudyGroupPort.update(group)
+        return StudyGroupDto.fromEntity(updatedGroup)
     }
 }

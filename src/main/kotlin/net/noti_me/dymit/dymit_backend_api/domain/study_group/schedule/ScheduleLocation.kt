@@ -7,7 +7,8 @@ package net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule
  */
 class ScheduleLocation(
     val type: LocationType = LocationType.OFFLINE,
-    val value: String = ""
+    val value: String = "",
+    val link: String? = null
 ) {
 
     enum class LocationType {

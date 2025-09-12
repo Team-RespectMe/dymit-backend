@@ -130,20 +130,27 @@ class StudyGroup(
      * 이 메서드는 현재 그룹 소유자만 호출할 수 있으며, 새로운 소유자 ID가 비어있거나 현재 소유자와 동일한 경우 예외를 발생시킵니다.
      * 새로운 소유자는 현재 그룹에 속한 멤버여야하며 서비스 레이어에서 검증되어야 합니다.
      * 이 메서드는 `StudyGroupOwnerChangedEvent` 이벤트를 발생시켜 그룹 소유자 변경을 알립니다.
-     * @param requesterId 요청자의 ID
-     * @param newOwnerId 새로운 소유자 ID
+     * @param requester 요청 그룹 멤버
+     * @param newOwner 새로운 그룹 소유자 예정 멤버
      */
-    fun changeOwner(requesterId: String, newOwnerId: String) {
-        if ( this.ownerId.toHexString() != requesterId ) {
-            throw ForbiddenException(message="그룹 소유자만 소유자를 변경할 수 있습니다.")
+    fun changeOwner(requester: StudyGroupMember, newOwner: StudyGroupMember) {
+
+        if ( this.ownerId.toHexString() != requester.identifier ) {
+            throw ForbiddenException(message="그룹 소유자만 그룹 소유자를 변경할 수 있습니다.")
         }
 
-        if ( !ObjectId.isValid(newOwnerId) ) {
-            throw BadRequestException(message="유효하지 않은 ID입니다.")
+        if ( requester.identifier == newOwner.identifier ) {
+            return;
         }
 
-        this.ownerId = ObjectId(newOwnerId)
-        val event = StudyGroupOwnerChangedEvent(this.id.toHexString(), requesterId, newOwnerId, this)
+        if ( newOwner.groupId != this.id ) {
+            throw BadRequestException(message="새로운 그룹 소유자는 현재 그룹에 속한 멤버여야 합니다.")
+        }
+
+        this.ownerId = ObjectId(newOwner.memberId.toHexString())
+        requester.changeRole(GroupMemberRole.MEMBER)
+        newOwner.changeRole(GroupMemberRole.OWNER)
+        val event = StudyGroupOwnerChangedEvent(this)
         this.registerEvent(event)
     }
 

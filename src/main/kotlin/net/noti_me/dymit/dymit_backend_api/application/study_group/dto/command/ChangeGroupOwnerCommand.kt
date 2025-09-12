@@ -1,9 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command
 
-data class StudyGroupModifyCommand(
+class ChangeGroupOwnerCommand(
     val groupId: String,
-    val name: String,
-    val description: String,
+    val newOwnerId: String
 ) {
-
 }

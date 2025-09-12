@@ -17,6 +17,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupListItemDto
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupMemberResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupModifyRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
 import org.apache.http.entity.ContentType
@@ -221,6 +222,21 @@ interface StudyGroupAPI {
         @PathVariable groupId: String,
         @RequestBody @Valid request: BlackListEnlistRequest
     ): Unit
+
+    @Operation(
+        summary = "스터디 그룹 정보 수정 API",
+        description = "스터디 그룹의 이름과 설명을 수정합니다."
+    )
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "스터디 그룹 정보 수정 성공"),
+    ])
+    @PutMapping("/{groupId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun updateStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid request: StudyGroupModifyRequest)
+    : StudyGroupResponse
 
 
 //    /**

@@ -44,4 +44,11 @@ class MongoLoadStudyGroupAdapter(
             StudyGroup::class.java
         )
     }
+
+    override fun countByOwnerId(ownerId: String): Long {
+        return mongoTemplate.count(
+            Query(Criteria.where("ownerId").`is`(ownerId)),
+            StudyGroup::class.java
+        )
+    }
 }
