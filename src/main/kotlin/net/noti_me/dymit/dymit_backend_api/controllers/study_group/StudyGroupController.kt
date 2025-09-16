@@ -7,6 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListEnlistRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.ChangeStudyGroupOwnerRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
@@ -128,6 +129,17 @@ class StudyGroupController(
                 memberInfo,
                 request.toCommand(groupId)
             )
+        )
+    }
+
+    override fun changeStudyGroupOwner(
+        memberInfo: MemberInfo,
+        groupId: String,
+        request: ChangeStudyGroupOwnerRequest
+    ) {
+        studyGroupCommandService.changeStudyGroupOwner(
+            memberInfo,
+            request.toCommand(groupId)
         )
     }
 

@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListEnlistRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.ChangeStudyGroupOwnerRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupJoinRequest
@@ -26,6 +27,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -238,6 +240,25 @@ interface StudyGroupAPI {
         @RequestBody @Valid request: StudyGroupModifyRequest)
     : StudyGroupResponse
 
+    /**
+     * 스터디 그룹 소유자를 변경한다.
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     * @param request 스터디 그룹 소유자 변경 요청 정보
+     */
+    @PatchMapping("/{groupId}/owner")
+    @Operation(
+        summary = "스터디 그룹 소유자 변경 API",
+        description = "스터디 그룹의 소유자를 변경합니다."
+    )
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "스터디 그룹 소유자 변경 성공"),
+    ])
+    fun changeStudyGroupOwner(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid request: ChangeStudyGroupOwnerRequest
+    )
 
 //    /**
 //     * 스터디 그룹 멤버 목록 조회 API

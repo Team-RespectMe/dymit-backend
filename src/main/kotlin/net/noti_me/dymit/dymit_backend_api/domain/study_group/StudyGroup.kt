@@ -135,11 +135,11 @@ class StudyGroup(
      */
     fun changeOwner(requester: StudyGroupMember, newOwner: StudyGroupMember) {
 
-        if ( this.ownerId.toHexString() != requester.identifier ) {
+        if ( this.ownerId != requester.memberId ) {
             throw ForbiddenException(message="그룹 소유자만 그룹 소유자를 변경할 수 있습니다.")
         }
 
-        if ( requester.identifier == newOwner.identifier ) {
+        if ( requester.memberId == newOwner.memberId ) {
             return;
         }
 
@@ -147,7 +147,7 @@ class StudyGroup(
             throw BadRequestException(message="새로운 그룹 소유자는 현재 그룹에 속한 멤버여야 합니다.")
         }
 
-        this.ownerId = ObjectId(newOwner.memberId.toHexString())
+        this.ownerId = newOwner.memberId
         requester.changeRole(GroupMemberRole.MEMBER)
         newOwner.changeRole(GroupMemberRole.OWNER)
         val event = StudyGroupOwnerChangedEvent(this)
