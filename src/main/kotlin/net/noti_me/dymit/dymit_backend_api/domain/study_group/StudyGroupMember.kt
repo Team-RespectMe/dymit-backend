@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group
 
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import org.bson.types.ObjectId
@@ -44,9 +45,9 @@ class StudyGroupMember(
         this.nickname = newNickname
     }
 
-    fun changeRole(newRole: GroupMemberRole) {
-        if (newRole == GroupMemberRole.OWNER) {
-            throw IllegalArgumentException("Cannot change role to OWNER directly")
+    fun changeRole(requester: StudyGroupMember, newRole: GroupMemberRole) {
+        if (requester.role != GroupMemberRole.OWNER) {
+            throw ForbiddenException(message = "스터디 그룹 소유자만 멤버의 역할을 변경할 수 있습니다.")
         }
         this.role = newRole
     }

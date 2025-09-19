@@ -254,6 +254,7 @@ interface StudyGroupAPI {
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "스터디 그룹 소유자 변경 성공"),
     ])
+    @SecurityRequirement(name = "bearer-jwt")
     fun changeStudyGroupOwner(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,

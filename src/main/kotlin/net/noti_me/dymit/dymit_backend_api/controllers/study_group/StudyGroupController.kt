@@ -77,7 +77,7 @@ class StudyGroupController(
     : StudyGroupQueryDetailResponse {
         val group = studyGroupQueryService.getStudyGroup(memberInfo, groupId)
         val groupMembers = studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
-
+        groupMembers.sortedBy { it.role  }
         return StudyGroupQueryDetailResponse.of(group, groupMembers)
     }
 

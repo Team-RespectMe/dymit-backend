@@ -148,8 +148,8 @@ class StudyGroup(
         }
 
         this.ownerId = newOwner.memberId
-        requester.changeRole(GroupMemberRole.MEMBER)
-        newOwner.changeRole(GroupMemberRole.OWNER)
+        newOwner.changeRole(requester,GroupMemberRole.OWNER)
+        requester.changeRole(requester, GroupMemberRole.MEMBER)
         val event = StudyGroupOwnerChangedEvent(this)
         this.registerEvent(event)
     }
