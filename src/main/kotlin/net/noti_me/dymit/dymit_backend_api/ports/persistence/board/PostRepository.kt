@@ -14,6 +14,8 @@ interface PostRepository {
 
     fun findByBoardId(boardId: String): List<Post>
 
+    fun findByBoardIdLteId(boardId: String, lastId: String?, limit: Int): List<Post>
+
     /**
      * 작성자 ID로 게시글을 조회합니다.
      * lastId가 null이 아니면, lastId 이후의 게시글을 조회합니다.

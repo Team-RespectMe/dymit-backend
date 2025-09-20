@@ -24,10 +24,12 @@ interface PostService {
         postId: String
     )
 
-    fun getBoardPosts(
+    fun getBoardPostsWithCursor(
         memberInfo: MemberInfo,
         groupId: String,
-        boardId: String
+        boardId: String,
+        cursor: String?,
+        size: Int
     ): List<PostDto>
 
     fun getPost(

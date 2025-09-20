@@ -7,6 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListEnlistRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.ChangeStudyGroupOwnerRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 class StudyGroupController(
     private val studyGroupCommandService: StudyGroupCommandService,
     private val studyGroupQueryService: StudyGroupQueryService
-): StudyGroupAPI {
+): StudyGroupApi {
 
     override fun createStudyGroup(
         memberInfo: MemberInfo,
@@ -77,8 +78,8 @@ class StudyGroupController(
     : StudyGroupQueryDetailResponse {
         val group = studyGroupQueryService.getStudyGroup(memberInfo, groupId)
         val groupMembers = studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
-        groupMembers.sortedBy { it.role  }
-        return StudyGroupQueryDetailResponse.of(group, groupMembers)
+        val sorted = groupMembers.sortedBy { it.role  }
+        return StudyGroupQueryDetailResponse.of(group, sorted)
     }
 
     override fun updateStudyGroupProfileImage(
@@ -117,6 +118,27 @@ class StudyGroupController(
             reason = request.reason
         )
         studyGroupCommandService.enlistBlacklist(memberInfo, command)
+    }
+
+    override fun getStudyGroupBlacklists(
+        memberInfo: MemberInfo,
+        groupId: String
+    ): ListResponse<BlackListResponse> {
+        val blacklists = studyGroupQueryService.getBlacklists(memberInfo = memberInfo,
+            groupId = groupId)
+            .asSequence()
+            .map { BlackListResponse.from(it) }
+            .toList()
+
+        return ListResponse.from(blacklists)
+    }
+
+    override fun removeStudyGroupMemberFromBlacklist(
+        memberInfo: MemberInfo,
+        groupId: String,
+        memberId: String
+    ) {
+        studyGroupCommandService.delistBlacklist(memberInfo, groupId, memberId)
     }
 
     override fun updateStudyGroup(

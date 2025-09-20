@@ -117,4 +117,11 @@ class MongoStudyGroupMemberRepository(
             StudyGroupMember::class.java
         )
     }
+
+    override fun countByOwnerId(ownerId: ObjectId): Long {
+        return mongoTemplate.count(
+            Query(Criteria.where("ownerId").`is`(ownerId)),
+            StudyGroupMember::class.java
+        )
+    }
 }

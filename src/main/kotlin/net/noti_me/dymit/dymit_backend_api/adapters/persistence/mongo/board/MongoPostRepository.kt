@@ -70,6 +70,18 @@ class MongoPostRepository(
         }
     }
 
+    override fun findByBoardIdLteId(boardId: String, lastId: String?, limit: Int): List<Post> {
+        val objectId = ObjectId(boardId)
+        val query = Query(Criteria.where("boardId").`is`(objectId))
+        if (lastId != null) {
+            val lastObjectId = ObjectId(lastId)
+            query.addCriteria(Criteria.where("_id").lte(lastObjectId))
+        }
+        query.limit(limit)
+        query.with(Sort.by(Sort.Direction.DESC, "_id"))
+        return mongoTemplate.find(query, Post::class.java)
+    }
+
     override fun deleteById(id: String): Boolean {
         return try {
             val objectId = ObjectId(id)

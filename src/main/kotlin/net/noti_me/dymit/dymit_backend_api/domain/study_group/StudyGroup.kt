@@ -317,6 +317,10 @@ class StudyGroup(
         return this.blacklists.contains(blacklisted)
     }
 
+    fun getBlacklisted(): Set<BlackList> {
+        return this.blacklists.toSet()
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is StudyGroup) return false

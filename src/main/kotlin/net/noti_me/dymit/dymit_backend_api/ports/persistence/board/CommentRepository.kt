@@ -18,6 +18,12 @@ interface CommentRepository {
 
     fun findByPostId(postId: String): List<PostComment>
 
+    fun findByPostIdLteId(
+        postId: String,
+        lastId: String?,
+        size: Int
+    ): List<PostComment>
+
     fun deleteById(id: String): Boolean
 
     fun delete(comment: PostComment): Boolean

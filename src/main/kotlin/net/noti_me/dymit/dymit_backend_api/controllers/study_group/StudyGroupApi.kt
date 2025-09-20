@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListEnlistRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.BlackListResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.ChangeStudyGroupOwnerRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.InviteCodeResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupCreateRequest
@@ -21,7 +22,6 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupModifyRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
-import org.apache.http.entity.ContentType
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 
 @Tag(name = "스터디 그룹 API", description = "스터디 그룹 관련 API")
 @RequestMapping("/api/v1/study-groups")
-interface StudyGroupAPI {
+interface StudyGroupApi {
 
     /**
      * 스터디 그룹 생성 API
@@ -197,7 +197,7 @@ interface StudyGroupAPI {
      * @param groupId 스터디 그룹 ID
      * @param memberId 강퇴할 멤버 ID
      */
-    @Operation(summary = "스터디 그룹 멤버 퇴장 API", description = "스터디 그룹에서 특정 멤버를 퇴장시킵니다. 단 재가입은 가능합니다.")
+    @Operation(summary = "스터디 그룹 멤버 삭제 API", description = "스터디 그룹에서 탈퇴할 때 사용합니다.")
     @ApiResponse(responseCode = "204", description = "스터디 그룹 멤버 강퇴 성공")
     @DeleteMapping("/{groupId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -223,6 +223,45 @@ interface StudyGroupAPI {
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
         @RequestBody @Valid request: BlackListEnlistRequest
+    ): Unit
+
+    /**
+     * 스터디 그룹의 블랙리스트 된 회원 목록을 조회합니다.
+     * @param memberInfo 로그인한 멤버의 정보
+     * @param groupId 스터디 그룹 ID
+     */
+    @Operation(
+        summary = "스터디 그룹 블랙리스트 조회 API",
+        description = "스터디 그룹의 블랙리스트 된 회원 목록을 조회합니다."
+    )
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "블랙리스트 조회 성공"),
+    ])
+    @GetMapping("/{groupId}/blacklists")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun getStudyGroupBlacklists(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): ListResponse<BlackListResponse>
+
+    /**
+     * 스터디 그룹에 추가된 블랙리스트 회원을 삭제합니다.
+     */
+    @Operation(
+        summary = "스터디 그룹 블랙리스트 회원 삭제 API",
+        description = "스터디 그룹의 블랙리스트 된 회원을 삭제합니다."
+    )
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "블랙리스트 회원 삭제 성공")
+    ])
+    @DeleteMapping("/{groupId}/blacklists/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun removeStudyGroupMemberFromBlacklist(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable memberId: String
     ): Unit
 
     @Operation(
@@ -260,6 +299,7 @@ interface StudyGroupAPI {
         @PathVariable groupId: String,
         @RequestBody @Valid request: ChangeStudyGroupOwnerRequest
     )
+
 
 //    /**
 //     * 스터디 그룹 멤버 목록 조회 API

@@ -242,32 +242,12 @@ class StudyGroupCommandServiceImpl(
         groupId: String,
         targetMemberId: String
     ) {
-        val group = loadStudyGroupPort.loadByGroupId(groupId)
-            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
-
         val loginMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = ObjectId(groupId),
             memberId = ObjectId(loginMember.memberId)
         ) ?: throw NotFoundException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
 
-        val targetMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
-            memberId = ObjectId(targetMemberId)
-        ) ?: throw NotFoundException(message = "강퇴 대상 멤버가 해당 스터디 그룹의 멤버가 아닙니다.")
-
-        if (targetMembership.role == GroupMemberRole.OWNER) {
-            throw BadRequestException(message = "스터디 그룹장은 강퇴할 수 없습니다.")
-        }
-
-        if (loginMembership.role == GroupMemberRole.ADMIN && targetMembership.role == GroupMemberRole.ADMIN) {
-            throw BadRequestException(message = "관리자는 다른 관리자를 강퇴할 수 없습니다.")
-        }
-
-        if ( loginMembership.identifier == targetMembership.identifier ) {
-            throw BadRequestException(message = "본인을 강퇴시킬 수 없습니다.")
-        }
-
-        studyGroupMemberRepository.delete(targetMembership)
+        studyGroupMemberRepository.delete(loginMembership)
     }
 
     override fun enlistBlacklist(

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @Tag(name = "게시글 API", description = "게시글 관련 API")
@@ -75,6 +76,8 @@ interface PostApi {
     fun getBoardPosts(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
-        @PathVariable boardId: String
+        @PathVariable boardId: String,
+        @RequestParam cursor: String? = null,
+        @RequestParam(defaultValue = "20") size: Int = 20
     ): ListResponse<PostListItem>
 }

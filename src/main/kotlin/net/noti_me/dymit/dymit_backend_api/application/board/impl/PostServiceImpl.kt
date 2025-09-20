@@ -109,10 +109,12 @@ class PostServiceImpl(
         this.postRepository.deleteById(post.id.toHexString())
     }
 
-    override fun getBoardPosts(
+    override fun getBoardPostsWithCursor(
         memberInfo: MemberInfo,
         groupId: String,
-        boardId: String
+        boardId: String,
+        cursor: String?,
+        size: Int
     ): List<PostDto> {
         val board = this.boardRepository.findById(ObjectId(boardId))
             ?: throw NotFoundException(message="해당 게시판을 찾을 수 없습니다.")
@@ -126,8 +128,11 @@ class PostServiceImpl(
             throw NotFoundException(message = "해당 게시판에 글 조회 권한이 없습니다.")
         }
 
-        val posts = this.postRepository.findByBoardId(boardId = board.id.toHexString())
-            .sortedByDescending { it.createdAt }
+        val posts = this.postRepository.findByBoardIdLteId(
+            boardId = boardId,
+            lastId = cursor,
+            limit = size
+        ).sortedByDescending { it.createdAt }
         return posts.map { PostDto.from(it) }
     }
 

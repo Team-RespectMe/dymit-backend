@@ -9,10 +9,10 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
@@ -94,9 +94,16 @@ class CommentServiceImpl(
 
     override fun getPostComments(
         memberInfo: MemberInfo,
-        postId: String
+        postId: String,
+        lastCommentId: String?,
+        size: Int
     ): List<CommentDto> {
-        val comments = this.commentRepository.findByPostId(postId)
+//        val comments = this.commentRepository.findByPostId(postId)
+        val comments = this.commentRepository.findByPostIdLteId(
+            postId = postId,
+            lastId = lastCommentId,
+            size = size
+        )
         return comments.map { CommentDto.from(it) }
     }
 }

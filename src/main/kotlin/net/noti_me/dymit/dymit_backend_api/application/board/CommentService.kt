@@ -24,6 +24,8 @@ interface CommentService {
 
     fun getPostComments(
         memberInfo: MemberInfo,
-        postId: String
+        postId: String,
+        lastCommentId: String?,
+        size: Int
     ): List<CommentDto>
 }

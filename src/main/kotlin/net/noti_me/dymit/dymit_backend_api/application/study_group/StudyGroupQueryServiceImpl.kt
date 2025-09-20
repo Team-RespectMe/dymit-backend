@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCodeVo
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.BlacklistDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupMemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
@@ -27,7 +28,6 @@ class StudyGroupQueryServiceImpl(
     private val loadMemberPort: LoadMemberPort,
     private val studyGroupMemberRepository: StudyGroupMemberRepository,
     private val saveStudyGroupPort: SaveStudyGroupPort,
-    private val scheduleRepository: StudyScheduleRepository
 ): StudyGroupQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -151,5 +151,30 @@ class StudyGroupQueryServiceImpl(
 
     private fun isExpiredInviteCode(inviteCode: InviteCodeVo): Boolean {
         return inviteCode.expireAt <= LocalDateTime.now()
+    }
+
+    override fun getOwnedGroupCount(memberInfo: MemberInfo): Long {
+        return studyGroupMemberRepository.countByOwnerId(ObjectId(memberInfo.memberId))
+    }
+
+    override fun getBlacklists(
+        memberInfo: MemberInfo,
+        groupId: String
+    ): List<BlacklistDto> {
+        val membership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = ObjectId(groupId),
+            memberId = ObjectId(memberInfo.memberId)
+        ) ?: throw ForbiddenException(message = "해당 스터디 그룹에 가입되어 있지 않습니다.")
+
+        if (membership.role == GroupMemberRole.MEMBER) {
+            throw ForbiddenException(message = "해당 스터디 그룹의 소유자 또는 관리자만 차단 목록을 조회할 수 있습니다.")
+        }
+
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+        return group.getBlacklisted()
+            .asSequence()
+            .map{ BlacklistDto.from(it) }
+            .toList()
     }
 }

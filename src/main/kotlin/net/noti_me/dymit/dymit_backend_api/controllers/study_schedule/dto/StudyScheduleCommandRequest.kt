@@ -14,7 +14,7 @@ class StudyScheduleCommandRequest(
     val title: String,
     @field: Schema(description = "스터디 일정 설명", example = "이번 주 스터디 모임입니다.")
     val description: String,
-    @field: Schema(description = "스터디 일정 장소", example = "{ \"type\": \"ONLINE\", \"value\": \"https://example.com/meeting\" }")
+    @field: Schema(description = "스터디 일정 장소", example = "{ \"type\": \"ONLINE\", \"value\": \"줌 미팅\", \"link\": \"https://zoom.us/j/1234567890\" }")
     val location: LocationVo,
     @field: Schema(description = "스터디 일정 시작 시간", example = "2030-10-01T10:00:00")
     val scheduleAt: LocalDateTime,

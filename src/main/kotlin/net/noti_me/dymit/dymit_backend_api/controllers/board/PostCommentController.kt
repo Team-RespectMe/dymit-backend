@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class PostCommentController(
     private val commentService: CommentService
-): CommentApi {
+): PostCommentApi {
 
     override fun createComment(
         memberInfo: MemberInfo,
@@ -65,10 +65,21 @@ class PostCommentController(
         memberInfo: MemberInfo,
         groupId: String,
         boardId: String,
-        postId: String
+        postId: String,
+        cursor: String?,
+        size: Int
     ): ListResponse<CommentListItem> {
-        val commentDtos = commentService.getPostComments(memberInfo, postId)
+        val commentDtos = commentService.getPostComments(
+            memberInfo = memberInfo,
+            postId = postId,
+            lastCommentId = cursor,
+            size = size + 1
+        )
         val commentListItems = commentDtos.map { CommentListItem.from(it) }
-        return ListResponse.from(commentListItems)
+        return ListResponse.of(
+            size = size,
+            items = commentListItems,
+            extractor = { it.id }
+        )
     }
 }

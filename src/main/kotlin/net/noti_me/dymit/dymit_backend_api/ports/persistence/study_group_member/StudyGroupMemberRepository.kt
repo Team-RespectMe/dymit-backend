@@ -27,4 +27,5 @@ interface StudyGroupMemberRepository {
 
     fun findByGroupIdAndMemberIdsIn(groupId: ObjectId, memberIds: List<ObjectId>): List<StudyGroupMember>
 
+    fun countByOwnerId(ownerId: ObjectId): Long
 }

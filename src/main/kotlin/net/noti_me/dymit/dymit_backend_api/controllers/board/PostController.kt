@@ -61,9 +61,25 @@ class PostController(
     override fun getBoardPosts(
         memberInfo: MemberInfo,
         groupId: String,
-        boardId: String
+        boardId: String,
+        cursor: String?,
+        size: Int
     ): ListResponse<PostListItem> {
-        return ListResponse.from(postService.getBoardPosts(memberInfo, groupId, boardId).map { PostListItem.from(it) })
+        val postDtos = postService.getBoardPostsWithCursor(
+            memberInfo = memberInfo,
+            groupId = groupId,
+            boardId = boardId,
+            cursor = cursor,
+            size = size + 1
+        ).map {
+            PostListItem.from(it)
+        }
+
+        return ListResponse.of(
+            size = size,
+            items = postDtos,
+            extractor = {it.id}
+        )
     }
 
     override fun getPost(

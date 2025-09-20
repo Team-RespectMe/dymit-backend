@@ -86,4 +86,16 @@ class MongoPostCommentRepository(
         return deleteResult.deletedCount > 0
     }
 
+    override fun findByPostIdLteId(postId: String, lastId: String?, size: Int): List<PostComment> {
+        val pId = ObjectId(postId)
+        val criteria = Criteria.where("postId").`is`(pId)
+        if (lastId != null) {
+            val lId = ObjectId(lastId)
+            criteria.andOperator(Criteria.where("_id").lte(lId))
+        }
+        val query = Query.query(criteria)
+            .limit(size)
+            .with(Sort.by(Sort.Direction.DESC, "_id"))
+        return mongoTemplate.find(query, PostComment::class.java)
+    }
 }
