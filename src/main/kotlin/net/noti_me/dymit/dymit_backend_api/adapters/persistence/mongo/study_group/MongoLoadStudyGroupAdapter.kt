@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_gro
 
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -47,7 +48,7 @@ class MongoLoadStudyGroupAdapter(
 
     override fun countByOwnerId(ownerId: String): Long {
         return mongoTemplate.count(
-            Query(Criteria.where("ownerId").`is`(ownerId)),
+            Query(Criteria.where("ownerId").`is`(ObjectId(ownerId))),
             StudyGroup::class.java
         )
     }

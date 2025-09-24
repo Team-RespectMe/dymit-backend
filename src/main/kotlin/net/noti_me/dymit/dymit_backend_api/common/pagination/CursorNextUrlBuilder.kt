@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.common.pagination
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.net.URLEncoder
@@ -24,10 +25,8 @@ class CursorNextUrlBuilder {
         fun getCurrentBaseUrl(): String {
             val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
 
-            // 프록시 환경에서의 실제 스키마, 호스트, 포트 확인
-            val scheme = request.getHeader("X-Forwarded-Proto")
-                ?: request.getHeader("X-Forwarded-Scheme")
-                ?: request.scheme
+            // 스키마 결정 로직
+            val scheme = getScheme(request)
 
             val serverName = request.getHeader("X-Forwarded-Host")
                 ?: request.getHeader("Host")?.substringBefore(':')
@@ -61,16 +60,33 @@ class CursorNextUrlBuilder {
         }
 
         /**
+         * 요청에서 올바른 스키마를 결정합니다.
+         * localhost 환경이면 http, 그 외엔 https 사용
+         */
+        private fun getScheme(request: HttpServletRequest): String {
+            val serverName = request.getHeader("X-Forwarded-Host")
+                ?: request.getHeader("Host")?.substringBefore(':')
+                ?: request.serverName
+
+            // localhost 또는 127.0.0.1인 경우에만 http 사용, 그 외엔 모두 https
+            return if (serverName.contains("localhost") || serverName.contains("127.0.0.1")) {
+                "http"
+            } else {
+                "https"
+            }
+        }
+
+        /**
          * 람다 함수를 사용하여 커서 값을 추출하고 next URL을 생성합니다
          *
          * @param items 페이지네이션 대상 리스트 (실제로는 size + 1개를 조회해야 함)
-         * @param cursorExtractor 커서 값을 추출하는 람다 함수
+         * @param extractors 커서 값을 추출하는 람다 함수들의 맵
          * @param size 페이지 크기
          * @return next URL 문자열 (다음 페이지가 없는 경우 null)
          */
         fun <T> buildNextUrlWithExtractor(
             items: List<T>,
-            cursorExtractor: (T) -> Any,
+            extractors: Map<String, (T) -> Any>,
             size: Int
         ): String? {
             // size + 1개를 조회했는데 실제로 size + 1개가 있어야만 다음 페이지 존재
@@ -80,17 +96,14 @@ class CursorNextUrlBuilder {
 
             // size번째 아이템(0-based에서 size-1 인덱스)의 커서 값을 사용
             val cursorItem = items[size - 1]
-            val cursorValue = cursorExtractor(cursorItem)
-
             val baseUrl = getCurrentBaseUrl()
             val queryParams = mutableMapOf<String, String>()
 
-            // 커서 값과 크기만 추가
-            queryParams["cursor"] = URLEncoder.encode(cursorValue.toString(), StandardCharsets.UTF_8)
-            queryParams["size"] = size.toString()
-
+            extractors.forEach { (key, extractor) ->
+                val value = extractor(cursorItem).toString()
+                queryParams[key] = URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
+            }
             val queryString = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
-
             return "$baseUrl?$queryString"
         }
     }

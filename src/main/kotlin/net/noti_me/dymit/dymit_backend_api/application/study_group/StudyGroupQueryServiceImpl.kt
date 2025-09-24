@@ -154,7 +154,11 @@ class StudyGroupQueryServiceImpl(
     }
 
     override fun getOwnedGroupCount(memberInfo: MemberInfo): Long {
-        return studyGroupMemberRepository.countByOwnerId(ObjectId(memberInfo.memberId))
+//        return loadStudyGroupPort.countByOwnerId(memberInfo.memberIkjd)
+        return studyGroupMemberRepository.countByMemberIdAndRole(
+            memberId = ObjectId(memberInfo.memberId),
+            role = GroupMemberRole.OWNER
+        )
     }
 
     override fun getBlacklists(

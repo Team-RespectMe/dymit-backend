@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_group_member
 
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.Document
@@ -118,9 +119,9 @@ class MongoStudyGroupMemberRepository(
         )
     }
 
-    override fun countByOwnerId(ownerId: ObjectId): Long {
+    override fun countByMemberIdAndRole(memberId: ObjectId, role: GroupMemberRole): Long {
         return mongoTemplate.count(
-            Query(Criteria.where("ownerId").`is`(ownerId)),
+            Query(Criteria.where("memberId").`is`(memberId).and("role").`is`(role)),
             StudyGroupMember::class.java
         )
     }
