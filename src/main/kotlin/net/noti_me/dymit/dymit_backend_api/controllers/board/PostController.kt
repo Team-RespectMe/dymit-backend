@@ -78,7 +78,10 @@ class PostController(
         return ListResponse.of(
             size = size,
             items = postDtos,
-            extractor = {it.id}
+            extractors = buildMap {
+                put("cursor") { it.id }
+                put("size") { size }
+            }
         )
     }
 

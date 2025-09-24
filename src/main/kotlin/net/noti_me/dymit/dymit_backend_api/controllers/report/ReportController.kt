@@ -48,7 +48,9 @@ class ReportController(
         return ListResponse.of(
             size = size,
             items = reportResponses,
-            extractor = { it.id }
+            extractors = buildMap {
+                put("cursor"){ it.id }
+            }
         )
     }
 }

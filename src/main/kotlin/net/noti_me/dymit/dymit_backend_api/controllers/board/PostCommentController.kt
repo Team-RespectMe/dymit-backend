@@ -79,7 +79,10 @@ class PostCommentController(
         return ListResponse.of(
             size = size,
             items = commentListItems,
-            extractor = { it.id }
+            extractors = buildMap{
+                put("cursor") { it.id }
+                put("size") { size }
+            }
         )
     }
 }

@@ -35,13 +35,13 @@ class ListResponse<T>(
          *
          * @param size 실제 응답에 포함할 아이템 수
          * @param list size + 1개를 조회한 아이템 리스트
-         * @param extractor 커서 값을 추출하는 람다 함수
+         * @param extractors 커서 값을 추출하는 람다 함수 맵
          * @return CursorPagination이 적용된 ListResponse
          */
         fun <T> of(
             size: Int,
             items: List<T>,
-            extractor: (T) -> Any
+            extractors: Map<String, (T) -> Any> = emptyMap()
         ): ListResponse<T> {
             // 실제 응답에는 size개만 포함
             val responseItems = if (items.size > size) {
@@ -56,7 +56,7 @@ class ListResponse<T>(
             )
 
             // next URL 추가 (원본 list로 판단)
-            val nextUrl = CursorNextUrlBuilder.buildNextUrlWithExtractor(items, extractor, size)
+            val nextUrl = CursorNextUrlBuilder.buildNextUrlWithExtractor(items, extractors, size)
             if (nextUrl != null) {
                 response._links["next"] = HateoasLink(nextUrl)
             }

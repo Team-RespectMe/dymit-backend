@@ -80,7 +80,10 @@ class ScheduleCommentController(
         return ListResponse.of(
             size = size,
             items = responseComments,
-            extractor = { it.id }
+            extractors = buildMap {
+                put("cursor") { it.id }
+                put("size") { size }
+            }
         )
     }
 }

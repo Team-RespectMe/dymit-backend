@@ -24,7 +24,10 @@ class UserFeedController(
         return ListResponse.of(
             size = size,
             items = feedResponses,
-            extractor = { it.id }
+            extractors = buildMap {
+                put("cursor") { it.id }
+                put("size") { size }
+            }
         )
     }
 
