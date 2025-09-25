@@ -8,11 +8,13 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.LocalDateTime
 
 @Document("study_group_boards")
 class Board(
-    @Id
-    val id: ObjectId,
+//    @Id
+//    val id: ObjectId,
+    id: ObjectId? = null,
     val groupId: ObjectId,
     name: String,
     permissions: MutableSet<BoardPermission> = mutableSetOf(
@@ -28,8 +30,16 @@ class Board(
             role = GroupMemberRole.MEMBER,
             actions = mutableListOf()
         )
-    )
-) : BaseAggregateRoot<Board>() {
+    ),
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<Board>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
     var name: String = name
         private set

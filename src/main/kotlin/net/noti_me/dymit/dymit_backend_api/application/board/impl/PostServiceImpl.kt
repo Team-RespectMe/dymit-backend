@@ -47,7 +47,7 @@ class PostServiceImpl(
 
         val newPost = Post(
             groupId = ObjectId(command.groupId),
-            boardId = board.id,
+            boardId = board.id!!,
             writer = Writer.from(groupMember),
             title = command.title,
             content = command.content
@@ -86,7 +86,7 @@ class PostServiceImpl(
         val updatedPost = this.postRepository.save(post)
             ?: throw RuntimeException("게시글 수정에 실패했습니다.")
 
-        if (group.recentPost?.postId == updatedPost.id.toHexString()) {
+        if (group.recentPost?.postId == updatedPost.identifier) {
             group.updateRecentPost(RecentPostVo.from(updatedPost))
             saveGroupPort.update(group)
         }
@@ -106,7 +106,7 @@ class PostServiceImpl(
             ObjectId(memberInfo.memberId)
         ) ?: throw NotFoundException(message="해당 그룹의 멤버가 아닙니다.")
 
-        this.postRepository.deleteById(post.id.toHexString())
+        this.postRepository.deleteById(post.identifier)
     }
 
     override fun getBoardPostsWithCursor(

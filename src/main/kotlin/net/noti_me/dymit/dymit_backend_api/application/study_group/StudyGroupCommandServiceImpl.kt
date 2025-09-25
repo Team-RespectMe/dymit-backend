@@ -49,7 +49,7 @@ class StudyGroupCommandServiceImpl(
         val memberEntity = loadMemberPort.loadById(member.memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
-        val groupCount = loadStudyGroupPort.countByOwnerId(memberEntity.id.toHexString())
+        val groupCount = loadStudyGroupPort.countByOwnerId(memberEntity.identifier)
 
         if ( groupCount > MAX_OWNED_GROUPS ) {
             throw BadRequestException(message = "하나의 멤버는 최대 $MAX_OWNED_GROUPS 개의 스터디 그룹만 생성할 수 있습니다.")
@@ -58,7 +58,7 @@ class StudyGroupCommandServiceImpl(
         var studyGroup = StudyGroup(
             name = command.name,
             description = command.description,
-            ownerId = memberEntity.id,
+            ownerId = memberEntity.id!!,
         )
 
         var inviteCode = (1..8)
@@ -75,7 +75,7 @@ class StudyGroupCommandServiceImpl(
         studyGroup = saveStudyGroupPort.persist(studyGroup)
 
         val owner = StudyGroupMember(
-            groupId = studyGroup.id,
+            groupId = studyGroup.id!!,
             memberId = memberEntity.id,
             nickname = memberEntity.nickname,
             profileImage = memberEntity.profileImage
@@ -104,8 +104,8 @@ class StudyGroupCommandServiceImpl(
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
         if (studyGroupMemberRepository.findByGroupIdAndMemberId(
-                groupId = group.id,
-                memberId = member.id
+                groupId = group.id!!,
+                memberId = member.id!!
         ) != null) {
             throw ConflictException(message="이미 해당 스터디 그룹에 가입되어 있습니다.")
         }
@@ -209,7 +209,7 @@ class StudyGroupCommandServiceImpl(
         }
 
         // 3. 스터디 그룹의 전체 회원수가 1명이 아니라면 reject
-        val memberCount = studyGroupMemberRepository.countByGroupId(group.id)
+        val memberCount = studyGroupMemberRepository.countByGroupId(group.id!!)
         if (memberCount != 1L) {
             throw BadRequestException(message = "스터디 그룹에 다른 멤버가 있어 삭제할 수 없습니다.")
         }
@@ -226,7 +226,7 @@ class StudyGroupCommandServiceImpl(
             ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
 
         val membership = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = group.id!!,
             memberId = ObjectId(member.memberId)
         ) ?: throw NotFoundException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
 
@@ -257,11 +257,11 @@ class StudyGroupCommandServiceImpl(
         val group = loadStudyGroupPort.loadByGroupId(command.groupId)
             ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
         val loginMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = group.id!!,
             memberId = ObjectId(loginMember.memberId)
         ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
         val targetMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = group.id!!,
             memberId = ObjectId(command.targetMember)
         ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
@@ -277,7 +277,7 @@ class StudyGroupCommandServiceImpl(
         val group = loadStudyGroupPort.loadByGroupId(groupId)
             ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
         val loginMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = group.id!!,
             memberId = ObjectId(loginMember.memberId)
         ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
@@ -296,12 +296,12 @@ class StudyGroupCommandServiceImpl(
             ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
 
         val loginMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = group.id!!,
             memberId = ObjectId(loginMember.memberId)
         ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
         val targetMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId = group.id,
+            groupId = group.id!!,
             memberId = ObjectId(command.newOwnerId)
         ) ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 

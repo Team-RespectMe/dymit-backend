@@ -49,7 +49,7 @@ class StudyGroupQueryServiceImpl(
                 profileImage = MemberProfileImageVo(type = "preset", url = "0")
             )
 
-        val membersCount = studyGroupMemberRepository.countByGroupId(studyGroup.id)
+        val membersCount = studyGroupMemberRepository.countByGroupId(studyGroup.id!!)
 
         val studyGroupDto =  StudyGroupSummaryDto(
             id = studyGroup.identifier,

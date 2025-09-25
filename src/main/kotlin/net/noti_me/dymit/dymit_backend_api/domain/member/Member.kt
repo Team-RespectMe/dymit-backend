@@ -15,8 +15,9 @@ import kotlin.random.Random
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
 class Member(
-    @Id
-    val id: ObjectId = ObjectId.get(),
+//    @Id
+//    val id: ObjectId = ObjectId.get(),
+    id: ObjectId? = null,
     nickname: String = "",
     oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
     profileImage: MemberProfileImageVo = MemberProfileImageVo(
@@ -30,10 +31,13 @@ class Member(
     lastAccessAt: LocalDateTime = LocalDateTime.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
     refreshTokens: MutableSet<String> = mutableSetOf(),
-) : BaseAggregateRoot<Member>() {
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<Member>(id, createdAt, updatedAt, isDeleted) {
 
-    val identifier: String
-        get() = id.toHexString()
+//    val identifier: String
+//        get() = id.toHexString()
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 

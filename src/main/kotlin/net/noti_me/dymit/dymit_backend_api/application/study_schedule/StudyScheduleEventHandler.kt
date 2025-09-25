@@ -55,11 +55,11 @@ class StudyScheduleEventHandler(
                 associates = listOf(
                     AssociatedResource(
                         type = ResourceType.STUDY_GROUP,
-                        resourceId = group.id.toHexString()
+                        resourceId = group.identifier
                     ),
                     AssociatedResource(
                         type = ResourceType.STUDY_GROUP_SCHEDULE,
-                        resourceId = schedule.id.toHexString()
+                        resourceId = schedule.identifier
                     ),
                 )
             )
@@ -123,7 +123,7 @@ class StudyScheduleEventHandler(
         val groupId = schedule.groupId
         studyGroupRepository.loadByGroupId(groupId.toHexString())
             ?.let { group ->
-                participantRepository.getByScheduleId(schedule.id)
+                participantRepository.getByScheduleId(schedule.id!!)
                     .forEach { participant ->
                         val userFeed = event.toUserFeed(
                             group = group,

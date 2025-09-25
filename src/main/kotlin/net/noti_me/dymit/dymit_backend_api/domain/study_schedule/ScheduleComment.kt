@@ -12,16 +12,25 @@ import java.time.LocalDateTime
 
 @Document(collection = "schedule_comments")
 class ScheduleComment(
-    @Id
-    val id: ObjectId = ObjectId.get(),
+//    @Id
+//    val id: ObjectId = ObjectId.get(),
+    id: ObjectId? = null,
     @Indexed
     val scheduleId: ObjectId,
     val writer: Writer,
     content: String,
-) : BaseAggregateRoot<ScheduleComment>() {
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<ScheduleComment>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
-    val identifier: String
-        get() = id.toHexString()
+//    val identifier: String
+//        get() = id.toHexString()
 
     var content: String = content
         private set

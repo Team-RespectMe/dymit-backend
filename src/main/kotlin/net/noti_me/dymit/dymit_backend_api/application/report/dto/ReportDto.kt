@@ -28,7 +28,7 @@ data class ReportDto(
          */
         fun from(entity: Report): ReportDto {
             return ReportDto(
-                id = entity.id.toHexString(),
+                id = entity.identifier,
                 memberId = entity.memberId.toHexString(),
                 resource = entity.resource,
                 title = entity.title,

@@ -12,12 +12,12 @@ class MemberCreatedEvent(
 
     fun toUserFeed(member: Member): UserFeed {
         return UserFeed(
-            memberId = member.id,
+            memberId = member.id!!,
             message = "환영합니다! ${member.nickname}님! Dymit에 오신 것을 환영합니다.",
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.MEMBER,
-                    resourceId = member.id.toHexString()
+                    resourceId = member.identifier,
                 )
             )
         )

@@ -29,7 +29,7 @@ class StudyGroupEventHandler(
         val member = event.member
         // 멤버의 프로필 이미지가 변경되었을 때, 관련된 스터디 그룹 멤버 정보도 업데이트
         var studyGroupMembers = studyGroupMemberRepository.findByMemberId(
-            memberId = member.id,
+            memberId = member.id!!,
             cursor = null,
             limit = DEFAULT_BATCH_SIZE + 1
         )
@@ -61,7 +61,7 @@ class StudyGroupEventHandler(
         // 블랙리스트에 추가된 멤버가 스터디 그룹에서 탈퇴 처리
 
         val studyGroupMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
-            groupId= event.group.id,
+            groupId= event.group.id!!,
             memberId = blacklisted.memberId
         ) ?: return
 

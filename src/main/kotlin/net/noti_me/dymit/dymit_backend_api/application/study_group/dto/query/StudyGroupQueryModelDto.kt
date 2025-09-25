@@ -22,7 +22,7 @@ class StudyGroupQueryModelDto(
     companion object {
         fun from(entity: StudyGroup, owner: Member): StudyGroupQueryModelDto {
             return StudyGroupQueryModelDto(
-                id = entity.id.toHexString(),
+                id = entity.identifier,
                 name = entity.name,
                 profileImage = entity.profileImage,
                 owner = MemberPreview.of(owner, GroupMemberRole.OWNER),

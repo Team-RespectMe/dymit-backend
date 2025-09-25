@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 
 @Document(collection="study_schedules")
 class StudySchedule(
-    id: ObjectId = ObjectId.get(),
+//    id: ObjectId = ObjectId.get(),
     groupId: ObjectId = ObjectId.get(),
     title: String = "",
     description: String = "",
@@ -24,13 +24,12 @@ class StudySchedule(
     nrParticipant: Long = 0L
 ) : BaseAggregateRoot<StudySchedule>() {
 
-    @Id
-    var id: ObjectId = id
-        private set
+//    @Id
+//    var id: ObjectId = id
+//        private set
 
-    val identifier: String
-        get() = id.toHexString()
-
+//    val identifier: String
+//        get() = id.toHexString()
     @Indexed(name = "study_schedule_group_id_idx")
     var groupId: ObjectId = groupId
         private set

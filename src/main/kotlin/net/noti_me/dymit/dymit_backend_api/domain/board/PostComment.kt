@@ -4,17 +4,24 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.LocalDateTime
 
 @Document("post_comments")
 class PostComment(
-    @Id
-    val id: ObjectId = ObjectId(),
+    id : ObjectId? = null,
     val postId: ObjectId,
     val writer: Writer,
-    content: String
-) : BaseAggregateRoot<PostComment>() {
+    content: String,
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<PostComment>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
     var content: String = content
         private set

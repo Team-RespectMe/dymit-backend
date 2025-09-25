@@ -76,7 +76,7 @@ class StudyScheduleServiceImpl(
             roles = roles
         )
         group.updateRecentSchedule(RecentScheduleVo(
-            scheduleId = newStudySchedule.id,
+            scheduleId = newStudySchedule.id!!,
             title = newStudySchedule.title,
             session = newStudySchedule.session,
             scheduleAt = newStudySchedule.scheduleAt
@@ -127,7 +127,7 @@ class StudyScheduleServiceImpl(
         schedule.updateRoles(requester = groupMember, newRoles = roles)
         schedule = studyScheduleRepository.save(schedule)
         group.updateRecentSchedule(RecentScheduleVo(
-            scheduleId = schedule.id,
+            scheduleId = schedule.id!!,
             title = schedule.title,
             session = schedule.session,
             scheduleAt = schedule.scheduleAt
@@ -184,7 +184,7 @@ class StudyScheduleServiceImpl(
         ) ?: throw ForbiddenException(message = "가입된 그룹이 아닙니다.")
 
         val participant = participantRepository.getByScheduleIdAndMemberId(
-            scheduleId = schedule.id,
+            scheduleId = schedule.id!!,
             memberId = ObjectId(memberInfo.memberId)
         )
 
@@ -256,7 +256,7 @@ class StudyScheduleServiceImpl(
             throw BadRequestException(message = "과거의 스케줄은 참여를 취소할 수 없습니다.")
         }
 
-        val participant = participantRepository.getByScheduleIdAndMemberId(schedule.id, ObjectId(memberInfo.memberId))
+        val participant = participantRepository.getByScheduleIdAndMemberId(schedule.id!!, ObjectId(memberInfo.memberId))
             ?: throw IllegalArgumentException("해당 스케줄에 참여하지 않은 멤버입니다.")
 
 //        studyScheduleRepository.delete(schedule)
@@ -266,7 +266,7 @@ class StudyScheduleServiceImpl(
     }
 
     private fun getParticipants(schedule: StudySchedule): List<StudyScheduleParticipantDto> {
-        val memberIds = participantRepository.getByScheduleId(schedule.id)
+        val memberIds = participantRepository.getByScheduleId(schedule.id!!)
             .map { it.memberId }
             .toSet()
             .toList()
@@ -306,7 +306,7 @@ class StudyScheduleServiceImpl(
     }
 
     private fun updateGroupRecentSchedule(group: StudyGroup) {
-        val schedules = studyScheduleRepository.loadByGroupIdOrderByScheduleAtDesc(group.id)
+        val schedules = studyScheduleRepository.loadByGroupIdOrderByScheduleAtDesc(group.id!!)
         if (schedules.isEmpty()) {
             group.updateRecentSchedule(null)
             saveStudyGroupPort.persist(group)
@@ -319,7 +319,7 @@ class StudyScheduleServiceImpl(
             group.updateRecentSchedule(null)
         } else {
             group.updateRecentSchedule(RecentScheduleVo(
-                scheduleId = recentSchedule.id,
+                scheduleId = recentSchedule.id!!,
                 title = recentSchedule.title,
                 session = recentSchedule.session,
                 scheduleAt = recentSchedule.scheduleAt

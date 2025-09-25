@@ -32,7 +32,7 @@ class BoardServiceImpl(
 
         // 새 게시판 생성
         val newBoard = Board(
-            id = ObjectId(),
+//            id = ObjectId(),
             groupId = groupObjectId,
             name = command.name,
             permissions = command.permissions.toMutableSet()

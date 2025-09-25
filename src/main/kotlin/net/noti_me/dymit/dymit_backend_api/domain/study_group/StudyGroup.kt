@@ -33,8 +33,9 @@ import kotlin.random.Random
  */
 @Document("study_groups")
 class StudyGroup(
-    @Id
-    val id: ObjectId = ObjectId.get(),
+//    @Id
+//    val id: ObjectId = ObjectId.get(),
+    id: ObjectId? = null,
     ownerId: ObjectId = ObjectId.get(),
     name: String = "",
     description: String = "",
@@ -43,13 +44,21 @@ class StudyGroup(
     inviteCode: InviteCodeVo = InviteCodeVo(""),
     recentSchedule: RecentScheduleVo? = null,
     recentPost: RecentPostVo? = null,
-    blacklists: Set<BlackList> = setOf()
-): BaseAggregateRoot<StudyGroup>() {
+    blacklists: Set<BlackList> = setOf(),
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+): BaseAggregateRoot<StudyGroup>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
     private val blacklists: MutableSet<BlackList> = blacklists.toMutableSet()
 
-    val identifier: String
-        get() = id.toHexString()
+//    val identifier: String
+//        get() = id.toHexString()
 
     var description: String = description
         private set
@@ -174,7 +183,7 @@ class StudyGroup(
         }
 
         if ( this.profileImage.type == "external" ) {
-            val event = StudyGroupProfileImageDeleteEvent(this.id.toHexString(), profileImage.filePath, this)
+            val event = StudyGroupProfileImageDeleteEvent(this.identifier, profileImage.filePath, this)
             this.registerEvent(event)
         }
 

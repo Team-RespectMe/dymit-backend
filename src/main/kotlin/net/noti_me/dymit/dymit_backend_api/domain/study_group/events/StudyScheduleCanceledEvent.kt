@@ -30,11 +30,11 @@ class StudyScheduleCanceledEvent(
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
-                    resourceId = group.id.toHexString()
+                    resourceId = group.identifier
                 ),
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
-                    resourceId = schedule.id.toHexString()
+                    resourceId = schedule.identifier
                 )
             )
         )
@@ -42,14 +42,14 @@ class StudyScheduleCanceledEvent(
 
     fun toSchedulePushEvent(): SchedulePushEvent {
         return SchedulePushEvent(
-            scheduleId = schedule.id,
+            scheduleId = schedule.id!!,
             title = group.name,
             body = "${schedule.session} 회차 일정이 취소되었어요.",
             image = null,
             data = mapOf(
                 "type" to "STUDY_GROUP_SCHEDULE",
-                "groupId" to group.id.toHexString(),
-                "scheduleId" to schedule.id.toHexString()
+                "groupId" to group.identifier,
+                "scheduleId" to schedule.identifier
             )
         )
     }

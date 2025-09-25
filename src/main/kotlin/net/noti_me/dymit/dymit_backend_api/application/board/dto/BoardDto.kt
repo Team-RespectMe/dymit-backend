@@ -16,7 +16,7 @@ class BoardDto(
     companion object {
         fun from(entity: Board): BoardDto {
             return BoardDto(
-                id = entity.id.toHexString(),
+                id = entity.identifier,
                 groupId = entity.groupId.toHexString(),
                 name = entity.name,
                 createdAt = entity.createdAt?: LocalDateTime.now(),

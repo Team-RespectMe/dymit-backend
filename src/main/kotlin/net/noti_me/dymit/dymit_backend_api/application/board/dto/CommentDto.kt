@@ -15,7 +15,7 @@ class CommentDto(
     companion object {
         fun from(entity: PostComment): CommentDto {
             return CommentDto(
-                id = entity.id.toHexString(),
+                id = entity.identifier,
                 postId = entity.postId.toHexString(),
                 writer = entity.writer,
                 content = entity.content,

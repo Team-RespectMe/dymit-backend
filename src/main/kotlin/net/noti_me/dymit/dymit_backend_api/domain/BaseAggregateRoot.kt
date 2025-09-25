@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain
 
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -14,16 +15,26 @@ import java.util.UUID
 
 @Document
 abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
+    @Id
+    @Indexed(unique = true)
+    val id: ObjectId? = null,
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
 ) : AbstractAggregateRoot<T>() {
+
+    val identifier: String
+        get() = id?.toHexString() ?: throw IllegalStateException("Entity ID is null")
+
     @CreatedDate
-    var createdAt: LocalDateTime? = null
+    var createdAt: LocalDateTime? = createdAt
         protected set
 
     @LastModifiedDate
-    var updatedAt: LocalDateTime? = null
+    var updatedAt: LocalDateTime? = updatedAt
         protected set
 
-    var isDeleted: Boolean = false
+    var isDeleted: Boolean = isDeleted
         protected set
 
     @DomainEvents

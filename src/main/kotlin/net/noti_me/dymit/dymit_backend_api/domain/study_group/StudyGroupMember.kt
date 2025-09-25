@@ -4,22 +4,33 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import org.bson.types.ObjectId
+import org.springframework.cglib.core.Local
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.LocalDateTime
 
 @Document("study_group_members")
 class StudyGroupMember(
-    @Id
-    val id: ObjectId = ObjectId.get(),
+//    @Id
+//    val id: ObjectId = ObjectId.get(),
+    id: ObjectId? = null,
     groupId: ObjectId = ObjectId.get(),
     memberId: ObjectId = ObjectId.get(),
     nickname: String = "",
-    profileImage: MemberProfileImageVo,
+    profileImage: MemberProfileImageVo = MemberProfileImageVo(),
     role: GroupMemberRole = GroupMemberRole.MEMBER,
-): BaseAggregateRoot<StudyGroupMember>() {
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+): BaseAggregateRoot<StudyGroupMember>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
-    val identifier: String
-        get() = id.toHexString()
+//    val identifier: String
+//        get() = id.toHexString()
 
     val groupId: ObjectId = groupId
 

@@ -24,11 +24,11 @@ class ScheduleTimeChangedEvent(
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
-                    resourceId = group.id.toHexString()
+                    resourceId = group.identifier
                 ),
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
-                    resourceId = schedule.id.toHexString()
+                    resourceId = schedule.identifier
                 )
             )
         )
@@ -36,7 +36,7 @@ class ScheduleTimeChangedEvent(
 
     fun toSchedulePushEvent(group: StudyGroup): SchedulePushEvent {
         return SchedulePushEvent(
-            scheduleId = this.schedule.id,
+            scheduleId = this.schedule.id!!,
             title = group.name,
             body = "${schedule.session} 회차 일정이 변경되었어요.",
             image = null,

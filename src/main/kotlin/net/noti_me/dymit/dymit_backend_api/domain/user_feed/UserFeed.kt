@@ -8,13 +8,20 @@ import java.time.LocalDateTime
 
 @Document(collection = "user_feeds")
 class UserFeed(
-    @Id
-    val id: ObjectId = ObjectId(),
+    id: ObjectId? = null,
     val memberId: ObjectId,
     val message: String,
     val associates: List<AssociatedResource>,
     isRead: Boolean = false,
-) : BaseAggregateRoot<UserFeed>() {
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<UserFeed>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
     var isRead: Boolean = isRead
         private set

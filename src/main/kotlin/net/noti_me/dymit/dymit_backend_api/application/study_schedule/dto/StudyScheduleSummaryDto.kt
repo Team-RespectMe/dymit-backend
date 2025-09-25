@@ -22,7 +22,7 @@ class StudyScheduleSummaryDto(
 
         fun from(entity: StudySchedule): StudyScheduleSummaryDto {
             return StudyScheduleSummaryDto(
-                id = entity.id.toHexString(),
+                id = entity.identifier,
                 groupId = entity.groupId.toHexString(),
                 title = entity.title,
                 description = entity.description,

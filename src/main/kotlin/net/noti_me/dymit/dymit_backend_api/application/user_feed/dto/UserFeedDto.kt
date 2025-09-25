@@ -15,7 +15,7 @@ data class UserFeedDto(
     companion object {
         fun from(userFeed: UserFeed): UserFeedDto {
             return UserFeedDto(
-                id = userFeed.id.toHexString(),
+                id = userFeed.identifier,
                 memberId = userFeed.memberId.toHexString(),
                 message = userFeed.message,
                 associates = userFeed.associates,

@@ -29,11 +29,11 @@ class StudyScheduleCreatedEvent(
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
-                    resourceId = group.id.toHexString()
+                    resourceId = group.identifier
                 ),
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
-                    resourceId = schedule.id.toHexString()
+                    resourceId = schedule.identifier
                 )
             )
         )
@@ -41,7 +41,7 @@ class StudyScheduleCreatedEvent(
 
     fun toGroupPushEvent(group: StudyGroup): GroupBroadCastPushEvent {
         return GroupBroadCastPushEvent(
-            groupId = group.id,
+            groupId = group.id!!,
             title = group.name,
             body = "새로운 스터디 일정이 생성되었어요",
             image = null,

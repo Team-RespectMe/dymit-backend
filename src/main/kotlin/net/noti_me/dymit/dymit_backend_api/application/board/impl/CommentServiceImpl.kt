@@ -41,7 +41,7 @@ class CommentServiceImpl(
         val comment = PostComment(
             postId = ObjectId(command.postId),
             writer = Writer(
-                id = groupMember.id,
+                id = groupMember.memberId,
                 nickname = groupMember.nickname,
                 image = ProfileImageVo(
                     url = groupMember.profileImage.url,

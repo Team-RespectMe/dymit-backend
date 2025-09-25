@@ -6,18 +6,28 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.LocalDateTime
 
 @Document("study_group_posts")
 class Post(
-    @Id
-    val id: ObjectId = ObjectId(),
+//    @Id
+//    val id: ObjectId = ObjectId(),
+    id: ObjectId? = null,
     val groupId: ObjectId,
     val boardId: ObjectId,
     writer: Writer,
     title: String,
     content: String,
     commentCount: Long = 0,
-) : BaseAggregateRoot<Post>() {
+    createdAt: LocalDateTime?= null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<Post>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
     var writer: Writer = writer
         private set

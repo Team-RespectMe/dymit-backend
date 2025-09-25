@@ -26,11 +26,11 @@ class StudyRoleAssignedEvent(
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
-                    resourceId = group.id.toHexString()
+                    resourceId = group.identifier,
                 ),
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
-                    resourceId = schedule.id.toHexString()
+                    resourceId = schedule.identifier
                 )
             )
         )
@@ -45,7 +45,7 @@ class StudyRoleAssignedEvent(
             data = mapOf(
                 "type" to "STUDY_GROUP_SCHEDULE",
                 "groupId" to schedule.groupId.toHexString(),
-                "scheduleId" to schedule.id.toHexString()
+                "scheduleId" to schedule.identifier
             )
         )
     }

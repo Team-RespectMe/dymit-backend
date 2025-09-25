@@ -18,7 +18,7 @@ class PostDto(
     companion object {
         fun from(entity: Post): PostDto {
             return PostDto(
-                id = entity.id.toHexString(),
+                id = entity.identifier,
                 groupId = entity.groupId.toHexString(),
                 boardId = entity.boardId.toHexString(),
                 writer = entity.writer,
