@@ -72,7 +72,7 @@ class GlobalErrorHandlerAdvice {
     @ExceptionHandler
     fun handleException(exception: Exception): ResponseEntity<ErrorResponse> {
         logger.error("Unhandled exception occurred: ${exception.message}", exception)
-        val response = ErrorResponse.of(status = HttpStatus.INTERNAL_SERVER_ERROR, code = "INTERNAL_SERVER_ERROR", message = "서버 내부 오류")
+        val response = ErrorResponse.of(status = HttpStatus.INTERNAL_SERVER_ERROR, code = "INTERNAL_SERVER_ERROR", message = exception.message)
         return ResponseEntity(response, HttpStatusCode.valueOf(500)) // Internal Server Error
     }
 }

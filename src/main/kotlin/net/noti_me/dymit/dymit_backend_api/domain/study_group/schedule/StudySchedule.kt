@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 @Document(collection="study_schedules")
 class StudySchedule(
 //    id: ObjectId = ObjectId.get(),
+    id: ObjectId? = null,
     groupId: ObjectId = ObjectId.get(),
     title: String = "",
     description: String = "",
@@ -21,8 +22,16 @@ class StudySchedule(
     val session: Long = 1,
     scheduleAt: LocalDateTime,
     roles: MutableSet<ScheduleRole> = mutableSetOf(),
-    nrParticipant: Long = 0L
-) : BaseAggregateRoot<StudySchedule>() {
+    nrParticipant: Long = 0L,
+    createdAt: LocalDateTime? = null,
+    updatedAt: LocalDateTime? = null,
+    isDeleted: Boolean = false
+) : BaseAggregateRoot<StudySchedule>(
+    id = id,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    isDeleted = isDeleted
+) {
 
 //    @Id
 //    var id: ObjectId = id

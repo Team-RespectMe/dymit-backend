@@ -75,15 +75,15 @@ class StudyScheduleServiceImpl(
             ),
             roles = roles
         )
+        val savedSchedule = studyScheduleRepository.save(newStudySchedule)
+
         group.updateRecentSchedule(RecentScheduleVo(
-            scheduleId = newStudySchedule.id!!,
-            title = newStudySchedule.title,
-            session = newStudySchedule.session,
-            scheduleAt = newStudySchedule.scheduleAt
+            scheduleId = savedSchedule.id!!,
+            title = savedSchedule.title,
+            session = savedSchedule.session,
+            scheduleAt = savedSchedule.scheduleAt
         ))
 
-        val savedSchedule = studyScheduleRepository.save(newStudySchedule)
-        saveStudyGroupPort.persist(group)
         eventPublisher.publishEvent(StudyScheduleCreatedEvent(savedSchedule));
         return StudyScheduleDto.from(savedSchedule)
     }
