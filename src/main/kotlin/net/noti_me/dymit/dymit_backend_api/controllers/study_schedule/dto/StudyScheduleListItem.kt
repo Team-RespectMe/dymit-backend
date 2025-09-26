@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleSummaryDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import java.time.LocalDateTime
 
 @Schema(
     description = "스터디 그룹 일정 목록 항목",
@@ -29,10 +30,10 @@ class StudyScheduleListItem(
     )
     val session: Long,
     @field: Schema(
-        description = "스터디 그룹 일정 장소",
-        example = "{ \"type\": \"ONLINE\", \"value\": \"https://example.com/meeting\" }",
+        description = "스터디 그룹 일정 예정 시간",
+        example = "2023-10-01T14:00:00",
     )
-    val scheduleAt: String,
+    val scheduleAt: LocalDateTime,
     @field: Schema(
         description = "참여 인원 수",
         example = "5",
@@ -51,7 +52,7 @@ class StudyScheduleListItem(
                 title = dto.title,
                 description = dto.description,
                 session = dto.session,
-                scheduleAt = dto.scheduleAt.toString(),
+                scheduleAt = dto.scheduleAt,
                 participantCount = dto.participantCount,
                 roles = dto.roles.map { StudyScheduleRoleResponse.from(it) }
             )
