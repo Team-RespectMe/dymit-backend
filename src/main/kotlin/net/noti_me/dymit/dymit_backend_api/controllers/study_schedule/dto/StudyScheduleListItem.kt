@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleSummaryDto
+import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import java.time.LocalDateTime
 
@@ -34,6 +35,11 @@ class StudyScheduleListItem(
         example = "2023-10-01T14:00:00",
     )
     val scheduleAt: LocalDateTime,
+    @field: Schema(
+        description = "스터디 그룹 일정 장소 정보",
+        example = "{type: 'OFFLINE', value: '서울 강남구 역삼동 123-45', link: null}",
+    )
+    val location: LocationVo = LocationVo(),
     @field: Schema(
         description = "참여 인원 수",
         example = "5",

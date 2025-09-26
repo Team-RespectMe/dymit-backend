@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleL
 
 class LocationVo(
     val type: ScheduleLocation.LocationType = ScheduleLocation.LocationType.OFFLINE,
-    val value: String = "",
+    val value: String = "임의의 장소",
     val link: String? = null
 ) {
 
