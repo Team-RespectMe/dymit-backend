@@ -42,7 +42,7 @@ class ScheduleComment(
      * @throws ForbiddenException 댓글 작성자가 아닌 경우
      */
     fun updateContent(requester: StudyGroupMember, newContent: String) {
-        if (requester.id != writer.id) {
+        if (requester.memberId != writer.id) {
             throw ForbiddenException(message = "댓글 작성자만 댓글을 수정할 수 있습니다.")
         }
 

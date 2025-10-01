@@ -20,6 +20,7 @@ class MemberDeleteUsecaseImpl(
 
         val member = loadMemberPort.loadById(memberId)
             ?: return
+        member.changeNickname("탈퇴한 회원${memberId}")
 
         saveMemberPort.delete(member)
     }
