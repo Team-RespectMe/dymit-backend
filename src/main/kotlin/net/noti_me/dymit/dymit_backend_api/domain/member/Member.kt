@@ -30,7 +30,7 @@ class Member(
     ),
     lastAccessAt: LocalDateTime = LocalDateTime.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
-    refreshTokens: MutableSet<String> = mutableSetOf(),
+    refreshTokens: MutableSet<RefreshToken> = mutableSetOf(),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false
@@ -41,7 +41,7 @@ class Member(
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 
-    val refreshTokens: MutableSet<String> = refreshTokens
+    val refreshTokens: MutableSet<RefreshToken> = refreshTokens
 
     @Indexed(unique = true)
     var nickname: String = nickname
@@ -113,17 +113,28 @@ class Member(
         this.lastAccessAt = LocalDateTime.now()
     }
 
-    fun addRefreshToken(token: String) {
-        if ( refreshTokens.size >= 5 ) {
-            refreshTokens.remove(refreshTokens.first());
-            // 토큰은 5개까지만 생성 가능하므로 무작위로 하나 삭제한다.
+    private fun removeExpiredToken() {
+        val iter = refreshTokens.iterator()
+        while ( iter.hasNext() ) {
+            val token = iter.next()
+            if ( token.isExpired() ) {
+                iter.remove()
+            }
         }
-        refreshTokens.add(token)
+    }
+
+    fun addRefreshToken(token: String, expireAt: Instant) {
+        removeExpiredToken()
+        // 최대 개수가 5개 이상이라면, 가장 오래된 토큰을 제거한다.
+        if ( refreshTokens.size >= 5 ) {
+            refreshTokens.remove(refreshTokens.first())
+        }
+        refreshTokens.add(RefreshToken(token, expireAt))
         updateLastAccessedAt()
     }
 
     fun removeRefreshToken(token: String) {
-        refreshTokens.remove(token)
+        refreshTokens.removeIf{ it.token == token }
         updateLastAccessedAt()
     }
 

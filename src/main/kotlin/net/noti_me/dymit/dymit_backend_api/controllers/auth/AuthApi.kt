@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
+import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.LoginResponse
 import org.springframework.web.bind.annotation.RequestBody
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcLoginRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.RefreshTokenSubmitRequest
@@ -39,7 +40,7 @@ interface AuthApi {
     @ResponseStatus(HttpStatus.CREATED)
     fun oidcLogin(
         @RequestBody request: OidcLoginRequest
-    ) : LoginResult
+    ) : LoginResponse
 
     @Operation(
         summary = "액세스 토큰 재발급",
@@ -70,7 +71,7 @@ interface AuthApi {
     @ResponseStatus(HttpStatus.OK)
     fun reissueAccessToken(
         @RequestBody @Valid request: RefreshTokenSubmitRequest
-    ): LoginResult
+    ): LoginResponse
 
     @Operation(
         summary = "JWT 블랙리스트 등록",

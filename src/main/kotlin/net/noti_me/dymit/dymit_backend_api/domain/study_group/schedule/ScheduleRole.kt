@@ -17,8 +17,16 @@ class ScheduleRole(
     val color: String = "#FF3357",
     val roles: List<String>
 ) {
-    fun isRoleChanged(newRoles: List<String>): Boolean {
-        return roles != newRoles
+
+    /**
+     * 새로운 역할 목록이 기존 역할 목록과 다른지 여부를 반환합니다.
+     * @param newRoles 새로운 역할 목록
+     * @return 역할 목록이 변경되었으면 true, 그렇지 않으면 false
+     */
+    fun isRoleChanged(newRoles: ScheduleRole): Boolean {
+        if ( this != newRoles ) throw IllegalArgumentException("Cannot compare roles for different members")
+        if (roles.size != newRoles.roles.size) return true
+        return roles.sorted() != newRoles.roles.sorted()
     }
 
     override fun equals(other: Any?): Boolean {

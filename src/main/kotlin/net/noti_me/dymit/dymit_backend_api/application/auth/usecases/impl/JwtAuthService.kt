@@ -40,44 +40,51 @@ class JwtAuthService(
             )
         ) ?: throw NotFoundException("존재하지 않는 회원입니다. 회원 가입이 필요합니다.")
 
+        val refreshToken = jwtService.createRefreshToken(member)
+        val accessToken = jwtService.createAccessToken(member)
+
         val result = LoginResult(
             memberId = member.identifier,
-            accessToken = jwtService.createAccessToken(member),
-            refreshToken = jwtService.createRefreshToken(member)
+            accessToken = accessToken.token,
+            refreshToken = refreshToken.token
         )
-        member.addRefreshToken(result.refreshToken)
+        member.addRefreshToken(refreshToken.token, refreshToken.expireAt)
         saveMemberPort.persist(member)
         return result
     }
 
     override fun reissueAccessToken(refreshToken: String): LoginResult {
-        val decodedToken = try {
-            jwtService.verifyRefreshToken(refreshToken)
-        } catch(e: JWTVerificationException) {
-            throw UnauthorizedException("AE-001", "유효하지 않은 리프레시 토큰입니다.")
-        }
+        val decodedToken = jwtService.decodeToken(refreshToken)
         val memberId = decodedToken.subject
         val member = loadMemberPort.loadById(memberId)
             ?: throw UnauthorizedException("AE-003", "사용자 정보를 찾을 수 없습니다.")
-
-        if ( member.refreshTokens.contains(refreshToken).not() ) {
-            throw UnauthorizedException("AE-004", "비활성화 된 리프레시 토큰입니다.")
-        }
+        val existsToken = member.refreshTokens.find {
+            it.token==refreshToken
+        }  ?: throw UnauthorizedException("AE-004", "비활성화 되었거나 등록되지 않은 리프레시 토큰입니다.")
 
         // Refresh 토큰의 유효기간이 하루 이하로 남은 경우 재발급 로직을 수행하고, 기존 토큰을 제거한다.
         // 우선 expiredAt을 Instant로 변환
         val expiresAt = decodedToken.expiresAt!!.toInstant()
         val current = Instant.now()
+
+        if (  existsToken.isExpired() ) {
+            member.removeRefreshToken(refreshToken)
+            saveMemberPort.update(member)
+            throw UnauthorizedException("AE-005", "만료된 리프레시 토큰입니다.")
+        }
+
         var newRefreshToken = refreshToken
         if ( expiresAt.isBefore(current.plusMillis(24 * 60 * 60 * 1000) ) ) {
-            newRefreshToken = jwtService.createRefreshToken(member)
+            val newRefreshTokenInfo = jwtService.createRefreshToken(member)
             member.removeRefreshToken(refreshToken)
+            member.addRefreshToken(newRefreshTokenInfo.token, newRefreshTokenInfo.expireAt)
+            newRefreshToken = newRefreshTokenInfo.token
             saveMemberPort.persist(member)
         }
 
         return LoginResult(
             memberId = member.identifier,
-            accessToken = jwtService.createAccessToken(member),
+            accessToken = jwtService.createAccessToken(member).token,
             refreshToken = newRefreshToken
         )
     }

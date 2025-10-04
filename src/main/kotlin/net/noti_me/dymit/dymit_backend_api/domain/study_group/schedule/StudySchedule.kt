@@ -4,9 +4,11 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleLocationChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleTimeChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyRoleAssignedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyRoleChangedEvent
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
@@ -33,12 +35,6 @@ class StudySchedule(
     isDeleted = isDeleted
 ) {
 
-//    @Id
-//    var id: ObjectId = id
-//        private set
-
-//    val identifier: String
-//        get() = id.toHexString()
     @Indexed(name = "study_schedule_group_id_idx")
     var groupId: ObjectId = groupId
         private set
@@ -113,7 +109,28 @@ class StudySchedule(
             return // No change
         }
         this.location = newLocation
-        registerEvent(ScheduleTimeChangedEvent(this))
+        registerEvent(ScheduleLocationChangedEvent(this) )
+    }
+
+    private fun addNewRole(newRole: ScheduleRole) {
+        roles.add(newRole)
+        registerEvent(StudyRoleAssignedEvent(this, newRole))
+    }
+
+    private fun updateExistingRole(target: ScheduleRole, newRole: ScheduleRole) {
+        if ( target.isRoleChanged(newRole) ) {
+            registerEvent(StudyRoleChangedEvent(this, newRole))
+        }
+        roles.remove(target)
+        roles.add(newRole)
+    }
+
+    private fun addRole(
+        newRole: ScheduleRole
+    ) {
+        roles.firstOrNull { it.memberId == newRole.memberId }
+            ?.let { updateExistingRole(it, newRole) }
+            ?: addNewRole(newRole)
     }
 
     fun updateRoles(
@@ -121,33 +138,11 @@ class StudySchedule(
         newRoles: Set<ScheduleRole>
     ) {
         checkDefaultPermissions(requester)
-
-        val oldRolesByMember = this.roles.associateBy { it.memberId }
-        val newRolesByMember = newRoles.associateBy { it.memberId }
-        val updatedRoles = mutableSetOf<ScheduleRole>()
-
-        // 기존 멤버 중 역할이 변경된 경우 교체
-        for (oldRole in this.roles) {
-            val newRole = newRoles.find { it.memberId == oldRole.memberId }
-            if (newRole != null) {
-                if (oldRole.roles != newRole.roles) {
-                    updatedRoles.add(newRole)
-                } else {
-                    updatedRoles.add(oldRole)
-                }
-            }
+        val rolesToRemove = roles.filter { existingRole ->
+            newRoles.none { it.memberId == existingRole.memberId }
         }
-
-        // 삭제된 멤버 역할 제거
-        val removedMemberIds = this.roles.map { it.memberId }.toSet() - newRoles.map { it.memberId }.toSet()
-        val addedRoles = newRoles.filter { newRole -> this.roles.none { it.memberId == newRole.memberId } }
-        if (addedRoles.isNotEmpty()) {
-            updatedRoles.addAll(addedRoles)
-        }
-        // 삭제된 멤버는 updatedRoles에 추가하지 않음
-        updatedRoles.removeAll { it.memberId in removedMemberIds }
-        this.roles.clear()
-        this.roles.addAll(updatedRoles)
+        rolesToRemove.forEach { this.roles.remove(it) }
+        newRoles.forEach { newRole -> addRole(newRole) }
     }
 
     fun increaseParticipantCount() {

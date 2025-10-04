@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTDecodeException
 import com.auth0.jwt.interfaces.DecodedJWT
+import net.noti_me.dymit.dymit_backend_api.application.auth.dto.TokenInfo
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
@@ -34,12 +35,12 @@ class JwtService(
         .withAudience(jwtConfig.audience)
         .build()
 
-    fun createAccessToken(member: Member): String {
+    fun createAccessToken(member: Member): TokenInfo {
         val now = Instant.now()
         val expiresAt = now.plusMillis(jwtConfig.accessTokenExpiration)
         logger.debug("expiry: ${jwtConfig.accessTokenExpiration}")
         logger.debug("Creating access token for member: ${member.identifier}, expires at: $expiresAt")
-        return JWT.create()
+        val token = JWT.create()
             .withIssuer(jwtConfig.issuer)
             .withAudience(jwtConfig.audience)
             .withSubject(member.identifier)
@@ -48,18 +49,21 @@ class JwtService(
             .withClaim("nickname", member.nickname)
             .withArrayClaim("roles", arrayOf(MemberRole.ROLE_MEMBER.name))
             .sign(algorithm)
+
+        return TokenInfo(token, expiresAt)
     }
 
-    fun createRefreshToken(member: Member): String {
+    fun createRefreshToken(member: Member): TokenInfo {
         val now = Instant.now()
         val expiresAt = now.plusMillis(jwtConfig.refreshTokenExpiration)
-        return JWT.create()
+        val token = JWT.create()
             .withIssuer(jwtConfig.issuer)
             .withAudience(jwtConfig.audience)
             .withSubject(member.identifier)
             .withIssuedAt(now)
             .withExpiresAt(expiresAt)
             .sign(algorithm)
+        return TokenInfo(token, expiresAt)
     }
 
     fun verifyAccessToken(token: String): DecodedJWT {
