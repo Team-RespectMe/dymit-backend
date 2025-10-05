@@ -59,6 +59,7 @@ class StudyScheduleListItem(
                 description = dto.description,
                 session = dto.session,
                 scheduleAt = dto.scheduleAt,
+                location = dto.location,
                 participantCount = dto.participantCount,
                 roles = dto.roles.map { StudyScheduleRoleResponse.from(it) }
             )
