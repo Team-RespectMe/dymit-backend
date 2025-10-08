@@ -29,7 +29,7 @@ class MongoPostCommentRepository(
         )
 
         comments.forEach { comment ->
-            val query = Query(Criteria.where("id").`is`(comment.id))
+            val query = Query(Criteria.where("_id").`is`(comment.id))
             val update = Update()
             val doc = mongoTemplate.getConverter()
                 .convertToMongoType(comment) as Document
@@ -75,13 +75,13 @@ class MongoPostCommentRepository(
 
     override fun deleteById(id: String): Boolean {
         val objectId = ObjectId(id)
-        val query = Query.query(Criteria.where("id").`is`(objectId))
+        val query = Query.query(Criteria.where("_id").`is`(objectId))
         val deleteResult = mongoTemplate.remove(query, PostComment::class.java)
         return deleteResult.deletedCount > 0
     }
 
     override fun delete(comment: PostComment): Boolean {
-        val query = Query.query(Criteria.where("id").`is`(comment.id))
+        val query = Query.query(Criteria.where("_id").`is`(comment.id))
         val deleteResult = mongoTemplate.remove(query, PostComment::class.java)
         return deleteResult.deletedCount > 0
     }

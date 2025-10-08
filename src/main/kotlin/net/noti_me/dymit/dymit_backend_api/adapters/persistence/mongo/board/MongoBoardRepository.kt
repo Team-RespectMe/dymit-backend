@@ -40,7 +40,7 @@ class MongoBoardRepository(
 
     override fun deleteById(id: ObjectId): Boolean {
         return try {
-            val query = Query(Criteria.where("id").`is`(id))
+            val query = Query(Criteria.where("_id").`is`(id))
             val result = mongoTemplate.remove(query, Board::class.java)
             result.deletedCount > 0
         } catch (e: Exception) {

@@ -1,31 +1,36 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
 
-import net.noti_me.dymit.dymit_backend_api.application.push_notification.GroupBroadCastPushEvent
+import net.noti_me.dymit.dymit_backend_api.common.event.GroupImportantEvent
+import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import org.springframework.context.ApplicationEvent
 
 /**
  * 스터디 그룹 일정이 생성되는 경우 발행해야하는 이벤트
- * 이 이벤트를 발행하면, 해당 스터디 그룹의 모든 멤버들에게
- * 알림이 전송됩니다.
+ * 이 이벤트를 처리하여 다음 두 프로세스로 파생되어야 한다.
+ * 1. 그룹 피드
+ * 2. 그룹 멤버들에게 푸시 알림
+ * @param studySchedule 생성된 스터디 일정
  */
 class StudyScheduleCreatedEvent(
+    val group: StudyGroup,
     val studySchedule: StudySchedule,
-): ApplicationEvent(studySchedule) {
+): GroupImportantEvent(studySchedule) {
 
-    fun toUserFeed(
-        group: StudyGroup,
-        schedule: StudySchedule,
-        member: StudyGroupMember
-    ): UserFeed {
-        return UserFeed(
-            memberId = member.memberId,
-            message = "[${group.name}] 새로운 스터디 일정: ${schedule.title}",
+    override fun processGroupFeed(): GroupFeed {
+        return GroupFeed(
+            groupId = studySchedule.groupId,
+            iconType = IconType.CALENDAR,
+            messages = listOf(
+                FeedMessage(
+                    text = "${group.name} ${studySchedule.session}회차 일정이 추가되었어요!",
+                ),
+            ),
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
@@ -33,22 +38,21 @@ class StudyScheduleCreatedEvent(
                 ),
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
-                    resourceId = schedule.identifier
+                    resourceId = studySchedule.identifier
                 )
             )
         )
     }
 
-    fun toGroupPushEvent(group: StudyGroup): GroupBroadCastPushEvent {
-        return GroupBroadCastPushEvent(
-            groupId = group.id!!,
+    override fun processGroupPush(): GroupPushMessage {
+        return GroupPushMessage(
+            groupId = studySchedule.groupId,
             title = group.name,
-            body = "새로운 스터디 일정이 생성되었어요",
-            image = null,
+            body = "${studySchedule.session}회차 일정이 추가되었어요!",
             data = mapOf(
-                "type" to "STUDY_GROUP",
-                "groupId" to group.id.toHexString()
-            )
+                "groupId" to group.identifier,
+                "scheduleId" to studySchedule.identifier
+            ),
         )
     }
 }

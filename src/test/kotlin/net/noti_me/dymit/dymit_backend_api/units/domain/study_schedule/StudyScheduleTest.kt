@@ -9,7 +9,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleTimeChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule

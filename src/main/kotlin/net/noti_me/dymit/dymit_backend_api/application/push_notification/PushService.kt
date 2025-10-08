@@ -1,23 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.application.push_notification
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken
+import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
+import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
 import org.bson.types.ObjectId
 
 interface PushService {
 
-    fun sendPushNotification(
-        deviceToken: String,
-        title: String,
-        body: String,
-        image : String? = null,
-        data: Map<String, String> = emptyMap(),
-    )
+    fun sendPersonalPush(message: PersonalPushMessage)
 
-    fun sendPushNotifications(
-        deviceTokens: List<String>,
-        title: String,
-        body: String,
-        image: String? = null,
-        data: Map<String, String> = emptyMap(),
-    )
+    fun sendGroupPush(message: GroupPushMessage)
 }

@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.GroupBroadCastPushEvent
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.MemberPushEvent
-import net.noti_me.dymit.dymit_backend_api.application.push_notification.PushEventHandler
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.PushService
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.SchedulePushEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken

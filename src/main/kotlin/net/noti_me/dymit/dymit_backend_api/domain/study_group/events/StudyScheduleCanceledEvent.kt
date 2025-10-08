@@ -1,13 +1,14 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
 
-import net.noti_me.dymit.dymit_backend_api.application.push_notification.SchedulePushEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.common.event.GroupImportantEvent
+import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import org.springframework.context.ApplicationEvent
 
 /**
  * 스터디 그룹 일정이 취소되는 경우 발행해야하는 이벤트
@@ -17,16 +18,23 @@ import org.springframework.context.ApplicationEvent
 class StudyScheduleCanceledEvent(
     val group: StudyGroup,
     val schedule: StudySchedule
-) : ApplicationEvent(schedule) {
+): GroupImportantEvent(schedule) {
 
-    fun toUserFeed(
-        group: StudyGroup,
-        schedule: StudySchedule,
-        participant: ScheduleParticipant,
-    ): UserFeed {
-        return UserFeed(
-            memberId = participant.memberId,
-            message = "[${group.name}] ${schedule.session} 회차 일정이 취소되었어요.",
+    override fun processGroupFeed(): GroupFeed {
+        return GroupFeed(
+            groupId = group.id!!,
+            iconType = IconType.CALENDAR,
+            messages = listOf(
+                FeedMessage(
+                    text = group.name,
+                ),
+                FeedMessage(
+                    text = " ${schedule.session}회차 ",
+                ),
+                FeedMessage(
+                    text = " 일정이 취소되었어요!",
+                )
+            ),
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
@@ -40,17 +48,16 @@ class StudyScheduleCanceledEvent(
         )
     }
 
-    fun toSchedulePushEvent(): SchedulePushEvent {
-        return SchedulePushEvent(
-            scheduleId = schedule.id!!,
+    override fun processGroupPush(): GroupPushMessage {
+        return GroupPushMessage(
+            groupId = group.id!!,
             title = group.name,
-            body = "${schedule.session} 회차 일정이 취소되었어요.",
-            image = null,
+            body = "${schedule.session}회차 일정이 취소되었어요!",
             data = mapOf(
-                "type" to "STUDY_GROUP_SCHEDULE",
                 "groupId" to group.identifier,
                 "scheduleId" to schedule.identifier
-            )
+            ),
+            image = null,
         )
     }
 }

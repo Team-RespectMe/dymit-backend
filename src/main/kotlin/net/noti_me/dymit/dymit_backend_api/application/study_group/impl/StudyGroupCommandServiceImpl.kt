@@ -1,7 +1,8 @@
-package net.noti_me.dymit.dymit_backend_api.application.study_group
+package net.noti_me.dymit.dymit_backend_api.application.study_group.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
+import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.ChangeGroupOwnerCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
@@ -22,7 +23,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupCreateEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberJoinEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberLeaveEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
@@ -83,8 +85,6 @@ class StudyGroupCommandServiceImpl(
             role = GroupMemberRole.OWNER
         )
         studyGroupMemberRepository.persist(owner)
-        applicationEventPublisher.publishEvent(StudyGroupCreateEvent(studyGroup.identifier, this))
-
         createStudyGroupBoard(member, studyGroup, "공지 사항")
 
         return StudyGroupDto
@@ -122,6 +122,13 @@ class StudyGroupCommandServiceImpl(
             role = GroupMemberRole.MEMBER,
         )
         newMember = studyGroupMemberRepository.persist(newMember)
+
+        applicationEventPublisher.publishEvent(
+            GroupMemberJoinEvent(
+                group = group,
+                member = newMember
+            )
+        )
 
         return StudyGroupMemberDto.from(newMember)
     }
@@ -234,6 +241,10 @@ class StudyGroupCommandServiceImpl(
             throw ConflictException(message = "스터디 그룹장은 스터디 그룹을 탈퇴할 수 없습니다. 다른 인원을 모두 탈퇴시킨 뒤 다시 시도하세요.")
         }
 
+        applicationEventPublisher.publishEvent(GroupMemberLeaveEvent(
+            group = group,
+            member = membership
+        ))
         studyGroupMemberRepository.delete(membership)
     }
 

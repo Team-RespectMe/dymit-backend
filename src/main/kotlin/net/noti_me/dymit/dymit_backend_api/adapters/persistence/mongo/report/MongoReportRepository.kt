@@ -50,7 +50,7 @@ class MongoReportRepository(
         val query = Query().with(Sort.by(Sort.Direction.DESC, "_id"))
 
         if (cursor != null) {
-            // 커서가 제공된 경우, 해당 커서 이후의 항목부터 조회
+            // 커서가 제공된 경우, 해당 커서 다음의 항목부터 조회
             query.addCriteria(Criteria.where("_id").lt(ObjectId(cursor)))
         }
         query.limit(size)

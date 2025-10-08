@@ -25,7 +25,7 @@ class MongoPostRepository(
         val ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Post::class.java)
 
         posts.forEach { post ->
-            val query = Query(Criteria.where("id").`is`(post.id))
+            val query = Query(Criteria.where("_id").`is`(post.id))
             val update = Update()
             val doc = mongoTemplate.getConverter()
                 .convertToMongoType(post) as Document
@@ -75,7 +75,7 @@ class MongoPostRepository(
         val query = Query(Criteria.where("boardId").`is`(objectId))
         if (lastId != null) {
             val lastObjectId = ObjectId(lastId)
-            query.addCriteria(Criteria.where("_id").lte(lastObjectId))
+            query.addCriteria(Criteria.where("_id").lt(lastObjectId))
         }
         query.limit(limit)
         query.with(Sort.by(Sort.Direction.DESC, "_id"))
@@ -85,7 +85,7 @@ class MongoPostRepository(
     override fun deleteById(id: String): Boolean {
         return try {
             val objectId = ObjectId(id)
-            val query = Query(Criteria.where("id").`is`(objectId))
+            val query = Query(Criteria.where("_id").`is`(objectId))
             val result = mongoTemplate.remove(query, Post::class.java)
             result.deletedCount > 0
         } catch (e: Exception) {

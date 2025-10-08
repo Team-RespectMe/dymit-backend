@@ -127,7 +127,7 @@ class MongoUserFeedRepositoryTest(
         userFeeds.forEach { mongoTemplate.save(it) }
 
         // When
-        val foundFeeds = mongoUserFeedRepository.findByMemberId(
+        val foundFeeds = mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
             testMemberId.toHexString(),
             null,
             10L
@@ -151,7 +151,7 @@ class MongoUserFeedRepositoryTest(
         val cursorFeed = userFeeds[2]
 
         // When
-        val foundFeeds = mongoUserFeedRepository.findByMemberId(
+        val foundFeeds = mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
             testMemberId.toHexString(),
             cursorFeed.id.toHexString(),
             10L
@@ -174,7 +174,7 @@ class MongoUserFeedRepositoryTest(
         }
 
         // When
-        val foundFeeds = mongoUserFeedRepository.findByMemberId(
+        val foundFeeds = mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
             testMemberId.toHexString(),
             null,
             5L
@@ -192,7 +192,7 @@ class MongoUserFeedRepositoryTest(
         mongoTemplate.save(userFeed)
 
         // When
-        val foundFeeds = mongoUserFeedRepository.findByMemberId(
+        val foundFeeds = mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
             testMemberId.toHexString(),
             "",
             10L
@@ -211,7 +211,7 @@ class MongoUserFeedRepositoryTest(
         val nonExistentMemberId = ObjectId().toHexString()
 
         // When
-        val foundFeeds = mongoUserFeedRepository.findByMemberId(
+        val foundFeeds = mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
             nonExistentMemberId,
             null,
             10L
@@ -228,7 +228,7 @@ class MongoUserFeedRepositoryTest(
 
         // When & Then
         shouldThrow<IllegalArgumentException> {
-            mongoUserFeedRepository.findByMemberId(invalidMemberId, null, 10L)
+            mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(invalidMemberId, null, 10L)
         }
     }
 
@@ -241,7 +241,7 @@ class MongoUserFeedRepositoryTest(
 
         // When & Then
         shouldThrow<IllegalArgumentException> {
-            mongoUserFeedRepository.findByMemberId(
+            mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
                 testMemberId.toHexString(),
                 invalidCursor,
                 10L

@@ -1,5 +1,6 @@
-package net.noti_me.dymit.dymit_backend_api.application.study_group
+package net.noti_me.dymit.dymit_backend_api.application.study_group.impl
 
+import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCodeVo
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.BlacklistDto
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
@@ -16,7 +17,6 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

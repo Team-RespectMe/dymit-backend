@@ -18,20 +18,20 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
     @Id
     @Indexed(unique = true)
     val id: ObjectId? = null,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: LocalDateTime? = LocalDateTime.now(),
+    updatedAt: LocalDateTime? = LocalDateTime.now(),
     isDeleted: Boolean = false
 ) : AbstractAggregateRoot<T>() {
 
     val identifier: String
         get() = id?.toHexString() ?: throw IllegalStateException("Entity ID is null")
 
-    @CreatedDate
-    var createdAt: LocalDateTime? = createdAt
+//    @CreatedDate
+    var createdAt: LocalDateTime? = createdAt ?: LocalDateTime.now()
         protected set
 
-    @LastModifiedDate
-    var updatedAt: LocalDateTime? = updatedAt
+//    @LastModifiedDate
+    var updatedAt: LocalDateTime? = updatedAt ?: LocalDateTime.now()
         protected set
 
     var isDeleted: Boolean = isDeleted

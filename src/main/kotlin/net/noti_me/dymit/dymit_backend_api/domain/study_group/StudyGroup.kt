@@ -8,7 +8,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberBlacklistedEvent
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -290,7 +289,6 @@ class StudyGroup(
             reason = reason
         )
         this.blacklists.add(blacklist)
-        registerEvent(GroupMemberBlacklistedEvent(this,blacklist))
     }
 
     /**
