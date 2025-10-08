@@ -1,16 +1,19 @@
 package net.noti_me.dymit.dymit_backend_api.domain.user_feed
 
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
 @Document(collection = "user_feeds")
+@CompoundIndex(name = "user_feeds_memberId_createdAt_idx", def = "{'memberId': 1, 'createdAt': -1}")
 class UserFeed(
     id: ObjectId? = null,
     val memberId: ObjectId,
-    val message: String,
+    val iconType: IconType,
+    val messages: List<FeedMessage>,
     val associates: List<AssociatedResource>,
     isRead: Boolean = false,
     createdAt: LocalDateTime? = null,
@@ -22,6 +25,34 @@ class UserFeed(
     updatedAt = updatedAt,
     isDeleted = isDeleted
 ) {
+
+    companion object {
+
+        fun create(memberId: ObjectId, groupFeed: GroupFeed): UserFeed {
+            assert(!groupFeed.isDeleted) { "삭제된 그룹 피드로부터 피드를 생성할 수 없습니다." }
+            return UserFeed(
+                memberId = memberId,
+                iconType = groupFeed.iconType,
+                messages = groupFeed.messages,
+                associates = groupFeed.associates,
+                createdAt = groupFeed.createdAt,
+                updatedAt = groupFeed.updatedAt
+            )
+        }
+
+        fun create( member: StudyGroupMember, groupFeed: GroupFeed ): UserFeed {
+            assert( !member.isDeleted ) { "삭제된 멤버에게 피드를 생성할 수 없습니다." }
+            assert( !groupFeed.isDeleted ) { "삭제된 그룹 피드로부터 피드를 생성할 수 없습니다." }
+            return UserFeed(
+                memberId = member.id!!,
+                iconType = groupFeed.iconType,
+                messages = groupFeed.messages,
+                associates = groupFeed.associates,
+                createdAt = groupFeed.createdAt,
+                updatedAt = groupFeed.updatedAt
+            )
+        }
+    }
 
     var isRead: Boolean = isRead
         private set
@@ -35,18 +66,16 @@ class UserFeed(
     fun isOwnedBy(memberId: String): Boolean {
         return this.memberId.toHexString() == memberId
     }
+
+    override fun equals(other: Any?): Boolean {
+        if ( this === other ) return true
+        if ( other !is UserFeed ) return false
+        if ( id == null || other.id == null ) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
 }
 
-enum class ResourceType {
-    MEMBER,
-    STUDY_GROUP,
-    STUDY_GROUP_MEMBER,
-    STUDY_GROUP_SCHEDULE,
-    STUDY_GROUP_POST,
-    STUDY_GROUP_POST_COMMENT
-}
-
-data class AssociatedResource(
-    val type: ResourceType,
-    val resourceId: String
-)

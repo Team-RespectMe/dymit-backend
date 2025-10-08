@@ -16,7 +16,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentScheduleVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyRoleAssignedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleCancelParticipateEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyScheduleCanceledEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyScheduleCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
@@ -69,10 +70,7 @@ class StudyScheduleServiceImpl(
             description = command.description,
             scheduleAt = command.scheduleAt,
             session = lastSessionNumber + 1L,
-            location = ScheduleLocation(
-                type = command.location.type,
-                value = command.location.value
-            ),
+            location = ScheduleLocation.from(command.location),
             roles = roles
         )
         val savedSchedule = studyScheduleRepository.save(newStudySchedule)
@@ -84,7 +82,7 @@ class StudyScheduleServiceImpl(
             scheduleAt = savedSchedule.scheduleAt
         ))
 
-        eventPublisher.publishEvent(StudyScheduleCreatedEvent(savedSchedule));
+        eventPublisher.publishEvent(StudyScheduleCreatedEvent(group = group, studySchedule=savedSchedule));
         return StudyScheduleDto.from(savedSchedule)
     }
 
@@ -113,18 +111,16 @@ class StudyScheduleServiceImpl(
             memberId = ObjectId(memberInfo.memberId)
         ) ?: throw ForbiddenException(message = "가입된 그룹이 아닙니다.")
 
-        schedule.changeScheduleAt(requester = groupMember, newScheduleAt = command.scheduleAt)
+        schedule.changeScheduleAt(group=group, requester = groupMember, newScheduleAt = command.scheduleAt)
         schedule.changeTitle(requester=groupMember,newTitle = command.title)
         schedule.changeDescription(groupMember, newDescription = command.description)
         schedule.changeLocation(
+            group = group,
             requester = groupMember,
-            newLocation = ScheduleLocation(
-                type = command.location.type,
-                value = command.location.value
-            )
+            newLocation = ScheduleLocation.from(command.location)
         )
         val roles = createScheduleRoles(groupId = ObjectId(groupId), roles=command.roles)
-        schedule.updateRoles(requester = groupMember, newRoles = roles)
+        schedule.updateRoles(group = group, requester = groupMember, newRoles = roles)
         schedule = studyScheduleRepository.save(schedule)
         group.updateRecentSchedule(RecentScheduleVo(
             scheduleId = schedule.id!!,
@@ -235,6 +231,13 @@ class StudyScheduleServiceImpl(
         )
 
         val participant = participantRepository.save(scheduleMember)
+        if ( schedule.isRoleAssigned(participant.memberId) ) {
+            eventPublisher.publishEvent(ScheduleParticipateEvent(
+                group = loadStudyGroupPort.loadByGroupId(groupId)!!,
+                schedule = schedule,
+                member = groupMember
+            ))
+        }
         schedule.increaseParticipantCount()
         studyScheduleRepository.save(schedule)
 
@@ -245,10 +248,13 @@ class StudyScheduleServiceImpl(
     }
 
     override fun leaveSchedule(memberInfo: MemberInfo, groupId: String, scheduleId: String): Unit {
+        val group = loadStudyGroupPort.loadByGroupId(groupId)
+            ?: throw IllegalArgumentException("존재하지 않는 스터디 그룹입니다.")
+
         val schedule = studyScheduleRepository.loadById(ObjectId(scheduleId))
             ?: throw IllegalArgumentException("존재하지 않는 스케줄입니다.")
 
-        if ( schedule.groupId != ObjectId(groupId) ) {
+        if ( schedule.groupId != group.id ) {
             throw ForbiddenException(message = "해당 그룹의 스케줄이 아닙니다.")
         }
 
@@ -258,6 +264,21 @@ class StudyScheduleServiceImpl(
 
         val participant = participantRepository.getByScheduleIdAndMemberId(schedule.id!!, ObjectId(memberInfo.memberId))
             ?: throw IllegalArgumentException("해당 스케줄에 참여하지 않은 멤버입니다.")
+
+        if ( schedule.isRoleAssigned(participant.memberId) ) {
+            groupMemberRepository.findByGroupIdAndMemberId(
+                groupId = ObjectId(groupId),
+                memberId = ObjectId(memberInfo.memberId)
+            )?.let {
+                eventPublisher.publishEvent(
+                    ScheduleCancelParticipateEvent(
+                        group = group,
+                        schedule = schedule,
+                        member = it
+                    )
+                )
+            }
+        }
 
 //        studyScheduleRepository.delete(schedule)
         participantRepository.delete(participant)

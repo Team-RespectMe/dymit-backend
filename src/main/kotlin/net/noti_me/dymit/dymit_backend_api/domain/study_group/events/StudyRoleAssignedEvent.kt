@@ -1,52 +1,62 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
 
-import net.noti_me.dymit.dymit_backend_api.application.push_notification.MemberPushEvent
+import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
+import net.noti_me.dymit.dymit_backend_api.common.event.PersonalImportantEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import org.springframework.context.ApplicationEvent
 
 class StudyRoleAssignedEvent(
+    val group: StudyGroup,
     val schedule: StudySchedule,
     val role: ScheduleRole,
-): ApplicationEvent(schedule){
+): PersonalImportantEvent(role) {
 
-    fun toUserFeed(
-        group: StudyGroup,
-        schedule: StudySchedule,
-        member: StudyGroupMember,
-    ): UserFeed {
+    override fun processUserFeed(): UserFeed {
         return UserFeed(
-            memberId = member.memberId,
-            message = "[${group.name}] 에서 ${schedule.session} 회차에 필요한 역할이 ${member.nickname}님께 할당되었어요.",
+            iconType = IconType.FRONT_OF_LAPTOP,
+            memberId = role.memberId,
+            messages = listOf(
+                FeedMessage(
+                    text = "${group.name} ${schedule.session}회차 ",
+                ),
+                FeedMessage(
+                    text = role.roles.joinToString (", "),
+                    textColor = "#FF821B",
+                    highlightColor = "#FFF2E4"
+                ),
+                FeedMessage(
+                    text = " 역할이 지정되었습니다.",
+                ),
+            ),
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
-                    resourceId = group.identifier,
+                    resourceId = schedule.groupId.toHexString()
                 ),
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
-                    resourceId = schedule.identifier
+                    resourceId = schedule.identifier,
                 )
             )
         )
     }
 
-    fun toMemberPushEvent(group: StudyGroup): MemberPushEvent {
-        return MemberPushEvent(
+    override fun processPushMessage(): PersonalPushMessage {
+        return PersonalPushMessage(
             memberId = role.memberId,
-            title = group.name,
-            body = "회원님께 중요한 역할이 할당되었어요. 확인해보세요!",
-            image = null,
-            data = mapOf(
-                "type" to "STUDY_GROUP_SCHEDULE",
+            title = "Dymit",
+            body = "${group.name} ${schedule.session}회차에 새로운 역할이 부여되었어요!",
+            data = mapOf (
                 "groupId" to schedule.groupId.toHexString(),
-                "scheduleId" to schedule.identifier
-            )
+                "scheduleId" to schedule.identifier,
+            ),
+            image = null,
         )
     }
 }

@@ -28,14 +28,6 @@ interface UserFeedApi {
                 responseCode = "200",
                 description = "피드 목록 조회 성공"
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증 실패"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류"
-            )
         ]
     )
     @ResponseStatus(HttpStatus.OK)
@@ -57,22 +49,6 @@ interface UserFeedApi {
                 responseCode = "204",
                 description = "피드 삭제 성공"
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증 실패"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "삭제 권한 없음"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "피드를 찾을 수 없음"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류"
-            )
         ]
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -94,22 +70,6 @@ interface UserFeedApi {
                 responseCode = "200",
                 description = "피드 읽음 처리 성공"
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증 실패"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "읽음 처리 권한 없음"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "피드를 찾을 수 없음"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류"
-            )
         ]
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)

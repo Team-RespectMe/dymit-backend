@@ -1,25 +1,26 @@
 package net.noti_me.dymit.dymit_backend_api.domain.member.events
 
+import net.noti_me.dymit.dymit_backend_api.common.event.PersonalFeedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import org.springframework.context.ApplicationEvent
 
 class MemberCreatedEvent(
-    source: Member
-): ApplicationEvent(source) {
+    val member: Member
+): PersonalFeedEvent(member) {
 
-    fun toUserFeed(member: Member): UserFeed {
+    override fun processUserFeed(): UserFeed {
+        val member = this.source as Member
         return UserFeed(
             memberId = member.id!!,
-            message = "환영합니다! ${member.nickname}님! Dymit에 오신 것을 환영합니다.",
-            associates = listOf(
-                AssociatedResource(
-                    type = ResourceType.MEMBER,
-                    resourceId = member.identifier,
+            iconType = IconType.HAND_WAVING,
+            messages = mutableListOf(
+                FeedMessage(
+                    text="환영합니다! ${member.nickname}님! Dymit에 오신 것을 환영합니다.",
                 )
-            )
+            ),
+            associates = listOf()
         )
     }
 }

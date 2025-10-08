@@ -31,8 +31,8 @@ class StudyScheduleSummaryDto(
                 location = LocationVo.from(entity.location),
                 participantCount = entity.nrParticipant,
                 roles = entity.roles.map { ScheduleRoleDto.from(it) },
-                createdAt = entity.createdAt?: LocalDateTime.now(),
-                updatedAt = entity.updatedAt?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: LocalDateTime.now(),
+                updatedAt = entity.updatedAt ?: LocalDateTime.now()
             )
         }
 

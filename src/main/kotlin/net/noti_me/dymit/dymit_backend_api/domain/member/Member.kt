@@ -5,13 +5,16 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeleteEvent
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 import kotlin.random.Random
 
+/**
+ * 멤버 도메인 엔티티
+ * 이 도메인 엔티티를 임베딩 하는 경우 아래 이벤트를 구독하여 일관성을 유지해야 한다.
+ * @see net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
+ */
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
 class Member(
@@ -35,9 +38,6 @@ class Member(
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<Member>(id, createdAt, updatedAt, isDeleted) {
-
-//    val identifier: String
-//        get() = id.toHexString()
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 
@@ -76,17 +76,17 @@ class Member(
 
     fun updateProfileImage(profileImage: MemberProfileImageVo) {
         this.profileImage = profileImage
-        registerEvent(MemberProfileImageChangedEvent(this))
+//        registerEvent(MemberProfileImageChangedEvent(this))
         updateLastAccessedAt()
     }
 
     fun deleteProfileImage() {
         if ( this.profileImage.type == "external" ) {
-            val event = MemberProfileImageDeleteEvent(
-                filePath = this.profileImage.filePath,
-                source = this
-            )
-            registerEvent(event)
+//            val event = MemberProfileImageDeleteEvent(
+//                filePath = this.profileImage.filePath,
+//                source = this
+//            )
+//            registerEvent(event)
         }
 
         this.profileImage = MemberProfileImageVo(
@@ -98,7 +98,7 @@ class Member(
             height = 0
         )
 
-        registerEvent(MemberProfileImageChangedEvent(this))
+//        registerEvent(MemberProfileImageChangedEvent(this))
     }
 
     fun addDeviceToken(deviceToken: DeviceToken) {

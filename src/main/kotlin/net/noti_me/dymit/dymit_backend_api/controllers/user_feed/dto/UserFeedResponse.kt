@@ -1,57 +1,45 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.user_feed.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import net.noti_me.dymit.dymit_backend_api.application.user_feed.dto.UserFeedDto
+import net.noti_me.dymit.dymit_backend_api.application.feed.dto.UserFeedDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.controllers.user_feed.vo.FeedMessageVo
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import java.time.LocalDateTime
 
 @Schema(description = "사용자 피드 응답")
 data class UserFeedResponse(
-    @Schema(description = "피드 ID", example = "507f1f77bcf86cd799439011")
+    @Schema(description = "피드 ID", example = "6884dec1beed715fdd4a7639")
     val id: String,
-
+    @Schema(description = "피드 아이콘 타입", example = "HAND_WAVING")
+    val iconType: IconType,
     @Schema(description = "피드 메시지", example = "새로운 댓글이 달렸습니다.")
-    val message: String,
-
-    @Schema(description = "연관 리소스 정보")
-    val associates: List<AssociatedResourceResponse>,
-
-    @Schema(description = "생성 시간")
-    val createdAt: LocalDateTime,
-
-    @Schema(description = "읽음 여부", example = "false")
-    val isRead: Boolean
+    val messages: List<FeedMessageVo> = listOf(
+        FeedMessageVo(text= "새로운 스터디 일정이 등록되었어요! ", highlightColor = "#FF5733"),
+        FeedMessageVo(text= "[ "),
+        FeedMessageVo(text= "2주차 - 포인터 및 배열(더미 데이터입니다.)", highlightColor = "#33C1FF"),
+        FeedMessageVo(text= " ]"),
+    ),
+    @Schema(description = "관련 리소스 목록, 리디렉션 시 사용")
+    val resources: List<AssociatedResourceResponse> ,
+    @Schema(description = "읽은 여부", example = "false")
+    val isRead: Boolean,
+    @Schema(description = "생성 일자", example = "2025-10-05T14:48:00")
+    val createdAt: LocalDateTime
 ): BaseResponse() {
+
     companion object {
         fun from(dto: UserFeedDto): UserFeedResponse {
             return UserFeedResponse(
                 id = dto.id,
-                message = dto.message,
-                associates = dto.associates.map { it ->
+                iconType = dto.iconType,
+                messages = dto.messages,
+                resources = dto.associates.map {
                     AssociatedResourceResponse.from(it)
                 },
-                createdAt = dto.createdAt,
-                isRead = dto.isRead
-            )
-        }
-    }
-}
-
-@Schema(description = "연관 리소스 응답")
-data class AssociatedResourceResponse(
-    @Schema(description = "리소스 타입", example = "STUDY_GROUP")
-    val type: ResourceType,
-
-    @Schema(description = "리소스 ID", example = "507f1f77bcf86cd799439012")
-    val resourceId: String
-) {
-    companion object {
-        fun from(associated: AssociatedResource): AssociatedResourceResponse {
-            return AssociatedResourceResponse(
-                type = associated.type,
-                resourceId = associated.resourceId
+                isRead = dto.isRead,
+                createdAt = dto.createdAt
             )
         }
     }

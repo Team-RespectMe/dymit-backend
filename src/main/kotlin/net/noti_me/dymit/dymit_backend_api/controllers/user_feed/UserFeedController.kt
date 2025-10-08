@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.user_feed
 
-import net.noti_me.dymit.dymit_backend_api.application.user_feed.UserFeedService
+import net.noti_me.dymit.dymit_backend_api.application.feed.UserFeedService
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.user_feed.dto.UserFeedResponse
@@ -16,11 +16,9 @@ class UserFeedController(
         cursor: String?,
         size: Int
     ): ListResponse<UserFeedResponse> {
-        // Service에서 size + 1개를 조회 (다음 페이지 존재 여부 확인용)
+//         Service에서 size + 1개를 조회 (다음 페이지 존재 여부 확인용)
         val feedDtos = userFeedService.getUserFeeds(loginMember, cursor, size + 1)
         val feedResponses = feedDtos.map { UserFeedResponse.from(it) }
-
-        // ListResponse에 추가된 fromWithCursor 메서드 사용
         return ListResponse.of(
             size = size,
             items = feedResponses,
@@ -32,6 +30,7 @@ class UserFeedController(
     }
 
     override fun deleteUserFeed(loginMember: MemberInfo, feedId: String) {
+        TODO("Not yet implemented")
         userFeedService.deleteUserFeed(loginMember, feedId)
     }
 

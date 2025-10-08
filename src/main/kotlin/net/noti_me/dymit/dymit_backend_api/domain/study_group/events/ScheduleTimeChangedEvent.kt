@@ -1,26 +1,29 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
 
-import net.noti_me.dymit.dymit_backend_api.application.push_notification.SchedulePushEvent
+import net.noti_me.dymit.dymit_backend_api.common.event.GroupImportantEvent
+import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType.CALENDAR
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import org.springframework.context.ApplicationEvent
 
 class ScheduleTimeChangedEvent(
+    val group: StudyGroup,
     val schedule: StudySchedule,
-): ApplicationEvent(schedule) {
+): GroupImportantEvent(schedule) {
 
-    fun toUserFeed(
-        group: StudyGroup,
-        schedule: StudySchedule,
-        member: StudyGroupMember
-    ): UserFeed {
-        return UserFeed(
-            memberId = member.memberId,
-            message = "[${group.name}] ${schedule.session} 회차 일정이 변경되었어요.",
+    override fun processGroupFeed(): GroupFeed {
+        return GroupFeed(
+            groupId = schedule.groupId,
+            iconType = CALENDAR,
+            messages = listOf(
+                FeedMessage(
+                    text = "${group.name} ${schedule.session}회차 모임 시간이 변경되었어요!",
+                ),
+            ),
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,
@@ -34,17 +37,16 @@ class ScheduleTimeChangedEvent(
         )
     }
 
-    fun toSchedulePushEvent(group: StudyGroup): SchedulePushEvent {
-        return SchedulePushEvent(
-            scheduleId = this.schedule.id!!,
+    override fun processGroupPush(): GroupPushMessage {
+        return GroupPushMessage(
+            groupId = schedule.groupId,
             title = group.name,
-            body = "${schedule.session} 회차 일정이 변경되었어요.",
-            image = null,
+            body = "${schedule.session}회차 모임 시간이 변경되었어요!",
             data = mapOf(
-                "type" to "STUDY_GROUP_SCHEDULE",
-                "groupId" to schedule.groupId.toHexString(),
-                "scheduleId" to schedule.id.toHexString()
-            )
+                "groupId" to group.identifier,
+                "scheduleId" to schedule.identifier
+            ),
+            image = null,
         )
     }
 }

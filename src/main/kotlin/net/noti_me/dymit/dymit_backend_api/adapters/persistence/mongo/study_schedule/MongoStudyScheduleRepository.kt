@@ -23,7 +23,7 @@ class MongoStudyScheduleRepository(
     }
 
     override fun deleteById(id: ObjectId): Boolean {
-        val query = Query(Criteria.where("id").`is`(id))
+        val query = Query(Criteria.where("_id").`is`(id))
         val result = mongoTemplate.remove(query, StudySchedule::class.java)
         return result.deletedCount > 0
     }

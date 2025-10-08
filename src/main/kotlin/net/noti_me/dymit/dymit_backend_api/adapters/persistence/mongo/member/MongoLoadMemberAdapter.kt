@@ -43,7 +43,7 @@ class MongoLoadMemberAdapter(
 
     override fun loadByIds(ids: List<String>): List<Member> {
         return mongoTemplate.find(
-            Query(Criteria.where("id").`in`(ids)),
+            Query(Criteria.where("_id").`in`(ids)),
             Member::class.java
         )
     }

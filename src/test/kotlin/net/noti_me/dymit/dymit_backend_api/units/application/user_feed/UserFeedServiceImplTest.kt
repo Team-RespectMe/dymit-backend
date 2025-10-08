@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.application.user_feed.impl.UserFeedServiceImpl
+import net.noti_me.dymit.dymit_backend_api.application.feed.impl.UserFeedServiceImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -67,7 +67,7 @@ class UserFeedServiceImplTest : BehaviorSpec({
                 val size = 10
                 val expectedFeeds = listOf(testUserFeed)
                 every {
-                    userFeedRepository.findByMemberId(testMemberId, cursor, size.toLong())
+                    userFeedRepository.findByMemberIdOrderByCreatedAtDesc(testMemberId, cursor, size.toLong())
                 } returns expectedFeeds
 
                 // when
@@ -77,9 +77,9 @@ class UserFeedServiceImplTest : BehaviorSpec({
                 result.size shouldBe 1
                 result[0].id shouldBe testFeedId
                 result[0].memberId shouldBe testMemberId
-                result[0].message shouldBe "테스트 피드 메시지입니다."
+                result[0].messages shouldBe "테스트 피드 메시지입니다."
                 result[0].isRead shouldBe false
-                verify { userFeedRepository.findByMemberId(testMemberId, cursor, size.toLong()) }
+                verify { userFeedRepository.findByMemberIdOrderByCreatedAtDesc(testMemberId, cursor, size.toLong()) }
             }
         }
 
@@ -90,7 +90,7 @@ class UserFeedServiceImplTest : BehaviorSpec({
                 val size = 5
                 val expectedFeeds = listOf(testUserFeed)
                 every {
-                    userFeedRepository.findByMemberId(testMemberId, cursor, size.toLong())
+                    userFeedRepository.findByMemberIdOrderByCreatedAtDesc(testMemberId, cursor, size.toLong())
                 } returns expectedFeeds
 
                 // when
@@ -98,7 +98,7 @@ class UserFeedServiceImplTest : BehaviorSpec({
 
                 // then
                 result.size shouldBe 1
-                verify { userFeedRepository.findByMemberId(testMemberId, cursor, size.toLong()) }
+                verify { userFeedRepository.findByMemberIdOrderByCreatedAtDesc(testMemberId, cursor, size.toLong()) }
             }
         }
 
@@ -108,7 +108,7 @@ class UserFeedServiceImplTest : BehaviorSpec({
                 val cursor = null
                 val size = 10
                 every {
-                    userFeedRepository.findByMemberId(testMemberId, cursor, size.toLong())
+                    userFeedRepository.findByMemberIdOrderByCreatedAtDesc(testMemberId, cursor, size.toLong())
                 } returns emptyList()
 
                 // when
@@ -116,7 +116,7 @@ class UserFeedServiceImplTest : BehaviorSpec({
 
                 // then
                 result shouldBe emptyList()
-                verify { userFeedRepository.findByMemberId(testMemberId, cursor, size.toLong()) }
+                verify { userFeedRepository.findByMemberIdOrderByCreatedAtDesc(testMemberId, cursor, size.toLong()) }
             }
         }
     }

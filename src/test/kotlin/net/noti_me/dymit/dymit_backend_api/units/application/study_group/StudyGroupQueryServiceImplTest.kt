@@ -9,7 +9,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryServiceImpl
+import net.noti_me.dymit.dymit_backend_api.application.study_group.impl.StudyGroupQueryServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCodeVo
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException

@@ -37,7 +37,7 @@ class MongoScheduleCommentRepository(
         val criteria = Criteria.where("scheduleId").`is`(scheduleId)
 
         if (cursor != null) {
-            criteria.and("id").lte(cursor)
+            criteria.and("_id").lt(cursor)
         }
 
         val query = Query(criteria).limit(size.toInt()).with(Sort.by(Sort.Direction.DESC, "id"))
@@ -45,7 +45,7 @@ class MongoScheduleCommentRepository(
     }
 
     override fun deleteById(id: ObjectId) {
-        val query = Query(Criteria.where("id").`is`(id))
+        val query = Query(Criteria.where("_id").`is`(id))
         mongoTemplate.remove(query, ScheduleComment::class.java)
     }
 }

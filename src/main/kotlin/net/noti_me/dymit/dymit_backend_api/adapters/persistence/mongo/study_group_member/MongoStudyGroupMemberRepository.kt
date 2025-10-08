@@ -25,7 +25,7 @@ class MongoStudyGroupMemberRepository(
         )
 
         members.forEach { member ->
-            val query = Query(Criteria.where("id").`is`(member.id))
+            val query = Query(Criteria.where("_id").`is`(member.id))
             val update = Update()
             val doc = mongoTemplate.getConverter()
                 .convertToMongoType(member) as Document
@@ -60,7 +60,7 @@ class MongoStudyGroupMemberRepository(
     ): List<StudyGroupMember> {
         val criteria = Criteria.where("memberId").`is`(memberId)
         if (cursor != null) {
-            criteria.and("_id").lte(cursor)
+            criteria.and("_id").lt(cursor)
         }
         val query = Query(criteria)
             .with(Sort.by(Sort.Direction.DESC, "_id"))

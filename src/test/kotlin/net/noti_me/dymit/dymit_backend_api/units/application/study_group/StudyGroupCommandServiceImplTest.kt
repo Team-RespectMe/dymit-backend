@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardDto
-import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandServiceImpl
+import net.noti_me.dymit.dymit_backend_api.application.study_group.impl.StudyGroupCommandServiceImpl
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupJoinCommand
