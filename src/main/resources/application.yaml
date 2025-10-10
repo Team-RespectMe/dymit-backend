@@ -55,7 +55,7 @@ log-reporter:
 logging:
   level:
     root: ${DYMIT_SERVER_LOG_LEVEL:DEBUG}
-    org.mongodb.driver: ${DYMIT_MONGODB_DRIVER_LOG_LEVEL:INFO}
+    org.mongodb.driver: ${DYMIT_MONGODB_DRIVER_LOG_LEVEL:DEBUG}
     org.apache: ${DYMIT_APACHE_LOG_LEVEL:INFO}
     org.springframework.web: ${DYMIT_SPRING_WEB_LOG_LEVEL:DEBUG}
     org.springframework.data.mongodb: ${DYMIT_SPRING_DATA_MONGODB_LOG_LEVEL:INFO}

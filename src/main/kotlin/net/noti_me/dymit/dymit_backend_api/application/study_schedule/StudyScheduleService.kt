@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule
 
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDetailDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDto
@@ -7,6 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyS
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleSummaryDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 interface StudyScheduleService {
@@ -40,6 +42,10 @@ interface StudyScheduleService {
         groupId: String,
         scheduleId: String
     ): StudyScheduleDetailDto
+
+    fun getUpcomingScheduleForGroups(
+        groups: List<StudyGroupQueryModelDto>
+    )
 
     fun joinSchedule(
         memberInfo: MemberInfo,

@@ -54,8 +54,6 @@ class PostServiceImpl(
         )
 
         val savedPost = this.postRepository.save(newPost)
-            ?: throw RuntimeException("게시글 생성에 실패했습니다.")
-
         group.updateRecentPost(RecentPostVo.from(savedPost))
         saveGroupPort.persist(group)
 
@@ -84,7 +82,6 @@ class PostServiceImpl(
         post.updateTitle(memberInfo.memberId, command.title)
         post.updateContent(memberInfo.memberId, command.content)
         val updatedPost = this.postRepository.save(post)
-            ?: throw RuntimeException("게시글 수정에 실패했습니다.")
 
         if (group.recentPost?.postId == updatedPost.identifier) {
             group.updateRecentPost(RecentPostVo.from(updatedPost))
@@ -98,6 +95,9 @@ class PostServiceImpl(
                             groupId: String,
                             boardId: String,
                             postId: String) {
+        val group = this.loadGroupPort.loadByGroupId(groupId)
+            ?: throw NotFoundException(message="해당 그룹을 찾을 수 없습니다.")
+
         val post = this.postRepository.findById(postId)
             ?: throw NotFoundException(message="해당 게시글을 찾을 수 없습니다.")
 
@@ -107,6 +107,15 @@ class PostServiceImpl(
         ) ?: throw NotFoundException(message="해당 그룹의 멤버가 아닙니다.")
 
         this.postRepository.deleteById(post.identifier)
+
+        if (group.recentPost?.postId == post.identifier) {
+            val recentPost = postRepository.findLastPostByGroupIdAndBoardId(
+                groupId = ObjectId(groupId),
+                boardId = ObjectId(boardId)
+            )
+            group.updateRecentPost(RecentPostVo.from(recentPost))
+            saveGroupPort.update(group)
+        }
     }
 
     override fun getBoardPostsWithCursor(

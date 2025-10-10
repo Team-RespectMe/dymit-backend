@@ -10,12 +10,14 @@ class RecentPostVo(
 ) {
 
     companion object {
-        fun from(entity: Post): RecentPostVo {
+        fun from(entity: Post?): RecentPostVo? {
+            if ( entity == null) return null
+
             return RecentPostVo(
-                postId = entity.id.toString(),
-                title = entity.title,
-                createdAt = entity.createdAt ?: LocalDateTime.now()
-            )
+                    postId = entity.id.toString(),
+                    title = entity.title,
+                    createdAt = entity.createdAt ?: LocalDateTime.now()
+                )
         }
     }
 }
