@@ -5,7 +5,6 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
@@ -32,7 +31,7 @@ class StudyScheduleTest : BehaviorSpec({
             groupId = groupId,
             memberId = memberId,
             nickname = "testUser_${role.name}",
-            profileImage = MemberProfileImageVo(),
+            profileImage = ProfileImageVo(),
             role = role
         )
     }
@@ -60,7 +59,7 @@ class StudyScheduleTest : BehaviorSpec({
         return ScheduleRole(
             memberId = memberId,
             nickname = "testUser",
-            image = ProfileImageVo(),
+            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(),
             color = "#FF3357",
             roles = roles
         )
@@ -314,7 +313,7 @@ class StudyScheduleTest : BehaviorSpec({
             val updatedRole1 = ScheduleRole(
                 memberId = member1Id,
                 nickname = "testUser",
-                image = ProfileImageVo(),
+                image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(),
                 color = "#FF3357",
                 roles = listOf("진행자", "발표자")
             )

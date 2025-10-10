@@ -5,8 +5,9 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeletedEvent
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 import kotlin.random.Random
 
@@ -56,37 +57,38 @@ class Member(
     var lastAccessAt: LocalDateTime = lastAccessAt
         private set
 
+    /**
+     * 닉네임 변경 메서드
+     * @param newNickname 새로운 닉네임
+     * @throws IllegalArgumentException 닉네임이 비어있거나 20자를 초과하는 경우
+     */
     fun changeNickname(newNickname: String) {
-
-        if (newNickname.isBlank()) {
-            throw IllegalArgumentException("닉네임은 비워둘 수 없습니다.")
-        }
-
+        require(newNickname.isNotBlank()) { "닉네임은 비워둘 수 없습니다." }
+        require(newNickname.length <= 20) { "닉네임은 20자 이내로 설정해야 합니다." }
         if ( newNickname == this.nickname ) {
             return
         }
-
-        if ( newNickname.length < 1 || newNickname.length > 20 ) {
-            throw IllegalArgumentException("닉네임은 1자 이상 20자 이내로 설정해야 합니다.")
-        }
-
         this.nickname = newNickname
         updateLastAccessedAt()
     }
 
-    fun updateProfileImage(profileImage: MemberProfileImageVo) {
+    /**
+     * 프로필 이미지 변경 메서드
+     * @param profileImage 새로운 프로필 이미지
+     */
+    fun changeProfileImage(profileImage: MemberProfileImageVo) {
         this.profileImage = profileImage
-//        registerEvent(MemberProfileImageChangedEvent(this))
+        registerEvent(MemberProfileImageChangedEvent(this))
         updateLastAccessedAt()
     }
 
     fun deleteProfileImage() {
         if ( this.profileImage.type == "external" ) {
-//            val event = MemberProfileImageDeleteEvent(
-//                filePath = this.profileImage.filePath,
-//                source = this
-//            )
-//            registerEvent(event)
+            val event = MemberProfileImageDeletedEvent(
+                filePath = this.profileImage.filePath,
+                source = this
+            )
+            registerEvent(event)
         }
 
         this.profileImage = MemberProfileImageVo(
@@ -98,7 +100,7 @@ class Member(
             height = 0
         )
 
-//        registerEvent(MemberProfileImageChangedEvent(this))
+        registerEvent(MemberProfileImageChangedEvent(this))
     }
 
     fun addDeviceToken(deviceToken: DeviceToken) {
@@ -151,4 +153,5 @@ class Member(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
+
 }

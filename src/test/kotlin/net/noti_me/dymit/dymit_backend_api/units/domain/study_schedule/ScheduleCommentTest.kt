@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldHaveLength
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
@@ -21,7 +20,7 @@ class ScheduleCommentTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "testWriter",
-            image = ProfileImageVo(type = "preset", url = "0")
+            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "preset", url = "0")
         )
         val scheduleComment = ScheduleComment(
             scheduleId = scheduleId,
@@ -52,7 +51,7 @@ class ScheduleCommentTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "testWriter",
-            image = ProfileImageVo(type = "preset", url = "0")
+            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "preset", url = "0")
         )
 
         val requester = StudyGroupMember(
@@ -60,7 +59,7 @@ class ScheduleCommentTest : BehaviorSpec({
             groupId = ObjectId.get(),
             memberId = writerId,
             nickname = "testWriter",
-            profileImage = MemberProfileImageVo(type = "preset", url = "0"),
+            profileImage = ProfileImageVo(type = "preset", url = "0"),
             role = GroupMemberRole.MEMBER
         )
 
@@ -69,7 +68,7 @@ class ScheduleCommentTest : BehaviorSpec({
             groupId = ObjectId.get(),
             memberId = ObjectId.get(),
             nickname = "anotherMember",
-            profileImage = MemberProfileImageVo(type = "preset", url = "1"),
+            profileImage = ProfileImageVo(type = "preset", url = "1"),
             role = GroupMemberRole.MEMBER
         )
 
@@ -155,7 +154,7 @@ class ScheduleCommentTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "testWriter",
-            image = ProfileImageVo(type = "preset", url = "0")
+            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "preset", url = "0")
         )
 
         val requester = StudyGroupMember(
@@ -163,7 +162,7 @@ class ScheduleCommentTest : BehaviorSpec({
             groupId = ObjectId.get(),
             memberId = writerId,
             nickname = "testWriter",
-            profileImage = MemberProfileImageVo(type = "preset", url = "0"),
+            profileImage = ProfileImageVo(type = "preset", url = "0"),
             role = GroupMemberRole.MEMBER
         )
 
@@ -204,7 +203,7 @@ class ScheduleCommentTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "testWriter",
-            image = ProfileImageVo(type = "preset", url = "0")
+            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "preset", url = "0")
         )
 
         When("작성자 ID가 동일한 경우") {
@@ -220,7 +219,7 @@ class ScheduleCommentTest : BehaviorSpec({
                     groupId = ObjectId.get(),
                     memberId = writerId,
                     nickname = "differentNickname",
-                    profileImage = MemberProfileImageVo(type = "preset", url = "2"),
+                    profileImage = ProfileImageVo(type = "preset", url = "2"),
                     role = GroupMemberRole.MEMBER
                 )
 
@@ -243,7 +242,7 @@ class ScheduleCommentTest : BehaviorSpec({
                     groupId = ObjectId.get(),
                     memberId = ObjectId.get(),
                     nickname = "testWriter", // 같은 닉네임이어도
-                    profileImage = MemberProfileImageVo(type = "preset", url = "3"),
+                    profileImage = ProfileImageVo(type = "preset", url = "3"),
                     role = GroupMemberRole.MEMBER
                 )
 

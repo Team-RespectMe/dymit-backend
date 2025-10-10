@@ -2,7 +2,6 @@ package net.noti_me.dymit.dymit_backend_api.application.member.dto
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import java.time.LocalDateTime
 

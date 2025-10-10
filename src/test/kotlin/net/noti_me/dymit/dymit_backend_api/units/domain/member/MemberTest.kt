@@ -105,14 +105,14 @@ internal class MemberTest : BehaviorSpec() {
 
             `when`("새로운 프로필 사진으로 업데이트하면") {
                 then("프로필 사진 정보가 업데이트된다.") {
-                    member.updateProfileImage(profileImage)
+                    member.changeProfileImage(profileImage)
                     member.profileImage shouldBe profileImage
                 }
             }
 
             `when`("external 타입의 프로필 사진을 삭제하면") {
                 then("프로필 사진 정보가 프리셋으로 변경되고 삭제 이벤트가 등록된다.") {
-                    member.updateProfileImage(profileImage) // 먼저 external 이미지를 설정
+                    member.changeProfileImage(profileImage) // 먼저 external 이미지를 설정
                     member.deleteProfileImage()
 
                     member.profileImage.type shouldBe "preset"
@@ -134,7 +134,7 @@ internal class MemberTest : BehaviorSpec() {
                         width = 0,
                         height = 0
                     )
-                    member.updateProfileImage(presetImage)
+                    member.changeProfileImage(presetImage)
                     member.deleteProfileImage()
 
                     member.profileImage.type shouldBe "preset"
@@ -310,7 +310,7 @@ internal class MemberTest : BehaviorSpec() {
 
                     // profileImage는 updateProfileImage를 통해서만 변경 가능
                     val newImage = MemberProfileImageVo(type = "external", filePath = "test", url = "test", fileSize = 100L, width = 50, height = 50)
-                    member.updateProfileImage(newImage)
+                    member.changeProfileImage(newImage)
                     member.profileImage shouldBe newImage
 
                     // lastAccessAt은 updateLastAccessedAt을 통해서만 변경 가능

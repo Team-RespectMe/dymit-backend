@@ -3,7 +3,6 @@ package net.noti_me.dymit.dymit_backend_api.units.domain.board
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
@@ -17,7 +16,7 @@ class WriterTest : BehaviorSpec({
     given("StudyGroupMember 엔티티가 주어졌을 때") {
         val memberId = ObjectId()
         val groupId = ObjectId()
-        val memberProfileImage = MemberProfileImageVo(
+        val memberProfileImage = ProfileImageVo(
             type = "external",
             filePath = "path/to/profile.jpg",
             url = "https://example.com/profile.jpg",
@@ -63,7 +62,7 @@ class WriterTest : BehaviorSpec({
         }
 
         `when`("다른 프로필 이미지 타입을 가진 StudyGroupMember로 변환할 때") {
-            val presetProfileImage = MemberProfileImageVo(
+            val presetProfileImage = ProfileImageVo(
                 type = "preset",
                 filePath = "",
                 url = "5",
@@ -147,7 +146,7 @@ class WriterTest : BehaviorSpec({
             groupId = ObjectId(),
             memberId = ObjectId(),
             nickname = "원본닉네임",
-            profileImage = MemberProfileImageVo(
+            profileImage = ProfileImageVo(
                 type = "preset",
                 filePath = "",
                 url = "1",
@@ -167,7 +166,8 @@ class WriterTest : BehaviorSpec({
             }
 
             then("image 속성을 변경할 수 있어야 한다") {
-                val newImage = ProfileImageVo(type = "external", url = "new-url")
+                val newImage =
+                    net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "external", url = "new-url")
                 writer.image = newImage
                 writer.image.type shouldBe "external"
                 writer.image.url shouldBe "new-url"

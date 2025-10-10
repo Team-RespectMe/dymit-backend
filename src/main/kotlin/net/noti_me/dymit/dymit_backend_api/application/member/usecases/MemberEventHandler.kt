@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.application.member
+package net.noti_me.dymit.dymit_backend_api.application.member.usecases
 
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.slf4j.LoggerFactory

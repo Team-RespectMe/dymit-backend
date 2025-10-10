@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.member.MemberImageUploadUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberImageUploadUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
@@ -40,7 +40,7 @@ class MemberImageUploadUsecaseImpl(
                 throw BadRequestException(message = "이미지 업로드를 위한 이미지 파일 또는 프리셋 번호가 필요합니다.")
             }
 
-            member.updateProfileImage(getPresetImage(presetNo))
+            member.changeProfileImage(getPresetImage(presetNo))
         }
 
         member = saveMemberPort.update(member)

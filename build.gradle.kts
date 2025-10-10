@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.3.4"
+version = "0.3.9"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 
@@ -31,13 +31,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}")
 	implementation("org.springdoc:springdoc-openapi-starter-common:${springDocVersion}")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("com.auth0:java-jwt:4.4.0")
     implementation("com.google.firebase:firebase-admin:9.3.0")
+    implementation("org.ehcache:ehcache:3.11.1")
 
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")

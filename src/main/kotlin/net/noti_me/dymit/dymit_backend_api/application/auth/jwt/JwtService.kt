@@ -4,12 +4,14 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTDecodeException
 import com.auth0.jwt.interfaces.DecodedJWT
+import net.noti_me.dymit.dymit_backend_api.application.auth.dto.JwtClaims
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.TokenInfo
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -66,8 +68,10 @@ class JwtService(
         return TokenInfo(token, expiresAt)
     }
 
-    fun verifyAccessToken(token: String): DecodedJWT {
-        return accessTokenVerifier.verify(token)
+    @Cacheable("accessToken", key="#token", unless="#result == null")
+    fun verifyAccessToken(token: String): JwtClaims{
+        logger.debug("Verifying access token: $token")
+        return JwtClaims.from(accessTokenVerifier.verify(token))
     }
 
     fun verifyRefreshToken(token: String): DecodedJWT {

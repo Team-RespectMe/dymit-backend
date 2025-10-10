@@ -21,6 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberJoinEvent
@@ -80,8 +81,8 @@ class StudyGroupCommandServiceImpl(
             groupId = studyGroup.id!!,
             memberId = memberEntity.id,
             nickname = memberEntity.nickname,
-            profileImage = memberEntity.profileImage
-                ?: MemberProfileImageVo(type = "preset", url = "0"),
+            profileImage = ProfileImageVo.from(memberEntity.profileImage)
+                ?: ProfileImageVo(type = "preset", url = "0"),
             role = GroupMemberRole.OWNER
         )
         studyGroupMemberRepository.persist(owner)
@@ -118,7 +119,7 @@ class StudyGroupCommandServiceImpl(
             groupId = group.id,
             memberId = member.id,
             nickname = member.nickname,
-            profileImage = member.profileImage,
+            profileImage = ProfileImageVo.from(member.profileImage),
             role = GroupMemberRole.MEMBER,
         )
         newMember = studyGroupMemberRepository.persist(newMember)

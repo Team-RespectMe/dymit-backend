@@ -18,7 +18,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
@@ -106,7 +105,7 @@ class CommentServiceImplTest : BehaviorSpec({
             groupId = groupId,
             memberId = memberId,
             nickname = nickname,
-            profileImage = MemberProfileImageVo(
+            profileImage = ProfileImageVo(
                 url = "https://example.com/profile.jpg",
                 type = "url"
             ),
@@ -155,7 +154,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = testGroupMember.memberId,
                         nickname = testGroupMember.nickname,
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = testGroupMember.profileImage.url,
                             type = testGroupMember.profileImage.type
                         )
@@ -316,7 +315,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = testGroupMember.memberId,
                         nickname = testGroupMember.nickname,
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = testGroupMember.profileImage.url,
                             type = testGroupMember.profileImage.type
                         )
@@ -394,7 +393,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = ObjectId(),
                         nickname = "다른사용자",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile.jpg",
                             type = "url"
                         )
@@ -443,7 +442,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = ObjectId(),
                         nickname = "다른사용자",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile.jpg",
                             type = "url"
                         )
@@ -482,7 +481,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = memberId,
                         nickname = "댓글작성자",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile.jpg",
                             type = "url"
                         )
@@ -538,7 +537,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = anotherMemberId,
                         nickname = "다른사용자",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile.jpg",
                             type = "url"
                         )
@@ -573,7 +572,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = memberId,
                         nickname = "댓글작성자",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile.jpg",
                             type = "url"
                         )
@@ -612,7 +611,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = ObjectId(),
                         nickname = "작성자1",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile1.jpg",
                             type = "url"
                         )
@@ -625,7 +624,7 @@ class CommentServiceImplTest : BehaviorSpec({
                     writer = Writer(
                         id = ObjectId(),
                         nickname = "작성자2",
-                        image = ProfileImageVo(
+                        image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                             url = "https://example.com/profile2.jpg",
                             type = "url"
                         )
@@ -687,7 +686,7 @@ class CommentServiceImplTest : BehaviorSpec({
                         writer = Writer(
                             id = ObjectId(),
                             nickname = "작성자$index",
-                            image = ProfileImageVo(
+                            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                                 url = "https://example.com/profile$index.jpg",
                                 type = "url"
                             )
@@ -732,7 +731,7 @@ class CommentServiceImplTest : BehaviorSpec({
                         writer = Writer(
                             id = authorId,
                             nickname = "동일작성자",
-                            image = ProfileImageVo(
+                            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                                 url = "https://example.com/profile.jpg",
                                 type = "url"
                             )

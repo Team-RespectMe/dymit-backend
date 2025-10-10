@@ -26,11 +26,9 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
     val identifier: String
         get() = id?.toHexString() ?: throw IllegalStateException("Entity ID is null")
 
-//    @CreatedDate
     var createdAt: LocalDateTime? = createdAt ?: LocalDateTime.now()
         protected set
 
-//    @LastModifiedDate
     var updatedAt: LocalDateTime? = updatedAt ?: LocalDateTime.now()
         protected set
 

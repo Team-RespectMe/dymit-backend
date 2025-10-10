@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.common.security.jwt
 
+import net.noti_me.dymit.dymit_backend_api.application.auth.dto.JwtClaims
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 
 /**
@@ -14,4 +15,21 @@ class MemberInfo(
     val nickname: String,
     val roles: List<MemberRole>
 ) {
+
+    companion object {
+
+        fun from(jwtClaims: JwtClaims): MemberInfo {
+            return MemberInfo(
+                memberId = jwtClaims.memberId,
+                nickname = jwtClaims.nickname,
+                roles = jwtClaims.roles.map {
+                    when (it) {
+                        "ROLE_MEMBER" -> MemberRole.ROLE_MEMBER
+                        "ROLE_ADMIN" -> MemberRole.ROLE_ADMIN
+                        else -> throw IllegalArgumentException("Invalid role: $it")
+                    }
+                }
+            )
+        }
+    }
 }

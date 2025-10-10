@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.member.MemberDeviceTokenUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeviceTokenUsecase
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken

@@ -3,7 +3,6 @@ package net.noti_me.dymit.dymit_backend_api.units.application.study_schedule.dto
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleParticipantDto
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
@@ -49,7 +48,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
             groupId = ObjectId.get(),
             memberId = ObjectId.get(),
             nickname = "테스트유저",
-            profileImage = MemberProfileImageVo(type = "preset", url = "1"),
+            profileImage = ProfileImageVo(type = "preset", url = "1"),
             role = GroupMemberRole.MEMBER
         )
     }
@@ -60,7 +59,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
         val scheduleId = "schedule123"
         val memberId = "member456"
         val nickname = "참여자닉네임"
-        val image = ProfileImageVo(type = "preset", url = "2")
+        val image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "preset", url = "2")
 
         // When
         val dto = StudyScheduleParticipantDto(
@@ -97,7 +96,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
     @Test
     fun `다양한 프로필 이미지 타입으로 객체를 생성할 수 있다`() {
         // Given
-        val customImage = ProfileImageVo(type = "custom", url = "https://example.com/profile.jpg")
+        val customImage = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(type = "custom", url = "https://example.com/profile.jpg")
 
         // When
         val dto = StudyScheduleParticipantDto(
@@ -120,7 +119,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
             groupId = ObjectId.get(),
             memberId = ObjectId.get(),
             nickname = "테스트유저",
-            profileImage = MemberProfileImageVo(type = "preset", url = "5"),
+            profileImage = ProfileImageVo(type = "preset", url = "5"),
             role = GroupMemberRole.MEMBER
         )
 
@@ -141,7 +140,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
             groupId = ObjectId.get(),
             memberId = ObjectId.get(),
             nickname = longNickname,
-            profileImage = MemberProfileImageVo(type = "preset", url = "1"),
+            profileImage = ProfileImageVo(type = "preset", url = "1"),
             role = GroupMemberRole.MEMBER
         )
 
@@ -177,7 +176,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
             groupId = groupId,
             memberId = memberId,
             nickname = "테스트유저",
-            profileImage = MemberProfileImageVo(type = "preset", url = "1"),
+            profileImage = ProfileImageVo(type = "preset", url = "1"),
             role = GroupMemberRole.MEMBER
         )
 
@@ -197,7 +196,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
             groupId = ObjectId.get(),
             memberId = ObjectId.get(),
             nickname = "그룹장",
-            profileImage = MemberProfileImageVo(type = "preset", url = "1"),
+            profileImage = ProfileImageVo(type = "preset", url = "1"),
             role = GroupMemberRole.OWNER
         )
 
@@ -217,7 +216,7 @@ class StudyScheduleParticipantDtoTest : AnnotationSpec() {
             groupId = ObjectId.get(),
             memberId = ObjectId.get(),
             nickname = "관리자",
-            profileImage = MemberProfileImageVo(type = "preset", url = "1"),
+            profileImage = ProfileImageVo(type = "preset", url = "1"),
             role = GroupMemberRole.ADMIN
         )
 

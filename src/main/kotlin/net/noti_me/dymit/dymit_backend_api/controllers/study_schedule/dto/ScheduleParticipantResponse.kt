@@ -2,13 +2,14 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleParticipantDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.common.ProfileImageResponse
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 
 class ScheduleParticipantResponse(
     val scheduleId: String,
     val memberId: String,
     val nickname: String,
-    val image: ProfileImageVo
+    val image: ProfileImageResponse
 ): BaseResponse() {
 
     companion object {
@@ -17,7 +18,7 @@ class ScheduleParticipantResponse(
                 scheduleId = dto.scheduleId,
                 memberId = dto.memberId,
                 nickname = dto.nickname,
-                image = dto.image
+                image = ProfileImageResponse.from(dto.image)
             )
         }
     }

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupMemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.common.ProfileImageResponse
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 
 @Schema(

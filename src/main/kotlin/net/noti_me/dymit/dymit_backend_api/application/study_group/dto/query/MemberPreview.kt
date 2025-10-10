@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 
 @Schema(
@@ -17,7 +18,7 @@ data class MemberPreview(
     @Schema(description = "그룹 내 회원 역할")
     val role: GroupMemberRole,
     @Schema(description = "회원 프로필 이미지")
-    val profileImage: MemberProfileImageVo
+    val profileImage: ProfileImageVo
 ) {
 
     companion object {
@@ -30,7 +31,7 @@ data class MemberPreview(
                 memberId = entity.identifier,
                 nickname = entity.nickname,
                 role = role,
-                profileImage = entity.profileImage
+                profileImage = ProfileImageVo.from(entity.profileImage)
             )
         }
 

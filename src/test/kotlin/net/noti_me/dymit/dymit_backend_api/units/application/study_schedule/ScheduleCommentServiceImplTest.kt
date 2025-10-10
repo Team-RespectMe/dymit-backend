@@ -16,7 +16,6 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
@@ -56,7 +55,7 @@ class ScheduleCommentServiceImplTest : BehaviorSpec({
         return Member(
             id = id,
             nickname = "테스트사용자",
-            profileImage = MemberProfileImageVo(
+            profileImage = ProfileImageVo(
                 type = "URL",
                 filePath = "",
                 url = "https://example.com/profile.jpg",
@@ -76,7 +75,7 @@ class ScheduleCommentServiceImplTest : BehaviorSpec({
             groupId = groupId,
             memberId = memberId,
             nickname = "테스트사용자",
-            profileImage = MemberProfileImageVo(
+            profileImage = ProfileImageVo(
                 type = "URL",
                 filePath = "",
                 url = "https://example.com/profile.jpg",
@@ -109,7 +108,7 @@ class ScheduleCommentServiceImplTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "테스트작성자",
-            image = ProfileImageVo(
+            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(
                 type = "URL",
                 url = "https://example.com/profile.jpg"
             )

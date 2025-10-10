@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.Mem
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.SchedulePreview
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.common.ProfileImageResponse
 import java.time.LocalDateTime
 
 @Schema(
@@ -21,8 +21,6 @@ class StudyGroupListItemDto(
     val image: ProfileImageResponse = ProfileImageResponse(
         type = "preset",
         url = "0",
-        width = 0,
-        height = 0
     ),
     @Schema(description = "스터디 그룹 설명")
     val description: String,

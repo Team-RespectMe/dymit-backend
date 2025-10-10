@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import java.time.LocalDateTime
 
@@ -9,7 +10,7 @@ class StudyGroupMemberDto(
     val groupId: String,
     val memberId: String,
     val nickname: String,
-    val profileImageVo: MemberProfileImageVo,
+    val profileImageVo: ProfileImageVo,
     val role: GroupMemberRole,
     val createdAt: LocalDateTime,
 ) {
@@ -26,17 +27,6 @@ class StudyGroupMemberDto(
                 profileImageVo = entity.profileImage,
                 role = entity.role,
                 createdAt = entity.createdAt ?: LocalDateTime.now()
-            )
-        }
-
-        fun dummy(): StudyGroupMemberDto {
-            return StudyGroupMemberDto(
-                groupId = "groupId",
-                memberId = "memberId",
-                nickname = "nickname",
-                profileImageVo = MemberProfileImageVo(),
-                role = GroupMemberRole.MEMBER,
-                createdAt = LocalDateTime.now()
             )
         }
     }

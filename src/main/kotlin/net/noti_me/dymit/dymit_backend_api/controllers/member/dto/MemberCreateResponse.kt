@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateResult
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.common.ProfileImageResponse
 
 @Schema(description = "멤버 생성 요청 응답 객체")
 class MemberCreateResponse(
@@ -20,11 +21,7 @@ class MemberCreateResponse(
                 memberId = result.member.id,
                 nickname = result.member.nickname,
                 profileImage = result.member.profileImage?.let {
-                    ProfileImageResponse(
-                        url = it.url,
-                        width = it.width,
-                        height = it.height
-                    )
+                    ProfileImageResponse.from(it)
                 },
                 accessToken = result.loginResult.accessToken,
                 refreshToken = result.loginResult.refreshToken

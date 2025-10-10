@@ -15,10 +15,10 @@ class RoleAssignment(
     val memberId: String,
     @Schema(description = "할당된 역할 이름", example = "[\"자료조사\", \"초기 디자인\"]")
     val roles: List<String>,
-    @Schema(description = "하이라이트 색상, #으로 시작 반드시 7자", example = "#FF5733")
+    @Schema(description = "하이라이트 색상, 0xFF5733FF", example = "0xFF5733FF")
     @field:NotEmpty(message = "색상은 비어 있을 수 없습니다.")
-    @field:Length(min = 7, max = 7, message = "색상은 반드시 7자여야 합니다.")
-    val color: String = "#FF3357",
+    @field:Length(min = 10, max = 10, message = "색상은 반드시 10자여야 합니다.")
+    val color: String = "0xFF5733FF",
 ) {
 
 }

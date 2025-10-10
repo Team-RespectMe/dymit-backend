@@ -1,9 +1,10 @@
-package net.noti_me.dymit.dymit_backend_api.controllers.member.dto
+package net.noti_me.dymit.dymit_backend_api.controllers.common
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 
 @Schema(description = "프로필 사진 응답 객체(사용자 프로필 또는 그룹 프로필 사진)")
 class ProfileImageResponse(
@@ -11,10 +12,6 @@ class ProfileImageResponse(
     val url: String,
     @Schema(description = "프로필 이미지 타입", allowableValues = ["preset", "external"], example = "preset")
     val type: String = "preset",
-    @Schema(description = "프로필 이미지 너비", example = "200")
-    val width: Int,
-    @Schema(description = "프로필 이미지 높이", example = "200")
-    val height: Int
 ): BaseResponse() {
 
     companion object {
@@ -22,8 +19,13 @@ class ProfileImageResponse(
             return ProfileImageResponse(
                 url = image.url,
                 type = image.type,
-                width = image.width,
-                height = image.height
+            )
+        }
+
+        fun from(profile: ProfileImageVo): ProfileImageResponse {
+            return ProfileImageResponse(
+                url = profile.url,
+                type = profile.type,
             )
         }
 
@@ -31,8 +33,6 @@ class ProfileImageResponse(
             return ProfileImageResponse(
                 url = image.url,
                 type = image.type,
-                width = image.width,
-                height = image.height
             )
         }
     }
