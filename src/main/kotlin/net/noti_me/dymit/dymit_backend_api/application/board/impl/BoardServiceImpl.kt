@@ -4,6 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardCommand
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.BoardDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.common.errors.InternalServerError
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Board
@@ -63,18 +64,8 @@ class BoardServiceImpl(
         val existingBoard = boardRepository.findById(boardObjectId)
             ?: throw NotFoundException("해당 게시판을 찾을 수 없습니다.")
 
-        // 그룹 일치 확인
-        if (existingBoard.groupId != groupObjectId) {
-            throw ForbiddenException("해당 그룹의 게시판이 아닙니다.")
-        }
-
-        // 게시판 이름 업데이트
         existingBoard.updateName(groupMember, command.name)
-
-        // 권한 업데이트
         existingBoard.updatePermissions(groupMember, command.permissions)
-
-        // 업데이트된 게시판 저장
         val updatedBoard = boardRepository.save(existingBoard)
             ?: throw RuntimeException("게시판 업데이트에 실패했습니다.")
 
@@ -98,11 +89,6 @@ class BoardServiceImpl(
         val existingBoard = boardRepository.findById(boardObjectId)
             ?: throw NotFoundException("해당 게시판을 찾을 수 없습니다.")
 
-        // 그룹 일치 확인
-        if (existingBoard.groupId != groupObjectId) {
-            throw ForbiddenException("해당 그룹의 게시판이 아닙니다.")
-        }
-
         // 게시판 삭제 권한 확인 (Board 도메인에서 권한 체크)
         // Board에 delete 권한 체크 메소드가 있다면 여기서 호출
         // existingBoard.checkDeletePermission(groupMember)
@@ -110,7 +96,7 @@ class BoardServiceImpl(
         // 게시판 삭제 수행
         val deleteResult = boardRepository.delete(existingBoard)
         if (!deleteResult) {
-            throw RuntimeException("게시판 삭제에 실패했습니다.")
+            throw InternalServerError(message="게시판 삭제에 실패했습니다.")
         }
     }
 

@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_group
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
+import net.noti_me.dymit.dymit_backend_api.application.study_schedule.StudyScheduleService
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
@@ -22,7 +23,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class StudyGroupController(
     private val studyGroupCommandService: StudyGroupCommandService,
-    private val studyGroupQueryService: StudyGroupQueryService
+    private val studyGroupQueryService: StudyGroupQueryService,
+    private val studyGroupScheduleService: StudyScheduleService
 ): StudyGroupApi {
 
     override fun createStudyGroup(
@@ -59,6 +61,7 @@ class StudyGroupController(
 
     override fun getMyStudyGroups(memberInfo: MemberInfo): ListResponse<StudyGroupListItemDto> {
         val studyGroups = studyGroupQueryService.getMyStudyGroups(memberInfo)
+        studyGroupScheduleService.getUpcomingScheduleForGroups(groups = studyGroups)
         return ListResponse.from(studyGroups.map { StudyGroupListItemDto.from(it) })
     }
 

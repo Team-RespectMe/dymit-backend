@@ -104,4 +104,17 @@ class MongoPostRepository(
         query.with(Sort.by(Sort.Direction.DESC, "_id"))
         return mongoTemplate.find(query, Post::class.java)
     }
+
+    override fun findLastPostByGroupIdAndBoardId(
+        groupId: ObjectId,
+        boardId: ObjectId
+    ): Post? {
+        val query = Query(
+            Criteria.where("groupId").`is`(groupId)
+                .and("boardId").`is`(boardId)
+        )
+        query.with(Sort.by(Sort.Direction.DESC, "createdAt"))
+        query.limit(1)
+        return mongoTemplate.findOne(query, Post::class.java)
+    }
 }

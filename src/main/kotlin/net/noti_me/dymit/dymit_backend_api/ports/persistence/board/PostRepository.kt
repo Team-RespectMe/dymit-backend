@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.ports.persistence.board
 
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
+import org.bson.types.ObjectId
 
 interface PostRepository {
 
@@ -15,6 +16,8 @@ interface PostRepository {
     fun findByBoardId(boardId: String): List<Post>
 
     fun findByBoardIdLteId(boardId: String, lastId: String?, limit: Int): List<Post>
+
+    fun findLastPostByGroupIdAndBoardId(groupId: ObjectId, boardId: ObjectId): Post?
 
     /**
      * 작성자 ID로 게시글을 조회합니다.

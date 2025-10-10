@@ -24,7 +24,7 @@ class StudyGroupListItemDto(
     ),
     @Schema(description = "스터디 그룹 설명")
     val description: String,
-    @Schema(description = "스터디 그룹 스케줄 정보")
+    @Schema(description = "스터디 그룹 스케줄 중 가장 가까운 미래 스케줄")
     val schedule: SchedulePreview?,
     @Schema(description = "스터디 그룹 개설 일시")
     val createdAt: LocalDateTime,
