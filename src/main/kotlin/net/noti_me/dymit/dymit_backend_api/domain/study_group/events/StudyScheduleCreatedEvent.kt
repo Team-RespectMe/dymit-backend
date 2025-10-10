@@ -25,7 +25,7 @@ class StudyScheduleCreatedEvent(
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = studySchedule.groupId,
-            iconType = IconType.CALENDAR,
+            iconType = IconType.DATE,
             messages = listOf(
                 FeedMessage(
                     text = "${group.name} ${studySchedule.session}회차 일정이 추가되었어요!",

@@ -8,7 +8,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType.STUDY_GROUP
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
-import org.bson.types.ObjectId
 
 /**
  * 그룹 멤버가 탈퇴한 경우 발생하는 이벤트
@@ -24,7 +23,7 @@ class GroupMemberLeaveEvent(
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             memberId = group.ownerId,
-            iconType = IconType.SWEATY,
+            iconType = IconType.BAD,
             messages = listOf(
                 FeedMessage(
                     text = "${member.nickname} 님이 ${group.name}에서 탈퇴하셨습니다."

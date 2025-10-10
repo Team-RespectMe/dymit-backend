@@ -22,7 +22,7 @@ class StudyScheduleModifiedEvent(
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = group.id!!,
-            iconType = IconType.CALENDAR,
+            iconType = IconType.DATE,
             messages = listOf(
                 FeedMessage(
                     text = "${group.name} ${schedule.session}회차 일정이 변경되었어요!",

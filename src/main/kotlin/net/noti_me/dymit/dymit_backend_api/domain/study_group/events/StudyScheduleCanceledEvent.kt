@@ -23,7 +23,7 @@ class StudyScheduleCanceledEvent(
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = group.id!!,
-            iconType = IconType.CALENDAR,
+            iconType = IconType.DATE,
             messages = listOf(
                 FeedMessage(
                     text = group.name,
