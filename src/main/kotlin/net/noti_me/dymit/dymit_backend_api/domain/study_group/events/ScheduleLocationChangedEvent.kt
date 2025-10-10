@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySche
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType.CALENDAR
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType.DATE
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType.STUDY_GROUP
 
@@ -19,7 +19,7 @@ class ScheduleLocationChangedEvent(
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = schedule.groupId,
-            iconType = CALENDAR,
+            iconType = DATE,
             messages = listOf(
                 FeedMessage(
                     text = group.name,

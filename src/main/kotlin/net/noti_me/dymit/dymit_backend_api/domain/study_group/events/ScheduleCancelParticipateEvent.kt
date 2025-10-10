@@ -24,7 +24,7 @@ class ScheduleCancelParticipateEvent(
                     text = "스터디 그룹 ${group.name}의 ${schedule.session}회차 일정에 ${member.nickname} 님이 참여하지 않기로 했어요."
                 )
             ),
-            iconType = IconType.UNCHECK,
+            iconType = IconType.BAD,
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,

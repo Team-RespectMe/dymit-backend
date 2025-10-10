@@ -1,7 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
 
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalFeedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
@@ -21,7 +20,7 @@ class GroupMemberJoinEvent(
             messages = listOf(
                 FeedMessage(text = "${member.nickname}님이 ${group.name}에 참가하셨습니다.")
             ),
-            iconType = IconType.HAND_WAVING,
+            iconType = IconType.APPLAUSE,
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,

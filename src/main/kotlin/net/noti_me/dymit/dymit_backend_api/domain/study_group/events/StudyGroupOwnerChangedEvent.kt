@@ -19,7 +19,7 @@ class StudyGroupOwnerChangedEvent(
 ): PersonalImportantEvent(group) {
 
     override fun processUserFeed() = UserFeed(
-        iconType = IconType.CALENDAR,
+        iconType = IconType.DATE,
         memberId = group.ownerId,
         messages = listOf(
             FeedMessage(

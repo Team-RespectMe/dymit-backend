@@ -14,7 +14,7 @@ class MemberCreatedEvent(
         val member = this.source as Member
         return UserFeed(
             memberId = member.id!!,
-            iconType = IconType.HAND_WAVING,
+            iconType = IconType.APPLAUSE,
             messages = mutableListOf(
                 FeedMessage(
                     text="환영합니다! ${member.nickname}님! Dymit에 오신 것을 환영합니다.",

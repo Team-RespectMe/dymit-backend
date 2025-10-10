@@ -19,7 +19,7 @@ class StudyRoleAssignedEvent(
 
     override fun processUserFeed(): UserFeed {
         return UserFeed(
-            iconType = IconType.FRONT_OF_LAPTOP,
+            iconType = IconType.ROLE,
             memberId = role.memberId,
             messages = listOf(
                 FeedMessage(
