@@ -8,9 +8,9 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -59,7 +59,7 @@ class StudyScheduleTest : BehaviorSpec({
         return ScheduleRole(
             memberId = memberId,
             nickname = "testUser",
-            image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(),
+            image = ProfileImageVo(),
             color = "#FF3357",
             roles = roles
         )
@@ -313,7 +313,7 @@ class StudyScheduleTest : BehaviorSpec({
             val updatedRole1 = ScheduleRole(
                 memberId = member1Id,
                 nickname = "testUser",
-                image = net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo(),
+                image = ProfileImageVo(),
                 color = "#FF3357",
                 roles = listOf("진행자", "발표자")
             )

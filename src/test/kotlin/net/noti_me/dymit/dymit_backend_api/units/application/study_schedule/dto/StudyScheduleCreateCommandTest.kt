@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.RoleAssignment
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
 import java.time.LocalDateTime
 
 /**

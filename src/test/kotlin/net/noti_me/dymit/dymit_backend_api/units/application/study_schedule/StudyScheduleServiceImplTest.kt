@@ -21,11 +21,11 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentScheduleVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyScheduleCanceledEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyScheduleCreatedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleParticipant
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleCanceledEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleCreatedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleParticipant
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository

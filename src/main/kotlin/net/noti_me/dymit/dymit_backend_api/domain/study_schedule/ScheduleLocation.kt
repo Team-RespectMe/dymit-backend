@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule
+package net.noti_me.dymit.dymit_backend_api.domain.study_schedule
 
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
 

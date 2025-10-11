@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_schedule
 
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleParticipant
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate

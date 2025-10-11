@@ -1,10 +1,10 @@
-package net.noti_me.dymit.dymit_backend_api.domain.study_group.events
+package net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event
 
 import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalImportantEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType

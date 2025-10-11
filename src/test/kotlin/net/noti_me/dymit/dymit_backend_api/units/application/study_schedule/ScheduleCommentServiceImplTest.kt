@@ -20,13 +20,14 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleComment
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.types.ObjectId
+import java.time.LocalDateTime
 
 class ScheduleCommentServiceImplTest : BehaviorSpec({
 
@@ -96,7 +97,7 @@ class ScheduleCommentServiceImplTest : BehaviorSpec({
             groupId = groupId,
             title = "테스트 스케줄",
             description = "테스트 스케줄 설명",
-            scheduleAt = java.time.LocalDateTime.now().plusDays(1)
+            scheduleAt = LocalDateTime.now().plusDays(1)
         )
     }
 

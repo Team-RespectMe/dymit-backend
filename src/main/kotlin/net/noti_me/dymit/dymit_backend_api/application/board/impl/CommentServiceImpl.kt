@@ -9,18 +9,26 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
+import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCommentCreatedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
 class CommentServiceImpl(
+    private val loadGroupPort: LoadStudyGroupPort,
     private val groupMemberRepository: StudyGroupMemberRepository,
     private val boardRepository: BoardRepository,
-    private val commentRepository: CommentRepository
+    private val postRepository: PostRepository,
+    private val commentRepository: CommentRepository,
+    private val eventPublisher: ApplicationEventPublisher
 ): CommentService {
 
     override fun createComment(
@@ -29,10 +37,14 @@ class CommentServiceImpl(
     ): CommentDto {
         val board = this.boardRepository.findById(ObjectId(command.boardId))
             ?: throw NotFoundException(message="해당 게시판을 찾을 수 없습니다.")
+
         val groupMember = this.groupMemberRepository.findByGroupIdAndMemberId(
             ObjectId(command.groupId),
             ObjectId(memberInfo.memberId)
         ) ?: throw ForbiddenException(message="해당 그룹의 멤버가 아닙니다.")
+
+        val post = this.postRepository.findById(command.postId)
+            ?: throw NotFoundException(message="해당 게시글을 찾을 수 없습니다.")
 
         if ( !board.hasPermission(groupMember, BoardAction.WRITE_COMMENT) ) {
             throw ForbiddenException(message = "해당 게시판에 댓글 작성 권한이 없습니다.")
@@ -52,6 +64,12 @@ class CommentServiceImpl(
         )
 
         val savedComment = this.commentRepository.save(comment)
+        eventPublisher.publishEvent(PostCommentCreatedEvent(
+            group = loadGroupPort.loadByGroupId(command.groupId)!!,
+            board = board,
+            post = post,
+            comment = savedComment
+        ))
         return CommentDto.from(savedComment)
     }
 

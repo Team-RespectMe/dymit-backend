@@ -1,7 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_schedule
 
-import com.mongodb.client.model.Aggregates.group
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -11,11 +10,6 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.Aggregation.ROOT
-import org.springframework.data.mongodb.core.aggregation.Aggregation.match
-import org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation
-import org.springframework.data.mongodb.core.aggregation.Aggregation.replaceRoot
-import org.springframework.data.mongodb.core.aggregation.Aggregation.sort
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 

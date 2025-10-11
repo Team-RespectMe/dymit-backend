@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule
+package net.noti_me.dymit.dymit_backend_api.domain.study_schedule
 
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id

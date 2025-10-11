@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto
 
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import java.time.LocalDateTime
 
 /**

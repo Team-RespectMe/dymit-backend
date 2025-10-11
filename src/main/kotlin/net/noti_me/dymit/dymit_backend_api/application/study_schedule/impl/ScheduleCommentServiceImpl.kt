@@ -10,44 +10,45 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleComment
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleCommentCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
 class ScheduleCommentServiceImpl(
+    private val loadStudyGroupPort: LoadStudyGroupPort,
     private val scheduleCommentRepository: ScheduleCommentRepository,
     private val studyGroupMemberRepository: StudyGroupMemberRepository,
-    private val loadMemberPort: LoadMemberPort,
-    private val studyScheduleRepository: StudyScheduleRepository
+    private val studyScheduleRepository: StudyScheduleRepository,
+    private val eventPublisher: ApplicationEventPublisher,
 ) : ScheduleCommentService {
 
     override fun createComment(
         memberInfo: MemberInfo,
         command: CreateScheduleCommentCommand
     ): ScheduleCommentDto {
-        // 1. 그룹 멤버인지 확인
-        studyGroupMemberRepository.findByGroupIdAndMemberId(
+        val group = loadStudyGroupPort.loadByGroupId(command.groupId.toHexString())
+            ?: throw NotFoundException(message = "해당 스터디 그룹을 찾을 수 없습니다.")
+        val groupMember = studyGroupMemberRepository.findByGroupIdAndMemberId(
             command.groupId,
             ObjectId(memberInfo.memberId)
         ) ?: throw ForbiddenException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
-
-        // 2. 스케줄이 존재하는지 확인
-        studyScheduleRepository.loadById(command.scheduleId)
+        val schedule = studyScheduleRepository.loadById(command.scheduleId)
             ?: throw NotFoundException(message = "해당 스케줄을 찾을 수 없습니다.")
-
-        // 3. 멤버 정보 로드
-        val member = loadMemberPort.loadById(ObjectId(memberInfo.memberId))
-            ?: throw NotFoundException(message = "멤버 정보를 찾을 수 없습니다.")
+//        val member = loadMemberPort.loadById(ObjectId(memberInfo.memberId))
+//            ?: throw NotFoundException(message = "멤버 정보를 찾을 수 없습니다.")
 
         // 4. 댓글 생성
         val writer = Writer(
             id = ObjectId(memberInfo.memberId),
-            nickname = member.nickname,
-            image = ProfileImageVo.from(member.profileImage)
+            nickname = groupMember.nickname,
+            image = groupMember.profileImage
         )
 
         val scheduleComment = ScheduleComment(
@@ -58,6 +59,11 @@ class ScheduleCommentServiceImpl(
 
         // 5. 저장
         val savedComment = scheduleCommentRepository.save(scheduleComment)
+        eventPublisher.publishEvent(ScheduleCommentCreatedEvent(
+            group = group,
+            schedule = schedule,
+            comment = savedComment
+        ))
 
         return ScheduleCommentDto.from(savedComment)
     }

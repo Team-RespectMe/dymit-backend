@@ -7,9 +7,9 @@ import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.Schedu
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 

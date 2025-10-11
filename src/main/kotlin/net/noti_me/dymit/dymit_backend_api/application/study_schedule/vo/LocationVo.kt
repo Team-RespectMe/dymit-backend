@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo
 
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
 
 class LocationVo(
     val type: ScheduleLocation.LocationType = ScheduleLocation.LocationType.OFFLINE,

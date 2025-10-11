@@ -8,9 +8,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_schedule.MongoStudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.StudySchedule
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleLocation
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import

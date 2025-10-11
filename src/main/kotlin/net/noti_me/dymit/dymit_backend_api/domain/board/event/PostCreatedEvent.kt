@@ -47,7 +47,7 @@ class PostCreatedEvent(
             groupId = group.id!!,
             title = "${group.name}의 새로운 공지사항",
             body = "post.title",
-            image = group.profileImage?.url,
+            image = group.profileImage.url,
             data = mapOf(
                 "groupId" to group.identifier,
                 "boardId" to board.identifier,

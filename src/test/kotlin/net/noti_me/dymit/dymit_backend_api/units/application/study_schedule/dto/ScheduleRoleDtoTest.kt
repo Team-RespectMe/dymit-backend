@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.ScheduleRoleDto
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
 import org.bson.types.ObjectId
 
 /**

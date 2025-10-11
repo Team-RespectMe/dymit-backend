@@ -1,13 +1,13 @@
-package net.noti_me.dymit.dymit_backend_api.domain.study_group.schedule
+package net.noti_me.dymit.dymit_backend_api.domain.study_schedule
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleLocationChangedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.ScheduleTimeChangedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyRoleChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleLocationChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleTimeChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleChangedEvent
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
