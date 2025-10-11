@@ -230,6 +230,10 @@ class StudyScheduleServiceImpl(
         val schedule = studyScheduleRepository.loadById(ObjectId(scheduleId))
             ?: throw IllegalArgumentException("존재하지 않는 스케줄입니다.")
 
+        if ( schedule.isExpired() ) {
+            throw BadRequestException(message = "지난 스케줄에는 참여할 수 없습니다.")
+        }
+
         if (schedule.groupId != ObjectId(groupId)) {
             throw ForbiddenException(message = "해당 그룹의 스케줄이 아닙니다.")
         }
@@ -277,6 +281,10 @@ class StudyScheduleServiceImpl(
 
         val schedule = studyScheduleRepository.loadById(ObjectId(scheduleId))
             ?: throw IllegalArgumentException("존재하지 않는 스케줄입니다.")
+
+        if ( schedule.isExpired() ) {
+            throw BadRequestException(message = "지난 스케줄에는 참여 취소할 수 없습니다.")
+        }
 
         if (schedule.groupId != group.id) {
             throw ForbiddenException(message = "해당 그룹의 스케줄이 아닙니다.")

@@ -5,16 +5,21 @@ import net.noti_me.dymit.dymit_backend_api.application.board.dto.PostCommand
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.PostDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
+import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
@@ -24,6 +29,7 @@ class PostServiceImpl(
     private val saveGroupPort: SaveStudyGroupPort,
     private val boardRepository: BoardRepository,
     private val groupMemberRepository: StudyGroupMemberRepository,
+    private val eventPublisher: ApplicationEventPublisher
 ): PostService {
 
     override fun createPost(
@@ -56,6 +62,11 @@ class PostServiceImpl(
         val savedPost = this.postRepository.save(newPost)
         group.updateRecentPost(RecentPostVo.from(savedPost))
         saveGroupPort.persist(group)
+        eventPublisher.publishEvent(PostCreatedEvent(
+            group = group,
+            board = board,
+            post = savedPost
+        ))
 
         return PostDto.from(savedPost)
     }
