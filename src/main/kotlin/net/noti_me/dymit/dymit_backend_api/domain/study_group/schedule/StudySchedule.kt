@@ -57,6 +57,10 @@ class StudySchedule(
     var nrParticipant: Long = nrParticipant
         private set
 
+    fun isExpired(): Boolean {
+        return scheduleAt.isBefore(LocalDateTime.now())
+    }
+
     fun changeTitle(
         requester: StudyGroupMember,
         newTitle: String

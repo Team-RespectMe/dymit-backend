@@ -6,6 +6,17 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
+/**
+ * 그룹 피드 객체
+ * - groupId: 피드가 속한 그룹 ID
+ * - iconType: 피드 아이콘 타입
+ * - title: 피드 제목
+ * - messages: 피드 메시지 목록
+ * - associates: 피드에 첨부된 리소스 목록
+ * - createdAt: 피드 생성 일시
+ * - updatedAt: 피드 수정 일시
+ * - isDeleted: 피드 삭제 여부
+ */
 @Document("group_feeds")
 class GroupFeed(
     id: ObjectId? = null,
