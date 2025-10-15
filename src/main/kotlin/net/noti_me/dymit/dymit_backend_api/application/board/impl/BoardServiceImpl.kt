@@ -89,10 +89,6 @@ class BoardServiceImpl(
         val existingBoard = boardRepository.findById(boardObjectId)
             ?: throw NotFoundException("해당 게시판을 찾을 수 없습니다.")
 
-        // 게시판 삭제 권한 확인 (Board 도메인에서 권한 체크)
-        // Board에 delete 권한 체크 메소드가 있다면 여기서 호출
-        // existingBoard.checkDeletePermission(groupMember)
-
         // 게시판 삭제 수행
         val deleteResult = boardRepository.delete(existingBoard)
         if (!deleteResult) {

@@ -14,7 +14,7 @@ class Writer(
     companion object {
         fun from(entity: StudyGroupMember): Writer {
             return Writer(
-                id = entity.id!!,
+                id = entity.memberId,
                 nickname = entity.nickname,
                 image = ProfileImageVo(
                     type = entity.profileImage.type,
