@@ -27,6 +27,8 @@ class StudyGroupQueryDetailResponse(
     val members: List<GroupMemberPreviewResponse>,
     @field:Schema(description = "스터디 그룹 초대 코드 정보")
     val inviteCode: InviteCodeVo = InviteCodeVo(),
+    @field:Schema(description = "공지사항 게시판 ID")
+    val noticeBoardId: String,
     @field:Schema(description = "최근 공지사항 정보")
     val recentPost: RecentPostVo? = null,
     @field:Schema(description = "스터디 그룹 개설일")
@@ -45,11 +47,12 @@ class StudyGroupQueryDetailResponse(
                 owner = GroupMemberPreviewResponse.from(group.owner),
                 members = members.map { GroupMemberPreviewResponse.from(it) },
                 inviteCode = group.inviteCode,
-                recentPost = RecentPostVo(
-                    postId = group.recentPost?.postId ?: "",
-                    title = group.recentPost?.title ?: "아직 올라온 공지사항이 없습니다.",
-                    createdAt = group.recentPost?.createdAt ?: LocalDateTime.now()
-                ),
+                noticeBoardId = group.noticeBoardId,
+                recentPost = group.recentPost?.let { it -> RecentPostVo(
+                    postId = it.postId,
+                    title = it.title,
+                    createdAt = it.createdAt
+                )},
                 createdAt = group.createdAt
             )
         }

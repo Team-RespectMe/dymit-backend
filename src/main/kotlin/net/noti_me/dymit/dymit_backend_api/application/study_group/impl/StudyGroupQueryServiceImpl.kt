@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
@@ -27,6 +28,7 @@ class StudyGroupQueryServiceImpl(
     private val loadStudyGroupPort: LoadStudyGroupPort,
     private val loadMemberPort: LoadMemberPort,
     private val studyGroupMemberRepository: StudyGroupMemberRepository,
+    private val groupBoardRepository: BoardRepository,
     private val saveStudyGroupPort: SaveStudyGroupPort,
 ): StudyGroupQueryService {
 
@@ -134,7 +136,15 @@ class StudyGroupQueryServiceImpl(
                 profileImage = MemberProfileImageVo(type = "preset", url = "0")
             )
 
-        return StudyGroupQueryModelDto.from(studyGroup, owner)
+        val noticeBoard = groupBoardRepository.findByGroupId(
+            groupId = ObjectId(groupId)
+        ).firstOrNull()
+
+        return if (noticeBoard != null) {
+            StudyGroupQueryModelDto.from(studyGroup, owner, noticeBoard)
+        } else {
+            StudyGroupQueryModelDto.from(studyGroup, owner)
+        }
     }
 
     override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): List<StudyGroupMemberQueryDto> {

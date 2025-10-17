@@ -15,7 +15,10 @@ class PostDetailResponse(
     val title: String,
     @Schema(description = "게시글 내용", example = "안녕하세요, 첫 번째 게시글입니다.")
     val content: String,
+    @Schema(description = "작성자 정보")
     val writer: WriterVo,
+    @Schema(description = "댓글 수")
+    val commentCount: Long = 0,
     @Schema(description = "게시글의 생성 시각", example = "2023-10-05T14:48:00Z")
     val createdAt: String,
 ) {
@@ -33,6 +36,7 @@ class PostDetailResponse(
                     nickname = dto.writer.nickname,
                     image = dto.writer.image
                 ),
+                commentCount =  dto.commentCount,
                 createdAt = dto.createdAt.toString()
             )
         }

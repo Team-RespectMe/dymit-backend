@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.3.16"
+version = "0.3.17"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 

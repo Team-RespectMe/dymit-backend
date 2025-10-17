@@ -29,7 +29,7 @@ class JwtAuthService(
     override fun login(provider: OidcProvider, idToken: String): LoginResult {
         val oidcAuthenticationProvider = oidcAuthenticationProviders
             .firstOrNull { it.support(provider.name) }
-            ?: throw BadRequestException("지원하지 않는 OIDC 프로바이더 입니다 ${provider.name}")
+            ?: throw BadRequestException(message="지원하지 않는 OIDC 프로바이더 입니다 ${provider.name}")
         val payload = oidcAuthenticationProvider.getPayload(idToken)
         logger.info("OIDC Login 요청 : ${provider.name}, sub: ${payload.sub}, email: ${payload.email}")
 
@@ -38,7 +38,7 @@ class JwtAuthService(
                 provider = provider.name,
                 subject = payload.sub
             )
-        ) ?: throw NotFoundException("존재하지 않는 회원입니다. 회원 가입이 필요합니다.")
+        ) ?: throw NotFoundException(message="존재하지 않는 회원입니다. 회원 가입이 필요합니다.")
 
         val refreshToken = jwtService.createRefreshToken(member)
         val accessToken = jwtService.createAccessToken(member)
