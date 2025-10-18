@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.member.impl
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
 import net.noti_me.dymit.dymit_backend_api.common.errors.ErrorMessage
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
@@ -23,17 +24,17 @@ class MemberDeleteUsecaseImpl(
 
         val member = loadMemberPort.loadById(memberId)
             ?: return
-        member.changeNickname("탈퇴한 회원${memberId}")
 
         val ownedGroups = loadGroupPort.loadByOwnerId(member.identifier)
-
         if (ownedGroups.isNotEmpty()) {
             throw ForbiddenException(
                 code = ErrorMessage.MEMBER_CAN_NOT_LEAVE_OWNED_GROUP.code
                 ,message = ErrorMessage.MEMBER_CAN_NOT_LEAVE_OWNED_GROUP.message
             )
         }
+        member.leaveService()
 
-        saveMemberPort.delete(member)
+        // saveMemberPort.delete(member)
+        saveMemberPort.update(member)
     }
 }

@@ -44,7 +44,7 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
         super.clearDomainEvents()
     }
 
-    fun markAsDeleted() {
+    open fun markAsDeleted() {
         isDeleted = true
     }   
 }

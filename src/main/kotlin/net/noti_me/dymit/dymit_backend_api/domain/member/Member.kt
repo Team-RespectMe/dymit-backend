@@ -140,6 +140,22 @@ class Member(
         updateLastAccessedAt()
     }
 
+    fun leaveService() {
+        this.nickname = "탈퇴한_회원_${ObjectId.get().toHexString()}"
+        this.oidcIdentities.clear()
+        this.deviceTokens.clear()
+        this.refreshTokens.clear()
+        this.profileImage = MemberProfileImageVo(
+            type = "preset",
+            filePath = "",
+            url = Random.nextInt(0, 6).toString(),
+            fileSize = 0L,
+            width = 0,
+            height = 0
+        )
+        super.markAsDeleted()
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Member) return false

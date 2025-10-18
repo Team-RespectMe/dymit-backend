@@ -38,7 +38,11 @@ class JwtAuthService(
                 provider = provider.name,
                 subject = payload.sub
             )
-        ) ?: throw NotFoundException(message="존재하지 않는 회원입니다. 회원 가입이 필요합니다.")
+        ) ?: throw NotFoundException("존재하지 않는 회원입니다. 회원 가입이 필요합니다.")
+
+        if ( member.isDeleted ) {
+            throw UnauthorizedException("AE-002", "삭제된 회원입니다. 관리자에게 문의하세요.")
+        }
 
         val refreshToken = jwtService.createRefreshToken(member)
         val accessToken = jwtService.createAccessToken(member)
@@ -61,6 +65,10 @@ class JwtAuthService(
         val existsToken = member.refreshTokens.find {
             it.token==refreshToken
         }  ?: throw UnauthorizedException("AE-004", "비활성화 되었거나 등록되지 않은 리프레시 토큰입니다.")
+
+        if ( member.isDeleted ) {
+            throw UnauthorizedException("AE-002", "삭제된 회원입니다. 관리자에게 문의하세요.")
+        }
 
         // Refresh 토큰의 유효기간이 하루 이하로 남은 경우 재발급 로직을 수행하고, 기존 토큰을 제거한다.
         // 우선 expiredAt을 Instant로 변환

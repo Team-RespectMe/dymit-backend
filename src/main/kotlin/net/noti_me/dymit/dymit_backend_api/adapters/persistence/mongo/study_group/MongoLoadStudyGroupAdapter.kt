@@ -27,7 +27,7 @@ class MongoLoadStudyGroupAdapter(
 
     override fun loadByOwnerId(ownerId: String): List<StudyGroup> {
         return mongoTemplate.find(
-           Query(Criteria.where("ownerId").`is`(ownerId)),
+           Query(Criteria.where("ownerId").`is`(ObjectId(ownerId))),
             StudyGroup::class.java,
         )
     }
