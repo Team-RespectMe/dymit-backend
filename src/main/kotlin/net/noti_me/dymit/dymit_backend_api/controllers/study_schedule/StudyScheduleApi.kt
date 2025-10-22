@@ -47,22 +47,6 @@ interface StudyScheduleApi {
                 responseCode = "201",
                 description = "스터디 그룹 일정이 성공적으로 생성되었습니다."
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹입니다."
-            ),
         ]
     )
     @PostMapping("{groupId}/schedules")
@@ -94,25 +78,10 @@ interface StudyScheduleApi {
                 responseCode = "200",
                 description = "스터디 그룹 일정이 성공적으로 업데이트되었습니다."
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹 또는 일정입니다."
-            ),
         ]
     )
     @PutMapping("{groupId}/schedules/{scheduleId}")
+    @ResponseStatus(HttpStatus.OK)
     fun updateSchedule(
         @LoginMember
         memberInfo: MemberInfo,
@@ -140,22 +109,6 @@ interface StudyScheduleApi {
             ApiResponse(
                 responseCode = "204",
                 description = "스터디 그룹 일정이 성공적으로 삭제되었습니다."
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹 또는 일정입니다."
             ),
         ]
     )
@@ -187,25 +140,10 @@ interface StudyScheduleApi {
                 responseCode = "200",
                 description = "스터디 그룹의 모든 일정 목록이 성공적으로 조회되었습니다."
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹입니다."
-            ),
         ]
     )
     @GetMapping("/{groupId}/schedules")
+    @ResponseStatus(HttpStatus.OK)
     fun getGroupSchedules(
         @LoginMember
         memberInfo: MemberInfo,
@@ -231,25 +169,10 @@ interface StudyScheduleApi {
                 responseCode = "200",
                 description = "스터디 그룹 일정의 상세 정보가 성공적으로 조회되었습니다."
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹 또는 일정입니다."
-            ),
         ]
     )
     @GetMapping("{groupId}/schedules/{scheduleId}")
+    @ResponseStatus(HttpStatus.OK)
     fun getScheduleDetail(
         @LoginMember
         memberInfo: MemberInfo,
@@ -276,22 +199,6 @@ interface StudyScheduleApi {
             ApiResponse(
                 responseCode = "201",
                 description = "스터디 그룹 일정에 성공적으로 참여하였습니다."
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹 또는 일정입니다."
             ),
         ]
     )
@@ -323,22 +230,6 @@ interface StudyScheduleApi {
                 responseCode = "204",
                 description = "스터디 그룹 일정에서 성공적으로 나갔습니다."
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청입니다. 요청 형식을 확인해주세요."
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증되지 않은 사용자입니다. 로그인 후 다시 시도해주세요."
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "권한이 없는 사용자입니다."
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "존재하지 않는 스터디 그룹 또는 일정입니다."
-            )
         ]
     )
     @DeleteMapping("{groupId}/schedules/{scheduleId}/participants")

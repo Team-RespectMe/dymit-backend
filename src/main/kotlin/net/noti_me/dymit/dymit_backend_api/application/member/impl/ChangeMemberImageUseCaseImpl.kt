@@ -1,12 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberImageUploadUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeMemberImageUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotImplementedException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
@@ -14,15 +15,15 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
 @Service
-class MemberImageUploadUsecaseImpl(
+class ChangeMemberImageUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort
-) : MemberImageUploadUsecase {
+) : ChangeMemberImageUseCase {
 
-    override fun uploadImage(
+    override fun changeProfileImage(
         loginMember: MemberInfo,
         memberId: String,
-        type: String,
+        type: ProfileImageType,
         presetNo: Int?,
         imageFile: MultipartFile?
     ): MemberDto {
@@ -50,7 +51,7 @@ class MemberImageUploadUsecaseImpl(
     private fun getExternalImage(
         loginMember: MemberInfo,
         memberId: String,
-        type: String,
+        type: ProfileImageType,
         imageFile: MultipartFile
     ): MemberProfileImageVo {
         return MemberProfileImageVo(
@@ -68,9 +69,17 @@ class MemberImageUploadUsecaseImpl(
             filePath = "",
             fileSize = 0L,
             url = "${presetNo}",
-            type = "presets",
+            type = ProfileImageType.PRESET,
             width = 0,
             height = 0,
         )
+    }
+
+    private fun processExternalImageUpload() {
+
+    }
+
+    private fun processPresetImageSelection() {
+
     }
 }

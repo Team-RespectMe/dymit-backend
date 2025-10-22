@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportStatusUpdateRequest
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -26,9 +27,8 @@ interface ReportApi {
     @Operation(summary = "신고 생성", description = "새로운 신고를 생성합니다.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "201", description = "신고 생성 성공"),
-        ApiResponse(responseCode = "400", description = "잘못된 요청"),
-        ApiResponse(responseCode = "401", description = "인증 실패")
     ])
+    @ResponseStatus(HttpStatus.CREATED)
     fun createReport(
         @LoginMember memberInfo: MemberInfo,
         @RequestBody request: ReportCreateRequest
@@ -38,11 +38,8 @@ interface ReportApi {
     @Operation(summary = "신고 상태 변경", description = "신고의 처리 상태를 변경합니다. (어드민 전용)")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "상태 변경 성공"),
-        ApiResponse(responseCode = "400", description = "잘못된 요청"),
-        ApiResponse(responseCode = "401", description = "인증 실패"),
-        ApiResponse(responseCode = "403", description = "권한 없음"),
-        ApiResponse(responseCode = "404", description = "신고를 찾을 수 없음")
     ])
+    @ResponseStatus(HttpStatus.OK)
     fun updateReportStatus(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable reportId: String,
@@ -53,9 +50,8 @@ interface ReportApi {
     @Operation(summary = "신고 목록 조회", description = "신고 목록을 커서 기반 페이징으로 조회합니다. (어드민 전용)")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "조회 성공"),
-        ApiResponse(responseCode = "401", description = "인증 실패"),
-        ApiResponse(responseCode = "403", description = "권한 없음")
     ])
+    @ResponseStatus(HttpStatus.OK)
     fun getReportList(
         @LoginMember memberInfo: MemberInfo,
         @RequestParam(required = false) cursor: String?,

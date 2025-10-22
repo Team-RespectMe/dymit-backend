@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeletedEvent
 import org.bson.types.ObjectId
@@ -19,19 +20,10 @@ import kotlin.random.Random
 @Document(collection = "members")
 @CompoundIndex(name = "oidc_identity_idx", def = "{'oidcIdentities.provider': 1, 'oidcIdentities.subject': 1}", unique = true)
 class Member(
-//    @Id
-//    val id: ObjectId = ObjectId.get(),
     id: ObjectId? = null,
     nickname: String = "",
     oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
-    profileImage: MemberProfileImageVo = MemberProfileImageVo(
-        type = "preset",
-        filePath = "",
-        url = "0",
-        fileSize = 0L,
-        width = 0,
-        height = 0
-    ),
+    profileImage: MemberProfileImageVo = MemberProfileImageVo(),
     lastAccessAt: LocalDateTime = LocalDateTime.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
     refreshTokens: MutableSet<RefreshToken> = mutableSetOf(),
@@ -83,7 +75,7 @@ class Member(
     }
 
     fun deleteProfileImage() {
-        if ( this.profileImage.type == "external" ) {
+        if ( this.profileImage.type == ProfileImageType.EXTERNAL ) {
             val event = MemberProfileImageDeletedEvent(
                 filePath = this.profileImage.filePath,
                 source = this
@@ -92,7 +84,7 @@ class Member(
         }
 
         this.profileImage = MemberProfileImageVo(
-            type = "preset",
+            type = ProfileImageType.PRESET,
             filePath = "",
             url = Random.nextInt(0, 6).toString(),
             fileSize = 0L,
@@ -146,7 +138,7 @@ class Member(
         this.deviceTokens.clear()
         this.refreshTokens.clear()
         this.profileImage = MemberProfileImageVo(
-            type = "preset",
+            type = ProfileImageType.PRESET,
             filePath = "",
             url = Random.nextInt(0, 6).toString(),
             fileSize = 0L,

@@ -1,9 +1,10 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group
 
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 
 class ProfileImageVo(
-    val type: String = "preset",
+    val type: ProfileImageType = ProfileImageType.PRESET,
     val url: String = "0"
 ) {
 

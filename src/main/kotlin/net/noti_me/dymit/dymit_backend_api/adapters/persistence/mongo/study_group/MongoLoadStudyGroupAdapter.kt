@@ -41,7 +41,7 @@ class MongoLoadStudyGroupAdapter(
 
     override fun loadByGroupIds(groupIds: List<String>): List<StudyGroup> {
         return mongoTemplate.find(
-            Query(Criteria.where("id").`in`(groupIds)),
+            Query(Criteria.where("_id").`in`(groupIds)),
             StudyGroup::class.java
         )
     }

@@ -16,6 +16,7 @@ interface ScheduleCommentApi {
 
     @Operation(summary = "댓글 생성", description = "스터디 일정에 댓글을 생성합니다.")
     @PostMapping("/{groupId}/schedules/{scheduleId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
     fun createComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -25,6 +26,7 @@ interface ScheduleCommentApi {
 
     @Operation(summary = "댓글 수정", description = "스터디 일정 댓글을 수정합니다.")
     @PutMapping("/{groupId}/schedules/{scheduleId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
     fun updateComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -45,6 +47,7 @@ interface ScheduleCommentApi {
 
     @Operation(summary = "댓글 목록 조회", description = "스터디 일정의 댓글 목록을 조회합니다.")
     @GetMapping("/{groupId}/schedules/{scheduleId}/comments")
+    @ResponseStatus(HttpStatus.OK)
     fun getScheduleComments(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,

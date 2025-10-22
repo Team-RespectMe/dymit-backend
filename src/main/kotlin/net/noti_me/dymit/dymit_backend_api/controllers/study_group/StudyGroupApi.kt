@@ -49,9 +49,6 @@ interface StudyGroupApi {
     @Operation(summary = "스터디 그룹 생성 API", description = "로그인한 멤버가 새로운 스터디 그룹을 생성합니다.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "201", description = "스터디 그룹 생성 성공"),
-        ApiResponse(responseCode = "400", description = "잘못된 요청 (입력 값이 유효하지 않을 때)"),
-        ApiResponse(responseCode = "401", description = "인증 실패 (로그인하지 않았거나 토큰이 유효하지 않을 때)"),
-        ApiResponse(responseCode = "403", description = "접근 권한 없음 (로그인한 멤버가 스터디 그룹을 생성할 수 없는 경우)"),
     ])
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
@@ -86,7 +83,6 @@ interface StudyGroupApi {
     @Operation(summary = "초대 코드를 통한 스터디 그룹 검색 API", description = "초대 코드에 따른 스터디 그룹을 검색합니다.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "검색 성공"),
-        ApiResponse(responseCode = "400", description = "잘못된 요청 (검색어가 유효하지 않을 때)"),
     ])
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
@@ -102,8 +98,6 @@ interface StudyGroupApi {
     @Operation(summary = "내 스터디 그룹 목록 조회 API", description = "로그인한 사용자가 속한 스터디 그룹 목록을 조회합니다.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "조회 성공"),
-        ApiResponse(responseCode = "401", description = "인증 실패 (로그인하지 않았거나 토큰이 유효하지 않을 때)"),
-        ApiResponse(responseCode = "404", description = "사용자가 없는 경우")
     ])
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -118,7 +112,6 @@ interface StudyGroupApi {
     @Operation(summary = "스터디 그룹 Invite Code 조회 API", description = "스터디 그룹의 Invite Code를 조회합니다.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "조회 성공"),
-        ApiResponse(responseCode = "404", description = "스터디 그룹을 찾을 수 없는 경우"),
     ])
     @GetMapping("/{groupId}/invite-code")
     @ResponseStatus(HttpStatus.OK)
@@ -134,7 +127,6 @@ interface StudyGroupApi {
     @Operation(summary = "스터디 그룹 세부 조회 API", description = "스터디 그룹의 세부 정보를 조회합니다.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "조회 성공"),
-        ApiResponse(responseCode = "404", description = "스터디 그룹을 찾을 수 없는 경우"),
     ])
     @GetMapping("/{groupId}")
     @ResponseStatus(HttpStatus.OK)
