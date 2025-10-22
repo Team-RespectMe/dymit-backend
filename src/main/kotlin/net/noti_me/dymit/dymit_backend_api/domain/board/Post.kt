@@ -48,6 +48,16 @@ class Post(
         this.commentCount = newCount
     }
 
+    fun increaseCommentCount() {
+        commentCount++;
+    }
+
+    fun decreaseCommentCount() {
+        if ( commentCount > 0 ) {
+            commentCount--;
+        }
+    }
+
     fun updateTitle(requesterId: String, newTitle: String) {
         if (requesterId != writer.id.toHexString()) {
             throw ForbiddenException(message="본인의 게시글이 아닙니다.")
