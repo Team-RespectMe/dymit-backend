@@ -115,6 +115,7 @@ class CommentServiceImpl(
         val post = postRepository.findById(comment.postId.toHexString())
 
         if ( post != null ) {
+            post.decreaseCommentCount()
             postRepository.save(post)
         }
     }
