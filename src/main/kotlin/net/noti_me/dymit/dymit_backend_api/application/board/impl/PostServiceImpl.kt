@@ -61,7 +61,7 @@ class PostServiceImpl(
 
         val savedPost = this.postRepository.save(newPost)
         group.updateRecentPost(RecentPostVo.from(savedPost))
-        saveGroupPort.persist(group)
+        saveGroupPort.update(group)
         eventPublisher.publishEvent(PostCreatedEvent(
             group = group,
             board = board,
@@ -102,10 +102,12 @@ class PostServiceImpl(
         return PostDto.from(updatedPost)
     }
 
-    override fun removePost(memberInfo: MemberInfo,
-                            groupId: String,
-                            boardId: String,
-                            postId: String) {
+    override fun removePost(
+        memberInfo: MemberInfo,
+        groupId: String,
+        boardId: String,
+        postId: String
+    ) {
         val group = this.loadGroupPort.loadByGroupId(groupId)
             ?: throw NotFoundException(message="해당 그룹을 찾을 수 없습니다.")
 
@@ -119,14 +121,13 @@ class PostServiceImpl(
 
         this.postRepository.deleteById(post.identifier)
 
-        if (group.recentPost?.postId == post.identifier) {
-            val recentPost = postRepository.findLastPostByGroupIdAndBoardId(
-                groupId = ObjectId(groupId),
-                boardId = ObjectId(boardId)
-            )
-            group.updateRecentPost(RecentPostVo.from(recentPost))
-            saveGroupPort.update(group)
-        }
+        val recentPost = postRepository.findLastPostByGroupIdAndBoardId(
+            groupId = ObjectId(groupId),
+            boardId = ObjectId(boardId)
+        )
+
+        group.updateRecentPost(RecentPostVo.from(recentPost))
+        saveGroupPort.update(group)
     }
 
     override fun getBoardPostsWithCursor(

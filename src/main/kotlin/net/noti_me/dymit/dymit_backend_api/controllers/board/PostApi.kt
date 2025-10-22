@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostCommandResp
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostListItem
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -52,7 +53,7 @@ interface PostApi {
 
     @Operation(summary = "게시글 삭제", description = "특정 스터디 그룹의 게시판에 있는 게시글을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "게시글이 성공적으로 삭제되었습니다.")
-    @PostMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
+    @DeleteMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deletePost(
         @LoginMember memberInfo: MemberInfo,

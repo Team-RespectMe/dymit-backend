@@ -246,22 +246,7 @@ class StudyGroup(
      * @param recentPost 새로운 최근 게시글 정보
      */
     fun updateRecentPost(recentPost: RecentPostVo?) {
-        if (recentPost == null ) {
-            this.recentPost = null
-            return;
-        }
-        if ( this.recentPost == null ) {
-            this.recentPost = recentPost
-            return
-        }
-        val now = LocalDateTime.now()
-
-        if (
-            recentPost!!.createdAt.isAfter(now) &&
-            recentPost!!.createdAt.isAfter( this.recentPost!!.createdAt )
-        ) {
-            this.recentPost = recentPost
-        }
+        this.recentPost = recentPost
     }
 
     /**
