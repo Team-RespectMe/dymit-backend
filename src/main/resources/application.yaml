@@ -23,6 +23,7 @@ jwt:
     expiration: ${DYMIT_JWT_ACCESS_TOKEN_EXPIRATION:900000} # milliseconds
   refresh-token:
     expiration: ${DYMIT_JWT_REFRESH_TOKEN_EXPIRATION:2592000000} # milliseconds
+
 dymit:
   oidc:
     apple:
@@ -43,6 +44,9 @@ server:
       max-file-size: ${DYMIT_SERVER_MAX_FILE_SIZE:2MB}
       max-request-size: ${DYMIT_SERVER_MAX_REQUEST_SIZE:2MB}
 
+cdn: 
+  domain: ${DYMIT_CDN_DOMAIN:http://localhost:8080}
+
 firebase:
   config:
     path: ${DYMIT_FIREBASE_SERVICE_ACCOUNT_PATH}
@@ -52,6 +56,7 @@ log-reporter:
   discord:
     webhook:
       url: ${DYMIT_DISCORD_WEBHOOK_URL:}
+
 logging:
   level:
     root: ${DYMIT_SERVER_LOG_LEVEL:DEBUG}

@@ -1,5 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
+import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileUploadResult
+import net.noti_me.dymit.dymit_backend_api.application.file.usecases.UploadProfileImageUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeMemberImageUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
@@ -13,11 +15,13 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.util.UUID
 
 @Service
 class ChangeMemberImageUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
-    private val saveMemberPort: SaveMemberPort
+    private val saveMemberPort: SaveMemberPort,
+    private val uploadProfileImageUseCase: UploadProfileImageUseCase
 ) : ChangeMemberImageUseCase {
 
     override fun changeProfileImage(
@@ -34,52 +38,52 @@ class ChangeMemberImageUseCaseImpl(
         var member = loadMemberPort.loadById(memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
-        if ( imageFile != null ) {
-            throw NotImplementedException(message = "이미지 업로드 기능은 아직 구현되지 않았습니다.")
-        } else {
-            if ( presetNo == null ) {
-                throw BadRequestException(message = "이미지 업로드를 위한 이미지 파일 또는 프리셋 번호가 필요합니다.")
+        val imageVo = when ( type ) {
+            ProfileImageType.EXTERNAL -> {
+                if ( imageFile == null ) {
+                    throw BadRequestException(message = "외부 이미지 업로드를 위한 이미지 파일이 필요합니다.")
+                }
+                processExternalImageUpload(loginMember, imageFile)
             }
-
-            member.changeProfileImage(getPresetImage(presetNo))
+            ProfileImageType.PRESET -> {
+                if ( presetNo == null ) {
+                    throw BadRequestException(message = "프리셋 이미지 선택을 위한 프리셋 번호가 필요합니다.")
+                }
+                processPresetImageSelection("$presetNo")
+            }
+            else -> {
+                throw NotImplementedException(message = "지원하지 않는 프로필 이미지 타입입니다.")
+            }
         }
 
+        member.changeProfileImage(imageVo)
         member = saveMemberPort.update(member)
         return MemberDto.fromEntity(member)
     }
 
-    private fun getExternalImage(
-        loginMember: MemberInfo,
-        memberId: String,
-        type: ProfileImageType,
-        imageFile: MultipartFile
-    ): MemberProfileImageVo {
+
+    private fun processExternalImageUpload(memberInfo: MemberInfo, imageFile: MultipartFile): MemberProfileImageVo {
+        val result: FileUploadResult = uploadProfileImageUseCase.upload(
+            member = memberInfo,
+            imageFile = imageFile
+        )
+        val filePath = result.bucket + "/" + result.key
         return MemberProfileImageVo(
-            filePath = "external/${loginMember.memberId}/$memberId/$type/${imageFile.originalFilename}",
+            filePath = filePath,
             fileSize = imageFile.size,
-            url = "https://example.com/external/${loginMember.memberId}/$memberId/$type/${imageFile.originalFilename}",
-            type = type,
-            width = 0, // TODO: 이미지 크기 계산 로직 필요
-            height = 0 // TODO: 이미지 크기 계산 로직 필요
+            url = result.url,
+            type = ProfileImageType.EXTERNAL,
         )
     }
 
-    private fun getPresetImage(presetNo: Int): MemberProfileImageVo {
+    private fun processPresetImageSelection(imageName: String): MemberProfileImageVo {
         return MemberProfileImageVo(
             filePath = "",
             fileSize = 0L,
-            url = "${presetNo}",
+            url = imageName,
             type = ProfileImageType.PRESET,
             width = 0,
             height = 0,
         )
-    }
-
-    private fun processExternalImageUpload() {
-
-    }
-
-    private fun processPresetImageSelection() {
-
     }
 }

@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.file
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileUploadResult
 import org.springframework.web.multipart.MultipartFile
 
-interface FileService {
+interface FileIOService {
 
     /**
      * 파일 업로드

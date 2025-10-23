@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.file.impl
 
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
-import net.noti_me.dymit.dymit_backend_api.application.file.FileService
+import net.noti_me.dymit.dymit_backend_api.application.file.FileIOService
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileUploadResult
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 class S3FileService(
     private val s3: AmazonS3
-): FileService {
+): FileIOService {
 
     /**
      * S3 파일 업로드
