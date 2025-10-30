@@ -39,22 +39,6 @@ interface MemberApi {
                 responseCode = "200",
                 description = "멤버 조회 성공",
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "잘못된 요청(멤버 ID가 유효하지 않을 때)",
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "접근 권한 없음(자신이 아닌 멤버의 프로필을 조회하려고 할 때)",
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "멤버를 찾을 수 없음",
-            ),
         ]
     )
     @ResponseStatus(HttpStatus.OK)
@@ -71,26 +55,6 @@ interface MemberApi {
             ApiResponse(
                 responseCode = "200",
                 description = "멤버 프로필 업데이트 성공",
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청(유효하지 않은 데이터 형식)",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증 실패",
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "접근 권한 없음(자신이 아닌 멤버의 프로필을 업데이트하려고 할 때)",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "멤버를 찾을 수 없음",
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류",
             ),
         ]
     )
@@ -113,14 +77,6 @@ interface MemberApi {
                 responseCode = "201",
                 description = "멤버 생성 성공",
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청(유효하지 않은 데이터 형식)",
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류",
-            ),
         ]
     )
     @ResponseStatus(HttpStatus.CREATED)
@@ -134,16 +90,6 @@ interface MemberApi {
                 responseCode = "200",
                 description = "닉네임이 유효합니다."
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청(유효하지 않은 닉네임 형식)",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "닉네임이 이미 사용 중입니다.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
     @GetMapping("/nickname-validation")
@@ -162,22 +108,6 @@ interface MemberApi {
                 responseCode = "200",
                 description = "프로필 이미지 업로드 성공",
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청(유효하지 않은 데이터 형식)",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "인증 실패",
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "접근 권한 없음(자신이 아닌 멤버의 프로필 이미지를 업로드하려고 할 때)",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "멤버를 찾을 수 없음",
-            )
         ]
     )
     @PutMapping("/{memberId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

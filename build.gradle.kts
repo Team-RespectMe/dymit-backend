@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.3.19"
+version = "0.3.24"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 
@@ -41,12 +41,13 @@ dependencies {
 	implementation("com.auth0:java-jwt:4.4.0")
     implementation("com.google.firebase:firebase-admin:9.3.0")
     implementation("org.ehcache:ehcache:3.11.1")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.792")
 
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
 
     // testImplementation("io.kotest:kotest-extensions-htmlreporter:5.9.1")
-//	 testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1")
+    // testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1")
 	// implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.20.0")
 	testImplementation("io.kotest:kotest-extensions-junitxml:${kotestVersion}")
@@ -61,6 +62,7 @@ dependencies {
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
+        // freeCompilerArgs.addAll("-Xdebug", "-Xno-inline", "-Xno-optimize")
 	}
 	jvmToolchain(21)
 }
@@ -96,4 +98,20 @@ tasks.register<DockerPushImage>("pushDockerImage") {
 	dependsOn("buildDockerImage")
 	images.add("elensar92/dymit-api:${version}")
 	group = "docker"
+}
+
+tasks.register<JavaExec>("bootDebug") {
+    group = "application"
+    description = "Run Spring Boot in debug mode for Neovim DAP"
+
+    // Spring Boot main 클래스 자동 감지
+    mainClass.set("net.noti_me.dymit.dymit_backend_api.ApplicationKt") // 실제 main 클래스 경로로 수정
+
+    // Gradle JVM args
+    jvmArgs = listOf(
+        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"
+    )
+
+    classpath = sourceSets["main"].runtimeClasspath
+    args = listOf() // 필요시 커맨드라인 아규먼트 추가
 }

@@ -1,7 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
-import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
-import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.JwtAuthUsecase
+import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.AuthServiceFacade
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.AuthApi
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.LoginResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcLoginRequest
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 class AuthController(
-    private val jwtAuthUsecase: JwtAuthUsecase,
+    private val jwtAuthUsecase: AuthServiceFacade,
 ): AuthApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -19,7 +18,7 @@ class AuthController(
     override fun oidcLogin(
         request: OidcLoginRequest
     ): LoginResponse {
-        return LoginResponse.from(jwtAuthUsecase.login(request.provider, request.idToken))
+        return LoginResponse.from(jwtAuthUsecase.loginByOidcToken(request.provider, request.idToken))
     }
 
     override fun reissueAccessToken(request: RefreshTokenSubmitRequest)

@@ -1,5 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.domain.member
 
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+
 /**
  * 멤버 프로필 이미지 VO
  * @param type 프로필 이미지 타입 (presets: 기본 이미지, upload: 업로드된 이미지)
@@ -10,7 +12,7 @@ package net.noti_me.dymit.dymit_backend_api.domain.member
  * @param height 프로필 이미지 높이
  */
 class MemberProfileImageVo(
-    val type: String = "presets",
+    val type: ProfileImageType = ProfileImageType.PRESET,
     val filePath: String = "",
     val url: String = "0",
     val fileSize: Long = 0L,

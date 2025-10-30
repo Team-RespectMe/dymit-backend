@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl.JwtAuthService
+import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.AuthServiceFacade
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateResult
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
@@ -21,7 +21,7 @@ class MemberCreateUsecaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
     private val oidcAuthenticationProviders: List<OidcAuthenticationProvider>,
-    private val jwtAuthService: JwtAuthService,
+    private val authService: AuthServiceFacade,
     private val eventPublisher: ApplicationEventPublisher
 ) : MemberCreateUsecase {
 
@@ -56,7 +56,7 @@ class MemberCreateUsecaseImpl(
 
         return MemberCreateResult.from(
             member = MemberDto.fromEntity(member),
-            loginResult = jwtAuthService.login(
+            loginResult = authService.loginByOidcToken(
                 provider = command.oidcProvider,
                 idToken = command.idToken
             )

@@ -70,6 +70,9 @@ class CommentServiceImpl(
             post = post,
             comment = savedComment
         ))
+        post.increaseCommentCount()
+        postRepository.save(post)
+
         return CommentDto.from(savedComment)
     }
 
@@ -104,9 +107,16 @@ class CommentServiceImpl(
             throw ForbiddenException(message="본인의 댓글만 삭제할 수 있습니다.")
         }
 
+        
         val deleteResult = this.commentRepository.delete(comment)
         if (!deleteResult) {
             throw RuntimeException("댓글 삭제에 실패했습니다.")
+        }
+        val post = postRepository.findById(comment.postId.toHexString())
+
+        if ( post != null ) {
+            post.decreaseCommentCount()
+            postRepository.save(post)
         }
     }
 

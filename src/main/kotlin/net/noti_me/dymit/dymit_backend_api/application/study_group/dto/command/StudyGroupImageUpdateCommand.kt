@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command
 
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import org.springframework.web.multipart.MultipartFile
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile
  */
 class StudyGroupImageUpdateCommand(
     val groupId: String,
-    val type: String,
+    val type: ProfileImageType,
     val value: Int?,
     val file: MultipartFile?
 ) {

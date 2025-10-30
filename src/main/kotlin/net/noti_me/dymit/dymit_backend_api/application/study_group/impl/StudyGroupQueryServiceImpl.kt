@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.Stu
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
@@ -48,7 +49,7 @@ class StudyGroupQueryServiceImpl(
             ?: Member(
                 id = studyGroup.ownerId,
                 nickname = "Unknown",
-                profileImage = MemberProfileImageVo(type = "preset", url = "0")
+                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET, url = "0")
             )
 
         val membersCount = studyGroupMemberRepository.countByGroupId(studyGroup.id!!)
@@ -84,7 +85,7 @@ class StudyGroupQueryServiceImpl(
             val owner = loadMemberPort.loadById(group.ownerId) ?: Member(
                 id = group.ownerId,
                 nickname = "Unknown",
-                profileImage = MemberProfileImageVo(type = "preset", url = "0")
+                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET, url = "0")
             )
 
             StudyGroupQueryModelDto.from(group, owner)
@@ -133,7 +134,7 @@ class StudyGroupQueryServiceImpl(
             ?: Member(
                 id = studyGroup.ownerId,
                 nickname = "Unknown",
-                profileImage = MemberProfileImageVo(type = "preset", url = "0")
+                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET, url = "0")
             )
 
         val noticeBoard = groupBoardRepository.findByGroupId(

@@ -16,6 +16,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
@@ -82,7 +83,7 @@ class StudyGroupCommandServiceImpl(
             memberId = memberEntity.id,
             nickname = memberEntity.nickname,
             profileImage = ProfileImageVo.from(memberEntity.profileImage)
-                ?: ProfileImageVo(type = "preset", url = "0"),
+                ?: ProfileImageVo(type = ProfileImageType.PRESET, url = "0"),
             role = GroupMemberRole.OWNER
         )
         studyGroupMemberRepository.persist(owner)
@@ -174,14 +175,14 @@ class StudyGroupCommandServiceImpl(
 
     private fun createImageVo(command: StudyGroupImageUpdateCommand): GroupProfileImageVo {
         return when (command.type) {
-            "preset" -> {
+            ProfileImageType.PRESET -> {
                 val presetNumber = command.value
                     ?: throw BadRequestException(message = "잘못된 Preset Value입니다.")
                 if (presetNumber < 0 || presetNumber > 6) {
                     throw BadRequestException(message = "존재하지 않는 Preset Value입니다.")
                 }
                 GroupProfileImageVo(
-                    type = "preset",
+                    type = ProfileImageType.PRESET,
                     url = presetNumber.toString()
                 )
             }

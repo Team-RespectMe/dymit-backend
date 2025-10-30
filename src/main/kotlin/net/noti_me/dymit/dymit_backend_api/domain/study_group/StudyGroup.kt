@@ -8,6 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -181,14 +182,14 @@ class StudyGroup(
             throw ForbiddenException(message="그룹 소유자만 프로필 이미지를 삭제할 수 있습니다.")
         }
 
-        if ( this.profileImage.type == "external" ) {
+        if ( this.profileImage.type == ProfileImageType.EXTERNAL ) {
             val event = StudyGroupProfileImageDeleteEvent(this.identifier, profileImage.filePath, this)
             this.registerEvent(event)
         }
 
         this.profileImage = GroupProfileImageVo(
             filePath = "",
-            type = "preset",
+            type = ProfileImageType.PRESET,
             url = Random.nextInt(0, 8).toString(),
         )
     }
@@ -245,22 +246,7 @@ class StudyGroup(
      * @param recentPost 새로운 최근 게시글 정보
      */
     fun updateRecentPost(recentPost: RecentPostVo?) {
-        if (recentPost == null ) {
-            this.recentPost = null
-            return;
-        }
-        if ( this.recentPost == null ) {
-            this.recentPost = recentPost
-            return
-        }
-        val now = LocalDateTime.now()
-
-        if (
-            recentPost!!.createdAt.isAfter(now) &&
-            recentPost!!.createdAt.isAfter( this.recentPost!!.createdAt )
-        ) {
-            this.recentPost = recentPost
-        }
+        this.recentPost = recentPost
     }
 
     /**

@@ -36,6 +36,7 @@ interface PostCommentApi {
 
     @PutMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments/{commentId}")
     @ApiResponse(responseCode = "200", description = "댓글이 성공적으로 수정되었습니다.")
+    @ResponseStatus(HttpStatus.OK)
     fun updateComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -58,6 +59,7 @@ interface PostCommentApi {
 
     @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments")
     @ApiResponse(responseCode = "200", description = "댓글 목록을 성공적으로 조회했습니다.")
+    @ResponseStatus(HttpStatus.OK)
     fun getPostComments(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,

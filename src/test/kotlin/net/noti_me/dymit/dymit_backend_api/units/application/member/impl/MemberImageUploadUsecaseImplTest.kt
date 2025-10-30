@@ -8,7 +8,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberImageUploadUsecaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.member.impl.ChangeMemberImageUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
@@ -32,7 +32,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
     val saveMemberPort = mockk<SaveMemberPort>()
     val multipartFile = mockk<MultipartFile>()
 
-    val memberImageUploadUsecase = MemberImageUploadUsecaseImpl(
+    val memberImageUploadUsecase = ChangeMemberImageUseCaseImpl(
         loadMemberPort = loadMemberPort,
         saveMemberPort = saveMemberPort
     )
@@ -84,7 +84,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns existingMember
             every { saveMemberPort.update(any()) } returns updatedMember
 
-            val result = memberImageUploadUsecase.uploadImage(
+            val result = memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
                 memberId = memberId,
                 type = type,
@@ -117,7 +117,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
 
         When("다른 멤버의 ID로 업로드를 요청하면") {
             val exception = shouldThrow<ForbiddenException> {
-                memberImageUploadUsecase.uploadImage(
+                memberImageUploadUsecase.changeProfileImage(
                     loginMember = loginMember,
                     memberId = targetMemberId,
                     type = type,
@@ -149,7 +149,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns null
 
             val exception = shouldThrow<NotFoundException> {
-                memberImageUploadUsecase.uploadImage(
+                memberImageUploadUsecase.changeProfileImage(
                     loginMember = loginMember,
                     memberId = memberId,
                     type = type,
@@ -187,7 +187,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { multipartFile.size } returns 1024L
 
             val exception = shouldThrow<NotImplementedException> {
-                memberImageUploadUsecase.uploadImage(
+                memberImageUploadUsecase.changeProfileImage(
                     loginMember = loginMember,
                     memberId = memberId,
                     type = type,
@@ -223,7 +223,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns existingMember
 
             val exception = shouldThrow<BadRequestException> {
-                memberImageUploadUsecase.uploadImage(
+                memberImageUploadUsecase.changeProfileImage(
                     loginMember = loginMember,
                     memberId = memberId,
                     type = type,
@@ -259,7 +259,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns existingMember
             every { saveMemberPort.update(any()) } answers { firstArg() }
 
-            val result = memberImageUploadUsecase.uploadImage(
+            val result = memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
                 memberId = memberId,
                 type = type,
@@ -277,7 +277,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns existingMember
             every { saveMemberPort.update(any()) } answers { firstArg() }
 
-            val result = memberImageUploadUsecase.uploadImage(
+            val result = memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
                 memberId = memberId,
                 type = type,
@@ -310,7 +310,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns existingMember
             every { saveMemberPort.update(any()) } answers { firstArg() }
 
-            val result = memberImageUploadUsecase.uploadImage(
+            val result = memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
                 memberId = memberId,
                 type = "avatar",
@@ -329,7 +329,7 @@ internal class MemberImageUploadUsecaseImplTest : BehaviorSpec({
             every { loadMemberPort.loadById(memberId) } returns existingMember
             every { saveMemberPort.update(any()) } answers { firstArg() }
 
-            val result = memberImageUploadUsecase.uploadImage(
+            val result = memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
                 memberId = memberId,
                 type = "thumbnail",

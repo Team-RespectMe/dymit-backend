@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostCommandResp
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostListItem
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -41,6 +42,7 @@ interface PostApi {
     @PutMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
     @Operation(summary = "게시글 수정", description = "특정 스터디 그룹의 게시판에 있는 게시글을 수정합니다.")
     @ApiResponse(responseCode = "200", description = "게시글이 성공적으로 수정되었습니다.")
+    @ResponseStatus(HttpStatus.OK)
     fun updatePost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -49,10 +51,10 @@ interface PostApi {
         @RequestBody @Valid request: PostCommandRequest
     ): PostCommandResponse
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "게시글 삭제", description = "특정 스터디 그룹의 게시판에 있는 게시글을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "게시글이 성공적으로 삭제되었습니다.")
-    @PostMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
+    @DeleteMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deletePost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -63,6 +65,7 @@ interface PostApi {
     @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
     @Operation(summary = "게시글 상세 조회", description = "특정 스터디 그룹의 게시판에 있는 게시글을 상세 조회합니다.")
     @ApiResponse(responseCode = "200", description = "게시글이 성공적으로 조회되었습니다.")
+    @ResponseStatus(HttpStatus.OK)
     fun getPost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -73,6 +76,7 @@ interface PostApi {
     @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts")
     @Operation(summary = "게시글 목록 조회", description = "특정 스터디 그룹의 게시판에 있는 모든 게시글을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "게시글 목록이 성공적으로 조회되었습니다.")
+    @ResponseStatus(HttpStatus.OK)
     fun getBoardPosts(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,

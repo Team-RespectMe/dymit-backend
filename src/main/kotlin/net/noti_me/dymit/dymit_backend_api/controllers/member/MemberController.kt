@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeviceTokenUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberImageUploadUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeMemberImageUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
@@ -26,7 +26,7 @@ class MemberController(
     private val memberQueryUsecase: MemberQueryUsecase,
     private val memberDeleteUsecase: MemberDeleteUsecase,
     private val memberUpdateNicknameUsecase: UpdateNicknameUsecase,
-    private val memberImageUploadUsecase: MemberImageUploadUsecase,
+    private val memberImageUploadUsecase: ChangeMemberImageUseCase,
     private val deviceTokenUsecase: MemberDeviceTokenUsecase
 ) : MemberApi {
 
@@ -81,7 +81,7 @@ class MemberController(
         val presetNo = request.presetNo
 
         return MemberProfileResponse.from(
-            memberImageUploadUsecase.uploadImage(
+            memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
                 memberId = memberId,
                 type = type,
