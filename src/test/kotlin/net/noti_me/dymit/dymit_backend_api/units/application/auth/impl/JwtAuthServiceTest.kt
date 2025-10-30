@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl.JwtAuthService
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
 import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.CommonOidcIdTokenPayload
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
@@ -74,7 +73,7 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
                 every { loadMemberPort.loadByOidcIdentity(any()) } returns null
                 then("NotFoundException 이 발생한다") {
                     shouldThrowExactly<NotFoundException> {
-                         jwtAuthService.login(
+                         jwtAuthService.loginByOidcToken(
                             provider = OidcProvider.GOOGLE,
                             idToken = "test-id-token"
                          )
@@ -86,7 +85,7 @@ internal class JwtAuthServiceTest() : BehaviorSpec() {
                 every { loadMemberPort.loadByOidcIdentity(any()) } returns member
                 every { saveMemberPort.persist(any()) } returns member
                 then("로그인 결과가 반환된다") {
-                    val loginResult = jwtAuthService.login(
+                    val loginResult = jwtAuthService.loginByOidcToken(
                         provider = OidcProvider.GOOGLE,
                         idToken = "test-id-token"
                     )

@@ -62,6 +62,7 @@ dependencies {
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
+        // freeCompilerArgs.addAll("-Xdebug", "-Xno-inline", "-Xno-optimize")
 	}
 	jvmToolchain(21)
 }
@@ -97,4 +98,20 @@ tasks.register<DockerPushImage>("pushDockerImage") {
 	dependsOn("buildDockerImage")
 	images.add("elensar92/dymit-api:${version}")
 	group = "docker"
+}
+
+tasks.register<JavaExec>("bootDebug") {
+    group = "application"
+    description = "Run Spring Boot in debug mode for Neovim DAP"
+
+    // Spring Boot main 클래스 자동 감지
+    mainClass.set("net.noti_me.dymit.dymit_backend_api.ApplicationKt") // 실제 main 클래스 경로로 수정
+
+    // Gradle JVM args
+    jvmArgs = listOf(
+        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"
+    )
+
+    classpath = sourceSets["main"].runtimeClasspath
+    args = listOf() // 필요시 커맨드라인 아규먼트 추가
 }

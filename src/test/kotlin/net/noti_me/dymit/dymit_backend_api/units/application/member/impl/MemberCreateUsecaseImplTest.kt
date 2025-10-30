@@ -8,7 +8,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
-import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.impl.JwtAuthService
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberCreateUsecaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
@@ -101,7 +100,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
                             OidcIdentity(provider = "GOOGLE", subject = commonOidcIdTokenPayload.sub)
                         )
                     )
-                    every { jwtService.login(any(), any()) } returns LoginResult(
+                    every { jwtService.loginByOidcToken(any(), any()) } returns LoginResult(
                         memberId = "memberId",
                         accessToken = "eyJ...",
                         refreshToken = "eyJ..."
