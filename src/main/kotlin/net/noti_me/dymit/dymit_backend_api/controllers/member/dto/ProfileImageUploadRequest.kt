@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @Schema(description = "프로필 이미지 업로드 요청 객체")
 class ProfileImageUploadRequest(
-    @field: Schema(description = "프로필 이미지 타입", allowableValues = ["preset", "external"], example = "preset")
+    @field: Schema(description = "프로필 이미지 타입")
     val type: ProfileImageType = ProfileImageType.PRESET,
     @field: Schema(description = "프리셋 이미지 사용 시 번호")
     val preset: MemberPresetImage? = null,
