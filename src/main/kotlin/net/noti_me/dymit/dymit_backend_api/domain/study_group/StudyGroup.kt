@@ -127,8 +127,8 @@ class StudyGroup(
             throw BadRequestException(message="스터디 그룹의 설명은 빈 문자열 일 수 없습니다.")
         }
 
-        if ( newDescription.length < 5 || newDescription.length > 500 ) {
-            throw BadRequestException(message="스터디 그룹의 설명은 5자 이상 500자 이하이어야 합니다.")
+        if ( newDescription.length < 1 || newDescription.length > 500 ) {
+            throw BadRequestException(message="스터디 그룹의 설명은 1자 이상 500자 이하이어야 합니다.")
         }
 
         this.description = newDescription
