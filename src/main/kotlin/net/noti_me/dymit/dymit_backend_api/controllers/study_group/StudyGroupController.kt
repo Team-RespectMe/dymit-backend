@@ -18,6 +18,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupModifyRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.UpdateStudyGroupProfileImageRequest
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -88,11 +89,11 @@ class StudyGroupController(
     override fun updateStudyGroupProfileImage(
         memberInfo: MemberInfo,
         groupId: String,
-        request: ProfileImageUploadRequest
+        request: UpdateStudyGroupProfileImageRequest
     ): StudyGroupResponse {
         val updatedGroup = studyGroupCommandService.updateStudyGroupProfileImage(
             member = memberInfo,
-            command = request.toGroupProfileUpdateCommand(groupId)
+            command = request.toCommand(groupId)
         )
 
         return StudyGroupResponse.from(updatedGroup)

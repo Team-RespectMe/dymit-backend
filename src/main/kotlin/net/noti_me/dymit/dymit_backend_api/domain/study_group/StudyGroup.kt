@@ -183,15 +183,15 @@ class StudyGroup(
         }
 
         if ( this.profileImage.type == ProfileImageType.EXTERNAL ) {
-            val event = StudyGroupProfileImageDeleteEvent(this.identifier, profileImage.filePath, this)
+            val event = StudyGroupProfileImageDeleteEvent(
+                thumbnail = this.profileImage.thumbnail,
+                original = this.profileImage.original,
+                source = this
+            )
             this.registerEvent(event)
         }
 
-        this.profileImage = GroupProfileImageVo(
-            filePath = "",
-            type = ProfileImageType.PRESET,
-            url = Random.nextInt(0, 8).toString(),
-        )
+        this.profileImage = GroupProfileImageVo(type = ProfileImageType.PRESET,)
     }
 
     /**

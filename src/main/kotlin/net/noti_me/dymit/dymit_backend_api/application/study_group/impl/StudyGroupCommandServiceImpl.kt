@@ -82,8 +82,7 @@ class StudyGroupCommandServiceImpl(
             groupId = studyGroup.id!!,
             memberId = memberEntity.id,
             nickname = memberEntity.nickname,
-            profileImage = ProfileImageVo.from(memberEntity.profileImage)
-                ?: ProfileImageVo(type = ProfileImageType.PRESET, url = "0"),
+            profileImage = ProfileImageVo.from(memberEntity.profileImage),
             role = GroupMemberRole.OWNER
         )
         studyGroupMemberRepository.persist(owner)
@@ -174,19 +173,14 @@ class StudyGroupCommandServiceImpl(
     }
 
     private fun createImageVo(command: StudyGroupImageUpdateCommand): GroupProfileImageVo {
-        return when (command.type) {
-            ProfileImageType.PRESET -> {
-                val presetNumber = command.value
-                    ?: throw BadRequestException(message = "잘못된 Preset Value입니다.")
-                if (presetNumber < 0 || presetNumber > 6) {
-                    throw BadRequestException(message = "존재하지 않는 Preset Value입니다.")
-                }
-                GroupProfileImageVo(
-                    type = ProfileImageType.PRESET,
-                    url = presetNumber.toString()
-                )
-            }
-            else -> throw IllegalArgumentException("Invalid image type")
+        return if ( command.type == ProfileImageType.PRESET ) {
+            GroupProfileImageVo(
+                type = ProfileImageType.PRESET,
+                thumbnail = command.value!!.thumbnail,
+                original = command.value!!.original,
+            )
+        } else {
+            throw BadRequestException(message = "지원하지 않는 이미지 타입입니다.")
         }
     }
 

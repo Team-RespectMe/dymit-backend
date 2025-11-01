@@ -77,7 +77,8 @@ class Member(
     fun deleteProfileImage() {
         if ( this.profileImage.type == ProfileImageType.EXTERNAL ) {
             val event = MemberProfileImageDeletedEvent(
-                filePath = this.profileImage.filePath,
+                thumbnail = this.profileImage.thumbnail,
+                original = this.profileImage.original,
                 source = this
             )
             registerEvent(event)
@@ -85,8 +86,6 @@ class Member(
 
         this.profileImage = MemberProfileImageVo(
             type = ProfileImageType.PRESET,
-            filePath = "",
-            url = Random.nextInt(0, 6).toString(),
             fileSize = 0L,
             width = 0,
             height = 0
@@ -139,8 +138,6 @@ class Member(
         this.refreshTokens.clear()
         this.profileImage = MemberProfileImageVo(
             type = ProfileImageType.PRESET,
-            filePath = "",
-            url = Random.nextInt(0, 6).toString(),
             fileSize = 0L,
             width = 0,
             height = 0

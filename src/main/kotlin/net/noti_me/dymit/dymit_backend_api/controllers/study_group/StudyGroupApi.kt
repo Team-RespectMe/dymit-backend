@@ -22,6 +22,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupModifyRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
+import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.UpdateStudyGroupProfileImageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -150,7 +151,7 @@ interface StudyGroupApi {
     fun updateStudyGroupProfileImage(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
-        @Valid @ModelAttribute request: ProfileImageUploadRequest // TODO: StudyGroupImageUpdateRequest로 변경
+        @Valid @ModelAttribute request: UpdateStudyGroupProfileImageRequest
     ): StudyGroupResponse
 
     /**

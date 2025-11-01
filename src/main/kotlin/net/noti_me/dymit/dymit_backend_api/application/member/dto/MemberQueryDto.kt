@@ -18,9 +18,10 @@ class MemberQueryDto(
                 nickname = member.nickname,
                 oidcInfo = member.oidcIdentities.toList(),
                 profileImageVo = MemberProfileImageVo(
-                    url = member.profileImage?.url ?: "",
-                    width = member.profileImage?.width ?: 0,
-                    height = member.profileImage?.height ?: 0
+                    thumbnail = member.profileImage.thumbnail,
+                    original = member.profileImage.original,
+                    width = member.profileImage.width,
+                    height = member.profileImage.height
                 )
             )
         }

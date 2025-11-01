@@ -76,17 +76,10 @@ class MemberController(
         memberId: String,
         request: ProfileImageUploadRequest
     ): MemberProfileResponse {
-        val imageFile = request.file
-        val type = request.type
-        val presetNo = request.presetNo
-
         return MemberProfileResponse.from(
             memberImageUploadUsecase.changeProfileImage(
                 loginMember = loginMember,
-                memberId = memberId,
-                type = type,
-                presetNo = presetNo,
-                imageFile = imageFile
+                command = request.toCommand(memberId)
             )
         )
     }

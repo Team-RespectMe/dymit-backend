@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent
  * 이 이벤트를 구독하여 스터디 그룹 프로필 이미지가 삭제된 후처리를 수행할 수 있습니다.
  */
 class StudyGroupProfileImageDeleteEvent (
-    val studyGroupId: String,
-    val filePath: String,
+    val thumbnail: String,
+    val original: String,
     source: Any
 ) : ApplicationEvent(source)

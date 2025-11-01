@@ -26,7 +26,7 @@ class PostCommentCreatedEvent(
                 "postId" to comment.postId.toHexString(),
                 "commentId" to comment.identifier
             ),
-            image = group.profileImage.url
+            image = group.profileImage.thumbnail
         )
     }
 }

@@ -12,8 +12,10 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberPresetImage
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupPresetImage
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -49,7 +51,11 @@ class StudyGroupQueryServiceImpl(
             ?: Member(
                 id = studyGroup.ownerId,
                 nickname = "Unknown",
-                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET, url = "0")
+                profileImage = MemberProfileImageVo(
+                    type = ProfileImageType.PRESET,
+                    thumbnail = MemberPresetImage.CHECK.thumbnail,
+                    original = MemberPresetImage.CHECK.original
+                )
             )
 
         val membersCount = studyGroupMemberRepository.countByGroupId(studyGroup.id!!)
@@ -85,9 +91,8 @@ class StudyGroupQueryServiceImpl(
             val owner = loadMemberPort.loadById(group.ownerId) ?: Member(
                 id = group.ownerId,
                 nickname = "Unknown",
-                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET, url = "0")
+                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET)
             )
-
             StudyGroupQueryModelDto.from(group, owner)
         }.toList()
 
@@ -134,7 +139,7 @@ class StudyGroupQueryServiceImpl(
             ?: Member(
                 id = studyGroup.ownerId,
                 nickname = "Unknown",
-                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET, url = "0")
+                profileImage = MemberProfileImageVo(type = ProfileImageType.PRESET)
             )
 
         val noticeBoard = groupBoardRepository.findByGroupId(

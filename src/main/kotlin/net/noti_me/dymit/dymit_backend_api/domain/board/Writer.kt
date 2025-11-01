@@ -29,7 +29,7 @@ class Writer(
                 nickname = entity.nickname,
                 image = ProfileImageVo(
                     type = entity.profileImage.type,
-                    url = entity.profileImage.url
+                    url = entity.profileImage.thumbnail
                 )
             )
         }

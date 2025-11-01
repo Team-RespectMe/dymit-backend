@@ -18,7 +18,7 @@ class ProfileImageResponse(
     companion object {
         fun from(image: MemberProfileImageVo) : ProfileImageResponse {
             return ProfileImageResponse(
-                url = image.url,
+                url = image.thumbnail,
                 type = image.type,
             )
         }
@@ -32,7 +32,7 @@ class ProfileImageResponse(
 
         fun from(image: GroupProfileImageVo): ProfileImageResponse {
             return ProfileImageResponse(
-                url = image.url,
+                url = image.thumbnail,
                 type = image.type,
             )
         }

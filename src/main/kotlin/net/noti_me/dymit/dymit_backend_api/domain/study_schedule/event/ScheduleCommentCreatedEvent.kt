@@ -23,7 +23,7 @@ class ScheduleCommentCreatedEvent(
                 "scheduleId" to schedule.identifier,
                 "commentId" to comment.identifier,
             ),
-            image = group.profileImage.url,
+            image = group.profileImage.thumbnail,
         )
     }
 }
