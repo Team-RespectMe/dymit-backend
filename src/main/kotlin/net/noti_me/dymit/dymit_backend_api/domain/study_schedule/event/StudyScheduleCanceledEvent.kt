@@ -20,10 +20,13 @@ class StudyScheduleCanceledEvent(
     val schedule: StudySchedule
 ): GroupImportantEvent(schedule) {
 
+    private val eventName = "STUDY_SCHEDULE_CANCELED"
+
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = group.id!!,
             iconType = IconType.DATE,
+            eventName = eventName,
             messages = listOf(
                 FeedMessage(
                     text = group.name,
@@ -52,6 +55,7 @@ class StudyScheduleCanceledEvent(
         return GroupPushMessage(
             groupId = group.id!!,
             title = group.name,
+            eventName = eventName,
             body = "${schedule.session}회차 일정이 취소되었어요!",
             data = mapOf(
                 "groupId" to group.identifier,

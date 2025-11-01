@@ -16,10 +16,13 @@ class ScheduleLocationChangedEvent(
     val schedule: StudySchedule,
 ): GroupImportantEvent(schedule) {
 
+    private val eventName = "SCHEDULE_LOCATION_CHANGED"
+
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = schedule.groupId,
             iconType = DATE,
+            eventName = eventName,
             messages = listOf(
                 FeedMessage(
                     text = group.name,
@@ -49,6 +52,7 @@ class ScheduleLocationChangedEvent(
             groupId = schedule.groupId,
             title = group.name,
             body = "${schedule.session}회차 일정 장소가 변경되었어요!",
+            eventName = eventName,
             data = mapOf(
                 "groupId" to group.identifier,
                 "scheduleId" to schedule.identifier

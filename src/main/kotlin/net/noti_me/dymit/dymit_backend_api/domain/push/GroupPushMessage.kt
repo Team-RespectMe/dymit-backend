@@ -13,6 +13,7 @@ import org.bson.types.ObjectId
  */
 class GroupPushMessage(
     val groupId: ObjectId,
+    val eventName: String,
     val title: String = "Dymit",
     val body: String,
     val image: String? = null,

@@ -12,13 +12,15 @@ class ScheduleCommentCreatedEvent(
     val comment: ScheduleComment
 ): PersonalPushEvent(comment) {
 
+    private val eventName = "SCHEDULE_COMMENT_CREATED"
+
     override fun processPushMessage(): PersonalPushMessage {
         return PersonalPushMessage(
             memberId = group.ownerId,
             title = group.name,
             body = "${schedule.session}회차 일정에 댓글이 달렸어요!",
+            eventName = eventName,
             data = mapOf(
-                "type" to "SCHEDULE_COMMENT",
                 "groupId" to schedule.groupId.toHexString(),
                 "scheduleId" to schedule.identifier,
                 "commentId" to comment.identifier,

@@ -14,13 +14,15 @@ class PostCommentCreatedEvent(
     val comment: PostComment
 ): PersonalPushEvent(comment) {
 
+    private val eventName = "POST_COMMENT_CREATED"
+
     override fun processPushMessage(): PersonalPushMessage {
         return PersonalPushMessage(
             memberId = post.writer.id,
             title = "회원님의 게시글에 댓글이 달렸어요!",
             body = comment.content,
+            eventName = eventName,
             data = mapOf(
-                "type" to "POST_COMMENT",
                 "groupId" to group.identifier,
                 "boardId" to board.identifier,
                 "postId" to comment.postId.toHexString(),

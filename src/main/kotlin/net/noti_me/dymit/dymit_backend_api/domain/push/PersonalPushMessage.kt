@@ -4,6 +4,7 @@ import org.bson.types.ObjectId
 
 data class PersonalPushMessage(
     val memberId: ObjectId,
+    val eventName: String,
     val title: String = "Dymit",
     val body: String,
     val image: String?,

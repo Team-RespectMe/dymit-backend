@@ -22,10 +22,13 @@ class StudyScheduleCreatedEvent(
     val studySchedule: StudySchedule,
 ): GroupImportantEvent(studySchedule) {
 
+    private val eventName = "STUDY_SCHEDULE_CREATED"
+
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = studySchedule.groupId,
             iconType = IconType.DATE,
+            eventName = eventName,
             messages = listOf(
                 FeedMessage(
                     text = "${group.name} ${studySchedule.session}회차 일정이 추가되었어요!",
@@ -48,6 +51,7 @@ class StudyScheduleCreatedEvent(
         return GroupPushMessage(
             groupId = studySchedule.groupId,
             title = group.name,
+            eventName = eventName,
             body = "${studySchedule.session}회차 일정이 추가되었어요!",
             data = mapOf(
                 "groupId" to group.identifier,

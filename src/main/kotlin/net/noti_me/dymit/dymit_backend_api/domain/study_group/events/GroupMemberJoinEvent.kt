@@ -14,6 +14,8 @@ class GroupMemberJoinEvent(
     val member: StudyGroupMember
 ): PersonalFeedEvent(member) {
 
+    private val eventName = "GROUP_MEMBER_JOIN"
+
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             memberId = group.ownerId,
@@ -21,6 +23,7 @@ class GroupMemberJoinEvent(
                 FeedMessage(text = "${member.nickname}님이 ${group.name}에 참가하셨습니다.")
             ),
             iconType = IconType.APPLAUSE,
+            eventName = eventName,
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,

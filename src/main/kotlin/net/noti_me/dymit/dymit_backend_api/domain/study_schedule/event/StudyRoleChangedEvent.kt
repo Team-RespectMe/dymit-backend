@@ -25,10 +25,13 @@ class StudyRoleChangedEvent(
     val role: ScheduleRole
 ): PersonalImportantEvent(role) {
 
+    private val eventName = "STUDY_ROLE_CHANGED"
+
     override fun processPushMessage(): PersonalPushMessage {
         return PersonalPushMessage(
             memberId = role.memberId,
             title = "Dymit",
+            eventName = eventName,
             body = "${group.name} ${schedule.session}회차 맡은 역할이 변경되었어요!",
             data = mapOf (
                 "groupId" to schedule.groupId.toHexString(),
@@ -41,6 +44,7 @@ class StudyRoleChangedEvent(
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             iconType = IconType.ROLE,
+            eventName = eventName,
             memberId = role.memberId,
             messages = listOf(
                 FeedMessage(

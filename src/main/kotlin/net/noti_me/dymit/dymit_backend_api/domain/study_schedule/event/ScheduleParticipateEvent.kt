@@ -16,6 +16,8 @@ class ScheduleParticipateEvent(
     val member: StudyGroupMember
 ): PersonalFeedEvent(schedule) {
 
+    private val eventName = "PARTICIPATE_SCHEDULE"
+
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             memberId = group.ownerId,
@@ -23,6 +25,7 @@ class ScheduleParticipateEvent(
                 FeedMessage("${group.name} ${schedule.session}회차 일정에 ${member.nickname} 님이 참여하기로 했어요." )
             ),
             iconType = IconType.CHECK,
+            eventName = eventName,
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,

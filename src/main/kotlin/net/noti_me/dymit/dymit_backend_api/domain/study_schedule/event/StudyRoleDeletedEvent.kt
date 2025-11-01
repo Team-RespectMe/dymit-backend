@@ -24,9 +24,12 @@ class StudyRoleDeletedEvent(
     val role: ScheduleRole,
 ): PersonalImportantEvent(role) {
 
+    private val eventName: String = "STUDY_ROLE_DELETED"
+
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             iconType = IconType.ROLE,
+            eventName = eventName,
             memberId = role.memberId,
             messages = listOf(
                 FeedMessage(
@@ -58,6 +61,7 @@ class StudyRoleDeletedEvent(
         return PersonalPushMessage(
             memberId = role.memberId,
             title = "Dymit",
+            eventName = eventName,
             body = "${group.name} ${schedule.session}회차에 맡은 역할이 해제되었어요!",
             data = mapOf (
                 "groupId" to schedule.groupId.toHexString(),

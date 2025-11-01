@@ -18,12 +18,15 @@ class PostCreatedEvent(
     val post: Post
 ): GroupImportantEvent(post) {
 
+    private val eventName: String = "POST_CREATED"
+
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = group.id!!,
             messages = listOf(
                 FeedMessage("${group.name}에 새로운 공지사항이 있어요!")
             ),
+            eventName = eventName,
             iconType = IconType.NOTICE,
             associates = listOf(
                 AssociatedResource(
@@ -48,6 +51,7 @@ class PostCreatedEvent(
             title = "${group.name}의 새로운 공지사항",
             body = "post.title",
             image = group.profileImage.thumbnail,
+            eventName = eventName,
             data = mapOf(
                 "groupId" to group.identifier,
                 "boardId" to board.identifier,
