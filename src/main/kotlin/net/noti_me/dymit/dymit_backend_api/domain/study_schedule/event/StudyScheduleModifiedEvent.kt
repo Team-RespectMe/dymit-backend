@@ -19,10 +19,13 @@ class StudyScheduleModifiedEvent(
     val schedule: StudySchedule
 ): GroupImportantEvent(schedule) {
 
+    private val eventName = "STUDY_SCHEDULE_MODIFIED"
+
     override fun processGroupFeed(): GroupFeed {
         return GroupFeed(
             groupId = group.id!!,
             iconType = IconType.DATE,
+            eventName = eventName,
             messages = listOf(
                 FeedMessage(
                     text = "${group.name} ${schedule.session}회차 일정이 변경되었어요!",
@@ -45,6 +48,7 @@ class StudyScheduleModifiedEvent(
         return GroupPushMessage(
             groupId = group.id!!,
             title = group.name,
+            eventName = eventName,
             body = "${schedule.session}회차 일정이 변경되었어요!",
             data = mapOf(
                 "groupId" to group.identifier,

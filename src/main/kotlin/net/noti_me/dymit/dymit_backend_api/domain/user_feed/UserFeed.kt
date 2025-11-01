@@ -13,6 +13,7 @@ class UserFeed(
     id: ObjectId? = null,
     val memberId: ObjectId,
     val iconType: IconType,
+    val eventName: String,
     val messages: List<FeedMessage>,
     val associates: List<AssociatedResource>,
     isRead: Boolean = false,
@@ -35,6 +36,7 @@ class UserFeed(
                 iconType = groupFeed.iconType,
                 messages = groupFeed.messages,
                 associates = groupFeed.associates,
+                eventName = groupFeed.eventName,
                 createdAt = groupFeed.createdAt,
                 updatedAt = groupFeed.updatedAt
             )
@@ -46,6 +48,7 @@ class UserFeed(
             return UserFeed(
                 memberId = member.id!!,
                 iconType = groupFeed.iconType,
+                eventName = groupFeed.eventName,
                 messages = groupFeed.messages,
                 associates = groupFeed.associates,
                 createdAt = groupFeed.createdAt,

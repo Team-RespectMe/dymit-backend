@@ -18,6 +18,8 @@ class StudyGroupOwnerChangedEvent(
     val group: StudyGroup,
 ): PersonalImportantEvent(group) {
 
+    private val eventName = "STUDY_GROUP_OWNER_CHANGED"
+
     override fun processUserFeed() = UserFeed(
         iconType = IconType.DATE,
         memberId = group.ownerId,
@@ -26,6 +28,7 @@ class StudyGroupOwnerChangedEvent(
                 text = "${group.name}의 소유자 위임",
             )
         ),
+        eventName = eventName,
         associates = listOf(
             AssociatedResource(
                 type = ResourceType.STUDY_GROUP,
@@ -37,6 +40,7 @@ class StudyGroupOwnerChangedEvent(
     override fun processPushMessage(): PersonalPushMessage {
         return PersonalPushMessage(
             memberId = group.ownerId,
+            eventName = eventName,
             title = "Dymit",
             body = "${group.name} 새로운 소유자가 되셨습니다!",
             data = mapOf(

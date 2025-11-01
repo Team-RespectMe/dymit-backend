@@ -46,7 +46,7 @@ class ChangeMemberImageUseCaseImpl(
             }
             ProfileImageType.PRESET -> {
                 if ( command.preset == null ) {
-                    throw BadRequestException(message = "프리셋 이미지 선택을 위한 프리셋 번호가 필요합니다.")
+                    throw BadRequestException(message = "프리셋 이미지 이름이 필요합니다.")
                 }
                 processPresetImageSelection(command.preset!!)
             }

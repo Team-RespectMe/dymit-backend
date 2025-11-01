@@ -16,6 +16,8 @@ class ScheduleCancelParticipateEvent(
     val member: StudyGroupMember
 ): PersonalFeedEvent(schedule) {
 
+    private val eventName = "CANCEL_TO_PARTICIPATE_SCHEDULE"
+
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             memberId = group.ownerId,
@@ -25,6 +27,7 @@ class ScheduleCancelParticipateEvent(
                 )
             ),
             iconType = IconType.BAD,
+            eventName = eventName,
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP,

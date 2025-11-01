@@ -17,9 +17,12 @@ class StudyRoleAssignedEvent(
     val role: ScheduleRole,
 ): PersonalImportantEvent(role) {
 
+    private val eventName = "STUDY_ROLE_ASSIGNED"
+
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             iconType = IconType.ROLE,
+            eventName = eventName,
             memberId = role.memberId,
             messages = listOf(
                 FeedMessage(
@@ -52,6 +55,7 @@ class StudyRoleAssignedEvent(
             memberId = role.memberId,
             title = "Dymit",
             body = "${group.name} ${schedule.session}회차에 새로운 역할이 부여되었어요!",
+            eventName = eventName,
             data = mapOf (
                 "groupId" to schedule.groupId.toHexString(),
                 "scheduleId" to schedule.identifier,

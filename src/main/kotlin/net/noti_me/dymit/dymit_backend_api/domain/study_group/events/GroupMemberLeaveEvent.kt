@@ -20,6 +20,8 @@ class GroupMemberLeaveEvent(
     val group: StudyGroup
 ): PersonalFeedEvent(group) {
 
+    private val eventName = "GROUP_MEMBER_LEAVE"
+
     override fun processUserFeed(): UserFeed {
         return UserFeed(
             memberId = group.ownerId,
@@ -29,6 +31,7 @@ class GroupMemberLeaveEvent(
                     text = "${member.nickname} 님이 ${group.name}에서 탈퇴하셨습니다."
                 ),
             ),
+            eventName = eventName,
             associates = listOf(
                 AssociatedResource(
                     type = STUDY_GROUP,

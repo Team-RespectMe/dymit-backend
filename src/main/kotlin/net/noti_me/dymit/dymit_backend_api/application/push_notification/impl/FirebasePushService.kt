@@ -36,7 +36,7 @@ class FirebasePushService(
             title = message.title,
             body = message.body,
             image = message.image,
-            data = message.data
+            data = message.data + mapOf("eventName" to message.eventName)
         )
     }
 
@@ -54,7 +54,7 @@ class FirebasePushService(
             title = message.title,
             body = message.body,
             image = message.image,
-            data = message.data
+            data = message.data + mapOf("eventName" to message.eventName)
         )
     }
     /**
@@ -95,6 +95,7 @@ class FirebasePushService(
         }
         val message = messageBuilder.build()
         try {
+            // TODO sendMulticast Deprecated, use sendEachForMulticast
             val response = FirebaseMessaging.getInstance(app).sendMulticast(message)
             if (response.failureCount > 0) {
                 response.responses.forEachIndexed { index, sendResponse ->
