@@ -169,7 +169,10 @@ class StudyGroupController(
         )
     }
 
-//    override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): ListResponse<StudyGroupMemberResponse> {
-//
-//    }
+   override fun getStudyGroupMembers(memberInfo: MemberInfo, groupId: String): ListResponse<StudyGroupMemberResponse> {
+       return ListResponse.from(
+              studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
+                .map { StudyGroupMemberResponse.from(it) }
+       )
+   }
 }

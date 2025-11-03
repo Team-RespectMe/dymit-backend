@@ -1,0 +1,41 @@
+{
+    "name": "Dymit member profile image presets",
+    "version": "1.0.0",
+    "createdAt": "2025-10-31T03:00:00.00+09:00",
+    "updatedAt": "2025-10-31T04:00:00.00+09:00",
+    "data" : {
+        "count": 6,
+        "items": [
+            {
+                "name": "KICK",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/kick_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/kick_64x64.png"
+            },
+            {
+                "name": "MEET",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/meet_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/meet_64x64.png"
+            },
+            {
+                "name": "PROJECT",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/project_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/project_64x64.png"
+            },
+            {
+                "name": "CHECK",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/check_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/check_64x64.png"
+            },
+            {
+                "name": "GROW",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/grow_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/grow_64x64.png"
+            },
+            {
+                "name": "STACK",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/stack_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/stack_64x64.png"
+            }
+        ]
+    }
+}

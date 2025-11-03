@@ -1,0 +1,36 @@
+{
+    "name": "Dymit group profile image presets",
+    "version": "1.0.0",
+    "createdAt": "2025-10-31T03:00:00.00+09:00",
+    "updatedAt": "2025-10-31T04:00:00.00+09:00",
+    "data" : {
+        "count": 5,
+        "items": [
+            {
+                "name": "COFFEE",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/coffee_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/coffee_64x64.png"
+            },
+            {
+                "name": "BOOK",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/book_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/book_64x64.png"
+            },
+            {
+                "name": "ROOM",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/room_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/room_64x64.png"
+            },
+            {
+                "name": "WORK",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/work_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/work_64x64.png"
+            },
+            {
+                "name": "STUDY",
+                "original": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/study_512x512.png",
+                "thumbnail": "https://d380gc0prbxdbr.cloudfront.net/static/presets/study-groups/study_64x64.png"
+            }
+        ]
+    }
+}
