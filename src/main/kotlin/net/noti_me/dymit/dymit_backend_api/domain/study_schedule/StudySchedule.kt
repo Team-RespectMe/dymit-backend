@@ -111,8 +111,8 @@ class StudySchedule(
         newLocation: ScheduleLocation
     ) {
         checkDefaultPermissions(requester)
-        if ( newLocation.type == this.location.type && newLocation.value == this.location.value ) {
-            return // No change
+        if ( newLocation == this.location ) {
+            return
         }
         this.location = newLocation
         registerEvent(ScheduleLocationChangedEvent(group = group, schedule = this))

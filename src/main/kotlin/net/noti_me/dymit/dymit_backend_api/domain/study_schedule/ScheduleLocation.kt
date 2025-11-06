@@ -23,6 +23,16 @@ class ScheduleLocation(
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ScheduleLocation) return false
+        if (type != other.type) return false
+        if (value != other.value) return false
+        if (link != other.link) return false
+
+        return true
+    }
+
     enum class LocationType {
         ONLINE,
         OFFLINE
