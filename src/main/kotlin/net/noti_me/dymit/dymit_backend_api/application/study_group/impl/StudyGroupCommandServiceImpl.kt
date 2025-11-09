@@ -277,7 +277,9 @@ class StudyGroupCommandServiceImpl(
             targetMember= targetMember,
             reason = command.reason
         )
+
         saveStudyGroupPort.update(group)
+        studyGroupMemberRepository.delete(targetMember)
     }
 
     override fun delistBlacklist(loginMember: MemberInfo, groupId: String, targetMemberId: String) {
