@@ -14,7 +14,9 @@ data class UserFeedResponse(
     val id: String,
     @Schema(description = "피드 아이콘 타입", example = "HAND_WAVING")
     val iconType: IconType,
-    @Schema(description = "피드 메시지", example = "새로운 댓글이 달렸습니다.")
+    @Schema(description = "이벤트 이름", example = "STUDY_SCHEDULE_CREATED")
+    val eventName: String,
+    @Schema(description = "피드 메시지")
     val messages: List<FeedMessageVo> = listOf(
         FeedMessageVo(text= "새로운 스터디 일정이 등록되었어요! ", highlightColor = "#FF5733"),
         FeedMessageVo(text= "[ "),
@@ -34,6 +36,7 @@ data class UserFeedResponse(
             return UserFeedResponse(
                 id = dto.id,
                 iconType = dto.iconType,
+                eventName = dto.eventName,
                 messages = dto.messages,
                 resources = dto.associates.map {
                     AssociatedResourceResponse.from(it)
