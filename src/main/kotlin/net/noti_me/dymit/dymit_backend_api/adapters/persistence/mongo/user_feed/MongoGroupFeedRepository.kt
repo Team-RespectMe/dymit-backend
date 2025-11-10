@@ -31,7 +31,7 @@ class MongoGroupFeedRepository(
             .limit(size.toInt())
             .with(Sort.by(Direction.DESC, "_id"))
 
-        cursor?.let { query.addCriteria(Criteria.where("_id").lt(cursor))}
+        cursor?.let { query.addCriteria(Criteria.where("_id").gt(cursor))}
         return mongoTemplate.find(query, GroupFeed::class.java)
     }
 }
