@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.push_notification.impl
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
+import com.google.firebase.messaging.MulticastMessage
 import com.google.firebase.messaging.Notification
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.PushService
 import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken
@@ -87,7 +88,7 @@ class FirebasePushService(
                 }
             }
             .build()
-        val messageBuilder = com.google.firebase.messaging.MulticastMessage.builder()
+        val messageBuilder = MulticastMessage.builder()
             .addAllTokens(deviceTokens)
             .setNotification(notification)
         data.forEach { (key, value) ->
@@ -95,8 +96,8 @@ class FirebasePushService(
         }
         val message = messageBuilder.build()
         try {
-            // TODO sendMulticast Deprecated, use sendEachForMulticast
-            val response = FirebaseMessaging.getInstance(app).sendMulticast(message)
+            val response = FirebaseMessaging.getInstance(app)
+                .sendEachForMulticast(message)
             if (response.failureCount > 0) {
                 response.responses.forEachIndexed { index, sendResponse ->
                     if (!sendResponse.isSuccessful) {

@@ -49,7 +49,7 @@ class PostCreatedEvent(
         return GroupPushMessage(
             groupId = group.id!!,
             title = "${group.name}의 새로운 공지사항",
-            body = "post.title",
+            body = "${post.title}",
             image = group.profileImage.thumbnail,
             eventName = eventName,
             data = mapOf(

@@ -93,6 +93,10 @@ class StudySchedule(
     ) {
         checkDefaultPermissions(requester)
 
+        if ( newScheduleAt == this.scheduleAt ) {
+            return
+        }
+
         if ( newScheduleAt.isBefore(LocalDateTime.now()) ) {
             throw IllegalArgumentException("새로운 시간은 현재 시간 이후여야 합니다.")
         }

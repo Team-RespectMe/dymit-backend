@@ -70,7 +70,8 @@ class SecurityConfig {
                     "/v3/api-docs/**",
                     "/actuator/**",
                     "/prometheus/**",
-                    "/health-check"
+                    "/health-check",
+                    "/api/v1/push-test"
                 ).permitAll()
                 it.requestMatchers(HttpMethod.POST,
                     "/api/v1/members",
