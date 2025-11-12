@@ -26,7 +26,8 @@ class PostCommentCreatedEvent(
                 "groupId" to group.identifier,
                 "boardId" to board.identifier,
                 "postId" to comment.postId.toHexString(),
-                "commentId" to comment.identifier
+                "commentId" to comment.identifier,
+                "ownerId" to group.ownerId.toHexString()
             ),
             image = group.profileImage.thumbnail
         )

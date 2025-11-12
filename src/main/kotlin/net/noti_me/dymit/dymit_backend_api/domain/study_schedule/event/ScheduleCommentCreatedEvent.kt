@@ -24,6 +24,7 @@ class ScheduleCommentCreatedEvent(
                 "groupId" to schedule.groupId.toHexString(),
                 "scheduleId" to schedule.identifier,
                 "commentId" to comment.identifier,
+                "ownerId" to group.ownerId.toHexString()
             ),
             image = group.profileImage.thumbnail,
         )
