@@ -111,4 +111,20 @@ class MongoStudyScheduleRepository(
         // 모든 요청된 그룹에 대해 결과 맵 생성 (없는 그룹은 null로 매핑)
         return groupIds.associateWith { scheduleMap[it] }
     }
+
+    override fun findByScheduleAtBetweenCursorPagination(
+        start: LocalDateTime,
+        end: LocalDateTime,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<StudySchedule> {
+        val criteria = Criteria.where("scheduleAt").gte(start).lt(end)
+        if (cursor != null) {
+            criteria.and("_id").gt(cursor)
+        }
+        val query = Query(criteria)
+            .with(Sort.by(Sort.Direction.DESC, "_id"))
+            .limit(limit)
+        return mongoTemplate.find(query, StudySchedule::class.java)
+    }
 }

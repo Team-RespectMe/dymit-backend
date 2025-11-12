@@ -19,4 +19,11 @@ interface StudyScheduleRepository {
     fun countByGroupId(studyGroupId: ObjectId): Long
 
     fun findFirstAfterByGroupIdsOrderByScheduleAtAsc(groupIds: List<ObjectId>, now: LocalDateTime): Map<ObjectId, StudySchedule?>
+
+    fun findByScheduleAtBetweenCursorPagination(
+        start: LocalDateTime,
+        end: LocalDateTime,
+        cursor: ObjectId?,
+        limit: Int = 1000
+    ): List<StudySchedule>
 }

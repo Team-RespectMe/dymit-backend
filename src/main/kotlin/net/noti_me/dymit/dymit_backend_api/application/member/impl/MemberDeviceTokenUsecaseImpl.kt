@@ -18,12 +18,15 @@ class MemberDeviceTokenUsecaseImpl(
         member: MemberInfo,
         deviceToken: String
     ) {
-        val tokenOwner = loadMemberPort.loadByDeviceToken(deviceToken)
+        val tokenOwners = loadMemberPort.loadByDeviceToken(deviceToken)
         val memberEntity = loadMemberPort.loadById(member.memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
+        
+        val targetDeviceToken = DeviceToken(token=deviceToken, isActive=true)
 
-        if ( tokenOwner != null ) {
-            saveMemberPort.update(tokenOwner)
+        tokenOwners.forEach { owner -> 
+            owner.removeDeviceToken(targetDeviceToken)
+            saveMemberPort.update(owner)
         }
 
         memberEntity.addDeviceToken(

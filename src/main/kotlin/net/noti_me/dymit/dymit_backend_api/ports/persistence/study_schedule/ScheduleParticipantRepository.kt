@@ -10,7 +10,6 @@ interface ScheduleParticipantRepository {
     fun delete(participant: ScheduleParticipant): Boolean
 
     fun getByScheduleIdAndMemberId(scheduleId: ObjectId, memberId: ObjectId): ScheduleParticipant?
-
     fun getByScheduleId(scheduleId: ObjectId): List<ScheduleParticipant>
 
     fun existsByScheduleIdAndMemberId(scheduleId: ObjectId, memberId: ObjectId): Boolean
