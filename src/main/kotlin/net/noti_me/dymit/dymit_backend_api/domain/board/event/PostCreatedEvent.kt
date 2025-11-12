@@ -40,6 +40,10 @@ class PostCreatedEvent(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_POST,
                     resourceId = post.identifier
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_OWNER,
+                    resourceId = group.ownerId.toHexString()
                 )
             ),
         )
@@ -56,6 +60,7 @@ class PostCreatedEvent(
                 "groupId" to group.identifier,
                 "boardId" to board.identifier,
                 "postId" to post.identifier,
+                "ownerId" to group.ownerId.toHexString()
             )
         )
     }

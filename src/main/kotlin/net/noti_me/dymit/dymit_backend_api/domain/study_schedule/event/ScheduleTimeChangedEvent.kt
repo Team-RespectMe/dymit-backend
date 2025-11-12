@@ -35,6 +35,10 @@ class ScheduleTimeChangedEvent(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
                     resourceId = schedule.identifier
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_OWNER,
+                    resourceId = group.ownerId.toHexString()
                 )
             )
         )
@@ -48,7 +52,8 @@ class ScheduleTimeChangedEvent(
             eventName = eventName,
             data = mapOf(
                 "groupId" to group.identifier,
-                "scheduleId" to schedule.identifier
+                "scheduleId" to schedule.identifier,
+                "ownerId" to group.ownerId.toHexString()
             ),
             image = null,
         )

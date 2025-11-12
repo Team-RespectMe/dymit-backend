@@ -42,6 +42,10 @@ class StudyScheduleCreatedEvent(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
                     resourceId = studySchedule.identifier
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_OWNER,
+                    resourceId = group.ownerId.toHexString()
                 )
             )
         )
@@ -55,7 +59,8 @@ class StudyScheduleCreatedEvent(
             body = "${studySchedule.session}회차 일정이 추가되었어요!",
             data = mapOf(
                 "groupId" to group.identifier,
-                "scheduleId" to studySchedule.identifier
+                "scheduleId" to studySchedule.identifier,
+                "ownerId" to group.ownerId.toHexString()
             ),
         )
     }

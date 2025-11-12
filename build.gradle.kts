@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.4.5"
+version = "0.4.8"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 
@@ -32,6 +32,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-cache")
+
+    // for batch operations
+    implementation("org.springframework.boot:spring-boot-starter-quartz:3.5.7")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")

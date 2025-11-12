@@ -39,6 +39,10 @@ class StudyScheduleModifiedEvent(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
                     resourceId = schedule.identifier
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_OWNER,
+                    resourceId = group.ownerId.toHexString()
                 )
             )
         )
@@ -52,7 +56,8 @@ class StudyScheduleModifiedEvent(
             body = "${schedule.session}회차 일정이 변경되었어요!",
             data = mapOf(
                 "groupId" to group.identifier,
-                "scheduleId" to schedule.identifier
+                "scheduleId" to schedule.identifier,
+                "ownerId" to group.ownerId.toHexString()
             ),
             image = null,
         )

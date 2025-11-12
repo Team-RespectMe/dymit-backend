@@ -30,6 +30,6 @@ interface LoadMemberPort {
 
     fun loadByDeviceToken(
         deviceToken: String
-    ): Member?
+    ): List<Member>
 
 }

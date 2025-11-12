@@ -34,6 +34,10 @@ class ScheduleParticipateEvent(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
                     resourceId = schedule.identifier
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_OWNER,
+                    resourceId = group.ownerId.toHexString()
                 )
             ),
         )

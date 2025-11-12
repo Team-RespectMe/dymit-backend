@@ -48,8 +48,8 @@ class MongoLoadMemberAdapter(
         )
     }
 
-    override fun loadByDeviceToken(deviceToken: String): Member? {
-        return mongoTemplate.findOne(
+    override fun loadByDeviceToken(deviceToken: String): List<Member> {
+        return mongoTemplate.find(
             Query(Criteria.where("deviceTokens.token").`is`(deviceToken)),
             Member::class.java
         )

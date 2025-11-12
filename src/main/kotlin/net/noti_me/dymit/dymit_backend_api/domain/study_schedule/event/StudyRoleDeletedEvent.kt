@@ -52,6 +52,10 @@ class StudyRoleDeletedEvent(
                 AssociatedResource(
                     type = ResourceType.STUDY_GROUP_SCHEDULE,
                     resourceId = schedule.identifier,
+                ),
+                AssociatedResource(
+                    type = ResourceType.STUDY_GROUP_OWNER,
+                    resourceId = group.ownerId.toHexString()
                 )
             )
         )
@@ -66,8 +70,10 @@ class StudyRoleDeletedEvent(
             data = mapOf (
                 "groupId" to schedule.groupId.toHexString(),
                 "scheduleId" to schedule.identifier,
+                "ownerId" to group.ownerId.toHexString()
             ),
             image = null,
         )
+            
     }
 }
