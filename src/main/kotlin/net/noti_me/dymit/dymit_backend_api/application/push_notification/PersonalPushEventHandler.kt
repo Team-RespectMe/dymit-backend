@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.push_notification
 
+import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastPushable
 import net.noti_me.dymit.dymit_backend_api.common.event.GroupImportantEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.GroupPushEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.GroupPushable
@@ -22,5 +23,13 @@ class PersonalPushEventHandler(
     @EventListener(classes = [GroupPushEvent::class, GroupImportantEvent::class])
     fun handleGroupPushEvent(event: GroupPushable) {
         pushService.sendGroupPush(event.toGroupPush())
+    }
+
+    @EventListener(classes = [BroadcastPushable::class])
+    fun handleBroadcastPushEvent(event: BroadcastPushable) {
+        val pushMessages = event.toPushMessages()
+        pushMessages.forEach { pushMessage ->
+            pushService.sendPersonalPush(pushMessage)
+        }
     }
 }

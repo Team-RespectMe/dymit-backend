@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.feed
 
 import net.noti_me.dymit.dymit_backend_api.application.feed.dto.CreateGroupFeedCommand
+import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastFeedable
 import net.noti_me.dymit.dymit_backend_api.common.event.Feedable
 import net.noti_me.dymit.dymit_backend_api.common.event.GroupFeedEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.GroupFeedable
@@ -29,5 +30,14 @@ class FeedEventHandler(
         groupFeedService.createGroupFeed(CreateGroupFeedCommand(
             groupFeed = event.toGroupFeed()
         ))
+    }
+
+    @EventListener(classes = [BroadcastFeedable::class])
+    @Async
+    fun handleBroadcastFeedableEvent(event: BroadcastFeedable) {
+        val feeds = event.toFeeds()
+        feeds.forEach { feed ->
+            userFeedService.createUserFeed(userFeed = feed)
+        }
     }
 }

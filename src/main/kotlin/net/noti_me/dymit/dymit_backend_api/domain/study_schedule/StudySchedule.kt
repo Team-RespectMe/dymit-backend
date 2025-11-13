@@ -8,6 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleLocationChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleTimeChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleDeletedEvent
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -122,8 +123,13 @@ class StudySchedule(
         registerEvent(ScheduleLocationChangedEvent(group = group, schedule = this))
     }
 
-    private fun addNewRole(newRole: ScheduleRole) {
+    private fun addNewRole(group: StudyGroup, newRole: ScheduleRole) {
         roles.add(newRole)
+        registerEvent(StudyRoleChangedEvent(
+            group = group,
+            schedule= this,
+            role = newRole
+        ))
     }
 
     private fun updateExistingRole(group: StudyGroup, target: ScheduleRole, newRole: ScheduleRole) {
@@ -140,7 +146,7 @@ class StudySchedule(
     ) {
         roles.firstOrNull { it.memberId == newRole.memberId }
             ?.let { updateExistingRole(group = group, target = it, newRole = newRole) }
-            ?: addNewRole(newRole)
+            ?: addNewRole(group, newRole)
     }
 
     fun updateRoles(
@@ -149,10 +155,18 @@ class StudySchedule(
         newRoles: Set<ScheduleRole>
     ) {
         checkDefaultPermissions(requester)
+
         val rolesToRemove = roles.filter { existingRole ->
             newRoles.none { it.memberId == existingRole.memberId }
         }
-        rolesToRemove.forEach { this.roles.remove(it) }
+        rolesToRemove.forEach { roleToRemove ->
+            roles.remove(roleToRemove)
+            registerEvent(StudyRoleDeletedEvent(
+                group = group,
+                schedule = this,
+                role = roleToRemove
+            ))
+        }
         newRoles.forEach { newRole -> addRole(group = group, newRole =newRole) }
     }
 
