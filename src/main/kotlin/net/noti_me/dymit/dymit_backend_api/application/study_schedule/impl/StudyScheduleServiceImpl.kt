@@ -16,6 +16,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.RoleAssignment
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleCancelParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleCanceledEvent
@@ -151,7 +152,8 @@ class StudyScheduleServiceImpl(
         // 스케줄이 미래의 시점이라면 레코드 자체를 삭제한다.
         if (schedule.scheduleAt.isAfter(LocalDateTime.now())) {
             studyScheduleRepository.delete(schedule)
-            eventPublisher.publishEvent(StudyScheduleCanceledEvent(group, schedule));
+            val event = createScheduleCanceledEvent(group, schedule)
+            eventPublisher.publishEvent(event)
         } else {
             // 과거의 스케줄이라면 소프트 딜리트
             schedule.markAsDeleted()
@@ -354,5 +356,13 @@ class StudyScheduleServiceImpl(
                 roles = role.roles
             )
         }.toMutableSet()
+    }
+
+    private fun createScheduleCanceledEvent(group: StudyGroup, schedule: StudySchedule): StudyScheduleCanceledEvent {
+        val participants = participantRepository.getByScheduleId(schedule.id!!)
+        return StudyScheduleCanceledEvent(
+            group = group,
+            schedule = schedule,
+        )
     }
 }

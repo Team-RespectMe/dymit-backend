@@ -1,6 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event
 
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalFeedEvent
+import net.noti_me.dymit.dymit_backend_api.common.event.PersonalImportantEvent
+import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
@@ -14,9 +16,24 @@ class ScheduleParticipateEvent(
     val group: StudyGroup,
     val schedule: StudySchedule,
     val member: StudyGroupMember
-): PersonalFeedEvent(schedule) {
+): PersonalImportantEvent(schedule) {
 
     private val eventName = "PARTICIPATE_SCHEDULE"
+
+    override fun processPushMessage(): PersonalPushMessage {
+        return PersonalPushMessage(
+            memberId = group.ownerId,
+            title = "Dymit",
+            body = "${group.name} ${schedule.session}회차 일정에 ${member.nickname} 님이 참여하기로 했어요.",
+            eventName = eventName,
+            data = mapOf(
+                "groupId" to group.identifier,
+                "scheduleId" to schedule.identifier,
+                "ownerId" to group.ownerId.toHexString()
+            ),
+            image = group.profileImage.thumbnail
+        )
+    }
 
     override fun processUserFeed(): UserFeed {
         return UserFeed(

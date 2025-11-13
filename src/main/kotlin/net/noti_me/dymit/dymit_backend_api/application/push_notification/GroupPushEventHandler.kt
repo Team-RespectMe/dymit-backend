@@ -10,9 +10,9 @@ class GroupPushEventHandler(
     private val pushService: PushService
 ) {
 
-    @EventListener(classes = [GroupPushEvent::class])
+/*     @EventListener(classes = [GroupPushEvent::class])
     @Async
     fun handleGroupPushEvent(event: GroupPushEvent) {
         pushService.sendGroupPush(event.toGroupPush())
-    }
+    } */
 }

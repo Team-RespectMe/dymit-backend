@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
+import org.slf4j.LoggerFactory
 
 /**
  * 스터디 그룹 일정에서 역할이 변경된 경우 발생하는 이벤트
@@ -27,7 +28,10 @@ class StudyRoleChangedEvent(
 
     private val eventName = "STUDY_ROLE_CHANGED"
 
+    private val logger = LoggerFactory.getLogger(StudyRoleChangedEvent::class.java)
+
     override fun processPushMessage(): PersonalPushMessage {
+        logger.debug("Processing StudyRoleChangedEvent for memberId: ${role.memberId}")
         return PersonalPushMessage(
             memberId = role.memberId,
             title = "Dymit",
@@ -43,14 +47,15 @@ class StudyRoleChangedEvent(
     }
 
     override fun processUserFeed(): UserFeed {
+        logger.debug("Creating UserFeed for StudyRoleChangedEvent for memberId: ${role.memberId}")
         return UserFeed(
             iconType = IconType.ROLE,
             eventName = eventName,
             memberId = role.memberId,
             messages = listOf(
                 FeedMessage(
-                    text = "${group.name} ${schedule.session}회차 맡은 역할이 변경되었어요!",
-                ),
+                    text = "${group.name} ${schedule.session} 회차에서 맡은 역할이 변경되었어요!"
+                )
             ),
             associates = listOf(
                 AssociatedResource(
