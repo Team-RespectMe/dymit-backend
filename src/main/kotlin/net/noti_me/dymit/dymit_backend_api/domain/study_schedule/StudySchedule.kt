@@ -7,6 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleLocationChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleTimeChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleAssignedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleDeletedEvent
 import org.bson.types.ObjectId
@@ -46,6 +47,7 @@ class StudySchedule(
     var description: String = description
         private set
 
+    @Indexed(name = "study_schedule_schedule_at_idx")
     var scheduleAt: LocalDateTime = scheduleAt
         private set
 
@@ -125,7 +127,7 @@ class StudySchedule(
 
     private fun addNewRole(group: StudyGroup, newRole: ScheduleRole) {
         roles.add(newRole)
-        registerEvent(StudyRoleChangedEvent(
+        registerEvent(StudyRoleAssignedEvent(
             group = group,
             schedule= this,
             role = newRole
