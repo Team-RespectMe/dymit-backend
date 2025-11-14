@@ -1,6 +1,6 @@
-package net.noti_me.dymit.dymit_backend_api.application.batch
+package net.noti_me.dymit.dymit_backend_api.application.reminder
 
-import net.noti_me.dymit.dymit_backend_api.application.batch.events.DailyScheduleNotificationEvent
+import net.noti_me.dymit.dymit_backend_api.application.reminder.events.DailyScheduleReminderEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -24,7 +24,7 @@ import java.time.LocalDateTime
  */
 @Component
 @DisallowConcurrentExecution
-class DailyScheduleNotificationJob(
+class DailyScheduleReminderJob(
     private val loadGroupPort: LoadStudyGroupPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val scheduleParticipantRepository: ScheduleParticipantRepository,
@@ -40,7 +40,7 @@ class DailyScheduleNotificationJob(
         var cursor: ObjectId? = null
 
         do {
-            val  schedules = pullStudySchedulesForToday(
+            val schedules = pullStudySchedulesForToday(
                 cursor = cursor,
                 current = now
             )
@@ -56,9 +56,17 @@ class DailyScheduleNotificationJob(
     }
 
     private fun pullStudySchedulesForToday(current: LocalDateTime, cursor: ObjectId?): List<StudySchedule> {
+
         val schedules = studyScheduleRepository.findByScheduleAtBetweenCursorPagination(
-            start = current.withHour(0).withMinute(0).withSecond(0).withNano(0),
-            end = current.withHour(15).withMinute(0).withSecond(0).withNano(0),
+            start = current.withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0),
+            end = current
+                .withHour(15)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0),
             cursor = cursor,
             limit = BATCH_SIZE
         )
@@ -81,7 +89,7 @@ class DailyScheduleNotificationJob(
             return
         }
 
-        val event = DailyScheduleNotificationEvent(
+        val event = DailyScheduleReminderEvent(
             group = group,
             schedule = schedule,
             memberIds = memberIds

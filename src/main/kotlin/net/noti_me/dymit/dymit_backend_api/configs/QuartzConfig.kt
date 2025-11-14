@@ -1,11 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.configs
 
-import net.noti_me.dymit.dymit_backend_api.application.batch.DailyScheduleNotificationJob
+import net.noti_me.dymit.dymit_backend_api.application.reminder.DailyScheduleReminderJob
+import net.noti_me.dymit.dymit_backend_api.application.reminder.HourlyScheduleReminderJob
 import org.quartz.CronScheduleBuilder
 import org.quartz.JobBuilder
 import org.quartz.JobDetail
 import org.quartz.Trigger
 import org.quartz.TriggerBuilder
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.TimeZone
@@ -13,24 +15,45 @@ import java.util.TimeZone
 @Configuration
 class QuartzConfig {
 
-    // TODO Discord Logger를 설정하여 배치 작업 실패시 알림을 받을 수 있도록 설정할 것
-
-    @Bean 
-    fun dailyScheduleNotificationJobDetail(): JobDetail {
-        return JobBuilder.newJob(DailyScheduleNotificationJob::class.java) 
-            .withIdentity("dailyScheduleNotificationJob")
+    @Bean
+    fun dailyScheduleReminderJobDetail(): JobDetail {
+        return JobBuilder.newJob(DailyScheduleReminderJob::class.java) 
+            .withIdentity("dailyScheduleReminderJob")
             .storeDurably()
             .build()
     }
 
+    @Bean
+    fun hourlyScheduleReminderJobDetail(): JobDetail {
+        return JobBuilder.newJob(HourlyScheduleReminderJob::class.java)
+            .withIdentity("hourlyScheduleReminderJob")
+            .storeDurably()
+            .build()
+    }
 
     @Bean
-    fun triggerOn9AMUTC9(jobDetail: JobDetail): Trigger {
+    fun triggerOn9AMUTC9(
+        @Qualifier("dailyScheduleReminderJobDetail") jobDetail: JobDetail
+    ): Trigger {
         return TriggerBuilder.newTrigger()
             .forJob(jobDetail)
-            .withIdentity("dailyScheduleNotificationTrigger")
+            .withIdentity("dailyScheduleReminderTrigger")
             .withSchedule(
-                CronScheduleBuilder.cronSchedule("0 0 9 * * ?") // 매일 오전 9시 (UTC+9 기준)
+                CronScheduleBuilder.cronSchedule("0 0 9 * * ?")
+                    .inTimeZone(TimeZone.getTimeZone("Asia/Seoul"))
+            )
+            .build()
+    }
+
+    @Bean
+    fun triggerEveryHour(
+        @Qualifier("hourlyScheduleReminderJobDetail") jobDetail: JobDetail
+    ): Trigger {
+        return TriggerBuilder.newTrigger()
+            .forJob(jobDetail)
+            .withIdentity("hourlyScheduleReminderTrigger")
+            .withSchedule(
+                CronScheduleBuilder.cronSchedule("0 0 * * * ?")
                     .inTimeZone(TimeZone.getTimeZone("Asia/Seoul"))
             )
             .build()

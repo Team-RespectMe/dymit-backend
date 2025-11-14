@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.application.batch.events
+package net.noti_me.dymit.dymit_backend_api.application.reminder.events
 
 import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
@@ -11,13 +11,13 @@ import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import org.bson.types.ObjectId
 
-class DailyScheduleNotificationEvent(
+class DailyScheduleReminderEvent(
     val group: StudyGroup,
     val schedule: StudySchedule,
     memberIds: List<ObjectId>
 ): BroadcastEvent(memberIds) {
 
-    private val eventName = "DAILY_SCHEDULE_NOTIFICATION"
+    private val eventName = "DAILY_SCHEDULE_REMINDER"
 
     override fun processPushMessages(): List<PersonalPushMessage> {
         return memberIds.map { memberId ->
