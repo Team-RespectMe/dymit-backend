@@ -9,15 +9,20 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeedQueryHistory
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedQueryHistoryRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Date
 
 @Service
 class UserFeedServiceImpl(
+    private val loadMemberPort: LoadMemberPort,
     private val userFeedRepository: UserFeedRepository,
     private val groupFeedService: GroupFeedService,
     private val studyGroupMemberRepository: StudyGroupMemberRepository,
@@ -78,6 +83,15 @@ class UserFeedServiceImpl(
                     lastFeedId = null
                 )
             )
+
+        if ( history.lastFeedId == null ) {
+            // 처음 조회하는 경우 마지막 QueryId 가 없으므로, 멤버가 생성된 시점의 가장 오래된 FeedId 로 설정한다.
+            val createdAt = loadMemberPort.loadById(memberId)?.createdAt 
+                ?: LocalDateTime.now()
+            val createdDate = Date.from( createdAt.atZone(ZoneId.systemDefault()).toInstant() )
+            val lastFeedId = ObjectId.getSmallestWithDate(createdDate)
+            history.updateLastGroupQueryId(lastFeedId)
+        }
 
         val groupIds = studyGroupMemberRepository.findGroupIdsByMemberId(memberId)
             .map { ObjectId(it) }
