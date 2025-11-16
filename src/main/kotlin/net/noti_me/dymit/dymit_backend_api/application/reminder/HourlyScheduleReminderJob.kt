@@ -7,6 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStu
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.application.reminder.events.HourlyScheduleReminderEvent
+import net.noti_me.dymit.dymit_backend_api.common.logging.discord.DiscordQuartzLogger
 import org.bson.types.ObjectId
 import org.quartz.Job
 import org.quartz.JobExecutionContext
@@ -27,7 +28,8 @@ class HourlyScheduleReminderJob(
     private val loadGroupPort: LoadStudyGroupPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val eventPublisher: ApplicationEventPublisher,
-    private val scheduleParticipantRepository: ScheduleParticipantRepository
+    private val scheduleParticipantRepository: ScheduleParticipantRepository,
+    private val quartzLogger: DiscordQuartzLogger
 ): Job {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -40,6 +42,11 @@ class HourlyScheduleReminderJob(
             .withSecond(0)
             .withNano(0)
         var cursor: ObjectId? = null
+
+        quartzLogger.log(
+            title = "Hourly Schedule Reminder Job Started",
+            message = "Starting to process study schedules from $start to ${start.plusHours(1)}"
+        )
 
         do {
             val schedules = studyScheduleRepository.findByScheduleAtBetweenCursorPagination(
@@ -57,6 +64,12 @@ class HourlyScheduleReminderJob(
                 cursor = schedules.last().id
             }
         } while ( schedules.size >= BATCH_SIZE ) 
+
+        val end = LocalDateTime.now()
+        quartzLogger.log(
+            title = "Hourly Schedule Reminder Job Completed",
+            message = "Completed processing study schedules for hourly reminders. Started at: $now, ended at: $end"
+        )
     }
 
     private fun processSchedule(schedule: StudySchedule) {
