@@ -1,12 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
+import net.noti_me.dymit.dymit_backend_api.common.logging.discord.DiscordQuartzLogger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class HealthCheckController {
+class HealthCheckController(
+    private val discordQuartzLogger: DiscordQuartzLogger
+) {
 
     private val logger = LoggerFactory.getLogger(HealthCheckController::class.java)
 
@@ -15,5 +18,11 @@ class HealthCheckController {
         logger.error("Health check endpoint was called")
         return System.currentTimeMillis()
     }
+
+/*     @GetMapping("api/v1/test/discord/quartz")
+    fun testDiscordQuartzLogging(): String {
+        discordQuartzLogger.log("Test Quartz Log", "This is a test log message from HealthCheckController.")
+        return "Discord Quartz logging test messages have been sent."
+    } */
 }
 

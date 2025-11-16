@@ -56,7 +56,9 @@ log-reporter:
   discord:
     webhook:
       url: ${DYMIT_DISCORD_WEBHOOK_URL:}
-
+    quartz:
+      webhook:
+        url: ${DYMIT_DISCORD_QUARTZ_WEBHOOK_URL:}
 logging:
   level:
     root: ${DYMIT_SERVER_LOG_LEVEL:INFO}

@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.reminder
 
 import net.noti_me.dymit.dymit_backend_api.application.reminder.events.DailyScheduleReminderEvent
+import net.noti_me.dymit.dymit_backend_api.common.logging.discord.DiscordQuartzLogger
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -28,7 +29,8 @@ class DailyScheduleReminderJob(
     private val loadGroupPort: LoadStudyGroupPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val scheduleParticipantRepository: ScheduleParticipantRepository,
-    private val eventPublisher: ApplicationEventPublisher
+    private val eventPublisher: ApplicationEventPublisher,
+    private val quartzLogger: DiscordQuartzLogger
 ) : Job {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -36,6 +38,10 @@ class DailyScheduleReminderJob(
     private val BATCH_SIZE = 1000
 
     override fun execute(context: JobExecutionContext) {
+        quartzLogger.log(
+            title = "Daily Schedule Reminder Job Started",
+            message = "Starting to process study schedules for daily reminders."
+        )
         val now = LocalDateTime.now()
         var cursor: ObjectId? = null
 
@@ -53,6 +59,11 @@ class DailyScheduleReminderJob(
                 cursor = schedules.last().id
             }
         } while ( schedules.size >= BATCH_SIZE )
+        val end = LocalDateTime.now()
+        quartzLogger.log(
+            title = "Daily Schedule Reminder Job Completed",
+            message = "Completed processing study schedules for daily reminders. Started at: $now, ended at: $end"
+        )
     }
 
     private fun pullStudySchedulesForToday(current: LocalDateTime, cursor: ObjectId?): List<StudySchedule> {
