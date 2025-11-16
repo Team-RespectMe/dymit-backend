@@ -143,6 +143,7 @@ class Member(
             height = 0
         )
         super.markAsDeleted()
+        registerEvent(MemberDeletedEvent(this))
     }
 
     override fun equals(other: Any?): Boolean {

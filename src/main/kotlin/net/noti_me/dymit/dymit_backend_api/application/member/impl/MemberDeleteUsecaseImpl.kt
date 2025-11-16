@@ -9,12 +9,14 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import org.springframework.stereotype.Service
+import org.springframework.context.ApplicationEventPublisher
 
 @Service
 class MemberDeleteUsecaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
-    private val loadGroupPort: LoadStudyGroupPort
+    private val loadGroupPort: LoadStudyGroupPort,
+    private val eventPublisher: ApplicationEventPublisher
 ): MemberDeleteUsecase {
 
     override fun deleteMember(loginMember: MemberInfo, memberId: String) {
@@ -33,7 +35,6 @@ class MemberDeleteUsecaseImpl(
             )
         }
         member.leaveService()
-
         // saveMemberPort.delete(member)
         saveMemberPort.update(member)
     }
