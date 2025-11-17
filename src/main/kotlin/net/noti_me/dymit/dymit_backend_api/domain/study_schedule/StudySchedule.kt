@@ -60,6 +60,9 @@ class StudySchedule(
     var nrParticipant: Long = nrParticipant
         private set
 
+    var modified: Boolean = false
+        private set
+
     fun isExpired(): Boolean {
         return scheduleAt.isBefore(LocalDateTime.now())
     }
@@ -75,6 +78,7 @@ class StudySchedule(
         }
 
         this.title = newTitle
+        modified = true
     }
 
     fun changeDescription(
@@ -87,6 +91,7 @@ class StudySchedule(
             throw IllegalArgumentException("설명은 100자 이내로 작성해야 합니다.")
         }
         this.description = newDescription
+        modified = true
     }
 
     fun changeScheduleAt(
@@ -109,7 +114,8 @@ class StudySchedule(
         }
 
         this.scheduleAt = newScheduleAt
-        registerEvent(ScheduleTimeChangedEvent(group = group, schedule = this))
+        //registerEvent(ScheduleTimeChangedEvent(group = group, schedule = this))
+        modified = true
     }
 
     fun changeLocation(
@@ -122,7 +128,8 @@ class StudySchedule(
             return
         }
         this.location = newLocation
-        registerEvent(ScheduleLocationChangedEvent(group = group, schedule = this))
+        // registerEvent(ScheduleLocationChangedEvent(group = group, schedule = this))
+        modified = true
     }
 
     private fun addNewRole(group: StudyGroup, newRole: ScheduleRole) {

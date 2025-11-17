@@ -25,6 +25,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocatio
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleModifiedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
@@ -123,13 +124,21 @@ class StudyScheduleServiceImpl(
         val roles = createScheduleRoles(groupId = ObjectId(groupId), roles = command.roles)
         schedule.updateRoles(group = group, requester = groupMember, newRoles = roles)
         schedule = studyScheduleRepository.save(schedule)
-//        group.updateRecentSchedule(RecentScheduleVo(
-//            scheduleId = schedule.id!!,
-//            title = schedule.title,
-//            session = schedule.session,
-//            scheduleAt = schedule.scheduleAt
-//        ))
         saveStudyGroupPort.persist(group)
+
+        if ( schedule.modified ) {
+            val participants = participantRepository.getByScheduleId(schedule.id!!)
+                .map { it.memberId }
+                .toSet()
+                .toList()
+            eventPublisher.publishEvent(
+                StudyScheduleModifiedEvent(
+                    group = group,
+                    schedule = schedule,
+                    memberIds = participants
+                )
+            )
+        }
 
         return StudyScheduleDto.from(schedule)
     }
@@ -360,9 +369,14 @@ class StudyScheduleServiceImpl(
 
     private fun createScheduleCanceledEvent(group: StudyGroup, schedule: StudySchedule): StudyScheduleCanceledEvent {
         val participants = participantRepository.getByScheduleId(schedule.id!!)
+            .map { it.memberId }
+            .toSet()
+            .toList()
+
         return StudyScheduleCanceledEvent(
             group = group,
             schedule = schedule,
+            memberIds = participants
         )
     }
 }
