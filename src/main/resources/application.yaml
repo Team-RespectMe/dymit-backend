@@ -25,6 +25,8 @@ jwt:
     expiration: ${DYMIT_JWT_REFRESH_TOKEN_EXPIRATION:2592000000} # milliseconds
 
 dymit:
+  debug-endpoint:
+    enabled: ${DYMIT_DEBUG_ENDPOINT_ENABLED:false}
   oidc:
     apple:
       audience: "com.project.dymit"

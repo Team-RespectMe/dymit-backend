@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain.member
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -35,12 +36,14 @@ class Member(
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 
+    @JsonIgnore
     val refreshTokens: MutableSet<RefreshToken> = refreshTokens
 
     @Indexed(unique = true)
     var nickname: String = nickname
         private set
 
+    @JsonIgnore
     var oidcIdentities: MutableSet<OidcIdentity> = oidcIdentities
         private set
 
