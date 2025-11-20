@@ -31,6 +31,8 @@ class UserFeedServiceImpl(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val DEFAULT_BATCH_SIZE: Long = 100L
+
     override fun createUserFeed(userFeed: UserFeed): UserFeed {
         return userFeedRepository.save(userFeed)
     }
@@ -85,12 +87,12 @@ class UserFeedServiceImpl(
             )
 
         if ( history.lastFeedId == null ) {
-            // 처음 조회하는 경우 마지막 QueryId 가 없으므로, 멤버가 생성된 시점의 가장 오래된 FeedId 로 설정한다.
             val createdAt = loadMemberPort.loadById(memberId)?.createdAt 
                 ?: LocalDateTime.now()
             val createdDate = Date.from( createdAt.atZone(ZoneId.systemDefault()).toInstant() )
             val lastFeedId = ObjectId.getSmallestWithDate(createdDate)
             history.updateLastGroupQueryId(lastFeedId)
+            userFeedQueryHistoryRepository.save(history)
         }
 
         val groupIds = studyGroupMemberRepository.findGroupIdsByMemberId(memberId)
@@ -102,12 +104,13 @@ class UserFeedServiceImpl(
             groupFeeds = groupFeedService.pullUnreadGroupFeeds(
                     groupIds = groupIds,
                     cursor = history.lastFeedId,
-                    size = 101)
+                    size = DEFAULT_BATCH_SIZE+1L
+                )
                 .asSequence()
-                .take(100)
                 .toList()
-
-            val lastId = groupFeeds.lastOrNull()?.id
+            val hasNext = groupFeeds.size > DEFAULT_BATCH_SIZE
+            groupFeeds = groupFeeds.take(DEFAULT_BATCH_SIZE.toInt())
+            val lastId =  groupFeeds.lastOrNull()?.id
 
             val targets = groupFeeds
                 .asSequence()
@@ -120,10 +123,10 @@ class UserFeedServiceImpl(
             if ( targets.isEmpty() ) return
 
             userFeedRepository.saveAll(targets)
-            lastId?.let {
+            lastId?.let{
                 history.updateLastGroupQueryId(lastId)
                 userFeedQueryHistoryRepository.save(history)
             }
-        } while( groupFeeds.size >= 100 )
+        } while( hasNext )
     }
 }
