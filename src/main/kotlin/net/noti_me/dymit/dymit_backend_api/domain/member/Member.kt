@@ -8,6 +8,7 @@ import java.time.Instant
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberDeletedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberNicknameChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeletedEvent
 import org.bson.types.ObjectId
@@ -65,6 +66,7 @@ class Member(
             return
         }
         this.nickname = newNickname
+        registerEvent(MemberNicknameChangedEvent(this))
         updateLastAccessedAt()
     }
 
