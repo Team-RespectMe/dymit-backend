@@ -4,6 +4,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.annotation.Transient
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.data.domain.DomainEvents
 import org.springframework.data.domain.Persistable
@@ -34,6 +35,13 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
 
     var isDeleted: Boolean = isDeleted
         protected set
+
+    @Transient
+    protected var modified: Boolean = false
+
+    public fun isModified(): Boolean {
+        return modified
+    }
 
     @DomainEvents
     public fun listDomainEvents(): Collection<Any> {

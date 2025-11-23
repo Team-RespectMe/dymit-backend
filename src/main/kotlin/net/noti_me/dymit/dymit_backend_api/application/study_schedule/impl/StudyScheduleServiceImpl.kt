@@ -126,7 +126,7 @@ class StudyScheduleServiceImpl(
         schedule = studyScheduleRepository.save(schedule)
         saveStudyGroupPort.persist(group)
 
-        if ( schedule.modified ) {
+        if ( schedule.isModified() ) {
             val participants = participantRepository.getByScheduleId(schedule.id!!)
                 .map { it.memberId }
                 .toSet()

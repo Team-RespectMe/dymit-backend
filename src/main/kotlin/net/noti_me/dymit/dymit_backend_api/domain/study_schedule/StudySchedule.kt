@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleDeletedEvent
 import org.bson.types.ObjectId
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
@@ -60,9 +61,6 @@ class StudySchedule(
     var nrParticipant: Long = nrParticipant
         private set
 
-    var modified: Boolean = false
-        private set
-
     fun isExpired(): Boolean {
         return scheduleAt.isBefore(LocalDateTime.now())
     }
@@ -75,6 +73,10 @@ class StudySchedule(
 
         if ( newTitle.length > 30 ) {
             throw IllegalArgumentException("제목은 30자 이내로 작성해야 합니다.")
+        }
+
+        if ( newTitle == this.title ) {
+            return
         }
 
         this.title = newTitle
@@ -90,6 +92,11 @@ class StudySchedule(
         if ( newDescription.length > 100 ) {
             throw IllegalArgumentException("설명은 100자 이내로 작성해야 합니다.")
         }
+
+        if ( newDescription == this.description ) {
+            return
+        }
+
         this.description = newDescription
         modified = true
     }
