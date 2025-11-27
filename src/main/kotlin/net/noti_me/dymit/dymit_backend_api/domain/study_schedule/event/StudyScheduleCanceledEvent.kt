@@ -52,13 +52,7 @@ class StudyScheduleCanceledEvent(
                 eventName = eventName,
                 messages = listOf(
                     FeedMessage(
-                        text = group.name,
-                    ),
-                    FeedMessage(
-                        text = " ${schedule.session}회차 ",
-                    ),
-                    FeedMessage(
-                        text = " 일정이 취소되었어요!",
+                        text = "${group.name} ${schedule.session}회차 일정이 취소되었어요!",
                     )
                 ),
                 associates = listOf(
