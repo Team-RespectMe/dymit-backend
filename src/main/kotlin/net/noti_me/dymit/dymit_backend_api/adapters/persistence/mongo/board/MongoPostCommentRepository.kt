@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.board
 
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
+import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -97,5 +98,17 @@ class MongoPostCommentRepository(
             .limit(size)
             .with(Sort.by(Sort.Direction.DESC, "_id"))
         return mongoTemplate.find(query, PostComment::class.java)
+    }
+
+    override fun updateWriterInfo(member: Member): Int {
+        return try {
+            val writerId = member.id!!
+            val query = Query(Criteria.where("writer._id").`is`(writerId))
+            val update = Update().set("writer", member)
+            val result = mongoTemplate.updateMulti(query, update, PostComment::class.java)
+            result.modifiedCount.toInt()
+        } catch (e: Exception) {
+            0
+        }
     }
 }
