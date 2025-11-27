@@ -28,6 +28,7 @@ class GroupFeed(
     val title: String = "Dymit",
     val messages: List<FeedMessage> = emptyList(),
     val associates: List<AssociatedResource> = emptyList(),
+    val excludedMemberIds : MutableSet<ObjectId> = mutableSetOf(),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false
@@ -37,6 +38,7 @@ class GroupFeed(
     updatedAt = updatedAt,
     isDeleted = isDeleted
 ) {
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

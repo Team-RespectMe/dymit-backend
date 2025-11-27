@@ -17,6 +17,7 @@ class GroupPushMessage(
     val title: String = "Dymit",
     val body: String,
     val image: String? = null,
-    val data: Map<String, String> = emptyMap()
+    val data: Map<String, String> = emptyMap(),
+    val excluded: MutableSet<ObjectId> = mutableSetOf()
 ) {
 }

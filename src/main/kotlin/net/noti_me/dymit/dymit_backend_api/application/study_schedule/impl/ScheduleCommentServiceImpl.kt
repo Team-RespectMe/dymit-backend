@@ -59,11 +59,25 @@ class ScheduleCommentServiceImpl(
 
         // 5. 저장
         val savedComment = scheduleCommentRepository.save(scheduleComment)
-        eventPublisher.publishEvent(ScheduleCommentCreatedEvent(
-            group = group,
-            schedule = schedule,
-            comment = savedComment
-        ))
+
+        // Event 발행
+
+        if ( memberInfo.memberId != group.ownerId.toHexString() ) {
+            val event = ScheduleCommentCreatedEvent(
+                group = group,
+                schedule = schedule,
+                comment = savedComment
+            )
+
+
+            eventPublisher.publishEvent(
+                ScheduleCommentCreatedEvent(
+                    group = group,
+                    schedule = schedule,
+                    comment = savedComment
+                )
+            )
+        }
 
         return ScheduleCommentDto.from(savedComment)
     }

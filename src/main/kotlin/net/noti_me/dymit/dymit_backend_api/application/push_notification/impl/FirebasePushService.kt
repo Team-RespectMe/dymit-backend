@@ -42,8 +42,15 @@ class FirebasePushService(
     }
 
     override fun sendGroupPush(message: GroupPushMessage) {
-        val groupMembers = groupMemberRepository.findByGroupId(message.groupId)
-        val members = loadMemberPort.loadByIds(groupMembers.map { it.memberId.toHexString() })
+        val targetMembers = groupMemberRepository.findByGroupId(message.groupId)
+
+        val receivers = if (message.excluded.isNotEmpty()) {
+            targetMembers.filter { !message.excluded.contains(it.memberId) }
+        } else {
+            targetMembers
+        }
+
+        val members = loadMemberPort.loadByIds(receivers.map { it.memberId.toHexString() })
         val deviceTokens = members.flatMap { member ->
             member.deviceTokens
                 .filter { it.isActive }

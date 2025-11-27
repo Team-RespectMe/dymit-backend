@@ -62,11 +62,13 @@ class PostServiceImpl(
         val savedPost = this.postRepository.save(newPost)
         group.updateRecentPost(RecentPostVo.from(savedPost))
         saveGroupPort.update(group)
-        eventPublisher.publishEvent(PostCreatedEvent(
+        val event = PostCreatedEvent(
             group = group,
             board = board,
             post = savedPost
-        ))
+        )
+        event.addExcludedMemberId(groupMember.memberId)
+        eventPublisher.publishEvent(event)
 
         return PostDto.from(savedPost)
     }
