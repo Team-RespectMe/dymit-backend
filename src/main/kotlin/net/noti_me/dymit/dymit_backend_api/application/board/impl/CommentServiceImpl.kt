@@ -64,12 +64,17 @@ class CommentServiceImpl(
         )
 
         val savedComment = this.commentRepository.save(comment)
-        eventPublisher.publishEvent(PostCommentCreatedEvent(
+        val event = PostCommentCreatedEvent(
             group = loadGroupPort.loadByGroupId(command.groupId)!!,
             board = board,
             post = post,
             comment = savedComment
-        ))
+        )
+
+        if ( memberInfo.memberId != post.writer.id.toHexString() ) {
+            eventPublisher.publishEvent(event)
+        }
+
         post.increaseCommentCount()
         postRepository.save(post)
 

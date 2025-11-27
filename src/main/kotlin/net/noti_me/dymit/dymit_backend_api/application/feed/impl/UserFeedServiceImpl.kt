@@ -114,9 +114,8 @@ class UserFeedServiceImpl(
 
             val targets = groupFeeds
                 .asSequence()
-                .map { groupFeed ->
-                    UserFeed.create(memberId, groupFeed)
-                }
+                .filterNot { groupFeed -> groupFeed.excludedMemberIds.contains(memberId)  }
+                .map { groupFeed -> UserFeed.create(memberId, groupFeed) }
                 .sortedByDescending { it.createdAt }
                 .toList()
 
