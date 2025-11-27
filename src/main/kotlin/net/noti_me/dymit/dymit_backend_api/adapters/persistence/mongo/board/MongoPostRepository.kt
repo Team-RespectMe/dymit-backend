@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.board
 
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
+import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -116,5 +117,17 @@ class MongoPostRepository(
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"))
         query.limit(1)
         return mongoTemplate.findOne(query, Post::class.java)
+    }
+
+    override fun updateWriterInfo(member: Member): Int {
+        return try {
+            val writerId = member.id!!
+            val query = Query(Criteria.where("writer._id").`is`(writerId))
+            val update = Update().set("writer", member)
+            val result = mongoTemplate.updateMulti(query, update, Post::class.java)
+            result.modifiedCount.toInt()
+        } catch (e: Exception) {
+            0
+        }
     }
 }

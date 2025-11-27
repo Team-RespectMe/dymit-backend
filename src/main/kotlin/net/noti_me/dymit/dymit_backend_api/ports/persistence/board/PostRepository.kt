@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.ports.persistence.board
 
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
+import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import org.bson.types.ObjectId
 
 interface PostRepository {
@@ -29,4 +30,7 @@ interface PostRepository {
     fun findByWriterId(writerId: String, lastId: String?, limit: Int): List<Post>
 
     fun deleteById(id: String): Boolean
+
+    // batch update
+    fun updateWriterInfo(member: Member): Int
 }
