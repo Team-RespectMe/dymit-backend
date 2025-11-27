@@ -75,6 +75,9 @@ class Member(
      * @param profileImage 새로운 프로필 이미지
      */
     fun changeProfileImage(profileImage: MemberProfileImageVo) {
+        if ( this.profileImage == profileImage ) {
+            return
+        }
         this.profileImage = profileImage
         registerEvent(MemberProfileImageChangedEvent(this))
         updateLastAccessedAt()

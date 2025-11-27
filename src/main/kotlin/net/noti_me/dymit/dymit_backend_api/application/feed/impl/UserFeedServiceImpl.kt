@@ -110,7 +110,10 @@ class UserFeedServiceImpl(
                 .toList()
             val hasNext = groupFeeds.size > DEFAULT_BATCH_SIZE
             groupFeeds = groupFeeds.take(DEFAULT_BATCH_SIZE.toInt())
+            // cursor용
             val lastId =  groupFeeds.lastOrNull()?.id
+            // history update 용
+            val firstId = groupFeeds.firstOrNull()?.id
 
             val targets = groupFeeds
                 .asSequence()
@@ -122,10 +125,12 @@ class UserFeedServiceImpl(
             if ( targets.isEmpty() ) return
 
             userFeedRepository.saveAll(targets)
-            lastId?.let{
-                history.updateLastGroupQueryId(lastId)
+
+            if ( history.lastFeedId!! < firstId ) {
+                history.updateLastGroupQueryId(firstId!!)
                 userFeedQueryHistoryRepository.save(history)
             }
+
         } while( hasNext )
     }
 }

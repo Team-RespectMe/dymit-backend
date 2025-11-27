@@ -18,8 +18,14 @@ class UserFeedQueryHistory(
 //        protected set
 
     fun updateLastGroupQueryId(newLastGroupQueryId: ObjectId) {
-        if (lastFeedId == null || newLastGroupQueryId > lastFeedId!!) {
+        // null 이거나, lastFeedId보다 이전에 생성된 id가 들어오면 무시한다.
+        if ( lastFeedId == null ) {
             lastFeedId = newLastGroupQueryId
+        } else {
+            // 마지막 쿼리 ID보다 큰값이 들어오면 갱신
+            if ( lastFeedId!! < newLastGroupQueryId ) {
+                lastFeedId = newLastGroupQueryId
+            }
         }
     }
 

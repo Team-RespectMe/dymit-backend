@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberNicknameChangedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleCommentRepository
@@ -23,6 +24,13 @@ class StudyScheduleTransactionHandler(
     @Async
     @EventListener(classes = [MemberNicknameChangedEvent::class])
     fun handleMemberNicknameChangedEvent(event: MemberNicknameChangedEvent) {
+        val member = event.member
+        scheduleCommentRepository.updateWriterInfo(member)
+    }
+
+    @Async
+    @EventListener(classes = [MemberProfileImageChangedEvent::class])
+    fun handleMemberProfileImageChangedEvent(event: MemberProfileImageChangedEvent) {
         val member = event.member
         scheduleCommentRepository.updateWriterInfo(member)
     }

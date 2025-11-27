@@ -20,4 +20,24 @@ class MemberProfileImageVo(
     val height: Int = 0,
 ) {
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is MemberProfileImageVo) return false
+
+        if (type != other.type) return false
+        if (thumbnail != other.thumbnail) return false
+        if (original != other.original) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = type.hashCode()
+        result = 31 * result + thumbnail.hashCode()
+        result = 31 * result + original.hashCode()
+        result = 31 * result + fileSize.hashCode()
+        result = 31 * result + width
+        result = 31 * result + height
+        return result
+    }
 }
