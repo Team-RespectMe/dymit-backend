@@ -43,20 +43,7 @@ class DailyScheduleReminderEvent(
                 eventName = eventName,
                 messages = listOf(
                     FeedMessage(
-                        text = "${group.name}",
-                        highlightColor = "#FF821B",
-                        textColor = "#FFF2E4"
-                    ),
-                    FeedMessage(
-                        text = " 의 ",
-                    ),
-                    FeedMessage(
-                        text = "${schedule.session} 회차 ",
-                        highlightColor = "#FF821B",
-                        textColor = "#FFF2E4"
-                    ),
-                    FeedMessage(
-                        text = " 일정이 오늘 예정되어 있어요!",
+                        text = "${group.name} ${schedule.session}회차 일정이 오늘 예정되어 있어요!",
                     )
                 ),
                 associates = listOf(
