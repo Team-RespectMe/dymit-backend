@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
@@ -59,6 +60,7 @@ interface StudyGroupApi {
         memberInfo: MemberInfo,
         @RequestBody
         @Valid
+        @Sanitize
         request: StudyGroupCreateRequest
     ): StudyGroupResponse
 

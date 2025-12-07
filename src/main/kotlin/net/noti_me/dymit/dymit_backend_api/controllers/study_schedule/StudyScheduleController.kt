@@ -1,6 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.StudyScheduleService
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleParticipantResponse
@@ -18,7 +20,7 @@ class StudyScheduleController(
     override fun createSchedule(
         memberInfo: MemberInfo,
         groupId: String,
-        request: StudyScheduleCommandRequest
+        @Valid @Sanitize request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse {
         val dto = scheduleService.createSchedule(memberInfo, groupId, request.toCreateCommand())
         return StudyScheduleCommandResponse.from(dto)
@@ -28,7 +30,7 @@ class StudyScheduleController(
         memberInfo: MemberInfo,
         groupId: String,
         scheduleId: String,
-        command: StudyScheduleCommandRequest
+        @Valid @Sanitize command: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse {
         val dto = scheduleService.updateSchedule(memberInfo, groupId, scheduleId, command.toUpdateCommand())
         return StudyScheduleCommandResponse.from(dto)

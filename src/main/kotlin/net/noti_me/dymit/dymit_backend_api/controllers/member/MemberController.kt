@@ -1,11 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeviceTokenUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeMemberImageUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberQueryUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import org.springframework.web.bind.annotation.*
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
@@ -46,7 +48,7 @@ class MemberController(
     override fun patchNickname(
         loginMember: MemberInfo,
         memberId: String,
-        request: MemberNicknameUpdateRequest)
+        @Valid @Sanitize request: MemberNicknameUpdateRequest)
     : MemberProfileResponse {
         val memberDto = memberUpdateNicknameUsecase.updateNickname(
             loginMember,
@@ -57,8 +59,9 @@ class MemberController(
     }
 
 //    @PostMapping
-    override fun createMember(request: MemberCreateRequest)
-    : MemberCreateResponse {
+    override fun createMember(
+        @Valid @Sanitize request: MemberCreateRequest
+    ): MemberCreateResponse {
         logger.debug("Creating member with request: $request")
         val result = memberCreateUsecase.createMember(
             request.toCommand()
@@ -74,7 +77,7 @@ class MemberController(
     override fun uploadProfileImage(
         loginMember: MemberInfo,
         memberId: String,
-        request: ProfileImageUploadRequest
+        @Valid @Sanitize request: ProfileImageUploadRequest
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
             memberImageUploadUsecase.changeProfileImage(

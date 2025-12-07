@@ -1,7 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.report
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.report.ReportService
 import net.noti_me.dymit.dymit_backend_api.application.report.dto.ReportCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportCreateRequest
@@ -20,7 +22,10 @@ class ReportController(
     private val reportService: ReportService
 ) : ReportApi {
 
-    override fun createReport(memberInfo: MemberInfo, request: ReportCreateRequest): ReportResponse {
+    override fun createReport(
+        memberInfo: MemberInfo,
+        @Valid @Sanitize request: ReportCreateRequest
+    ): ReportResponse {
         val command = ReportCommand(
             title = request.title,
             content = request.content,

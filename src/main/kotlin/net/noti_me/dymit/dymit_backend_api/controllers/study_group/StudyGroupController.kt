@@ -1,9 +1,11 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_group
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.StudyScheduleService
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
@@ -19,6 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGrou
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupQueryDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.StudyGroupResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.UpdateStudyGroupProfileImageRequest
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -30,7 +33,7 @@ class StudyGroupController(
 
     override fun createStudyGroup(
         memberInfo: MemberInfo,
-        request: StudyGroupCreateRequest
+        @RequestBody @Valid @Sanitize request: StudyGroupCreateRequest
     ): StudyGroupResponse {
         val result = studyGroupCommandService.createStudyGroup(
             member = memberInfo,
@@ -43,7 +46,7 @@ class StudyGroupController(
     override fun joinStudyGroup(
         memberInfo: MemberInfo,
         groupId: String,
-        request: StudyGroupJoinRequest
+        @Valid @Sanitize request: StudyGroupJoinRequest
     ): StudyGroupMemberResponse {
         val result = studyGroupCommandService.joinStudyGroup(memberInfo, request.toCommand(groupId))
         return StudyGroupMemberResponse.from(result)
@@ -89,7 +92,7 @@ class StudyGroupController(
     override fun updateStudyGroupProfileImage(
         memberInfo: MemberInfo,
         groupId: String,
-        request: UpdateStudyGroupProfileImageRequest
+        @Valid @Sanitize request: UpdateStudyGroupProfileImageRequest
     ): StudyGroupResponse {
         val updatedGroup = studyGroupCommandService.updateStudyGroupProfileImage(
             member = memberInfo,
@@ -114,7 +117,7 @@ class StudyGroupController(
     override fun addStudyGroupMemberToBlacklist(
         memberInfo: MemberInfo,
         groupId: String,
-        request: BlackListEnlistRequest
+        @Valid @Sanitize request: BlackListEnlistRequest
     ) {
         val command = EnlistBlacklistCommand(
             groupId = groupId,

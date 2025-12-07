@@ -1,7 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.board
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.board.CommentService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.CommentCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.CommentCommandRequest
@@ -19,7 +21,7 @@ class PostCommentController(
         groupId: String,
         boardId: String,
         postId: String,
-        request: CommentCommandRequest
+        @Valid @Sanitize request: CommentCommandRequest
     ): CommentCommandResponse {
         val command = CommentCommand(
             groupId = groupId,
@@ -38,7 +40,7 @@ class PostCommentController(
         boardId: String,
         postId: String,
         commentId: String,
-        request: CommentCommandRequest
+        @Valid @Sanitize request: CommentCommandRequest
     ): CommentCommandResponse {
         val command = CommentCommand(
             groupId = groupId,

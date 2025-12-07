@@ -1,8 +1,10 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.ScheduleCommentService
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.CreateScheduleCommentCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.UpdateScheduleCommentCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleCommentCommandRequest
@@ -19,7 +21,7 @@ class ScheduleCommentController(
         memberInfo: MemberInfo,
         groupId: String,
         scheduleId: String,
-        request: ScheduleCommentCommandRequest
+        @Valid @Sanitize request: ScheduleCommentCommandRequest
     ): ScheduleCommentResponse {
         val command = CreateScheduleCommentCommand(
             groupId = ObjectId(groupId),
@@ -36,7 +38,7 @@ class ScheduleCommentController(
         groupId: String,
         scheduleId: String,
         commentId: String,
-        request: ScheduleCommentCommandRequest
+        @Valid @Sanitize request: ScheduleCommentCommandRequest
     ): ScheduleCommentResponse {
         val command = UpdateScheduleCommentCommand(
             groupId = ObjectId(groupId),

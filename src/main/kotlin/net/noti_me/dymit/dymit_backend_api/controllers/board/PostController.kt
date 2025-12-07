@@ -1,6 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.board
 
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.board.PostService
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostCommandRequest
@@ -18,7 +20,7 @@ class PostController(
         memberInfo: MemberInfo,
         groupId: String,
         boardId: String,
-        request: PostCommandRequest
+        @Valid @Sanitize request: PostCommandRequest
     ): PostCommandResponse {
         return PostCommandResponse.from(
             postService.createPost(
@@ -33,7 +35,7 @@ class PostController(
         groupId: String,
         boardId: String,
         postId: String,
-        request: PostCommandRequest
+        @Valid @Sanitize request: PostCommandRequest
     ): PostCommandResponse {
         return PostCommandResponse.from(
             postService.updatePost(

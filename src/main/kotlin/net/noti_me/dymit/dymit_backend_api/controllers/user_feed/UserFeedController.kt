@@ -30,7 +30,6 @@ class UserFeedController(
     }
 
     override fun deleteUserFeed(loginMember: MemberInfo, feedId: String) {
-        TODO("Not yet implemented")
         userFeedService.deleteUserFeed(loginMember, feedId)
     }
 
