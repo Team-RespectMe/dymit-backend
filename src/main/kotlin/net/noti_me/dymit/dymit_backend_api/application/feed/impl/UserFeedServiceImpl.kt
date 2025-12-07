@@ -39,7 +39,6 @@ class UserFeedServiceImpl(
 
 
     override fun getUserFeeds(memberInfo: MemberInfo, cursorId: String?, size: Int): List<UserFeedDto> {
-        logger.debug("Getting UserFeeds for memberId: ${memberInfo.memberId} with cursor: $cursorId and size: $size")
 
         // 그룹 피드를 먼저 가져와서 영속화 한다.
         pullUnreadGroupFeeds(ObjectId(memberInfo.memberId))
@@ -49,7 +48,6 @@ class UserFeedServiceImpl(
             cursor = cursorId,
             size = size.toLong()
         )
-        logger.debug("User Feeds found: ${userFeeds.size}")
 
         return userFeeds.map { UserFeedDto.from(it) }
     }
