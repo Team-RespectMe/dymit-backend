@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupImageUpdateCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupPresetImage
 import org.springframework.web.multipart.MultipartFile

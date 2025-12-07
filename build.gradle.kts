@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.4.29"
+version = "0.5.0"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 
@@ -45,6 +45,8 @@ dependencies {
     implementation("com.google.firebase:firebase-admin:9.3.0")
     implementation("org.ehcache:ehcache:3.11.1")
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.792")
+    implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
+
 
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")

@@ -5,9 +5,11 @@ import jakarta.validation.constraints.NotEmpty
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleUpdateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import java.time.LocalDateTime
 
 @Schema(description = "스터디 그룹 일정 생성 요청")
+@Sanitize
 class StudyScheduleCommandRequest(
     @field: Schema(description = "스터디 일정 제목", example = "1회차 스터디 모임")
     @field: NotEmpty(message = "스터디 일정 제목은 비어있을 수 없습니다.")

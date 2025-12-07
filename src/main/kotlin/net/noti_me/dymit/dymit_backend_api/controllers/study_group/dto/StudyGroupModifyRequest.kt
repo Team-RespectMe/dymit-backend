@@ -3,11 +3,13 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotEmpty
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupModifyCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import org.hibernate.validator.constraints.Length
 
 @Schema(
     description = "스터디 그룹 수정 요청",
 )
+@Sanitize
 class StudyGroupModifyRequest(
     @field: Schema(
         description = "스터디 그룹 이름",

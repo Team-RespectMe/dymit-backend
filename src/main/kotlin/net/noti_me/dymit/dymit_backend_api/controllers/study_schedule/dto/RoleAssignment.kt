@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotEmpty
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import org.hibernate.validator.constraints.Length
 
 /**
@@ -10,6 +11,7 @@ import org.hibernate.validator.constraints.Length
  * @param roleName 할당된 역할 이름
  */
 @Schema(description = "스터디 그룹 일정의 역할 할당 정보")
+@Sanitize
 class RoleAssignment(
     @Schema(description = "역할을 할당받은 멤버의 ID", example = "64b8f0c2e1b0c8a1d2f3e4b5")
     val memberId: String,

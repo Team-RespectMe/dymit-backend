@@ -1,12 +1,14 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.member.dto
 
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberNicknameUpdateCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import org.hibernate.validator.constraints.Length
 
 // import org.jakarta.validation.constraints.NotBlank
 // import org.jakarta.validation.constraints.Length
 
+@Sanitize
 data class MemberNicknameUpdateRequest(
     // @field: NotBlank(message = "Nickname cannot be blank")
     @field: Nickname

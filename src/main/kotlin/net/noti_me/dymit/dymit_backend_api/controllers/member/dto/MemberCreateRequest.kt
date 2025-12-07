@@ -7,12 +7,14 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.multipart.MultipartFile
 
 @Schema(description = "사용자 생성 요청 객체")
+@Sanitize
 data class MemberCreateRequest(
     @Schema(description = "사용자 닉네임", required = true, example = "닉네임 입력")
     @field: Nickname
