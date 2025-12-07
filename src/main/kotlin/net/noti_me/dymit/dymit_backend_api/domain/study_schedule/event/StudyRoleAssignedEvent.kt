@@ -25,9 +25,13 @@ class StudyRoleAssignedEvent(
             eventName = eventName,
             memberId = role.memberId,
             messages = listOf(
+                FeedMessage(text = "${group.name} ${schedule.session}회차 "),
                 FeedMessage(
-                    text = "${group.name} ${schedule.session}회차 ${role.roles.joinToString(", ")} 역할이 지정되었습니다.",
+                    text=role.roles.joinToString(", "),
+                    textColor = "#FF821B",
+                    highlightColor = "#FFF2E4"
                 ),
+                FeedMessage(text="역할이 지정되었습니다."),
             ),
             associates = listOf(
                 AssociatedResource(

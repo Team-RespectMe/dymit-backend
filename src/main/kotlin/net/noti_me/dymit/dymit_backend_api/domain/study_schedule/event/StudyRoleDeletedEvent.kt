@@ -33,8 +33,14 @@ class StudyRoleDeletedEvent(
             memberId = role.memberId,
             messages = listOf(
                 FeedMessage(
-                    text = "${group.name} ${schedule.session}회차 ${role.roles.joinToString (", ")} 역할이 해제되었어요!",
+                    text = "${group.name} ${schedule.session}회차 "
                 ),
+                FeedMessage(
+                    text = role.roles.joinToString (", "),
+                    textColor = "#FF821B",
+                    highlightColor = "#FFF2E4"
+                ),
+                FeedMessage(text=" 역할이 해제되었어요!")
             ),
             associates = listOf(
                 AssociatedResource(
