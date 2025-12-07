@@ -1,7 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo
 
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
 
+@Sanitize
 class LocationVo(
     val type: ScheduleLocation.LocationType = ScheduleLocation.LocationType.OFFLINE,
     val value: String = "임의의 장소",
