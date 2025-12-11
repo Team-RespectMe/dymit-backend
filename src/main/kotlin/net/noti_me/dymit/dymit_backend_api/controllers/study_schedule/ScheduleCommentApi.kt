@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 
 @Tag(name = "스터디 일정 댓글", description = "스터디 일정 댓글 API")
 @RequestMapping("/api/v1/study-groups")
+@SecurityRequirement(name = "bearer-jwt")
 interface ScheduleCommentApi {
 
     @Operation(summary = "댓글 생성", description = "스터디 일정에 댓글을 생성합니다.")

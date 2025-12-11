@@ -17,6 +17,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.types.ObjectId
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
@@ -28,6 +29,8 @@ class ScheduleCommentServiceImpl(
     private val studyScheduleRepository: StudyScheduleRepository,
     private val eventPublisher: ApplicationEventPublisher,
 ) : ScheduleCommentService {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun createComment(
         memberInfo: MemberInfo,
@@ -61,22 +64,13 @@ class ScheduleCommentServiceImpl(
         val savedComment = scheduleCommentRepository.save(scheduleComment)
 
         // Event 발행
-
         if ( memberInfo.memberId != group.ownerId.toHexString() ) {
             val event = ScheduleCommentCreatedEvent(
                 group = group,
                 schedule = schedule,
                 comment = savedComment
             )
-
-
-            eventPublisher.publishEvent(
-                ScheduleCommentCreatedEvent(
-                    group = group,
-                    schedule = schedule,
-                    comment = savedComment
-                )
-            )
+            eventPublisher.publishEvent(event)
         }
 
         return ScheduleCommentDto.from(savedComment)
