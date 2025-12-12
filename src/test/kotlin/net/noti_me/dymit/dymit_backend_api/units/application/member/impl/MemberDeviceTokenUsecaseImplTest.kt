@@ -4,7 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberDeviceTokenUsecaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.member.impl.ManageDeviceTokenUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken
@@ -25,7 +25,7 @@ class MemberDeviceTokenUsecaseImplTest : BehaviorSpec({
     val saveMemberPort = mockk<SaveMemberPort>(relaxed = true)
 
     // 테스트 대상
-    val memberDeviceTokenUsecase = MemberDeviceTokenUsecaseImpl(
+    val memberDeviceTokenUsecase = ManageDeviceTokenUseCaseImpl(
         loadMemberPort = loadMemberPort,
         saveMemberPort = saveMemberPort
     )

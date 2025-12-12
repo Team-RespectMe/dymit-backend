@@ -10,7 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 @Sanitize
 @Schema(description = "디바이스 토큰 등록/해제 요청 DTO")
 class DeviceTokenCommandRequest(
-    @field:Schema(description = "디바이스 토큰 문자열", example = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890")
+    @field: Schema(description = "디바이스 토큰 문자열", example = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890")
     val deviceToken: String
 ) {
 }

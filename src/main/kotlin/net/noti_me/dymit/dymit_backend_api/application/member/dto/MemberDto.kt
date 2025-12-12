@@ -10,7 +10,8 @@ data class MemberDto(
     val nickname: String,
     val createdAt: LocalDateTime,
     val profileImage: MemberProfileImageVo?=null,
-    val oidcIdentities : List<OidcIdentity> = emptyList()
+    val oidcIdentities : List<OidcIdentity> = emptyList(),
+    val interests: Set<String> = emptySet()
 ) {
 
     companion object {
@@ -22,7 +23,8 @@ data class MemberDto(
                 nickname = entity.nickname,
                 createdAt = entity.createdAt ?: LocalDateTime.now(),
                 profileImage = entity.profileImage,
-                oidcIdentities = entity.oidcIdentities.toList()
+                oidcIdentities = entity.oidcIdentities.toList(),
+                interests = entity.interests.toSet()
             )
         }
     }

@@ -1,12 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
 import jakarta.validation.Valid
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeviceTokenUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ManageDeviceTokenUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeMemberImageUseCase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberQueryUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.QueryMemberUseCase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.CreateMemberUseCase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.DeleteMemberUseCase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeNicknameUseCase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateInterestsUseCase
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import org.springframework.web.bind.annotation.*
@@ -17,6 +18,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.DeviceTokenCom
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.UpdateInterestsRequest
 import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
 
@@ -24,17 +26,17 @@ import org.springframework.validation.annotation.Validated
 @Validated
 //@RequestMapping("/api/v1/members")
 class MemberController(
-    private val memberCreateUsecase: MemberCreateUsecase,
-    private val memberQueryUsecase: MemberQueryUsecase,
-    private val memberDeleteUsecase: MemberDeleteUsecase,
-    private val memberUpdateNicknameUsecase: UpdateNicknameUsecase,
+    private val memberCreateUsecase: CreateMemberUseCase,
+    private val memberQueryUsecase: QueryMemberUseCase,
+    private val memberDeleteUsecase: DeleteMemberUseCase,
+    private val memberUpdateNicknameUsecase: ChangeNicknameUseCase,
     private val memberImageUploadUsecase: ChangeMemberImageUseCase,
-    private val deviceTokenUsecase: MemberDeviceTokenUsecase
+    private val updateInterestsUseCase: UpdateInterestsUseCase,
+    private val deviceTokenUsecase: ManageDeviceTokenUseCase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-//    @GetMapping("/{memberId}")
     override fun getMemberProfile(
         loginMember: MemberInfo,
         memberId: String
@@ -44,7 +46,6 @@ class MemberController(
         )
     }
 
-//    @PatchMapping("/{memberId}/nickname")
     override fun patchNickname(
         loginMember: MemberInfo,
         memberId: String,
@@ -58,11 +59,21 @@ class MemberController(
         return MemberProfileResponse.from(memberDto)
     }
 
+    override fun patchInterests(
+        loginMember: MemberInfo,
+        memberId: String,
+        @Valid @Sanitize request: UpdateInterestsRequest
+    ): MemberProfileResponse {
+        return MemberProfileResponse.from( updateInterestsUseCase.updateInterests(
+            loginMember = loginMember,
+            command = request.toCommand()
+        ))
+    }
+
 //    @PostMapping
     override fun createMember(
         @Valid @Sanitize request: MemberCreateRequest
     ): MemberCreateResponse {
-        logger.debug("Creating member with request: $request")
         val result = memberCreateUsecase.createMember(
             request.toCommand()
         )
