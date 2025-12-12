@@ -32,7 +32,8 @@ class Member(
     refreshTokens: MutableSet<RefreshToken> = mutableSetOf(),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
-    isDeleted: Boolean = false
+    isDeleted: Boolean = false,
+    interests: MutableSet<String>? = null
 ) : BaseAggregateRoot<Member>(id, createdAt, updatedAt, isDeleted) {
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
@@ -52,6 +53,9 @@ class Member(
         private set
 
     var lastAccessAt: LocalDateTime = lastAccessAt
+        private set
+
+    var interests: MutableSet<String> = interests ?: mutableSetOf()
         private set
 
     /**
@@ -123,6 +127,11 @@ class Member(
                 iter.remove()
             }
         }
+    }
+
+    fun updateInterests(newInterests: Set<String>) {
+        this.interests = newInterests.toMutableSet()
+        updateLastAccessedAt()
     }
 
     fun addRefreshToken(token: String, expireAt: Instant) {

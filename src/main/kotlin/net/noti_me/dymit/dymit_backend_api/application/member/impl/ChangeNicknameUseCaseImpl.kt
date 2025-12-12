@@ -1,8 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberNicknameUpdateCommand
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.dto.UpdateNicknameCommand
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeNicknameUseCase
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
@@ -12,15 +12,15 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPo
 import org.springframework.stereotype.Service
 
 @Service
-class UpdateNicknameUsecaseImpl(
+class ChangeNicknameUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort
-): UpdateNicknameUsecase {
+): ChangeNicknameUseCase {
 
     override fun updateNickname(
         loginMember: MemberInfo,
         memberId: String,
-        command: MemberNicknameUpdateCommand
+        command: UpdateNicknameCommand
     ): MemberDto {
         val member = loadMemberPort.loadById(memberId)
             ?: throw NotFoundException(message = "존재하지 않는 회원입니다.")

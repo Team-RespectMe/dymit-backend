@@ -6,7 +6,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberQueryUsecaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.member.impl.QueryMemberUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
@@ -19,7 +19,7 @@ class MemberQueryUsecaseImplTest : BehaviorSpec() {
 
     private val loadMemberPort = mockk<LoadMemberPort>()
 
-    private val memberQueryUsecase = MemberQueryUsecaseImpl(loadMemberPort)
+    private val memberQueryUsecase = QueryMemberUseCaseImpl(loadMemberPort)
 
     private val member = Member(
         id = ObjectId.get(),

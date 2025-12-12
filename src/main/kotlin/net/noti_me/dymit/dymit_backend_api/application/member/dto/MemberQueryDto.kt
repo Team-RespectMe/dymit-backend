@@ -8,7 +8,8 @@ class MemberQueryDto(
     val id: String,
     val nickname: String,
     val oidcInfo: List<OidcIdentity>,
-    val profileImageVo: MemberProfileImageVo
+    val profileImageVo: MemberProfileImageVo,
+    val interests: Set<String> = emptySet()
 ) {
 
     companion object {
@@ -22,7 +23,8 @@ class MemberQueryDto(
                     original = member.profileImage.original,
                     width = member.profileImage.width,
                     height = member.profileImage.height
-                )
+                ),
+                interests = member.interests.toSet()
             )
         }
     }

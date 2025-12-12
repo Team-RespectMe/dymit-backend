@@ -8,8 +8,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberCreateUsecaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.member.dto.CreateMemberCommand
+import net.noti_me.dymit.dymit_backend_api.application.member.impl.CreateMemberUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
 import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.CommonOidcIdTokenPayload
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
@@ -36,7 +36,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
 
     private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
 
-    private val memberCreateUsecase = MemberCreateUsecaseImpl(
+    private val memberCreateUsecase = CreateMemberUseCaseImpl(
         saveMemberPort = saveMemberPort,
         loadMemberPort = loadMemberPort,
         oidcAuthenticationProviders = providers,
@@ -55,7 +55,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
         profileImageUrl = null
     )
 
-    val command = MemberCreateCommand(
+    val command = CreateMemberCommand(
         nickname = "test-nickname",
         oidcProvider = OidcProvider.GOOGLE,
         idToken = ""

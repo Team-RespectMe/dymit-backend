@@ -6,8 +6,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberNicknameUpdateCommand
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.UpdateNicknameUsecaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.member.dto.UpdateNicknameCommand
+import net.noti_me.dymit.dymit_backend_api.application.member.impl.ChangeNicknameUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
@@ -22,7 +22,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
 
     private val saveMemberPort = mockk<SaveMemberPort>()
 
-    private val updateNicknameUsecase = UpdateNicknameUsecaseImpl(
+    private val updateNicknameUsecase = ChangeNicknameUseCaseImpl(
         loadMemberPort = loadMemberPort,
         saveMemberPort = saveMemberPort
     )
@@ -46,7 +46,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                         updateNicknameUsecase.updateNickname(
                             loginMember = createMemberInfo(member),
                             memberId = member.identifier,
-                            command = MemberNicknameUpdateCommand(nickname = newNickname)
+                            command = UpdateNicknameCommand(nickname = newNickname)
                         )
                     }
                 }
@@ -63,7 +63,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                         updateNicknameUsecase.updateNickname(
                             loginMember = createMemberInfo(member),
                             memberId = member.identifier,
-                            command = MemberNicknameUpdateCommand(nickname = newNickname)
+                            command = UpdateNicknameCommand(nickname = newNickname)
                         )
                     }
                 }
@@ -80,7 +80,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                     val updatedMember = updateNicknameUsecase.updateNickname(
                         loginMember = createMemberInfo(member),
                         memberId = member.identifier,
-                        command = MemberNicknameUpdateCommand(nickname = newNickname)
+                        command = UpdateNicknameCommand(nickname = newNickname)
                     )
                     updatedMember.nickname shouldBe newNickname
                 }
@@ -96,7 +96,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                         updateNicknameUsecase.updateNickname(
                             loginMember = createMemberInfo(member),
                             memberId = other.identifier,
-                            command = MemberNicknameUpdateCommand(nickname = newNickname)
+                            command = UpdateNicknameCommand(nickname = newNickname)
                         )
                     }
                 }
@@ -112,7 +112,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                     val updatedMember = updateNicknameUsecase.updateNickname(
                         loginMember = createMemberInfo(member),
                         memberId = member.identifier,
-                        command = MemberNicknameUpdateCommand(nickname = newNickname)
+                        command = UpdateNicknameCommand(nickname = newNickname)
                     )
                     updatedMember.nickname shouldBe newNickname
                 }
@@ -128,7 +128,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                     val updatedMember = updateNicknameUsecase.updateNickname(
                         loginMember = createMemberInfo(member),
                         memberId = member.identifier,
-                        command = MemberNicknameUpdateCommand(nickname = newNickname)
+                        command = UpdateNicknameCommand(nickname = newNickname)
                     )
                     updatedMember.nickname shouldBe newNickname
                 }
@@ -144,7 +144,7 @@ internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
                         updateNicknameUsecase.updateNickname(
                             loginMember = createMemberInfo(member),
                             memberId = member.identifier,
-                            command = MemberNicknameUpdateCommand(nickname = newNickname)
+                            command = UpdateNicknameCommand(nickname = newNickname)
                         )
                     }
                 }

@@ -7,7 +7,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberDeleteUsecaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.member.impl.DeleteMemberUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
@@ -26,7 +26,7 @@ class MemberDeleteUsecaseImplTest : BehaviorSpec({
     // 테스트 대상 클래스와 의존성 객체들
     val loadMemberPort = mockk<LoadMemberPort>()
     val saveMemberPort = mockk<SaveMemberPort>()
-    val memberDeleteUsecase = MemberDeleteUsecaseImpl(
+    val memberDeleteUsecase = DeleteMemberUseCaseImpl(
         loadMemberPort = loadMemberPort,
         saveMemberPort = saveMemberPort
     )

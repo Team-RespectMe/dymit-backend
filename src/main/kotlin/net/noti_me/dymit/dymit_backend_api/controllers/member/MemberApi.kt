@@ -20,6 +20,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRe
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberNicknameUpdateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.UpdateInterestsRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
@@ -65,6 +66,15 @@ interface MemberApi {
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
         @RequestBody @Valid request: MemberNicknameUpdateRequest
+    ): MemberProfileResponse
+
+    @PatchMapping("/{memberId}/interests")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearer-jwt")
+    fun patchInterests(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid request: UpdateInterestsRequest
     ): MemberProfileResponse
 
     @Operation(
