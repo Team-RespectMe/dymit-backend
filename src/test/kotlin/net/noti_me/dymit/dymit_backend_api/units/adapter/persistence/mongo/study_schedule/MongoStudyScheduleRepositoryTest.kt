@@ -7,10 +7,10 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_schedule.MongoStudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
+import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import
@@ -24,6 +24,8 @@ internal class MongoStudyScheduleRepositoryTest(
 ) : AnnotationSpec() {
 
     private val scheduleRepository = MongoStudyScheduleRepository(mongoTemplate)
+
+
 
     companion object {
         fun createTestStudySchedule(
@@ -42,10 +44,7 @@ internal class MongoStudyScheduleRepositoryTest(
                 ScheduleRole(
                     memberId = ObjectId.get(),
                     nickname = "테스트 멤버",
-                    image = ProfileImageVo(
-                        type = "preset",
-                        url = "0"
-                    ),
+                    image = createProfileImageVo(),
                     roles = listOf("자료조사")
                 )
             )
@@ -94,7 +93,7 @@ internal class MongoStudyScheduleRepositoryTest(
 
         // Then
         result shouldBe true
-        scheduleRepository.loadById(schedule.id).shouldBeNull()
+        scheduleRepository.loadById(schedule.id!!).shouldBeNull()
     }
 
     @Test
@@ -116,11 +115,11 @@ internal class MongoStudyScheduleRepositoryTest(
         scheduleRepository.save(schedule)
 
         // When
-        val result = scheduleRepository.deleteById(schedule.id)
+        val result = scheduleRepository.deleteById(schedule.id!!)
 
         // Then
         result shouldBe true
-        scheduleRepository.loadById(schedule.id).shouldBeNull()
+        scheduleRepository.loadById(schedule.id!!).shouldBeNull()
     }
 
     @Test
@@ -142,7 +141,7 @@ internal class MongoStudyScheduleRepositoryTest(
         scheduleRepository.save(schedule)
 
         // When
-        val loadedSchedule = scheduleRepository.loadById(schedule.id)
+        val loadedSchedule = scheduleRepository.loadById(schedule.id!!)
 
         // Then
         loadedSchedule.shouldNotBeNull()

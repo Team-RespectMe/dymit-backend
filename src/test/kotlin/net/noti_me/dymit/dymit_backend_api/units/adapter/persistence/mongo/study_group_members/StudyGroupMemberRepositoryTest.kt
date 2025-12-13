@@ -12,8 +12,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_group_member.MongoStudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
@@ -30,6 +31,13 @@ class StudyGroupMemberRepositoryTest(
 
     private lateinit var repository: MongoStudyGroupMemberRepository
 
+    private fun createProfileImageVo(): ProfileImageVo {
+        return ProfileImageVo(
+            type = ProfileImageType.PRESET,
+            url = "https://example.com/image.jpg"
+        )
+    }
+
     @BeforeEach
     fun setup() {
         repository = MongoStudyGroupMemberRepository(mongoTemplate)
@@ -41,7 +49,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val groupId = ObjectId()
         val memberId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
         val member = StudyGroupMember(
             groupId = groupId,
             memberId = memberId,
@@ -66,7 +74,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val groupId = ObjectId()
         val memberId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
         val member = StudyGroupMember(
             groupId = groupId,
             memberId = memberId,
@@ -90,7 +98,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val groupId = ObjectId()
         val memberId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
         val member = StudyGroupMember(
             groupId = groupId,
             memberId = memberId,
@@ -113,7 +121,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val groupId = ObjectId()
         val memberId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
         val member = StudyGroupMember(
             id = ObjectId(),
             groupId = groupId,
@@ -135,7 +143,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val groupId = ObjectId()
         val memberId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
         val member = StudyGroupMember(
             groupId = groupId,
             memberId = memberId,
@@ -172,7 +180,7 @@ class StudyGroupMemberRepositoryTest(
     fun `findByGroupId - 그룹 ID로 모든 멤버를 찾는다`() {
         // Given
         val groupId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         val member1 = StudyGroupMember(
             groupId = groupId,
@@ -215,7 +223,7 @@ class StudyGroupMemberRepositoryTest(
     fun `countByGroupId - 그룹의 멤버 수를 반환한다`() {
         // Given
         val groupId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         repeat(3) { index ->
             val member = StudyGroupMember(
@@ -252,7 +260,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val groupId1 = ObjectId()
         val groupId2 = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         val member1 = StudyGroupMember(
             groupId = groupId1,
@@ -296,7 +304,7 @@ class StudyGroupMemberRepositoryTest(
     fun `findByGroupIdsOrderByCreatedAt - limit이 적용된다`() {
         // Given
         val groupId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         repeat(5) { index ->
             val member = StudyGroupMember(
@@ -323,7 +331,7 @@ class StudyGroupMemberRepositoryTest(
         val memberId = ObjectId()
         val groupId1 = ObjectId()
         val groupId2 = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         val member1 = StudyGroupMember(
             groupId = groupId1,
@@ -357,7 +365,7 @@ class StudyGroupMemberRepositoryTest(
         // Given
         val memberId = ObjectId()
         val groupId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         // 같은 그룹에 같은 멤버가 두 번 추가되는 경우 (실제로는 발생하지 않아야 하지만 테스트용)
         val member1 = StudyGroupMember(
@@ -397,7 +405,7 @@ class StudyGroupMemberRepositoryTest(
         val memberId1 = ObjectId()
         val memberId2 = ObjectId()
         val memberId3 = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         val member1 = StudyGroupMember(
             groupId = groupId,
@@ -452,7 +460,7 @@ class StudyGroupMemberRepositoryTest(
         val groupId1 = ObjectId()
         val groupId2 = ObjectId()
         val memberId = ObjectId()
-        val profileImage = MemberProfileImageVo("test.jpg", "https://example.com/test.jpg")
+        val profileImage = createProfileImageVo()
 
         val member = StudyGroupMember(
             groupId = groupId2, // 다른 그룹

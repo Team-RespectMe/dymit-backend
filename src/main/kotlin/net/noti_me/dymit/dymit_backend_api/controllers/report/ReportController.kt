@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.report
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.report.ReportService
 import net.noti_me.dymit.dymit_backend_api.application.report.dto.ReportCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -10,21 +11,24 @@ import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportCreateRe
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportStatusUpdateRequest
 import org.bson.types.ObjectId
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
 /**
  * ReportApi 인터페이스의 구현체
  * 신고 관련 HTTP 요청을 처리합니다.
  */
 @RestController
+@RequestMapping("/api/v1")
 class ReportController(
-
     private val reportService: ReportService
 ) : ReportApi {
 
+    @PostMapping("/reports")
+    @ResponseStatus(HttpStatus.CREATED)
     override fun createReport(
-        memberInfo: MemberInfo,
-        @Valid @Sanitize request: ReportCreateRequest
+        @LoginMember memberInfo: MemberInfo,
+        @RequestBody @Valid @Sanitize request: ReportCreateRequest
     ): ReportResponse {
         val command = ReportCommand(
             title = request.title,
@@ -36,17 +40,25 @@ class ReportController(
         return ReportResponse.from(reportDto)
     }
 
+    @PutMapping("/reports/{reportId}/status")
+    @ResponseStatus(HttpStatus.OK)
     override fun updateReportStatus(
-        memberInfo: MemberInfo,
-        reportId: String,
-        request: ReportStatusUpdateRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable reportId: String,
+        @RequestBody request: ReportStatusUpdateRequest
     ): ReportResponse {
         val reportObjectId = ObjectId(reportId)
         val reportDto = reportService.updateReportStatus(memberInfo, reportObjectId, request.status)
         return ReportResponse.from(reportDto)
     }
 
-    override fun getReportList(memberInfo: MemberInfo, cursor: String?, size: Int): ListResponse<ReportResponse> {
+    @GetMapping("/reports")
+    @ResponseStatus(HttpStatus.OK)
+    override fun getReportList(
+        @LoginMember memberInfo: MemberInfo,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "10") size: Int
+    ): ListResponse<ReportResponse> {
         val reportDtos = reportService.getReportList(memberInfo, cursor, size)
         val reportResponses = reportDtos.map { ReportResponse.from(it) }
 

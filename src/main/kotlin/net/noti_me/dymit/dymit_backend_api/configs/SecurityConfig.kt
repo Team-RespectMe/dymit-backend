@@ -17,9 +17,15 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(
+    prePostEnabled = true,
+    securedEnabled = true,
+    jsr250Enabled = true
+)
 class SecurityConfig {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -65,23 +71,24 @@ class SecurityConfig {
                 it.accessDeniedHandler(accessDeniedHandler)
             }
             .authorizeHttpRequests { it ->
-                it.requestMatchers(
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/actuator/**",
-                    "/prometheus/**",
-                    "/health-check",
-                    "/api/v1/test/**",
-                    "/api/v1/debug/**"
-                ).permitAll()
-                it.requestMatchers(HttpMethod.POST,
-                    "/api/v1/members",
-                    "/api/v1/auth/oidc/**",
-                    "/api/v1/auth/jwt/**"
-                ).permitAll()
-                it.requestMatchers("/api/v1/members/nickname-validation")
-                    .permitAll()
-                it.anyRequest().authenticated()
+                it.anyRequest().permitAll()
+//                it.requestMatchers(
+//                    "/swagger-ui/**",
+//                    "/v3/api-docs/**",
+//                    "/actuator/**",
+//                    "/prometheus/**",
+//                    "/health-check",
+//                    "/api/v1/test/**",
+//                    "/api/v1/debug/**"
+//                ).permitAll()
+//                it.requestMatchers(HttpMethod.POST,
+//                    "/api/v1/members",
+//                    "/api/v1/auth/oidc/**",
+//                    "/api/v1/auth/jwt/**"
+//                ).permitAll()
+//                it.requestMatchers("/api/v1/members/nickname-validation")
+//                    .permitAll()
+//                it.anyRequest().authenticated()
             }
 
         return http.build()

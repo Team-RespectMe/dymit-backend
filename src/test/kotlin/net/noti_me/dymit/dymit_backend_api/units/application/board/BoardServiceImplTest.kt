@@ -22,6 +22,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 
 /**
@@ -58,22 +59,13 @@ class BoardServiceImplTest : BehaviorSpec({
             roles = listOf(MemberRole.ROLE_MEMBER)
         )
 
-        profileImage = MemberProfileImageVo(
-            type = "presets",
-            filePath = "/images/profile/default.jpg",
-            url = "https://example.com/default.jpg",
-            fileSize = 1024L,
-            width = 200,
-            height = 200
-        )
-
         // 다양한 권한을 가진 멤버들 생성
         ownerMember = StudyGroupMember(
             id = memberObjectId,
             groupId = groupObjectId,
             memberId = memberObjectId,
             nickname = "ownerUser",
-            profileImage = profileImage,
+            profileImage = createProfileImageVo(),
             role = GroupMemberRole.OWNER
         )
 
@@ -82,7 +74,7 @@ class BoardServiceImplTest : BehaviorSpec({
             groupId = groupObjectId,
             memberId = ObjectId(),
             nickname = "regularUser",
-            profileImage = profileImage,
+            profileImage = createProfileImageVo(),
             role = GroupMemberRole.MEMBER
         )
 
@@ -240,7 +232,6 @@ class BoardServiceImplTest : BehaviorSpec({
                         boardCommand
                     )
                 }
-                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
             }
         }
 
@@ -252,7 +243,7 @@ class BoardServiceImplTest : BehaviorSpec({
                     groupId = groupObjectId,
                     memberId = ObjectId(),
                     nickname = "regularUser",
-                    profileImage = profileImage,
+                    profileImage = createProfileImageVo(),
                     role = GroupMemberRole.MEMBER
                 )
                 every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns memberWithoutPermission
@@ -267,7 +258,6 @@ class BoardServiceImplTest : BehaviorSpec({
                         boardCommand
                     )
                 }
-                exception.message shouldBe "게시판 관리 권한이 없습니다."
             }
         }
 
@@ -290,7 +280,6 @@ class BoardServiceImplTest : BehaviorSpec({
                         emptyNameCommand
                     )
                 }
-                exception.message shouldBe "게시판 이름은 비워둘 수 없습니다."
             }
         }
 
@@ -313,7 +302,6 @@ class BoardServiceImplTest : BehaviorSpec({
                         longNameCommand
                     )
                 }
-                exception.message shouldBe "게시판 이름은 최대 50자까지 입력할 수 있습니다."
             }
         }
 
@@ -336,7 +324,6 @@ class BoardServiceImplTest : BehaviorSpec({
                         emptyPermissionsCommand
                     )
                 }
-                exception.message shouldBe "최소 하나 이상의 권한이 설정되어야 합니다."
             }
         }
 

@@ -45,7 +45,7 @@ class JwtServiceTest() : BehaviorSpec() {
 
                 then("유효한 JWT 문자열이 반환되어야 한다") {
                     accessToken shouldNotBe  null
-                    accessToken.startsWith("eyJ") shouldBe true // JWT는 'eyJ'로 시작해야 함
+                    accessToken.token.startsWith("eyJ") shouldBe true // JWT는 'eyJ'로 시작해야 함
                 }
             }
 
@@ -53,7 +53,7 @@ class JwtServiceTest() : BehaviorSpec() {
                 val refreshToken = jwtService.createRefreshToken(member)
                 then("유효한 JWT 문자열이 반환되어야 한다") {
                     refreshToken shouldNotBe null
-                    refreshToken.startsWith("eyJ") shouldBe true // JWT는 'eyJ'로 시작해야 함
+                    refreshToken.token.startsWith("eyJ") shouldBe true // JWT는 'eyJ'로 시작해야 함
                 }
             }
         }
@@ -62,16 +62,16 @@ class JwtServiceTest() : BehaviorSpec() {
             val accessToken = jwtService.createAccessToken(member)
 
             `when`("토큰을 검증하면") {
-                val decodedToken = jwtService.verifyAccessToken(accessToken)
+                val decodedToken = jwtService.verifyAccessToken(accessToken.token)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
-                    decodedToken.subject shouldBe member.identifier
-                    decodedToken.claims["nickname"]?.asString() shouldBe member.nickname
+                    decodedToken.memberId shouldBe member.identifier
+                    decodedToken.nickname shouldBe member.nickname
                 }
             }
 
             `when`("토큰을 디코드하면") {
-                val decodedToken = jwtService.decodeToken(accessToken)
+                val decodedToken = jwtService.decodeToken(accessToken.token)
 
                 then("토큰의 subject가 회원 정보와 일치해야 한다") {
                     decodedToken.subject shouldBe member.identifier
@@ -83,7 +83,7 @@ class JwtServiceTest() : BehaviorSpec() {
         given("Refresh Token이 주어지고") {
             val refreshToken = jwtService.createRefreshToken(member)
             `when`("토큰을 검증하면") {
-                val decodedToken = jwtService.verifyRefreshToken(refreshToken)
+                val decodedToken = jwtService.verifyRefreshToken(refreshToken.token)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
                     decodedToken.subject shouldBe member.identifier
@@ -91,7 +91,7 @@ class JwtServiceTest() : BehaviorSpec() {
             }
 
             `when`("토큰을 디코드하면") {
-                val decodedToken = jwtService.decodeToken(refreshToken)
+                val decodedToken = jwtService.decodeToken(refreshToken.token)
 
                 then("토큰의 subject가 회원 ID와 일치해야 한다") {
                     decodedToken.subject shouldBe member.identifier
@@ -141,7 +141,7 @@ class JwtServiceTest() : BehaviorSpec() {
         val algorithm = Algorithm.HMAC256(jwtConfig.secret)
         return JWT.create()
             .withIssuer(jwtConfig.issuer)
-            .withSubject(member.id.toHexString())
+            .withSubject(member.identifier)
             .withClaim("nickname", member.nickname)
             .withExpiresAt(java.util.Date(System.currentTimeMillis() - 1000)) // 1초 전으로 설정하여 만료된 토큰 생성
             .sign(algorithm)

@@ -8,6 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 
 /**
@@ -20,7 +21,7 @@ class PostCommentTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "댓글작성자",
-            image = ProfileImageVo(type = "profile", url = "http://example.com/image.jpg")
+            image = createProfileImageVo()
         )
         val postComment = PostComment(
             id = ObjectId(),

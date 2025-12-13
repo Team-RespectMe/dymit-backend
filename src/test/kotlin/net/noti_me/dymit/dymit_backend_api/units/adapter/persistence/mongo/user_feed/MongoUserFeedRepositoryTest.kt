@@ -12,6 +12,8 @@ import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.user_feed.
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
+import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
@@ -56,7 +58,6 @@ class MongoUserFeedRepositoryTest(
         savedUserFeed.shouldNotBeNull()
         savedUserFeed.id.shouldNotBeNull()
         savedUserFeed.memberId shouldBe testMemberId
-        savedUserFeed.message shouldBe "테스트 메시지"
         savedUserFeed.isRead shouldBe false
     }
 
@@ -83,13 +84,12 @@ class MongoUserFeedRepositoryTest(
         val savedUserFeed = mongoTemplate.save(userFeed)
 
         // When
-        val foundUserFeed = mongoUserFeedRepository.findById(savedUserFeed.id.toHexString())
+        val foundUserFeed = mongoUserFeedRepository.findById(savedUserFeed.identifier)
 
         // Then
         foundUserFeed.shouldNotBeNull()
         foundUserFeed.id shouldBe savedUserFeed.id
         foundUserFeed.memberId shouldBe testMemberId
-        foundUserFeed.message shouldBe "테스트 메시지"
     }
 
     @Test
@@ -153,7 +153,7 @@ class MongoUserFeedRepositoryTest(
         // When
         val foundFeeds = mongoUserFeedRepository.findByMemberIdOrderByCreatedAtDesc(
             testMemberId.toHexString(),
-            cursorFeed.id.toHexString(),
+            cursorFeed.identifier,
             10L
         )
 
@@ -161,7 +161,7 @@ class MongoUserFeedRepositoryTest(
         foundFeeds.shouldNotBeNull()
         foundFeeds.forEach {
             it.memberId shouldBe testMemberId
-            (it.id.toHexString() <= cursorFeed.id.toHexString()) shouldBe true
+            (it.identifier <= cursorFeed.identifier) shouldBe true
         }
     }
 
@@ -256,11 +256,11 @@ class MongoUserFeedRepositoryTest(
         val savedUserFeed = mongoTemplate.save(userFeed)
 
         // When
-        val isDeleted = mongoUserFeedRepository.deleteById(savedUserFeed.id.toHexString())
+        val isDeleted = mongoUserFeedRepository.deleteById(savedUserFeed.identifier)
 
         // Then
         isDeleted shouldBe true
-        val foundUserFeed = mongoTemplate.findById(savedUserFeed.id, UserFeed::class.java)
+        val foundUserFeed = mongoTemplate.findById(savedUserFeed.identifier, UserFeed::class.java)
         foundUserFeed.shouldBeNull()
     }
 
@@ -293,14 +293,19 @@ class MongoUserFeedRepositoryTest(
     ): UserFeed {
         return UserFeed(
             memberId = memberId,
-            message = message,
+            messages = listOf(
+                FeedMessage(
+                    text = message
+                )
+            ),
             associates = listOf(
                 AssociatedResource(
                     type = ResourceType.MEMBER,
                     resourceId = memberId.toHexString()
                 )
             ),
-            isRead = false
+            iconType = IconType.CHECK,
+            eventName = "Sample Event"
         )
     }
 }

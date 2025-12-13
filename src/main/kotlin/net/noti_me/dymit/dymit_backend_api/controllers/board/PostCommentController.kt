@@ -3,12 +3,14 @@ package net.noti_me.dymit.dymit_backend_api.controllers.board
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.board.CommentService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.CommentCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.CommentCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.CommentCommandResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.CommentListItem
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -16,12 +18,15 @@ class PostCommentController(
     private val commentService: CommentService
 ): PostCommentApi {
 
+    @PostMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
     override fun createComment(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String,
-        @Valid @Sanitize request: CommentCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String,
+        @RequestBody @Valid @Sanitize request: CommentCommandRequest
+
     ): CommentCommandResponse {
         val command = CommentCommand(
             groupId = groupId,
@@ -34,13 +39,15 @@ class PostCommentController(
         return CommentCommandResponse.from(commentDto)
     }
 
+    @PutMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
     override fun updateComment(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String,
-        commentId: String,
-        @Valid @Sanitize request: CommentCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String,
+        @PathVariable commentId: String,
+        @RequestBody @Valid @Sanitize request: CommentCommandRequest
     ): CommentCommandResponse {
         val command = CommentCommand(
             groupId = groupId,
@@ -53,23 +60,28 @@ class PostCommentController(
         return CommentCommandResponse.from(commentDto)
     }
 
+    @DeleteMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun deleteComment(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String,
-        commentId: String
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String,
+        @PathVariable commentId: String
     ) {
         commentService.removeComment(memberInfo, commentId)
     }
 
+    @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments")
+    @ResponseStatus(HttpStatus.OK)
     override fun getPostComments(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String,
-        cursor: String?,
-        size: Int
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "40") size: Int
+
     ): ListResponse<CommentListItem> {
         val commentDtos = commentService.getPostComments(
             memberInfo = memberInfo,

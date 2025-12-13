@@ -2,6 +2,8 @@ package net.noti_me.dymit.dymit_backend_api.common.security.jwt
 
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.JwtClaims
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
 
 /**
  * JwtAuthentication 인증된 사용자 정보를 나타낸다.
@@ -13,7 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 class MemberInfo(
     val memberId: String,
     val nickname: String,
-    val roles: List<MemberRole>
+    val roles: List<MemberRole>,
 ) {
 
     companion object {
@@ -31,5 +33,9 @@ class MemberInfo(
                 }
             )
         }
+    }
+
+    override fun toString(): String {
+        return "MemberInfo(memberId='$memberId', nickname='$nickname', roles=$roles)"
     }
 }

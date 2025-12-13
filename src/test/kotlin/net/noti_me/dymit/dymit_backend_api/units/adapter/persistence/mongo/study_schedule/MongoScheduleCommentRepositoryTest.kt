@@ -9,6 +9,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.study_schedule.MongoScheduleCommentRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleComment
@@ -194,7 +195,7 @@ class MongoScheduleCommentRepositoryTest(
             id = memberId,
             nickname = "테스트 작성자",
             image = ProfileImageVo(
-                type = "URL",
+                type = ProfileImageType.PRESET,
                 url = "https://example.com/profile.jpg"
             )
         )

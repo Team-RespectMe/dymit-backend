@@ -120,7 +120,7 @@ class MongoReportRepositoryTest(
         val savedReport = mongoTemplate.save(report)
 
         // When
-        val foundReport = mongoReportRepository.findById(savedReport.id)
+        val foundReport = mongoReportRepository.findById(savedReport.id!!)
 
         // Then
         foundReport.shouldNotBeNull()
@@ -195,7 +195,7 @@ class MongoReportRepositoryTest(
         firstPage[2].content shouldBe "내용 3"
 
         // When - 두 번째 페이지 조회 (커서 사용)
-        val cursor = firstPage.last().id.toHexString()
+        val cursor = firstPage.last().id!!.toHexString()
         val secondPage = mongoReportRepository.findAllOrderByCreatedAtDesc(cursor, 3)
 
         // Then

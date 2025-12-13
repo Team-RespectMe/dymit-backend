@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.supports
 
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import org.bson.types.ObjectId
 
@@ -22,12 +23,14 @@ fun createMemberEntity(
     nickname: String = "nickname",
     oidcIdentities: List<OidcIdentity> = listOf(
         createOidcIdentity()
-    )
+    ),
+    roles: List<MemberRole> = listOf(MemberRole.ROLE_MEMBER)
 ) : Member {
     return Member(
         id = id,
         nickname = nickname,
         oidcIdentities = oidcIdentities.toMutableSet(),
-        profileImage = MemberProfileImageVo()
+        profileImage = MemberProfileImageVo(),
+        roles = roles.toMutableSet()
     )
 }

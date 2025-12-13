@@ -49,7 +49,8 @@ class JwtService(
             .withIssuedAt(now)
             .withExpiresAt(expiresAt)
             .withClaim("nickname", member.nickname)
-            .withArrayClaim("roles", arrayOf(MemberRole.ROLE_MEMBER.name))
+//            .withArrayClaim("roles", arrayOf(MemberRole.ROLE_MEMBER.name))
+            .withArrayClaim("roles", member.roles.map{it.name}.toTypedArray() )
             .sign(algorithm)
 
         return TokenInfo(token, expiresAt)

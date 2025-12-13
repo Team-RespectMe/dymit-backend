@@ -2,60 +2,94 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.StudyScheduleService
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleParticipantResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleCommandRequest
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleCommandResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleListItem
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleResponse
-import org.springframework.web.bind.annotation.RestController
+import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.*
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping("/api/v1/study-groups/")
 class StudyScheduleController(
     private val scheduleService: StudyScheduleService
 ) : StudyScheduleApi {
 
+    @PostMapping("{groupId}/schedules")
+    @ResponseStatus(HttpStatus.CREATED)
     override fun createSchedule(
-        memberInfo: MemberInfo,
-        groupId: String,
-        @Valid @Sanitize request: StudyScheduleCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid @Sanitize request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse {
         val dto = scheduleService.createSchedule(memberInfo, groupId, request.toCreateCommand())
         return StudyScheduleCommandResponse.from(dto)
     }
 
+    @PutMapping("{groupId}/schedules/{scheduleId}")
+    @ResponseStatus(HttpStatus.OK)
     override fun updateSchedule(
-        memberInfo: MemberInfo,
-        groupId: String,
-        scheduleId: String,
-        @Valid @Sanitize command: StudyScheduleCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String,
+        @RequestBody @Valid @Sanitize request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse {
-        val dto = scheduleService.updateSchedule(memberInfo, groupId, scheduleId, command.toUpdateCommand())
+        val dto = scheduleService.updateSchedule(memberInfo, groupId, scheduleId, request.toUpdateCommand())
         return StudyScheduleCommandResponse.from(dto)
     }
 
-    override fun removeSchedule(memberInfo: MemberInfo, groupId: String, scheduleId: String) {
+    @DeleteMapping("{groupId}/schedules/{scheduleId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    override fun removeSchedule(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String
+    ) {
         scheduleService.removeSchedule(memberInfo, groupId, scheduleId)
     }
 
-    override fun joinSchedule(memberInfo: MemberInfo, groupId: String, scheduleId: String): ScheduleParticipantResponse {
-        val participant = scheduleService.joinSchedule(memberInfo, groupId, scheduleId)
-        return ScheduleParticipantResponse.from(participant)
+    @GetMapping("/{groupId}/schedules")
+    @ResponseStatus(HttpStatus.OK)
+    override fun getGroupSchedules(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): ListResponse<StudyScheduleListItem> {
+        val response = scheduleService.getGroupSchedules(memberInfo, groupId)
+        return ListResponse.from(response.map { StudyScheduleListItem.from(it) })
     }
 
-    override fun leaveSchedule(memberInfo: MemberInfo, groupId: String, scheduleId: String) {
-        scheduleService.leaveSchedule(memberInfo, groupId, scheduleId)
-    }
-
-    override fun getScheduleDetail(memberInfo: MemberInfo, groupId: String, scheduleId: String): StudyScheduleResponse {
+    @GetMapping("{groupId}/schedules/{scheduleId}")
+    @ResponseStatus(HttpStatus.OK)
+    override fun getScheduleDetail(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String
+    ): StudyScheduleResponse {
         val dto = scheduleService.getScheduleDetail(memberInfo, groupId, scheduleId)
         return StudyScheduleResponse.from(dto)
     }
 
-    override fun getGroupSchedules(memberInfo: MemberInfo, groupId: String): ListResponse<StudyScheduleListItem> {
-        val response = scheduleService.getGroupSchedules(memberInfo, groupId)
-        return ListResponse.from(response.map { StudyScheduleListItem.from(it) })
+    @PostMapping("{groupId}/schedules/{scheduleId}/participants")
+    @ResponseStatus(HttpStatus.CREATED)
+    override fun joinSchedule(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String
+    ): ScheduleParticipantResponse {
+        val participant = scheduleService.joinSchedule(memberInfo, groupId, scheduleId)
+        return ScheduleParticipantResponse.from(participant)
     }
+
+    @DeleteMapping("{groupId}/schedules/{scheduleId}/participants")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    override fun leaveSchedule(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String
+    ) {
+        scheduleService.leaveSchedule(memberInfo, groupId, scheduleId)
+    }
+
+
 }

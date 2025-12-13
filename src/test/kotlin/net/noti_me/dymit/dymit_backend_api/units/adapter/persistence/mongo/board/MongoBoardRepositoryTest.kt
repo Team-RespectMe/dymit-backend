@@ -173,7 +173,7 @@ class MongoBoardRepositoryTest(
         deleteResult shouldBe true
 
         // Verify deletion
-        val deletedBoard = mongoBoardRepository.findById(boardToDelete.id)
+        val deletedBoard = mongoBoardRepository.findById(boardToDelete.id!!)
         deletedBoard.shouldBeNull()
     }
 

@@ -9,6 +9,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.board.MongoPostCommentRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
@@ -131,7 +132,7 @@ class MongoPostCommentRepositoryTest(
         deleteResult shouldBe true
 
         // Verify deletion
-        val foundComment = mongoTemplate.findById(existingComment!!.id, PostComment::class.java)
+        val foundComment = mongoTemplate.findById(existingComment!!.id!!, PostComment::class.java)
         foundComment.shouldBeNull()
     }
 
@@ -159,7 +160,7 @@ class MongoPostCommentRepositoryTest(
         deleteResult shouldBe true
 
         // Verify deletion
-        val foundComment = mongoTemplate.findById(comment.id, PostComment::class.java)
+        val foundComment = mongoTemplate.findById(comment.id!!, PostComment::class.java)
         foundComment.shouldBeNull()
     }
 
@@ -184,7 +185,7 @@ class MongoPostCommentRepositoryTest(
             id = ObjectId(),
             nickname = "테스트 작성자",
             image = ProfileImageVo(
-                type = "URL",
+                type = ProfileImageType.PRESET,
                 url = "https://example.com/profile.jpg"
             )
         )

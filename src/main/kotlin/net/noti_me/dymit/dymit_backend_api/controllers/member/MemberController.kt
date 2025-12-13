@@ -1,28 +1,21 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
 import jakarta.validation.Valid
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeviceTokenUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.ChangeMemberImageUseCase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberQueryUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberDeleteUsecase
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.UpdateNicknameUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.*
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
+import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import org.springframework.web.bind.annotation.*
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberProfileResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberNicknameUpdateRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.member.MemberApi
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.DeviceTokenCommandRequest
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateRequest
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.MemberCreateResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.ProfileImageUploadRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.*
 import org.slf4j.LoggerFactory
-import org.springframework.validation.annotation.Validated
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.*
+import javax.annotation.security.PermitAll
 
 @RestController
-@Validated
-//@RequestMapping("/api/v1/members")
+@RequestMapping("/api/v1/members")
 class MemberController(
     private val memberCreateUsecase: MemberCreateUsecase,
     private val memberQueryUsecase: MemberQueryUsecase,
@@ -34,21 +27,23 @@ class MemberController(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-//    @GetMapping("/{memberId}")
+    @GetMapping("/{memberId}")
+    @ResponseStatus(HttpStatus.OK)
     override fun getMemberProfile(
-        loginMember: MemberInfo,
-        memberId: String
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
             memberQueryUsecase.getMemberById(loginMember, memberId)
         )
     }
 
-//    @PatchMapping("/{memberId}/nickname")
+    @PatchMapping("/{memberId}/nickname")
+    @ResponseStatus(HttpStatus.OK)
     override fun patchNickname(
-        loginMember: MemberInfo,
-        memberId: String,
-        @Valid @Sanitize request: MemberNicknameUpdateRequest)
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid @Sanitize request: MemberNicknameUpdateRequest)
     : MemberProfileResponse {
         val memberDto = memberUpdateNicknameUsecase.updateNickname(
             loginMember,
@@ -58,9 +53,10 @@ class MemberController(
         return MemberProfileResponse.from(memberDto)
     }
 
-//    @PostMapping
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     override fun createMember(
-        @Valid @Sanitize request: MemberCreateRequest
+        @RequestBody @Valid @Sanitize request: MemberCreateRequest
     ): MemberCreateResponse {
         logger.debug("Creating member with request: $request")
         val result = memberCreateUsecase.createMember(
@@ -69,15 +65,22 @@ class MemberController(
         return MemberCreateResponse.from(result)
     }
 
-    override fun checkNickname(nickname: String) {
+    @PermitAll
+    @GetMapping("/nickname-validation")
+    @ResponseStatus(HttpStatus.OK)
+    override fun checkNickname(
+        @RequestParam @Valid @Nickname nickname: String
+    ) {
         logger.debug("checkNickname called with nickname: $nickname")
         return memberCreateUsecase.checkNickname(nickname)
     }
 
+    @PutMapping("/{memberId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @ResponseStatus(HttpStatus.OK)
     override fun uploadProfileImage(
-        loginMember: MemberInfo,
-        memberId: String,
-        @Valid @Sanitize request: ProfileImageUploadRequest
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @ModelAttribute @Valid @Sanitize request: ProfileImageUploadRequest
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
             memberImageUploadUsecase.changeProfileImage(
@@ -87,21 +90,38 @@ class MemberController(
         )
     }
 
-    override fun deleteMember(loginMember: MemberInfo, memberId: String) {
+    @DeleteMapping("/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    override fun deleteMember(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String
+    ) {
         return memberDeleteUsecase.deleteMember(
             loginMember = loginMember,
             memberId = memberId
         )
     }
 
-    override fun registerDeviceToken(loginMember: MemberInfo, memberId: String, request: DeviceTokenCommandRequest) {
+    @PostMapping("/{memberId}/device-tokens")
+    @ResponseStatus(HttpStatus.CREATED)
+    override fun registerDeviceToken(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid request: DeviceTokenCommandRequest
+    ) {
         deviceTokenUsecase.registerDeviceToken(
             member = loginMember,
             deviceToken = request.deviceToken
         )
     }
 
-    override fun unregisterDeviceToken(loginMember: MemberInfo, memberId: String, request: DeviceTokenCommandRequest) {
+    @DeleteMapping("/{memberId}/device-tokens" )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    override fun unregisterDeviceToken(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid request: DeviceTokenCommandRequest
+    ) {
         deviceTokenUsecase.unregisterDeviceToken(
             member = loginMember,
             deviceToken = request.deviceToken

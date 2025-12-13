@@ -4,24 +4,29 @@ import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.ScheduleCommentService
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.CreateScheduleCommentCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.UpdateScheduleCommentCommand
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleCommentCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleCommentResponse
 import org.bson.types.ObjectId
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping("/api/v1/study-groups")
 class ScheduleCommentController(
     private val scheduleCommentService: ScheduleCommentService
 ) : ScheduleCommentApi {
 
+    @PostMapping("/{groupId}/schedules/{scheduleId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
     override fun createComment(
-        memberInfo: MemberInfo,
-        groupId: String,
-        scheduleId: String,
-        @Valid @Sanitize request: ScheduleCommentCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String,
+        @RequestBody @Valid @Sanitize request: ScheduleCommentCommandRequest
     ): ScheduleCommentResponse {
         val command = CreateScheduleCommentCommand(
             groupId = ObjectId(groupId),
@@ -33,12 +38,14 @@ class ScheduleCommentController(
         return ScheduleCommentResponse.from(dto)
     }
 
+    @PutMapping("/{groupId}/schedules/{scheduleId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
     override fun updateComment(
-        memberInfo: MemberInfo,
-        groupId: String,
-        scheduleId: String,
-        commentId: String,
-        @Valid @Sanitize request: ScheduleCommentCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String,
+        @PathVariable commentId: String,
+        @RequestBody @Valid @Sanitize request: ScheduleCommentCommandRequest
     ): ScheduleCommentResponse {
         val command = UpdateScheduleCommentCommand(
             groupId = ObjectId(groupId),
@@ -51,21 +58,25 @@ class ScheduleCommentController(
         return ScheduleCommentResponse.from(dto)
     }
 
+    @DeleteMapping("/{groupId}/schedules/{scheduleId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun deleteComment(
-        memberInfo: MemberInfo,
-        groupId: String,
-        scheduleId: String,
-        commentId: String
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String,
+        @PathVariable commentId: String
     ) {
         scheduleCommentService.deleteComment(memberInfo, commentId)
     }
 
+    @GetMapping("/{groupId}/schedules/{scheduleId}/comments")
+    @ResponseStatus(HttpStatus.OK)
     override fun getScheduleComments(
-        memberInfo: MemberInfo,
-        groupId: String,
-        scheduleId: String,
-        cursor: String?,
-        size: Int
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable scheduleId: String,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") size: Int
     ): ListResponse<ScheduleCommentResponse> {
         // size+1로 조회하여 다음 페이지 존재 여부 확인
         val comments = scheduleCommentService.getScheduleComments(
@@ -74,11 +85,7 @@ class ScheduleCommentController(
             cursor = cursor,
             size = size + 1
         )
-
-        // ScheduleCommentDto를 ScheduleCommentResponse로 변환
         val responseComments = comments.map { ScheduleCommentResponse.from(it) }
-
-        // ListResponse.of() 메서드를 사용하여 커서 페이지네이션 적용
         return ListResponse.of(
             size = size,
             items = responseComments,

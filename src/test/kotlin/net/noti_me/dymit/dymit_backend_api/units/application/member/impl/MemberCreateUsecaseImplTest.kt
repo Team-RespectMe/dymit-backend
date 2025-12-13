@@ -8,6 +8,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.LoginResult
+import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.AuthServiceFacade
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.impl.MemberCreateUsecaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
@@ -32,7 +33,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
 
     private val providers = listOf(authenticationProvider)
 
-    private val jwtService = mockk<JwtAuthService>()
+    private val authServiceFacade = mockk<AuthServiceFacade>()
 
     private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
 
@@ -40,7 +41,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
         saveMemberPort = saveMemberPort,
         loadMemberPort = loadMemberPort,
         oidcAuthenticationProviders = providers,
-        jwtAuthService = jwtService,
+        authService = authServiceFacade,
         eventPublisher = eventPublisher
     )
 
@@ -100,7 +101,7 @@ internal class MemberCreateUsecaseImplTest(): BehaviorSpec() {
                             OidcIdentity(provider = "GOOGLE", subject = commonOidcIdTokenPayload.sub)
                         )
                     )
-                    every { jwtService.loginByOidcToken(any(), any()) } returns LoginResult(
+                    every { authServiceFacade.loginByOidcToken(any(), any()) } returns LoginResult(
                         memberId = "memberId",
                         accessToken = "eyJ...",
                         refreshToken = "eyJ..."

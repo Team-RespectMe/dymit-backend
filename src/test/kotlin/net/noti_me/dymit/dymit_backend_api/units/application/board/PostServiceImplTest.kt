@@ -27,7 +27,9 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepositor
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
 import java.time.LocalDateTime
 
 /**
@@ -42,12 +44,14 @@ class PostServiceImplTest : BehaviorSpec({
     val saveGroupPort = mockk<SaveStudyGroupPort>()
     val boardRepository = mockk<BoardRepository>()
     val groupMemberRepository = mockk<StudyGroupMemberRepository>()
+    val eventPublisher = mockk< ApplicationEventPublisher>()
     val postService = PostServiceImpl(
         postRepository,
         loadGroupPort,
         saveGroupPort,
         boardRepository,
-        groupMemberRepository
+        groupMemberRepository,
+        eventPublisher
     )
 
     // 테스트용 데이터
@@ -71,14 +75,7 @@ class PostServiceImplTest : BehaviorSpec({
             groupId = groupObjectId,
             memberId = memberId,
             nickname = "testUser",
-            profileImage = MemberProfileImageVo(
-                type = "presets",
-                filePath = "/images/profile/default.jpg",
-                url = "https://example.com/default.jpg",
-                fileSize = 1024L,
-                width = 200,
-                height = 200
-            ),
+            profileImage = createProfileImageVo(),
             role = role
         )
     }
@@ -544,10 +541,12 @@ class PostServiceImplTest : BehaviorSpec({
                 every { postRepository.findByBoardId(boardObjectId.toHexString()) } returns posts
 
                 // When
-                val result = postService.getBoardPosts(
+                val result = postService.getBoardPostsWithCursor(
                     memberInfo,
                     groupObjectId.toHexString(),
-                    boardObjectId.toHexString()
+                    boardObjectId.toHexString(),
+                    cursor = null,
+                    size = 10
                 )
 
                 // Then
@@ -565,10 +564,12 @@ class PostServiceImplTest : BehaviorSpec({
 
                 // When & Then
                 val exception = shouldThrow<NotFoundException> {
-                    postService.getBoardPosts(
+                    postService.getBoardPostsWithCursor(
                         memberInfo,
                         groupObjectId.toHexString(),
-                        boardObjectId.toHexString()
+                        boardObjectId.toHexString(),
+                        null,
+                        10
                     )
                 }
                 exception.message shouldBe "해당 게시판을 찾을 수 없습니다."
@@ -584,10 +585,12 @@ class PostServiceImplTest : BehaviorSpec({
 
                 // When & Then
                 val exception = shouldThrow<NotFoundException> {
-                    postService.getBoardPosts(
+                    postService.getBoardPostsWithCursor(
                         memberInfo,
                         groupObjectId.toHexString(),
-                        boardObjectId.toHexString()
+                        boardObjectId.toHexString(),
+                        null,
+                        10
                     )
                 }
                 exception.message shouldBe "해당 그룹의 멤버가 아닙니다."
@@ -604,10 +607,12 @@ class PostServiceImplTest : BehaviorSpec({
 
                 // When & Then
                 val exception = shouldThrow<NotFoundException> {
-                    postService.getBoardPosts(
+                    postService.getBoardPostsWithCursor(
                         memberInfo,
                         groupObjectId.toHexString(),
-                        boardObjectId.toHexString()
+                        boardObjectId.toHexString(),
+                        null,
+                        10
                     )
                 }
                 exception.message shouldBe "해당 게시판에 글 조회 권한이 없습니다."

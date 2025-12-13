@@ -30,6 +30,7 @@ class Member(
     lastAccessAt: LocalDateTime = LocalDateTime.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
     refreshTokens: MutableSet<RefreshToken> = mutableSetOf(),
+    roles: MutableSet<MemberRole> = mutableSetOf(MemberRole.ROLE_MEMBER),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false
@@ -53,6 +54,8 @@ class Member(
 
     var lastAccessAt: LocalDateTime = lastAccessAt
         private set
+
+    var roles: MutableSet<MemberRole> = roles
 
     /**
      * 닉네임 변경 메서드
@@ -153,6 +156,18 @@ class Member(
         )
         super.markAsDeleted()
         registerEvent(MemberDeletedEvent(this))
+    }
+
+    fun assignRole(role: MemberRole) {
+        this.roles.add(role)
+    }
+
+    fun revokeRole(role: MemberRole) {
+        this.roles.remove(role)
+    }
+
+    fun isAdmin(): Boolean {
+        return roles.contains(MemberRole.ROLE_ADMIN)
     }
 
     override fun equals(other: Any?): Boolean {

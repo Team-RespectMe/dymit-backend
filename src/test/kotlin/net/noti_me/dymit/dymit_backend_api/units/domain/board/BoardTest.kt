@@ -15,6 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 
 /**
@@ -25,17 +26,7 @@ internal class BoardTest : BehaviorSpec({
     val boardId = ObjectId()
     val groupId = ObjectId()
     val otherGroupId = ObjectId()
-
-    // 테스트용 프로필 이미지
-    val testProfileImage = MemberProfileImageVo(
-        type = "presets",
-        filePath = "/images/profile/test.jpg",
-        url = "https://example.com/test.jpg",
-        fileSize = 1024L,
-        width = 200,
-        height = 200
-    )
-
+    val testProfileImage = createProfileImageVo()
     // 다양한 역할의 멤버들 생성
     val ownerMember = StudyGroupMember(
         id = ObjectId(),

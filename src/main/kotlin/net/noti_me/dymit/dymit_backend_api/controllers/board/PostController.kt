@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.board
 
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.board.PostService
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -9,18 +10,22 @@ import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostCommandRequ
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostCommandResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostDetailResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostListItem
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping("/api/v1")
 class PostController(
     private val postService: PostService
 ) : PostApi {
 
+    @PostMapping("/study-groups/{groupId}/boards/{boardId}/posts")
+    @ResponseStatus(HttpStatus.CREATED)
     override fun createPost(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        @Valid @Sanitize request: PostCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @RequestBody @Valid @Sanitize request: PostCommandRequest
     ): PostCommandResponse {
         return PostCommandResponse.from(
             postService.createPost(
@@ -30,12 +35,14 @@ class PostController(
         )
     }
 
+    @PutMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
+    @ResponseStatus(HttpStatus.OK)
     override fun updatePost(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String,
-        @Valid @Sanitize request: PostCommandRequest
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String,
+        @RequestBody @Valid @Sanitize request: PostCommandRequest
     ): PostCommandResponse {
         return PostCommandResponse.from(
             postService.updatePost(
@@ -46,11 +53,13 @@ class PostController(
         )
     }
 
+    @DeleteMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun deletePost(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String
     ) {
         postService.removePost(
             memberInfo = memberInfo,
@@ -60,12 +69,14 @@ class PostController(
         )
     }
 
+    @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts")
+    @ResponseStatus(HttpStatus.OK)
     override fun getBoardPosts(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        cursor: String?,
-        size: Int
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @RequestParam cursor: String?,
+        @RequestParam(defaultValue = "20") size: Int
     ): ListResponse<PostListItem> {
         val postDtos = postService.getBoardPostsWithCursor(
             memberInfo = memberInfo,
@@ -87,11 +98,13 @@ class PostController(
         )
     }
 
+    @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
+    @ResponseStatus(HttpStatus.OK)
     override fun getPost(
-        memberInfo: MemberInfo,
-        groupId: String,
-        boardId: String,
-        postId: String
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable boardId: String,
+        @PathVariable postId: String
     ): PostDetailResponse {
         return PostDetailResponse.from(postService.getPost(
             memberInfo = memberInfo,

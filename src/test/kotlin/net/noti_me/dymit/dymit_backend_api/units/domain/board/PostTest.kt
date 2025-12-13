@@ -5,9 +5,11 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 
 /**
@@ -20,7 +22,7 @@ class PostTest : BehaviorSpec({
         val writer = Writer(
             id = writerId,
             nickname = "테스트작성자",
-            image = ProfileImageVo(type = "profile", url = "http://example.com/image.jpg")
+            image = createProfileImageVo()
         )
         val post = Post(
             id = ObjectId(),
@@ -148,7 +150,7 @@ class PostTest : BehaviorSpec({
                 val newWriter = Writer(
                     id = writerId,
                     nickname = "수정된 닉네임",
-                    image = ProfileImageVo(type = "profile", url = "http://example.com/new-image.jpg")
+                    image = createProfileImageVo()
                 )
 
                 shouldThrow<ForbiddenException> {
@@ -161,7 +163,7 @@ class PostTest : BehaviorSpec({
                 val differentWriter = Writer(
                     id = differentUserId,
                     nickname = "다른 사용자",
-                    image = ProfileImageVo(type = "profile", url = "http://example.com/other-image.jpg")
+                    image = createProfileImageVo()
                 )
 
                 shouldThrow<IllegalArgumentException> {
@@ -173,13 +175,13 @@ class PostTest : BehaviorSpec({
                 val updatedWriter = Writer(
                     id = writerId,
                     nickname = "수정된 닉네임",
-                    image = ProfileImageVo(type = "updated", url = "http://example.com/updated-image.jpg")
+                    image = createProfileImageVo()
                 )
 
                 post.updateWriterInfo(writerId.toHexString(), updatedWriter)
 
                 post.writer.nickname shouldBe "수정된 닉네임"
-                post.writer.image.type shouldBe "updated"
+                post.writer.image.type shouldBe ProfileImageType.PRESET
                 post.writer.image.url shouldBe "http://example.com/updated-image.jpg"
             }
         }

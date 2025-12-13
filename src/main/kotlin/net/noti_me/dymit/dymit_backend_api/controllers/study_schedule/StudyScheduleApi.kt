@@ -1,31 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.responses.*
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.Valid
-import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleParticipantResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleCommandRequest
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleCommandResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleListItem
-import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleResponse
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
+import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.*
 
 @Tag(name = "스터디 일정 API", description = "스터디 그룹 일정 관리 API")
 @SecurityRequirement(name = "bearer-jwt")
-@RequestMapping("/api/v1/study-groups/")
 interface StudyScheduleApi {
 
 
@@ -38,25 +22,14 @@ interface StudyScheduleApi {
      * @return 생성된 스터디 일정 정보
      */
     @Operation(
+        method = "POST",
         summary = "스터디 그룹 일정 생성",
         description = "로그인한 멤버가 스터디 그룹의 일정을 생성합니다."
     )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "201",
-                description = "스터디 그룹 일정이 성공적으로 생성되었습니다."
-            ),
-        ]
-    )
-    @PostMapping("{groupId}/schedules")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponse(responseCode = "201", description = "스터디 그룹 일정이 성공적으로 생성되었습니다.")
     fun createSchedule(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String,
-        @RequestBody @Valid
         request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse
 
@@ -69,28 +42,19 @@ interface StudyScheduleApi {
      * @param command 스터디 일정 업데이트 요청
      */
     @Operation(
+        method = "PUT",
         summary = "스터디 그룹 일정 업데이트",
         description = "로그인한 멤버가 스터디 그룹의 일정을 업데이트합니다."
     )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "스터디 그룹 일정이 성공적으로 업데이트되었습니다."
-            ),
-        ]
+    @ApiResponse(
+        responseCode = "200",
+        description = "스터디 그룹 일정이 성공적으로 업데이트되었습니다."
     )
-    @PutMapping("{groupId}/schedules/{scheduleId}")
-    @ResponseStatus(HttpStatus.OK)
     fun updateSchedule(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String,
-        @PathVariable
         scheduleId: String,
-        @RequestBody @Valid
-        command: StudyScheduleCommandRequest
+        request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse
 
     /**
@@ -100,28 +64,13 @@ interface StudyScheduleApi {
      * @param groupId 스터디 그룹 ID
      * @param scheduleId 삭제할 스터디 일정 ID
      */
-    @Operation(
-        summary = "스터디 그룹 일정 삭제",
-        description = "로그인한 멤버가 스터디 그룹의 일정을 삭제합니다."
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "204",
-                description = "스터디 그룹 일정이 성공적으로 삭제되었습니다."
-            ),
-        ]
-    )
-    @DeleteMapping("{groupId}/schedules/{scheduleId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "스터디 그룹 일정 삭제", description = "로그인한 멤버가 스터디 그룹의 일정을 삭제합니다.")
+    @ApiResponse(responseCode = "204", description = "스터디 그룹 일정이 성공적으로 삭제되었습니다.")
     fun removeSchedule(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String,
-        @PathVariable
         scheduleId: String
-    ): Unit
+    )
 
     /**
      * 스터디 그룹의 모든 일정을 조회합니다.
@@ -130,24 +79,10 @@ interface StudyScheduleApi {
      * @param groupId 스터디 그룹 ID
      * @return 스터디 그룹의 모든 일정 목록
      */
-    @Operation(
-        summary = "스터디 그룹 일정 목록 조회",
-        description = "로그인한 멤버가 스터디 그룹의 모든 일정을 조회합니다."
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "스터디 그룹의 모든 일정 목록이 성공적으로 조회되었습니다."
-            ),
-        ]
-    )
-    @GetMapping("/{groupId}/schedules")
-    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "스터디 그룹 일정 목록 조회", description = "로그인한 멤버가 스터디 그룹의 모든 일정을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "스터디 그룹의 모든 일정 목록이 성공적으로 조회되었습니다.")
     fun getGroupSchedules(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String
     ): ListResponse<StudyScheduleListItem>
 
@@ -159,26 +94,11 @@ interface StudyScheduleApi {
      * @param scheduleId 조회할 스터디 일정 ID
      * @return 스터디 그룹 일정의 상세 정보
      */
-    @Operation(
-        summary = "스터디 그룹 일정 상세 조회",
-        description = "로그인한 멤버가 스터디 그룹 일정의 상세 정보를 조회합니다."
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "스터디 그룹 일정의 상세 정보가 성공적으로 조회되었습니다."
-            ),
-        ]
-    )
-    @GetMapping("{groupId}/schedules/{scheduleId}")
-    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "스터디 그룹 일정 상세 조회", description = "로그인한 멤버가 스터디 그룹 일정의 상세 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "스터디 그룹 일정의 상세 정보가 성공적으로 조회되었습니다.")
     fun getScheduleDetail(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String,
-        @PathVariable
         scheduleId: String
     ): StudyScheduleResponse
 
@@ -190,26 +110,11 @@ interface StudyScheduleApi {
      * @param scheduleId 참여할 스터디 일정 ID
      * @return 참여한 스터디 일정의 정보
      */
-    @Operation(
-        summary = "스터디 그룹 일정 참여",
-        description = "로그인한 멤버가 스터디 그룹 일정에 참여합니다."
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "201",
-                description = "스터디 그룹 일정에 성공적으로 참여하였습니다."
-            ),
-        ]
-    )
-    @PostMapping("{groupId}/schedules/{scheduleId}/participants")
-    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "스터디 그룹 일정 참여", description = "로그인한 멤버가 스터디 그룹 일정에 참여합니다.")
+    @ApiResponse(responseCode = "201", description = "스터디 그룹 일정에 성공적으로 참여하였습니다.")
     fun joinSchedule(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String,
-        @PathVariable
         scheduleId: String
     ): ScheduleParticipantResponse
 
@@ -220,26 +125,12 @@ interface StudyScheduleApi {
      * @param groupId 스터디 그룹 ID
      * @param scheduleId 나갈 스터디 일정 ID
      */
-    @Operation(
-        summary = "스터디 그룹 일정 나가기",
-        description = "로그인한 멤버가 스터디 그룹 일정에서 나갑니다."
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "204",
-                description = "스터디 그룹 일정에서 성공적으로 나갔습니다."
-            ),
-        ]
-    )
-    @DeleteMapping("{groupId}/schedules/{scheduleId}/participants")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "스터디 그룹 일정 나가기", description = "로그인한 멤버가 스터디 그룹 일정에서 나갑니다.")
+    @ApiResponse(responseCode = "204", description = "스터디 그룹 일정에서 성공적으로 나갔습니다.")
+
     fun leaveSchedule(
-        @LoginMember
         memberInfo: MemberInfo,
-        @PathVariable
         groupId: String,
-        @PathVariable
         scheduleId: String
     ): Unit
 }

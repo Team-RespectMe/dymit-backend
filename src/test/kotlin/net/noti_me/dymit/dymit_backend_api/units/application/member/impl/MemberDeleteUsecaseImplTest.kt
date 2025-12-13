@@ -14,8 +14,10 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
 
 /**
  * MemberDeleteUsecaseImpl 클래스의 기능을 테스트한다.
@@ -26,9 +28,14 @@ class MemberDeleteUsecaseImplTest : BehaviorSpec({
     // 테스트 대상 클래스와 의존성 객체들
     val loadMemberPort = mockk<LoadMemberPort>()
     val saveMemberPort = mockk<SaveMemberPort>()
+    val loadGroupPort = mockk<LoadStudyGroupPort>(relaxed = true)
+    val applicationEventPublisher = mockk< ApplicationEventPublisher>(relaxed = true)
+
     val memberDeleteUsecase = MemberDeleteUsecaseImpl(
         loadMemberPort = loadMemberPort,
-        saveMemberPort = saveMemberPort
+        saveMemberPort = saveMemberPort,
+        loadGroupPort = loadGroupPort,
+        eventPublisher = applicationEventPublisher
     )
 
     beforeEach {

@@ -9,6 +9,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.board.MongoPostRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
@@ -194,7 +195,7 @@ class MongoPostRepositoryTest(
             id = ObjectId(),
             nickname = "테스트작성자",
             image = ProfileImageVo(
-                type = "profile",
+                type = ProfileImageType.PRESET,
                 url = "http://example.com/image.jpg"
             )
         )

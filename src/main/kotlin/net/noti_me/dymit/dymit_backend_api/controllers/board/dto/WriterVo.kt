@@ -10,6 +10,7 @@ class WriterVo(
     val memberId: String,
     @Schema(description = "작성자 닉네임", example = "john_doe")
     val nickname: String,
+    @Schema(description = "작성자 프로필 이미지")
     val image: ProfileImageVo
 ) {
     companion object {
