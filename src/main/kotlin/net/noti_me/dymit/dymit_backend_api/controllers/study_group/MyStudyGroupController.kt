@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import javax.annotation.security.PermitAll
 
 @RestController
 class MyStudyGroupController(
@@ -16,6 +17,7 @@ class MyStudyGroupController(
 
     @GetMapping("/members/me/study-groups/owned/count")
     @ResponseStatus(HttpStatus.OK)
+    @PermitAll
     override fun countMyOwnedStudyGroups(
         @LoginMember memberInfo: MemberInfo
     ): IntegerValueResponse {

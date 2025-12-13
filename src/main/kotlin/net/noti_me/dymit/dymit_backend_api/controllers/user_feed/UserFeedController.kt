@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.user_feed
 
 import io.swagger.v3.oas.annotations.Parameter
+import jakarta.annotation.security.RolesAllowed
 import net.noti_me.dymit.dymit_backend_api.application.feed.UserFeedService
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
@@ -17,6 +18,7 @@ class UserFeedController(
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getUserFeeds(
         @LoginMember loginMember: MemberInfo,
         @Parameter(description = "커서 feed id") @RequestParam(required = false) cursor: String?,
@@ -37,6 +39,7 @@ class UserFeedController(
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{feedId}")
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun deleteUserFeed(
         @LoginMember loginMember: MemberInfo,
         @PathVariable feedId: String
@@ -46,6 +49,7 @@ class UserFeedController(
 
     @PatchMapping("/{feedId}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun markFeedAsRead(
         @LoginMember loginMember: MemberInfo,
         @PathVariable feedId: String

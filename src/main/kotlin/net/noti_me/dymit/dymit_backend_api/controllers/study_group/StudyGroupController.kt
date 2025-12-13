@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_group
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupCommandService
 import net.noti_me.dymit.dymit_backend_api.application.study_group.StudyGroupQueryService
@@ -12,7 +13,9 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_group.dto.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.annotation.security.PermitAll
 
 @RestController
 @RequestMapping("/api/v1/study-groups")
@@ -24,6 +27,7 @@ class StudyGroupController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun createStudyGroup(
         @LoginMember memberInfo: MemberInfo,
         @RequestBody @Valid @Sanitize request: StudyGroupCreateRequest
@@ -38,6 +42,7 @@ class StudyGroupController(
 
     @PostMapping("/{groupId}/members")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun joinStudyGroup(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -49,6 +54,7 @@ class StudyGroupController(
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun searchStudyGroupByInviteCode(
         @LoginMember memberInfo: MemberInfo,
         @RequestParam("inviteCode", required=true) inviteCode: String
@@ -62,6 +68,7 @@ class StudyGroupController(
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getMyStudyGroups(memberInfo: MemberInfo): ListResponse<StudyGroupListItemDto> {
         val studyGroups = studyGroupQueryService.getMyStudyGroups(memberInfo)
         studyGroupScheduleService.getUpcomingScheduleForGroups(groups = studyGroups)
@@ -70,6 +77,7 @@ class StudyGroupController(
 
     @GetMapping("/{groupId}/invite-code")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getStudyGroupInviteCode(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -84,6 +92,7 @@ class StudyGroupController(
 
     @GetMapping("/{groupId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getStudyGroup(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -96,6 +105,7 @@ class StudyGroupController(
 
     @PutMapping("/{groupId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updateStudyGroupProfileImage(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -111,6 +121,7 @@ class StudyGroupController(
 
     @DeleteMapping("/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun deleteStudyGroup(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -120,6 +131,7 @@ class StudyGroupController(
 
     @DeleteMapping("/{groupId}/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun leaveStudyGroup(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -129,6 +141,7 @@ class StudyGroupController(
 
     @DeleteMapping("/{groupId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun removeStudyGroupMember(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -139,6 +152,7 @@ class StudyGroupController(
 
     @DeleteMapping("/{groupId}/blacklists")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun addStudyGroupMemberToBlacklist(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -154,6 +168,7 @@ class StudyGroupController(
 
     @GetMapping("/{groupId}/blacklists")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getStudyGroupBlacklists(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -169,6 +184,7 @@ class StudyGroupController(
 
     @DeleteMapping("/{groupId}/blacklists/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun removeStudyGroupMemberFromBlacklist(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -179,6 +195,7 @@ class StudyGroupController(
 
     @PutMapping("/{groupId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updateStudyGroup(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -194,6 +211,7 @@ class StudyGroupController(
 
     @PatchMapping("/{groupId}/owner")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun changeStudyGroupOwner(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -207,6 +225,7 @@ class StudyGroupController(
 
     @GetMapping("/{groupId}/group-members")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getStudyGroupMembers(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String

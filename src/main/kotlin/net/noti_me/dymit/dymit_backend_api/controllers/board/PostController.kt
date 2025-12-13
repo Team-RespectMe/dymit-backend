@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.board
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.board.PostService
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
@@ -21,6 +22,7 @@ class PostController(
 
     @PostMapping("/study-groups/{groupId}/boards/{boardId}/posts")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun createPost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -37,6 +39,7 @@ class PostController(
 
     @PutMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updatePost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -55,6 +58,7 @@ class PostController(
 
     @DeleteMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun deletePost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -71,6 +75,7 @@ class PostController(
 
     @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getBoardPosts(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -100,6 +105,7 @@ class PostController(
 
     @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getPost(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,

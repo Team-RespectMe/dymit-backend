@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.board
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.board.CommentService
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.CommentCommand
@@ -20,13 +21,13 @@ class PostCommentController(
 
     @PostMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun createComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
         @PathVariable boardId: String,
         @PathVariable postId: String,
         @RequestBody @Valid @Sanitize request: CommentCommandRequest
-
     ): CommentCommandResponse {
         val command = CommentCommand(
             groupId = groupId,
@@ -41,6 +42,7 @@ class PostCommentController(
 
     @PutMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updateComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -62,6 +64,7 @@ class PostCommentController(
 
     @DeleteMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun deleteComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -74,6 +77,7 @@ class PostCommentController(
 
     @GetMapping("/study-groups/{groupId}/boards/{boardId}/posts/{postId}/comments")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getPostComments(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -81,7 +85,6 @@ class PostCommentController(
         @PathVariable postId: String,
         @RequestParam(required = false) cursor: String?,
         @RequestParam(defaultValue = "40") size: Int
-
     ): ListResponse<CommentListItem> {
         val commentDtos = commentService.getPostComments(
             memberInfo = memberInfo,

@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.StudyScheduleService
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
@@ -18,6 +19,7 @@ class StudyScheduleController(
 
     @PostMapping("{groupId}/schedules")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun createSchedule(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -29,6 +31,7 @@ class StudyScheduleController(
 
     @PutMapping("{groupId}/schedules/{scheduleId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updateSchedule(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -41,6 +44,7 @@ class StudyScheduleController(
 
     @DeleteMapping("{groupId}/schedules/{scheduleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun removeSchedule(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -51,6 +55,7 @@ class StudyScheduleController(
 
     @GetMapping("/{groupId}/schedules")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getGroupSchedules(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -61,6 +66,7 @@ class StudyScheduleController(
 
     @GetMapping("{groupId}/schedules/{scheduleId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getScheduleDetail(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -72,6 +78,7 @@ class StudyScheduleController(
 
     @PostMapping("{groupId}/schedules/{scheduleId}/participants")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun joinSchedule(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -83,11 +90,12 @@ class StudyScheduleController(
 
     @DeleteMapping("{groupId}/schedules/{scheduleId}/participants")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun leaveSchedule(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
         @PathVariable scheduleId: String
-    ) {
+    ){
         scheduleService.leaveSchedule(memberInfo, groupId, scheduleId)
     }
 

@@ -60,9 +60,7 @@ class ServerNoticeRestController(
     }
 
     @GetMapping
-//    @Secured("ROLE_MEMBER")
-//    @PermitAll
-    @RolesAllowed("MEMBER")
+    @PermitAll
     override fun getNotices(
         @RequestParam(required = false) cursor: String?,
         @RequestParam(required = false, defaultValue = "20") size: Int?
@@ -85,7 +83,7 @@ class ServerNoticeRestController(
     }
 
     @GetMapping("/{noticeId}")
-    @PermitAll()
+    @PermitAll
     override fun getNotice(@PathVariable noticeId: String): ServerNoticeResponse {
         val noticeDto = serverNoticeService.getNotice(noticeId)
         return ServerNoticeResponse.from(noticeDto)

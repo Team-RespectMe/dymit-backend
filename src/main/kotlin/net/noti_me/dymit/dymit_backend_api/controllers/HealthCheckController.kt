@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.annotation.security.PermitAll
 
 @RestController
 class HealthCheckController(
@@ -14,9 +15,9 @@ class HealthCheckController(
 
     private val logger = LoggerFactory.getLogger(HealthCheckController::class.java)
 
-    @GetMapping("health-check")
+    @GetMapping("/api/v1/health-check")
+    @PermitAll
     fun healthCheck(): Long {
-        logger.error("Health check endpoint was called")
         return System.currentTimeMillis()
     }
 

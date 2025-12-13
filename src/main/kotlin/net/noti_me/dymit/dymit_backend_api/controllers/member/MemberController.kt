@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.*
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
@@ -29,6 +30,7 @@ class MemberController(
 
     @GetMapping("/{memberId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getMemberProfile(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String
@@ -40,6 +42,7 @@ class MemberController(
 
     @PatchMapping("/{memberId}/nickname")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun patchNickname(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
@@ -55,6 +58,7 @@ class MemberController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PermitAll
     override fun createMember(
         @RequestBody @Valid @Sanitize request: MemberCreateRequest
     ): MemberCreateResponse {
@@ -65,9 +69,9 @@ class MemberController(
         return MemberCreateResponse.from(result)
     }
 
-    @PermitAll
     @GetMapping("/nickname-validation")
     @ResponseStatus(HttpStatus.OK)
+    @PermitAll
     override fun checkNickname(
         @RequestParam @Valid @Nickname nickname: String
     ) {
@@ -77,6 +81,7 @@ class MemberController(
 
     @PutMapping("/{memberId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun uploadProfileImage(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
@@ -92,6 +97,7 @@ class MemberController(
 
     @DeleteMapping("/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun deleteMember(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String
@@ -104,6 +110,7 @@ class MemberController(
 
     @PostMapping("/{memberId}/device-tokens")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun registerDeviceToken(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
@@ -117,6 +124,7 @@ class MemberController(
 
     @DeleteMapping("/{memberId}/device-tokens" )
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun unregisterDeviceToken(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,

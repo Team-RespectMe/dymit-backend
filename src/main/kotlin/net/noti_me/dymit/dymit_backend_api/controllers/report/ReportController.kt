@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.report
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.report.ReportService
 import net.noti_me.dymit.dymit_backend_api.application.report.dto.ReportCommand
@@ -26,6 +27,7 @@ class ReportController(
 
     @PostMapping("/reports")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun createReport(
         @LoginMember memberInfo: MemberInfo,
         @RequestBody @Valid @Sanitize request: ReportCreateRequest
@@ -42,6 +44,7 @@ class ReportController(
 
     @PutMapping("/reports/{reportId}/status")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updateReportStatus(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable reportId: String,
@@ -54,6 +57,7 @@ class ReportController(
 
     @GetMapping("/reports")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getReportList(
         @LoginMember memberInfo: MemberInfo,
         @RequestParam(required = false) cursor: String?,

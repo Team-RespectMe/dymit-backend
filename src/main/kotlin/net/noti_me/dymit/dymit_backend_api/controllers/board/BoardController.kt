@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.board
 
+import jakarta.annotation.security.RolesAllowed
 import net.noti_me.dymit.dymit_backend_api.application.board.BoardService
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
@@ -17,6 +18,7 @@ class BoardController(
 
     @GetMapping("/study-groups/{groupId}/boards")
     @ResponseStatus(OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getGroupBoards(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
@@ -28,6 +30,7 @@ class BoardController(
 
     @GetMapping("/study-groups/{groupId}/boards/{boardId}")
     @ResponseStatus(OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getBoard(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,

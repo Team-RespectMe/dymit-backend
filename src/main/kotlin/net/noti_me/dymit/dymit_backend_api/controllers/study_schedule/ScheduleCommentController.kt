@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule
 
+import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.ScheduleCommentService
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.CreateScheduleCommentCommand
@@ -22,6 +23,7 @@ class ScheduleCommentController(
 
     @PostMapping("/{groupId}/schedules/{scheduleId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun createComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -40,6 +42,7 @@ class ScheduleCommentController(
 
     @PutMapping("/{groupId}/schedules/{scheduleId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun updateComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -60,6 +63,7 @@ class ScheduleCommentController(
 
     @DeleteMapping("/{groupId}/schedules/{scheduleId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun deleteComment(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
@@ -71,6 +75,7 @@ class ScheduleCommentController(
 
     @GetMapping("/{groupId}/schedules/{scheduleId}/comments")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getScheduleComments(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
