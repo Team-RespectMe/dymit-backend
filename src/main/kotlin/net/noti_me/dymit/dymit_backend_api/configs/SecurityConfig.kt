@@ -63,7 +63,7 @@ class SecurityConfig {
             .sessionManagement{ it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authenticationManager(authenticationManager)
             .addFilterBefore(
-                JwtAuthenticationFilter(authenticationManager),
+                JwtAuthenticationFilter(authenticationManager,entryPointUnauthorizedHandler),
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .exceptionHandling {
@@ -77,9 +77,6 @@ class SecurityConfig {
 //                    "/v3/api-docs/**",
 //                    "/actuator/**",
 //                    "/prometheus/**",
-//                    "/health-check",
-//                    "/api/v1/test/**",
-//                    "/api/v1/debug/**"
 //                ).permitAll()
 //                it.requestMatchers(HttpMethod.POST,
 //                    "/api/v1/members",
