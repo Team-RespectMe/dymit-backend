@@ -78,4 +78,17 @@ interface MemberApi {
         memberId: String,
         request: DeviceTokenCommandRequest
     ): Unit
+
+    @Operation(
+        method = "PATCH",
+        summary = "멤버 관심사 업데이트",
+        description = "특정 멤버의 관심사를 업데이트합니다. 자신이 아닌 멤버의 관심사를 업데이트하려고 할 경우, 접근 권한이 없을 수 있습니다."
+    )
+    @ApiResponse(responseCode = "200", description = "멤버 관심사 업데이트 성공")
+    @SecurityRequirement(name = "bearer-jwt")
+    fun patchInterests(
+        loginMember: MemberInfo,
+        memberId: String,
+        request: UpdateInterestsRequest
+    ): MemberProfileResponse
 }

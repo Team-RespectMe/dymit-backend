@@ -18,12 +18,13 @@ import javax.annotation.security.PermitAll
 @RestController
 @RequestMapping("/api/v1/members")
 class MemberController(
-    private val memberCreateUsecase: MemberCreateUsecase,
-    private val memberQueryUsecase: MemberQueryUsecase,
-    private val memberDeleteUsecase: MemberDeleteUsecase,
-    private val memberUpdateNicknameUsecase: UpdateNicknameUsecase,
-    private val memberImageUploadUsecase: ChangeMemberImageUseCase,
-    private val deviceTokenUsecase: MemberDeviceTokenUsecase
+    private val createMemberUseCase: CreateMemberUseCase,
+    private val queryMemberUseCase: QueryMemberUseCase,
+    private val deleteMemberUseCase: DeleteMemberUseCase,
+    private val changeNicknameUseCase: ChangeNicknameUseCase,
+    private val changeMemberImageUseCase: ChangeMemberImageUseCase,
+    private val deviceTokenUsecase: ManageDeviceTokenUseCase,
+    private val updateInterestsUseCase: UpdateInterestsUseCase
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -36,7 +37,7 @@ class MemberController(
         @PathVariable memberId: String
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
-            memberQueryUsecase.getMemberById(loginMember, memberId)
+            queryMemberUseCase.getMemberById(loginMember, memberId)
         )
     }
 
@@ -48,7 +49,7 @@ class MemberController(
         @PathVariable memberId: String,
         @RequestBody @Valid @Sanitize request: MemberNicknameUpdateRequest)
     : MemberProfileResponse {
-        val memberDto = memberUpdateNicknameUsecase.updateNickname(
+        val memberDto = changeNicknameUseCase.updateNickname(
             loginMember,
             memberId,
             request.toCommand()
@@ -63,7 +64,7 @@ class MemberController(
         @RequestBody @Valid @Sanitize request: MemberCreateRequest
     ): MemberCreateResponse {
         logger.debug("Creating member with request: $request")
-        val result = memberCreateUsecase.createMember(
+        val result = createMemberUseCase.createMember(
             request.toCommand()
         )
         return MemberCreateResponse.from(result)
@@ -76,7 +77,7 @@ class MemberController(
         @RequestParam @Valid @Nickname nickname: String
     ) {
         logger.debug("checkNickname called with nickname: $nickname")
-        return memberCreateUsecase.checkNickname(nickname)
+        return createMemberUseCase.checkNickname(nickname)
     }
 
     @PutMapping("/{memberId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -88,7 +89,7 @@ class MemberController(
         @ModelAttribute @Valid @Sanitize request: ProfileImageUploadRequest
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
-            memberImageUploadUsecase.changeProfileImage(
+            changeMemberImageUseCase.changeProfileImage(
                 loginMember = loginMember,
                 command = request.toCommand(memberId)
             )
@@ -102,7 +103,7 @@ class MemberController(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String
     ) {
-        return memberDeleteUsecase.deleteMember(
+        return deleteMemberUseCase.deleteMember(
             loginMember = loginMember,
             memberId = memberId
         )
@@ -134,6 +135,19 @@ class MemberController(
             member = loginMember,
             deviceToken = request.deviceToken
         )
+    }
+
+    @PatchMapping("/{memberId}/interests")
+    @ResponseStatus(HttpStatus.OK)
+    override fun patchInterests(
+        @LoginMember loginMember: MemberInfo,
+        @PathVariable memberId: String,
+        @RequestBody @Valid @Sanitize request: UpdateInterestsRequest
+    ): MemberProfileResponse {
+        return MemberProfileResponse.from( updateInterestsUseCase.updateInterests(
+            loginMember = loginMember,
+            command = request.toCommand()
+        ))
     }
 }
 

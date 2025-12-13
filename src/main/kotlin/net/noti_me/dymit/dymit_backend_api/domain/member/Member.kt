@@ -33,7 +33,8 @@ class Member(
     roles: MutableSet<MemberRole> = mutableSetOf(MemberRole.ROLE_MEMBER),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
-    isDeleted: Boolean = false
+    isDeleted: Boolean = false,
+    interests: MutableSet<String>? = null
 ) : BaseAggregateRoot<Member>(id, createdAt, updatedAt, isDeleted) {
 
     val deviceTokens: MutableSet<DeviceToken> = deviceTokens
@@ -56,6 +57,15 @@ class Member(
         private set
 
     var roles: MutableSet<MemberRole> = roles
+        private set
+
+    var interests: MutableSet<String> = interests ?: mutableSetOf()
+        private set
+
+    fun updateInterests(newInterests: Set<String>) {
+        this.interests = newInterests.toMutableSet()
+        updateLastAccessedAt()
+    }
 
     /**
      * 닉네임 변경 메서드
