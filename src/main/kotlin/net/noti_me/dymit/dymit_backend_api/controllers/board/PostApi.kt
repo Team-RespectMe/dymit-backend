@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.PostCommandRequest
@@ -21,7 +22,7 @@ interface PostApi {
         memberInfo: MemberInfo,
         groupId: String,
         boardId: String,
-        request: PostCommandRequest
+        @Valid request: PostCommandRequest
     ): PostCommandResponse
 
     @Operation(summary = "게시글 수정", description = "특정 스터디 그룹의 게시판에 있는 게시글을 수정합니다.")
@@ -31,7 +32,7 @@ interface PostApi {
         groupId: String,
         boardId: String,
         postId: String,
-        request: PostCommandRequest
+        @Valid request: PostCommandRequest
     ): PostCommandResponse
 
     @Operation(summary = "게시글 삭제", description = "특정 스터디 그룹의 게시판에 있는 게시글을 삭제합니다.")

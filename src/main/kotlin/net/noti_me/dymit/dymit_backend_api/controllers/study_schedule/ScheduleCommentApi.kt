@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.ScheduleCommentCommandRequest
@@ -19,7 +20,7 @@ interface ScheduleCommentApi {
         memberInfo: MemberInfo,
         groupId: String,
         scheduleId: String,
-        request: ScheduleCommentCommandRequest
+        @Valid request: ScheduleCommentCommandRequest
     ): ScheduleCommentResponse
 
     @Operation(summary = "댓글 수정", description = "스터디 일정 댓글을 수정합니다.")
@@ -29,7 +30,7 @@ interface ScheduleCommentApi {
         groupId: String,
         scheduleId: String,
         commentId: String,
-        request: ScheduleCommentCommandRequest
+        @Valid request: ScheduleCommentCommandRequest
     ): ScheduleCommentResponse
 
     @Operation(summary = "댓글 삭제", description = "스터디 일정 댓글을 삭제합니다.")

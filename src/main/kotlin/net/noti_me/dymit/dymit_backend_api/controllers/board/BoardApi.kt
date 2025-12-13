@@ -15,10 +15,17 @@ interface BoardApi {
 
     @Operation(summary = "스터디 그룹 게시판 목록 조회", description = "스터디 그룹에 속한 게시판 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    fun getGroupBoards(memberInfo: MemberInfo, groupId: String): ListResponse<BoardListItem>
+    fun getGroupBoards(
+        memberInfo: MemberInfo,
+        groupId: String
+    ): ListResponse<BoardListItem>
 
 
     @Operation(summary = "스터디 그룹 게시판 단건 조회", description = "스터디 그룹에 속한 게시판을 단건 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    fun getBoard(memberInfo: MemberInfo, groupId: String, boardId: String): BoardResponse
+    fun getBoard(
+        memberInfo: MemberInfo,
+        groupId: String,
+        boardId: String
+    ): BoardResponse
 }

@@ -74,7 +74,7 @@ class MemberController(
     @ResponseStatus(HttpStatus.OK)
     @PermitAll
     override fun checkNickname(
-        @RequestParam @Valid @Nickname nickname: String
+        @RequestParam nickname: String
     ) {
         logger.debug("checkNickname called with nickname: $nickname")
         return createMemberUseCase.checkNickname(nickname)
@@ -115,7 +115,7 @@ class MemberController(
     override fun registerDeviceToken(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
-        @RequestBody @Valid request: DeviceTokenCommandRequest
+        @RequestBody @Valid @Sanitize request: DeviceTokenCommandRequest
     ) {
         deviceTokenUsecase.registerDeviceToken(
             member = loginMember,
@@ -129,7 +129,7 @@ class MemberController(
     override fun unregisterDeviceToken(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,
-        @RequestBody @Valid request: DeviceTokenCommandRequest
+        @RequestBody @Valid @Sanitize request: DeviceTokenCommandRequest
     ) {
         deviceTokenUsecase.unregisterDeviceToken(
             member = loginMember,
@@ -139,6 +139,7 @@ class MemberController(
 
     @PatchMapping("/{memberId}/interests")
     @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun patchInterests(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String,

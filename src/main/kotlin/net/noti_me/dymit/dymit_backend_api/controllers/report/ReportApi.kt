@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.report.dto.ReportCreateRequest
@@ -27,7 +28,7 @@ interface ReportApi {
     fun updateReportStatus(
         memberInfo: MemberInfo,
         reportId: String,
-        request: ReportStatusUpdateRequest
+        @Valid request: ReportStatusUpdateRequest
     ): ReportResponse
 
     @Operation(method = "GET", summary = "신고 목록 조회", description = "신고 목록을 커서 기반 페이징으로 조회합니다. (어드민 전용)")

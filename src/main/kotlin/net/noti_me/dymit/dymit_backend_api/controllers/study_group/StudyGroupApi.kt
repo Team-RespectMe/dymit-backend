@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -24,7 +25,7 @@ interface StudyGroupApi {
     @SecurityRequirement(name="bearer-jwt")
     fun createStudyGroup(
         memberInfo: MemberInfo,
-        request: StudyGroupCreateRequest
+        @Valid request: StudyGroupCreateRequest
     ): StudyGroupResponse
 
     /**
@@ -36,7 +37,7 @@ interface StudyGroupApi {
     fun joinStudyGroup(
         memberInfo: MemberInfo,
         groupId: String,
-        request: StudyGroupJoinRequest
+        @Valid request: StudyGroupJoinRequest
     ): StudyGroupMemberResponse
 
     /**
@@ -47,7 +48,7 @@ interface StudyGroupApi {
     @SecurityRequirements(SecurityRequirement(name = "bearer-jwt"))
     fun searchStudyGroupByInviteCode(
         memberInfo: MemberInfo,
-         inviteCode: String
+        inviteCode: String
     ): StudyGroupResponse
 
     /**
@@ -95,7 +96,7 @@ interface StudyGroupApi {
     fun updateStudyGroupProfileImage(
         memberInfo: MemberInfo,
         groupId: String,
-        request: UpdateStudyGroupProfileImageRequest
+        @Valid request: UpdateStudyGroupProfileImageRequest
     ): StudyGroupResponse
 
     /**
@@ -151,7 +152,7 @@ interface StudyGroupApi {
     fun addStudyGroupMemberToBlacklist(
         memberInfo: MemberInfo,
         groupId: String,
-        request: BlackListEnlistRequest
+        @Valid request: BlackListEnlistRequest
     )
 
     /**
@@ -185,7 +186,7 @@ interface StudyGroupApi {
     fun updateStudyGroup(
         memberInfo: MemberInfo,
         groupId: String,
-        request: StudyGroupModifyRequest
+        @Valid request: StudyGroupModifyRequest
     ): StudyGroupResponse
 
     /**
@@ -200,7 +201,7 @@ interface StudyGroupApi {
     fun changeStudyGroupOwner(
         memberInfo: MemberInfo,
         groupId: String,
-        request: ChangeStudyGroupOwnerRequest
+        @Valid request: ChangeStudyGroupOwnerRequest
     )
 
 

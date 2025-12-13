@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.CommentCommandRequest
@@ -23,7 +24,7 @@ interface PostCommentApi {
         groupId: String,
         boardId: String,
         postId: String,
-        request: CommentCommandRequest
+        @Valid request: CommentCommandRequest
     ): CommentCommandResponse
 
 
@@ -35,7 +36,7 @@ interface PostCommentApi {
         boardId: String,
         postId: String,
         commentId: String,
-        request: CommentCommandRequest
+        @Valid request: CommentCommandRequest
     ): CommentCommandResponse
 
     @ApiResponse(responseCode = "204", description = "댓글이 성공적으로 삭제되었습니다.")

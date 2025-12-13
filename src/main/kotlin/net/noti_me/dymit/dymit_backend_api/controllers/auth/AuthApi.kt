@@ -18,7 +18,7 @@ interface AuthApi {
         summary = "OIDC 로그인",
         description = "OIDC 제공자의 ID 토큰을 사용하여 사용자를 인증하고, JWT 액세스 토큰과 리프레시 토큰을 발급합니다."
     )
-    fun oidcLogin(request: OidcLoginRequest) : LoginResponse
+    fun oidcLogin(@Valid request: OidcLoginRequest) : LoginResponse
 
     @Operation(
         method = "POST",
@@ -38,5 +38,5 @@ interface AuthApi {
         description = "특정 JWT를 블랙리스트에 등록하여 더 이상 사용되지 않도록 합니다. 주로 로그아웃 시 사용됩니다."
     )
     @ApiResponse(responseCode = "204", description = "블랙리스트 등록 성공")
-    fun logout(@RequestBody @Valid request: RefreshTokenSubmitRequest)
+    fun logout(@Valid request: RefreshTokenSubmitRequest)
 }

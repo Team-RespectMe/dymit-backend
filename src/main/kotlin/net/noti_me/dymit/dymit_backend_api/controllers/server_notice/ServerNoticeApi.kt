@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.server_notice
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.server_notice.dto.CreateServerNoticeRequest
@@ -18,14 +19,21 @@ interface ServerNoticeApi {
         description = "서버 공지를 등록합니다. 관리자 권한이 필요합니다.",
     )
     @SecurityRequirement(name = "bearer-jwt")
-    fun postNotice(loginMember: MemberInfo, request: CreateServerNoticeRequest)
+    fun postNotice(
+        loginMember: MemberInfo,
+        @Valid request: CreateServerNoticeRequest
+    )
 
     @Operation(method = "PUT",
         summary = "서버 공지 수정",
         description = "서버 공지를 수정합니다. 관리자 권한이 필요합니다.",
     )
     @SecurityRequirement(name = "bearer-jwt")
-    fun putNotice(loginMember: MemberInfo, noticeId: String, request: UpdateServerNoticeRequest)
+    fun putNotice(
+        loginMember: MemberInfo,
+        noticeId: String,
+        @Valid request: UpdateServerNoticeRequest
+    )
 
     @Operation(
         method = "DELETE",

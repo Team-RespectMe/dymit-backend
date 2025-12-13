@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.*
@@ -30,7 +31,7 @@ interface StudyScheduleApi {
     fun createSchedule(
         memberInfo: MemberInfo,
         groupId: String,
-        request: StudyScheduleCommandRequest
+        @Valid request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse
 
 
@@ -54,7 +55,7 @@ interface StudyScheduleApi {
         memberInfo: MemberInfo,
         groupId: String,
         scheduleId: String,
-        request: StudyScheduleCommandRequest
+        @Valid request: StudyScheduleCommandRequest
     ): StudyScheduleCommandResponse
 
     /**

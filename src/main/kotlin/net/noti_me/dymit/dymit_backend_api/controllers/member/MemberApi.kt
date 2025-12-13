@@ -3,9 +3,11 @@ package net.noti_me.dymit.dymit_backend_api.controllers.member
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.annotations.parameters.ValidatedParameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.*
 
@@ -31,12 +33,12 @@ interface MemberApi {
     fun patchNickname(
         loginMember: MemberInfo,
         memberId: String,
-        request: MemberNicknameUpdateRequest
+        @Valid request: MemberNicknameUpdateRequest
     ): MemberProfileResponse
 
     @Operation(method = "POST", summary = "멤버 생성", description = """새로운 멤버를 생성합니다.""")
     @ApiResponse(responseCode = "201", description = "멤버 생성 성공")
-    fun createMember(request: MemberCreateRequest): MemberCreateResponse
+    fun createMember(@Valid request: MemberCreateRequest): MemberCreateResponse
 
     @Operation(method = "GET", summary = "닉네임 유효성 검사", description = "닉네임 중복체크 및 유효성 검사를 수행합니다.")
     @ApiResponse(responseCode = "200", description = "닉네임이 유효합니다.")
@@ -54,7 +56,7 @@ interface MemberApi {
     fun uploadProfileImage(
         loginMember: MemberInfo,
         memberId: String,
-        request: ProfileImageUploadRequest
+        @Valid request: ProfileImageUploadRequest
     ): MemberProfileResponse
 
     @Operation(method = "DELETE", summary = "회원 탈퇴 삭제 API", description = "회원을 삭제합니다, 단 소프트 삭제이기 때문에 OIDC 연동 정보만 제거 됩니다.")
@@ -68,7 +70,11 @@ interface MemberApi {
     @Operation(method = "POST", summary = "디바이스 토큰 등록 API", description = "디바이스 토큰을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "디바이스 토큰 등록 성공")
     @SecurityRequirement(name = "bearer-jwt")
-    fun registerDeviceToken(loginMember: MemberInfo, memberId: String, request: DeviceTokenCommandRequest)
+    fun registerDeviceToken(
+        loginMember: MemberInfo,
+        memberId: String,
+        @Valid request: DeviceTokenCommandRequest
+    )
 
     @Operation(method = "DELETE", summary = "디바이스 토큰 삭제 API", description = "디바이스 토큰을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "디바이스 토큰 삭제 성공")
@@ -76,7 +82,7 @@ interface MemberApi {
     fun unregisterDeviceToken(
         loginMember: MemberInfo,
         memberId: String,
-        request: DeviceTokenCommandRequest
+        @Valid request: DeviceTokenCommandRequest
     ): Unit
 
     @Operation(
@@ -89,6 +95,6 @@ interface MemberApi {
     fun patchInterests(
         loginMember: MemberInfo,
         memberId: String,
-        request: UpdateInterestsRequest
+        @Valid request: UpdateInterestsRequest
     ): MemberProfileResponse
 }
