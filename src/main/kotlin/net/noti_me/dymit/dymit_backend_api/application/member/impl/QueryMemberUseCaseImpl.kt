@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberQueryUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.QueryMemberUseCase
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
@@ -9,9 +9,9 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPo
 import org.springframework.stereotype.Service
 
 @Service
-class MemberQueryUsecaseImpl(
+class QueryMemberUseCaseImpl(
     private val loadMemberPort: LoadMemberPort
-): MemberQueryUsecase {
+): QueryMemberUseCase {
 
     override fun getMemberById(loginMember: MemberInfo, memberId: String): MemberQueryDto {
         val member = loadMemberPort.loadById(memberId)

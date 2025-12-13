@@ -11,6 +11,7 @@ class MemberCreateResponse(
     val memberId: String,
     val nickname: String,
     val profileImage: ProfileImageResponse? = null,
+    val interests: List<String> = emptyList(),
     val accessToken: String = "",
     val refreshToken: String = ""
 ): BaseResponse() {
@@ -24,7 +25,8 @@ class MemberCreateResponse(
                     ProfileImageResponse.from(it)
                 },
                 accessToken = result.loginResult.accessToken,
-                refreshToken = result.loginResult.refreshToken
+                refreshToken = result.loginResult.refreshToken,
+                interests = result.member.interests.toList()
             )
         }
     }

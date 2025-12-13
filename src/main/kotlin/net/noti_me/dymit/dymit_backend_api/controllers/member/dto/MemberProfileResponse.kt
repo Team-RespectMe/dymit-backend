@@ -16,6 +16,8 @@ class MemberProfileResponse(
     @Schema(description = "프로필 이미지 정보")
     val profileImage: ProfileImageResponse? = null,
     val oidcIdentities: List<OidcIdentity> = emptyList(),
+    @Schema(description = "회원 관심사 목록", example = "[\"스터디\", \"개발\"]")
+    val interests: List<String> = emptyList()
 ) : BaseResponse() {
 
     companion object {
@@ -27,7 +29,8 @@ class MemberProfileResponse(
                 profileImage = member.profileImage?.let {
                     ProfileImageResponse.from(it)
                 },
-                oidcIdentities = member.oidcIdentities
+                oidcIdentities = member.oidcIdentities,
+                interests = member.interests.toList()
             )
         }
 
@@ -38,7 +41,8 @@ class MemberProfileResponse(
                 profileImage = member.profileImageVo?.let {
                     ProfileImageResponse.from(it)
                 },
-                oidcIdentities = member.oidcInfo
+                oidcIdentities = member.oidcInfo,
+                interests = member.interests.toList()
             )
         }
     }

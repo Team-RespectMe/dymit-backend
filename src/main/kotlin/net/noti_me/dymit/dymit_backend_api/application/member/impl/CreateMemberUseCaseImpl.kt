@@ -1,10 +1,10 @@
 package net.noti_me.dymit.dymit_backend_api.application.member.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.AuthServiceFacade
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateCommand
+import net.noti_me.dymit.dymit_backend_api.application.member.dto.CreateMemberCommand
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateResult
 import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberDto
-import net.noti_me.dymit.dymit_backend_api.application.member.usecases.MemberCreateUsecase
+import net.noti_me.dymit.dymit_backend_api.application.member.usecases.CreateMemberUseCase
 import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
@@ -17,17 +17,17 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
-class MemberCreateUsecaseImpl(
+class CreateMemberUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
     private val oidcAuthenticationProviders: List<OidcAuthenticationProvider>,
     private val authService: AuthServiceFacade,
     private val eventPublisher: ApplicationEventPublisher
-) : MemberCreateUsecase {
+) : CreateMemberUseCase {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun createMember(command: MemberCreateCommand): MemberCreateResult {
+    override fun createMember(command: CreateMemberCommand): MemberCreateResult {
         val oidcAuthenticationProvider = oidcAuthenticationProviders
             .firstOrNull { it.support(command.oidcProvider.name) }
             ?: throw IllegalArgumentException("지원하지 않는 OIDC 프로바이더 입니다 ${command.oidcProvider.name}")
@@ -49,6 +49,7 @@ class MemberCreateUsecaseImpl(
                 subject = payload.sub,
                 email = payload.email
             )),
+            interests = command.interests.toMutableSet()
         )
 
         member = saveMemberPort.persist(member)
