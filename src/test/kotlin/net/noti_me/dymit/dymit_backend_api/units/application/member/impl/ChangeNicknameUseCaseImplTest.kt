@@ -16,7 +16,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPo
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 
-internal class UpdateNicknameUsecaseTest: BehaviorSpec() {
+internal class ChangeNicknameUseCaseImplTest: BehaviorSpec() {
 
     private val loadMemberPort = mockk<LoadMemberPort>()
 

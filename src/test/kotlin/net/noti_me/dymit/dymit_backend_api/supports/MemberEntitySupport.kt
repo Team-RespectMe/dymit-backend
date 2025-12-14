@@ -24,13 +24,15 @@ fun createMemberEntity(
     oidcIdentities: List<OidcIdentity> = listOf(
         createOidcIdentity()
     ),
-    roles: List<MemberRole> = listOf(MemberRole.ROLE_MEMBER)
+    roles: List<MemberRole> = listOf(MemberRole.ROLE_MEMBER),
+    interests:Set<String> = setOf<String>()
 ) : Member {
     return Member(
         id = id,
         nickname = nickname,
         oidcIdentities = oidcIdentities.toMutableSet(),
         profileImage = MemberProfileImageVo(),
-        roles = roles.toMutableSet()
+        roles = roles.toMutableSet(),
+        interests = interests.toMutableSet()
     )
 }

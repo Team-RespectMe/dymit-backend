@@ -2,10 +2,10 @@ package net.noti_me.dymit.dymit_backend_api.controllers
 
 import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
+import net.noti_me.dymit.dymit_backend_api.application.member.MemberServiceFacade
 import net.noti_me.dymit.dymit_backend_api.application.member.usecases.*
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
-import net.noti_me.dymit.dymit_backend_api.common.constraints.nickname.Nickname
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.member.MemberApi
 import net.noti_me.dymit.dymit_backend_api.controllers.member.dto.*
@@ -18,13 +18,7 @@ import javax.annotation.security.PermitAll
 @RestController
 @RequestMapping("/api/v1/members")
 class MemberController(
-    private val createMemberUseCase: CreateMemberUseCase,
-    private val queryMemberUseCase: QueryMemberUseCase,
-    private val deleteMemberUseCase: DeleteMemberUseCase,
-    private val changeNicknameUseCase: ChangeNicknameUseCase,
-    private val changeMemberImageUseCase: ChangeMemberImageUseCase,
-    private val deviceTokenUsecase: ManageDeviceTokenUseCase,
-    private val updateInterestsUseCase: UpdateInterestsUseCase
+    private val memberServiceFacade: MemberServiceFacade
 ) : MemberApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -37,7 +31,7 @@ class MemberController(
         @PathVariable memberId: String
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
-            queryMemberUseCase.getMemberById(loginMember, memberId)
+            memberServiceFacade.getMember(loginMember, memberId)
         )
     }
 
@@ -49,12 +43,11 @@ class MemberController(
         @PathVariable memberId: String,
         @RequestBody @Valid @Sanitize request: MemberNicknameUpdateRequest)
     : MemberProfileResponse {
-        val memberDto = changeNicknameUseCase.updateNickname(
-            loginMember,
-            memberId,
-            request.toCommand()
-        )
-        return MemberProfileResponse.from(memberDto)
+        return MemberProfileResponse.from(memberServiceFacade.changeNickname(
+            loginMember = loginMember,
+            memberId = memberId,
+            command = request.toCommand()
+        ))
     }
 
     @PostMapping
@@ -63,11 +56,7 @@ class MemberController(
     override fun createMember(
         @RequestBody @Valid @Sanitize request: MemberCreateRequest
     ): MemberCreateResponse {
-        logger.debug("Creating member with request: $request")
-        val result = createMemberUseCase.createMember(
-            request.toCommand()
-        )
-        return MemberCreateResponse.from(result)
+        return MemberCreateResponse.from( memberServiceFacade.createMember(request.toCommand()) )
     }
 
     @GetMapping("/nickname-validation")
@@ -76,8 +65,7 @@ class MemberController(
     override fun checkNickname(
         @RequestParam nickname: String
     ) {
-        logger.debug("checkNickname called with nickname: $nickname")
-        return createMemberUseCase.checkNickname(nickname)
+        return memberServiceFacade.checkNicknameAvailability(nickname)
     }
 
     @PutMapping("/{memberId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -89,7 +77,7 @@ class MemberController(
         @ModelAttribute @Valid @Sanitize request: ProfileImageUploadRequest
     ): MemberProfileResponse {
         return MemberProfileResponse.from(
-            changeMemberImageUseCase.changeProfileImage(
+            memberServiceFacade.changeMemberImage(
                 loginMember = loginMember,
                 command = request.toCommand(memberId)
             )
@@ -103,7 +91,7 @@ class MemberController(
         @LoginMember loginMember: MemberInfo,
         @PathVariable memberId: String
     ) {
-        return deleteMemberUseCase.deleteMember(
+        return memberServiceFacade.deleteMember(
             loginMember = loginMember,
             memberId = memberId
         )
@@ -117,8 +105,8 @@ class MemberController(
         @PathVariable memberId: String,
         @RequestBody @Valid @Sanitize request: DeviceTokenCommandRequest
     ) {
-        deviceTokenUsecase.registerDeviceToken(
-            member = loginMember,
+        memberServiceFacade.registerDeviceToken(
+            loginMember = loginMember,
             deviceToken = request.deviceToken
         )
     }
@@ -131,8 +119,8 @@ class MemberController(
         @PathVariable memberId: String,
         @RequestBody @Valid @Sanitize request: DeviceTokenCommandRequest
     ) {
-        deviceTokenUsecase.unregisterDeviceToken(
-            member = loginMember,
+        memberServiceFacade.unregisterDeviceToken(
+            loginMember = loginMember,
             deviceToken = request.deviceToken
         )
     }
@@ -145,10 +133,12 @@ class MemberController(
         @PathVariable memberId: String,
         @RequestBody @Valid @Sanitize request: UpdateInterestsRequest
     ): MemberProfileResponse {
-        return MemberProfileResponse.from( updateInterestsUseCase.updateInterests(
-            loginMember = loginMember,
-            command = request.toCommand()
-        ))
+        return MemberProfileResponse.from(
+            memberServiceFacade.updateInterests(
+                loginMember = loginMember,
+                command = request.toCommand()
+            )
+        )
     }
 }
 

@@ -15,7 +15,6 @@ class DeleteMemberUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
     private val loadGroupPort: LoadStudyGroupPort,
-    private val eventPublisher: ApplicationEventPublisher
 ): DeleteMemberUseCase {
 
     override fun deleteMember(loginMember: MemberInfo, memberId: String) {

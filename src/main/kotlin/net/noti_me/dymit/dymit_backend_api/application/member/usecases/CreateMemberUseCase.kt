@@ -6,6 +6,4 @@ import net.noti_me.dymit.dymit_backend_api.application.member.dto.CreateMemberCo
 interface CreateMemberUseCase {
 
     fun createMember(request: CreateMemberCommand): MemberCreateResult
-
-    fun checkNickname(nickname: String)
 }
