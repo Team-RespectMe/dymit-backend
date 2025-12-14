@@ -160,9 +160,6 @@ class Member(
         this.refreshTokens.clear()
         this.profileImage = MemberProfileImageVo(
             type = ProfileImageType.PRESET,
-            fileSize = 0L,
-            width = 0,
-            height = 0
         )
         super.markAsDeleted()
         registerEvent(MemberDeletedEvent(this))
@@ -170,10 +167,14 @@ class Member(
 
     fun assignRole(role: MemberRole) {
         this.roles.add(role)
+        println("Assigned role $role to member $id ")
+        println("Current roles: $roles")
     }
 
     fun revokeRole(role: MemberRole) {
         this.roles.remove(role)
+        println("Revoked role $role from member $id ")
+        println("Current roles: $roles")
     }
 
     fun isAdmin(): Boolean {

@@ -1,12 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.units.common.security.jwt
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.AnnotationSpec
 
 import io.mockk.*
 import jakarta.servlet.FilterChain
+import net.noti_me.dymit.dymit_backend_api.common.security.exceptions.JwtEntrypointUnauthorizedHandler
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtAuthenticationFilter
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtConfig
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtService
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.authentication.AuthenticationManager
@@ -17,7 +20,11 @@ internal class JwtAuthenticationFilterTest : AnnotationSpec() {
 
     private val authenticationManager = mockk<AuthenticationManager>(relaxed = true)
 
-    private val jwtAuthenticationFilter = JwtAuthenticationFilter(authenticationManager)
+    private val objectMapper = ObjectMapper()
+
+    private val onEntrypointUnauthorizedHandler = JwtEntrypointUnauthorizedHandler(objectMapper)
+
+    private val jwtAuthenticationFilter = JwtAuthenticationFilter(authenticationManager, onEntrypointUnauthorizedHandler)
 
     private val securityContext = mockk<SecurityContext>(relaxed = true)
 

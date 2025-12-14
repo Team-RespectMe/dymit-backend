@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.member.RefreshToken
 import org.bson.types.ObjectId
 import java.time.Instant
@@ -167,7 +168,7 @@ internal class MemberTest : BehaviorSpec() {
         given("리프레시 토큰 관리 기능") {
             val refreshToken = RefreshToken(
                 token = "test-refresh",
-                expiresAt = Instant.now().plusSeconds(3600*24)
+                expiresAt = Instant.now().plusSeconds(3600 * 24)
             )
 
             `when`("새로운 리프레시 토큰을 추가하면") {
@@ -192,18 +193,28 @@ internal class MemberTest : BehaviorSpec() {
             `when`("리프레시 토큰이 5개 이상일 때 새 토큰을 추가하면") {
                 then("가장 오래된 토큰이 제거되고 새 토큰이 추가된다.") {
                     // 5개의 토큰을 추가
+                    val refreshTokens = mutableListOf<RefreshToken>()
                     repeat(5) { index ->
-                        member.addRefreshToken("token-$index", expireAt = Instant.now().plusSeconds(3600*24) )
+//                        member.addRefreshToken("token-$index", expireAt = Instant.now().plusSeconds(3600*24) )
+                        refreshTokens.add(
+                            RefreshToken(
+                                token = "token-$index",
+                                expiresAt = Instant.now().plusSeconds(3600 * 24)
+                            )
+                        )
+                    }
+                    refreshTokens.forEach { token ->
+                        member.addRefreshToken(token.token, expireAt = token.expiresAt)
                     }
                     member.refreshTokens shouldHaveSize 5
 
                     // 6번째 토큰 추가
-                    val sixthToken = "token-6"
-                    member.addRefreshToken(sixthToken, expireAt = Instant.now().plusSeconds(3600*24) )
+                    val sixthToken = RefreshToken(token = "token-5", expiresAt = Instant.now().plusSeconds(3600 * 24))
+                    member.addRefreshToken(sixthToken.token, expireAt = sixthToken.expiresAt)
 
                     member.refreshTokens shouldHaveSize 5
                     member.refreshTokens shouldContain sixthToken
-                    member.refreshTokens shouldNotContain "token-0" // 첫 번째 토큰이 제거되어야 함
+                    member.refreshTokens shouldNotContain refreshTokens[0] // 첫 번째 토큰이 제거되어야 함
                 }
             }
 
@@ -307,7 +318,11 @@ internal class MemberTest : BehaviorSpec() {
                     member.nickname shouldBe "new-name"
 
                     // profileImage는 updateProfileImage를 통해서만 변경 가능
-                    val newImage = MemberProfileImageVo(type = ProfileImageType.EXTERNAL, original = "path/to/new-original.jpg", thumbnail = "path/to/new-thumbnail.jpg")
+                    val newImage = MemberProfileImageVo(
+                        type = ProfileImageType.EXTERNAL,
+                        original = "path/to/new-original.jpg",
+                        thumbnail = "path/to/new-thumbnail.jpg"
+                    )
                     member.changeProfileImage(newImage)
                     member.profileImage shouldBe newImage
 
@@ -316,6 +331,40 @@ internal class MemberTest : BehaviorSpec() {
                     Thread.sleep(1)
                     member.updateLastAccessedAt()
                     member.lastAccessAt shouldNotBe oldTime
+                }
+            }
+        }
+
+        given("새로운 역할을 추가한다.") {
+            val newRole = MemberRole.ROLE_ADMIN
+            `when`("assignRole을 호출하면") {
+                then("역할이 추가된다.") {
+                    member.assignRole(newRole)
+
+                    member.roles shouldContain newRole
+                }
+            }
+        }
+
+        given("기존에 역할이 존재한다.") {
+            val existsRole = MemberRole.ROLE_MEMBER
+
+            `when`("해당 역할을 삭지하면") {
+                then("역할이 제거된다.") {
+                    member.assignRole(existsRole)
+                    member.revokeRole(existsRole)
+                    member.roles shouldNotContain existsRole
+                }
+            }
+        }
+
+        given("멤버 관심사 업데이트 기능") {
+            val newInterests = setOf("Kotlin", "Backend Development", "Microservices")
+
+            `when`("새로운 관심사 집합으로 업데이트를 시도하면") {
+                then("관심사 목록이 성공적으로 업데이트된다.") {
+                    member.updateInterests(newInterests)
+                    member.interests shouldBe newInterests
                 }
             }
         }

@@ -16,10 +16,10 @@ class UpdateInterestsUseCaseImpl(
 ): UpdateInterestsUseCase {
 
     override fun updateInterests(
-        memberInfo: MemberInfo,
+        loginMember: MemberInfo,
         command: UpdateInterestsCommand
     ): MemberDto {
-        val member = loadMemberPort.loadById(memberInfo.memberId)
+        val member = loadMemberPort.loadById(loginMember.memberId)
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
         member.updateInterests(command.interests.toMutableSet())
         val updatedMember = saveMemberPort.update(member)

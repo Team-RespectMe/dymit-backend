@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtConfig
 import net.noti_me.dymit.dymit_backend_api.supports.createJwtService
+import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.Authentication
 
@@ -18,9 +19,7 @@ class JwtAuthenticationProviderTest : AnnotationSpec() {
 
     private val provider = JwtAuthenticationProvider(jwtService)
 
-    private val member = Member(
-        nickname = "nickname",
-    )
+    private val member = createMemberEntity()
 
     @Test
     fun `supports 테스트`() {
@@ -32,7 +31,7 @@ class JwtAuthenticationProviderTest : AnnotationSpec() {
     fun `올바른 JWT 토큰 인증 테스트`() {
         // Given
         val token = jwtService.createAccessToken(member)
-        val jwtAuthenticationToken: Authentication = JwtAuthenticationToken(token);
+        val jwtAuthenticationToken: Authentication = JwtAuthenticationToken(token.token);
 
         // When
         val authentication: Authentication? = provider.authenticate(jwtAuthenticationToken)
