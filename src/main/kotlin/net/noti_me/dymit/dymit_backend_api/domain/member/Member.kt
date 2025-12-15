@@ -41,6 +41,11 @@ class Member(
 
     @JsonIgnore
     val refreshTokens: MutableSet<RefreshToken> = refreshTokens
+        get() {
+            removeExpiredToken()
+            updateLastAccessedAt()
+            return field
+        }
 
     @Indexed(unique = true)
     var nickname: String = nickname
@@ -162,19 +167,16 @@ class Member(
             type = ProfileImageType.PRESET,
         )
         super.markAsDeleted()
+        updateLastAccessedAt()
         registerEvent(MemberDeletedEvent(this))
     }
 
     fun assignRole(role: MemberRole) {
         this.roles.add(role)
-        println("Assigned role $role to member $id ")
-        println("Current roles: $roles")
     }
 
     fun revokeRole(role: MemberRole) {
         this.roles.remove(role)
-        println("Revoked role $role from member $id ")
-        println("Current roles: $roles")
     }
 
     fun isAdmin(): Boolean {

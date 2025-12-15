@@ -3,6 +3,8 @@ package net.noti_me.dymit.dymit_backend_api.ports.persistence.member
 import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
 import org.bson.types.ObjectId
+import org.springframework.cglib.core.Local
+import java.time.LocalDateTime
 
 /**
  * 멤버 조회 포트
@@ -32,4 +34,17 @@ interface LoadMemberPort {
         deviceToken: String
     ): List<Member>
 
+
+    fun countByCreatedAtBetween(
+        start: LocalDateTime,
+        end: LocalDateTime
+    ): Long
+
+    fun countByLastAccessedAtBetween(
+        start: LocalDateTime,
+        end: LocalDateTime,
+        isDeleted: Boolean = false
+    ): Long
+
+    fun countAll(): Long
 }

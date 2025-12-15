@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.configs
 
+import net.noti_me.dymit.dymit_backend_api.application.member.batch.DailyMemberStatusJob
 import net.noti_me.dymit.dymit_backend_api.application.reminder.DailyScheduleReminderJob
 import net.noti_me.dymit.dymit_backend_api.application.reminder.HourlyScheduleReminderJob
 import org.quartz.CronScheduleBuilder
@@ -16,6 +17,14 @@ import java.util.TimeZone
 class QuartzConfig {
 
     @Bean
+    fun dailyMemberStatusJobDetail(): JobDetail {
+        return JobBuilder.newJob(DailyMemberStatusJob::class.java)
+            .withIdentity("dailyMemberStatusJob")
+            .storeDurably()
+            .build()
+    }
+
+    @Bean
     fun dailyScheduleReminderJobDetail(): JobDetail {
         return JobBuilder.newJob(DailyScheduleReminderJob::class.java) 
             .withIdentity("dailyScheduleReminderJob")
@@ -28,6 +37,20 @@ class QuartzConfig {
         return JobBuilder.newJob(HourlyScheduleReminderJob::class.java)
             .withIdentity("hourlyScheduleReminderJob")
             .storeDurably()
+            .build()
+    }
+
+    @Bean
+    fun triggerDailyMemberStatusJob(
+        @Qualifier("dailyMemberStatusJobDetail") jobDetail: JobDetail
+    ): Trigger {
+        return TriggerBuilder.newTrigger()
+            .forJob(jobDetail)
+            .withIdentity("dailyMemberStatusTrigger")
+            .withSchedule(
+                CronScheduleBuilder.cronSchedule("0 0 4 * * ?")
+                    .inTimeZone(TimeZone.getTimeZone("Asia/Seoul"))
+            )
             .build()
     }
 

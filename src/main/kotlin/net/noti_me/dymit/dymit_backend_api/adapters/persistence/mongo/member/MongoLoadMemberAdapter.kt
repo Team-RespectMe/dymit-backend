@@ -8,6 +8,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import java.time.LocalDateTime
 
 @Repository
 class MongoLoadMemberAdapter(
@@ -51,6 +52,43 @@ class MongoLoadMemberAdapter(
     override fun loadByDeviceToken(deviceToken: String): List<Member> {
         return mongoTemplate.find(
             Query(Criteria.where("deviceTokens.token").`is`(deviceToken)),
+            Member::class.java
+        )
+    }
+
+    override fun countByCreatedAtBetween(
+        start: LocalDateTime,
+        end: LocalDateTime
+    ): Long {
+        return mongoTemplate.count(
+            Query(
+                Criteria.where("createdAt")
+                    .gte(start)
+                    .lt(end)
+            ),
+            Member::class.java
+        )
+    }
+
+    override fun countByLastAccessedAtBetween(
+        start: LocalDateTime,
+        end: LocalDateTime,
+        isDeleted: Boolean
+    ): Long {
+        return mongoTemplate.count(
+            Query(
+                Criteria.where("lastAccessAt")
+                    .gte(start)
+                    .lt(end)
+                    .and("isDeleted").`is`(isDeleted)
+            ),
+            Member::class.java
+        )
+    }
+
+    override fun countAll(): Long {
+        return mongoTemplate.count(
+            Query(),
             Member::class.java
         )
     }
