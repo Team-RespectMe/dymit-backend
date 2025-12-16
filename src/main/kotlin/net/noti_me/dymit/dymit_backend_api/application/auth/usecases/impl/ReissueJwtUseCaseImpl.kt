@@ -47,8 +47,10 @@ class ReissueJwtUseCaseImpl(
             member.removeRefreshToken(refreshToken)
             member.addRefreshToken(newRefreshTokenInfo.token, newRefreshTokenInfo.expireAt)
             newRefreshToken = newRefreshTokenInfo.token
-            saveMemberPort.persist(member)
         }
+
+        member.updateLastAccessedAt()
+        saveMemberPort.persist(member)
 
         return LoginResult(
             memberId = member.identifier,

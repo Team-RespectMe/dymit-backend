@@ -41,11 +41,6 @@ class Member(
 
     @JsonIgnore
     val refreshTokens: MutableSet<RefreshToken> = refreshTokens
-        get() {
-            removeExpiredToken()
-            updateLastAccessedAt()
-            return field
-        }
 
     @Indexed(unique = true)
     var nickname: String = nickname
