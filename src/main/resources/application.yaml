@@ -32,6 +32,8 @@ dymit:
       audience: "com.project.dymit"
     google:
       audience: "33564605967-67ggm8jg70kkiognv4jjbfavampnake8.apps.googleusercontent.com,33564605967-bronvoe294ns8v0brm51i848g6gqqmjl.apps.googleusercontent.com,33564605967-hp0jt1faj3r477dnvdq04iijsp7csep0.apps.googleusercontent.com"
+    kakao: 
+      audience: "4039f3bbe2c48f462b6a516c266fc389"
 swagger:
   domain: ${DYMIT_SWAGGER_DOMAIN:http://localhost:8080}
 
