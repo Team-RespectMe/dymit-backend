@@ -29,6 +29,7 @@ class AppleS2SAlarmService(
 
     companion object {
         const val ISSUER_NAME = "https://appleid.apple.com"
+        const val AUDIENCE = "com.project.dymit"
     }
 
     fun handleEvent(request: AppleS2SRequest) {
@@ -58,12 +59,14 @@ class AppleS2SAlarmService(
         val algorithm = getAlgorithm(decodedJWT, publicKey)
         val verifier = JWT.require(algorithm)
             .withIssuer(ISSUER_NAME)
+            .withAudience(AUDIENCE)
             .build()
 
         return try {
             verifier.verify(jwt)
         } catch ( e: JWTVerificationException ) {
-            throw BadRequestException(message = "Invalid JWT token, expired or manipulated. ")
+            throw BadRequestException(message = "Invalid JWT token, ${e.message}")
         }
+
     }
 }
