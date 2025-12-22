@@ -77,7 +77,10 @@ class MongoStudyGroupMemberRepository(
     }
 
     override fun findByGroupId(groupId: ObjectId): List<StudyGroupMember> {
-        val query = Query(Criteria.where("groupId").`is`(groupId))
+        val query = Query(
+            Criteria.where("groupId").`is`(groupId)
+                .and("isDeleted").`is`(false)
+        )
         // sort by createdAt
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"))
         return mongoTemplate.find(query, StudyGroupMember::class.java)

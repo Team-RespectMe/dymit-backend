@@ -60,4 +60,8 @@ class StudyGroupMember(
         }
         this.role = newRole
     }
+
+    fun forcePromote(role: GroupMemberRole) {
+        this.role = role
+    }
 }

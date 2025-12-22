@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.common.security.jwt
 
 import net.noti_me.dymit.dymit_backend_api.application.auth.dto.JwtClaims
+import net.noti_me.dymit.dymit_backend_api.domain.member.Member
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
@@ -19,6 +20,14 @@ class MemberInfo(
 ) {
 
     companion object {
+
+        fun from(member: Member): MemberInfo {
+            return MemberInfo(
+                memberId = member.identifier,
+                nickname = member.nickname,
+                roles = member.roles.toList()
+            )
+        }
 
         fun from(jwtClaims: JwtClaims): MemberInfo {
             return MemberInfo(
