@@ -1,7 +1,10 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberForceDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupOwnerMissingEvent
+import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
@@ -13,13 +16,14 @@ import org.springframework.stereotype.Service
 @Service
 class StudyGroupEventHandler(
     private val studyGroupMemberRepository: StudyGroupMemberRepository,
+    private val loadStudyGroupPort: LoadStudyGroupPort,
     private val eventPublisher: ApplicationEventPublisher
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @EventListener(classes = [MemberProfileImageChangedEvent::class] )
     @Async
+    @EventListener(classes = [MemberProfileImageChangedEvent::class] )
     fun handleMemberProfileImageChangedEvent(event: MemberProfileImageChangedEvent) {
         val member = event.member
         val profileImage = ProfileImageVo.from(member.profileImage)
@@ -48,6 +52,15 @@ class StudyGroupEventHandler(
                 emptyList()
             }
         } while ( groupMembers.isNotEmpty() )
+    }
+
+    @Async
+    @EventListener(classes = [MemberForceDeletedEvent::class] )
+    fun onMemberForceDeleted(event: MemberForceDeletedEvent) {
+        loadStudyGroupPort.loadByOwnerId(event.member.identifier)
+            .forEach { group ->
+                eventPublisher.publishEvent(GroupOwnerMissingEvent(group))
+            }
     }
 
     companion object {

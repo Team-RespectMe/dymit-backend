@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.domain.member
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -13,7 +14,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileIma
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageDeletedEvent
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
-import kotlin.random.Random
 
 /**
  * 멤버 도메인 엔티티
@@ -172,6 +172,14 @@ class Member(
 
     fun revokeRole(role: MemberRole) {
         this.roles.remove(role)
+    }
+
+    fun updateOidcIdentity(identity: OidcIdentity) {
+        val target = this.oidcIdentities.filter{ it == identity }.firstOrNull()
+            ?: throw IllegalArgumentException("해당 OIDC 아이덴티티가 존재하지 않습니다. identity: $identity")
+        this.oidcIdentities.remove(target)
+        this.oidcIdentities.add(identity)
+        updateLastAccessedAt()
     }
 
     fun isAdmin(): Boolean {

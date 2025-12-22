@@ -297,6 +297,18 @@ class StudyGroup(
     }
 
     /**
+     * 멤버를 그룹 소유자로 승격시킵니다.
+     * @param member: StudyGroupMember 승격시킬 멤버
+     */
+    fun promoteOwner(member: StudyGroupMember) {
+        if ( member.groupId != this.id) {
+            throw BadRequestException(message="멤버가 해당 그룹에 속해있지 않습니다.")
+        }
+        this.ownerId = member.memberId
+        member.forcePromote(GroupMemberRole.OWNER)
+    }
+
+    /**
      * 멤버가 블랙리스트에 존재하는지 확인합니다.
      * @param memberId: String 확인할 멤버 ID
      * @return Boolean 블랙리스트에 존재하면 true, 그렇지 않으면 false
