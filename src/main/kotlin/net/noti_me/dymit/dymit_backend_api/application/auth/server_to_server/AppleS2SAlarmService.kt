@@ -34,6 +34,11 @@ class AppleS2SAlarmService(
 
     fun handleEvent(request: AppleS2SRequest) {
         val decodedJWT = verifyJwt(request.payload)
+
+        if (!decodedJWT.audience.contains(AUDIENCE)) {
+            throw BadRequestException(message = "Invalid audience in JWT token")
+        }
+
         val payload = AppleS2SPayload.from(decodedJWT)
         for ( handler in handlers ) {
             if ( handler.isSupport(payload) ) {
