@@ -12,7 +12,8 @@ class ServerNotice(
     id: ObjectId? = null,
     val writer: Writer,
     title: String,
-    content: String
+    content: String,
+    link: Link? = null,
 ): BaseAggregateRoot<ServerNotice>(id) {
 
     var title: String = title
@@ -21,11 +22,15 @@ class ServerNotice(
     var content: String = content
         private set
 
+    var link: Link? = link
+        private set
+
     companion object {
         fun create(
             writer: Member,
             title: String,
-            content: String
+            content: String,
+            link: Link? = null
         ): ServerNotice {
             require(title.isNotEmpty() && title.length <= 100) { "공지사항 제목은 비어있을 수 없으며, 100자를 초과할 수 없습니다." }
             require(content.isNotEmpty()) { "공지사항 내용은 비어있을 수 없습니다." }
@@ -37,7 +42,8 @@ class ServerNotice(
             return ServerNotice(
                 writer = Writer.from(writer),
                 title = title,
-                content = content
+                content = content,
+                link = link
             )
         }
     }

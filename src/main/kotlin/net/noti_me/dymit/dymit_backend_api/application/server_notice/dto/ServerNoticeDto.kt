@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.server_notice.dto
 
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
+import net.noti_me.dymit.dymit_backend_api.domain.server_notice.Link
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
@@ -10,6 +11,7 @@ class ServerNoticeDto(
     val writer: Writer,
     val title: String,
     val content: String,
+    val link: Link?,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
@@ -23,7 +25,8 @@ class ServerNoticeDto(
                 title = notice.title,
                 content = notice.content,
                 createdAt = notice.createdAt!!,
-                updatedAt = notice.updatedAt!!
+                updatedAt = notice.updatedAt!!,
+                link = notice.link
             )
         }
     }
