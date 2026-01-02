@@ -1,6 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
+import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupOwnerMissingEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -21,6 +23,21 @@ class TransactionEventListener(
 
     companion object {
         private const val FETCH_GROUP_MEMBER_LIMITS = 100
+    }
+
+    @Async
+    @EventListener(classes=[MemberCreatedEvent::class])
+    fun onMemberCreated(event: MemberCreatedEvent) {
+        // 회원 소유의 스터디 그룹을 1개 생성한다.
+        val memberInfo = MemberInfo.from(event.member)
+        val command = StudyGroupCreateCommand(
+            name = "${event.member.nickname}님의 스터디 그룹",
+            description = "자동 생성된 스터디 그룹입니다.",
+        )
+        studyGroupCommandService.createStudyGroup(
+            member = memberInfo,
+            command = command
+        )
     }
 
     @Async
