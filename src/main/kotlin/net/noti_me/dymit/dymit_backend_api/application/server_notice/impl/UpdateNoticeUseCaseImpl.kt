@@ -25,6 +25,7 @@ class UpdateNoticeUseCaseImpl(
 
         notice.updateContent(requester = member,command.content)
         notice.updateTitle(requester = member,command.title)
+        notice.updateCategory(requester = member,command.category)
         val updatedNotice = serverNoticeRepository.save(notice)
         return ServerNoticeDto.from(updatedNotice)
     }

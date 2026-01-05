@@ -8,6 +8,8 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 @Schema(description = "서버 공지 생성 요청")
 @Sanitize
 data class CreateServerNoticeRequest(
+    @Schema(description = "카테고리", example = "이벤트")
+    val category: String,
     @Schema(description = "공지 제목, 100자 제한", example = "서버 점검 안내")
     @field: Size(min = 1, max = 100, message = "공지 제목은 100자 이내로 작성해야 합니다.")
     val title: String,
@@ -20,6 +22,7 @@ data class CreateServerNoticeRequest(
 
     fun toCommand(): CreateServerNoticeCommand {
         return CreateServerNoticeCommand(
+            category = this.category,
             title = this.title,
             content = this.content,
             pushRequired = this.pushRequired

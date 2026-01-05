@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 
 class ServerNoticeDto(
     val id: ObjectId,
+    val category: String,
     val writer: Writer,
     val title: String,
     val content: String,
@@ -21,6 +22,7 @@ class ServerNoticeDto(
 //            println("notice : $notice")
             return ServerNoticeDto(
                 id = notice.id!!,
+                category = notice.category,
                 writer = notice.writer,
                 title = notice.title,
                 content = notice.content,

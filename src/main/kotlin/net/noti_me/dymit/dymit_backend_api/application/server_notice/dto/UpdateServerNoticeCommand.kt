@@ -4,6 +4,7 @@ import org.bson.types.ObjectId
 
 data class UpdateServerNoticeCommand(
     val noticeId: ObjectId,
+    val category: String,
     val title: String,
     val content: String
 ) {

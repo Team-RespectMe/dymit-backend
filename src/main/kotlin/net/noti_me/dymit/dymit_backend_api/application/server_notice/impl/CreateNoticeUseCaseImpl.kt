@@ -23,7 +23,8 @@ class CreateNoticeUseCaseImpl(
         val notice = ServerNotice.create(
             writer = member,
             title = command.title,
-            content = command.content
+            content = command.content,
+            category = command.category
         )
         val savedNotice = serverNoticeRepository.save(notice)
         return ServerNoticeDto.from(savedNotice)

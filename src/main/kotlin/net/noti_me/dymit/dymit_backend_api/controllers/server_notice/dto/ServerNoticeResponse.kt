@@ -10,6 +10,8 @@ import java.time.LocalDateTime
 data class ServerNoticeResponse(
     @Schema(description = "공지 ID", example = "64b8f0c2e1b2c3d4e5f67890")
     val id: String,
+    @Schema(description = "공지 카테고리", example = "이벤트")
+    val category: String,
     @Schema(description = "공지 제목", example = "서버 점검 안내")
     val title: String,
     @Schema(description = "공지 내용", example = "안녕하세요, 서버 점검이 예정되어 있습니다...")
@@ -25,6 +27,7 @@ data class ServerNoticeResponse(
     companion object {
         fun from( dto: ServerNoticeDto ) = ServerNoticeResponse(
             id = dto.id.toString(),
+            category = dto.category,
             title = dto.title,
             content = dto.content,
             createdAt = dto.createdAt,

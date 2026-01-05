@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "server_notices")
 class ServerNotice(
     id: ObjectId? = null,
+    category: String,
     val writer: Writer,
     title: String,
     content: String,
@@ -25,15 +26,20 @@ class ServerNotice(
     var link: Link? = link
         private set
 
+    var category: String = category
+        private set
+
     companion object {
         fun create(
             writer: Member,
+            category: String,
             title: String,
             content: String,
             link: Link? = null
         ): ServerNotice {
             require(title.isNotEmpty() && title.length <= 100) { "공지사항 제목은 비어있을 수 없으며, 100자를 초과할 수 없습니다." }
             require(content.isNotEmpty()) { "공지사항 내용은 비어있을 수 없습니다." }
+            require(category.isNotEmpty()) { "공지사항 카테고리는 비어있을 수 없습니다." }
 
             if ( !writer.isAdmin() ) {
                 throw ForbiddenException(message = "공지사항을 작성할 권한이 없습니다.")
@@ -43,9 +49,20 @@ class ServerNotice(
                 writer = Writer.from(writer),
                 title = title,
                 content = content,
+                category = category,
                 link = link
             )
         }
+    }
+
+    fun updateCategory(requester: Member, newCategory: String) {
+        require(newCategory.isNotEmpty()) { "공지사항 카테고리는 비어있을 수 없습니다." }
+
+        if ( !requester.isAdmin() ) {
+            throw ForbiddenException(message = "공지사항 카테고리를 수정할 권한이 없습니다.")
+        }
+
+        this.category = newCategory
     }
 
     fun updateTitle(requester: Member, newTitle: String) {
