@@ -9,7 +9,8 @@ class KakaoOidcIdTokenPayload(
     val iat: Long,
     val exp: Long,
     val nonce: String,
-    val auth_time: Long
+    val auth_time: Long,
+    val email: String? = null
 ) {
 
     companion object {
@@ -21,7 +22,8 @@ class KakaoOidcIdTokenPayload(
                 iat = decodedJWT.issuedAt.time / 1000,
                 exp = decodedJWT.expiresAt.time / 1000,
                 nonce = decodedJWT.claims["nonce"]?.asString() ?: "",
-                auth_time = decodedJWT.claims["auth_time"]?.asLong() ?: 0L
+                auth_time = decodedJWT.claims["auth_time"]?.asLong() ?: 0L,
+                email = decodedJWT.claims["email"]?.asString()
             )
         }
     }
@@ -33,7 +35,7 @@ class KakaoOidcIdTokenPayload(
             aud = this.aud,
             iat = this.iat,
             exp = this.exp,
-            email = "kakao:${sub}@kakao.com",
+            email = this.email?:"kakao:${sub}@kakao.com",
             name = "KakaoUser_$sub",
             profileImageUrl = null
         )
