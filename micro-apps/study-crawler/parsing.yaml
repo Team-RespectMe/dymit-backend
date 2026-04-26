@@ -1,0 +1,8 @@
+services:
+  - type: inflearn
+    listUrl: "https://www.inflearn.com/community/studies?page={}&order=recent"
+    pagination: 
+      - pageParam: "page"
+        startPage: 1
+        endPage: 5
+    detailUrl: "https://www.inflearn.com/studies/{}"
