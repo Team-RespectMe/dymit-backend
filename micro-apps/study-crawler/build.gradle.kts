@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.1.0"
+version = "0.1.1"
 
 val dockerImageName = "elensar92/study-crawler:${project.version}"
 

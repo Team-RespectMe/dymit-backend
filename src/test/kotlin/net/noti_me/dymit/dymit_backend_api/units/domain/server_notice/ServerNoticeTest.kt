@@ -27,6 +27,7 @@ internal class ServerNoticeTest : BehaviorSpec({
     beforeEach {
         serverNotice = ServerNotice.create(
             writer = admin,
+            category = "일반",
             title = "초기 제목",
             content = "초기 내용"
         )
@@ -41,6 +42,7 @@ internal class ServerNoticeTest : BehaviorSpec({
                val serverNotice = shouldNotThrowAny {
                    ServerNotice.create(
                        writer = admin,
+                       category = "일반",
                        title = title,
                        content = content
                    )
@@ -57,6 +59,7 @@ internal class ServerNoticeTest : BehaviorSpec({
                 shouldThrow< ForbiddenException > {
                     ServerNotice.create(
                         writer = member,
+                        category = "일반",
                         title = title,
                         content = content
                     )
@@ -107,18 +110,21 @@ internal class ServerNoticeTest : BehaviorSpec({
         fun createServerNotice(
             id: ObjectId? = null,
             writer: Member = createMemberEntity(roles = listOf(MemberRole.ROLE_ADMIN)),
+            category: String = "일반",
             title: String = "테스트 공지사항 제목",
             content: String = "테스트 공지사항 내용"
         ): ServerNotice {
             val notice = if ( id == null ) {
                 ServerNotice.create(
                     writer = writer,
+                    category = category,
                     title = title,
                     content = content
                 )
             } else {
                 ServerNotice(
                     id = id,
+                    category = category,
                     writer = Writer.from(writer),
                     title = title,
                     content = content,

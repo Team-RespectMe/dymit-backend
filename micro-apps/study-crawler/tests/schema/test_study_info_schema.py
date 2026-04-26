@@ -32,7 +32,7 @@ def test_study_info_schema_to_document_uses_camel_case_keys() -> None:
     assert "_id" not in document
     assert document["writer"] == "writer"
     assert document["type"] == "INFLEARN"
-    assert document["externalId"] == 99
+    assert document["externalId"] == "99"
     assert document["url"] == "https://example.com/studies/99"
     assert document["title"] == "title"
     assert document["content"] == "content"
@@ -41,5 +41,5 @@ def test_study_info_schema_to_document_uses_camel_case_keys() -> None:
     assert document["isDeleted"] is False
     assert (
         document["_class"]
-        == "net.noti_me.dymit.dymit_backend_api.domain.study.Recruitment"
+        == "net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment"
     )

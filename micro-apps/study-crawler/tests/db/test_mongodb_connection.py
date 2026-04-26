@@ -111,9 +111,9 @@ def test_insert_one_maps_schema_and_returns_inserted_id(monkeypatch: Any) -> Non
     inserted_id = connection.insert_one(_sample_study(77), source_type="INFLEARN")
 
     assert inserted_id == "id-1"
-    assert connection.collection.saved_one_filter == {"type": "INFLEARN", "externalId": 77}
+    assert connection.collection.saved_one_filter == {"type": "INFLEARN", "externalId": "77"}
     assert connection.collection.saved_one_update is not None
-    assert connection.collection.saved_one_update["$set"]["externalId"] == 77
+    assert connection.collection.saved_one_update["$set"]["externalId"] == "77"
     assert connection.collection.saved_one_update["$set"]["type"] == "INFLEARN"
     assert connection.collection.saved_one_upsert is True
 

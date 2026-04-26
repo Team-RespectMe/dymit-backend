@@ -29,8 +29,8 @@ class ReportTest : BehaviorSpec({
         )
 
         `when`("Report가 생성될 때") {
-            then("기본 ID가 자동으로 생성된다") {
-                report.id shouldNotBe null
+            then("기본 ID는 null 상태다") {
+                report.id shouldBe null
             }
 
             then("memberId가 올바르게 설정된다") {

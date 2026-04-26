@@ -4,7 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.application.board.dto.PostCommand
@@ -44,7 +46,7 @@ class PostServiceImplTest : BehaviorSpec({
     val saveGroupPort = mockk<SaveStudyGroupPort>()
     val boardRepository = mockk<BoardRepository>()
     val groupMemberRepository = mockk<StudyGroupMemberRepository>()
-    val eventPublisher = mockk< ApplicationEventPublisher>()
+    val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
     val postService = PostServiceImpl(
         postRepository,
         loadGroupPort,
@@ -214,7 +216,8 @@ class PostServiceImplTest : BehaviorSpec({
         every { loadGroupPort.loadByGroupId(groupObjectId.toHexString()) } returns studyGroup
         every { groupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns groupMember
         every { postRepository.save(any<Post>()) } returns post
-        every { saveGroupPort.persist(any()) } returns studyGroup
+        every { saveGroupPort.update(any()) } returns studyGroup
+        justRun { eventPublisher.publishEvent(any()) }
     }
 
     /**
@@ -256,6 +259,10 @@ class PostServiceImplTest : BehaviorSpec({
         )
     }
 
+    beforeEach {
+        clearAllMocks()
+    }
+
     Given("게시글을 생성할 때") {
 
         When("정상적인 요청으로 게시글을 생성하면") {
@@ -274,7 +281,7 @@ class PostServiceImplTest : BehaviorSpec({
                 result.groupId shouldBe groupObjectId.toHexString()
                 result.boardId shouldBe boardObjectId.toHexString()
                 verify { postRepository.save(any<Post>()) }
-                verify { saveGroupPort.persist(any()) }
+                verify { saveGroupPort.update(any()) }
             }
         }
 
@@ -472,9 +479,12 @@ class PostServiceImplTest : BehaviorSpec({
 
             Then("게시글이 성공적으로 삭제되어야 한다") {
                 // Given
+                every { loadGroupPort.loadByGroupId(groupObjectId.toHexString()) } returns studyGroup
                 every { postRepository.findById(postObjectId.toHexString()) } returns post
                 every { groupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns groupMember
                 every { postRepository.deleteById(postObjectId.toHexString()) } returns true
+                every { postRepository.findLastPostByGroupIdAndBoardId(groupObjectId, boardObjectId) } returns null
+                every { saveGroupPort.update(any()) } returns studyGroup
 
                 // When
                 postService.removePost(
@@ -493,6 +503,7 @@ class PostServiceImplTest : BehaviorSpec({
 
             Then("NotFoundException이 발생해야 한다") {
                 // Given
+                every { loadGroupPort.loadByGroupId(groupObjectId.toHexString()) } returns studyGroup
                 every { postRepository.findById(postObjectId.toHexString()) } returns null
 
                 // When & Then
@@ -512,6 +523,7 @@ class PostServiceImplTest : BehaviorSpec({
 
             Then("NotFoundException이 발생해야 한다") {
                 // Given
+                every { loadGroupPort.loadByGroupId(groupObjectId.toHexString()) } returns studyGroup
                 every { postRepository.findById(postObjectId.toHexString()) } returns post
                 every { groupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns null
 
@@ -538,7 +550,7 @@ class PostServiceImplTest : BehaviorSpec({
                 val posts = listOf(post)
                 every { boardRepository.findById(boardObjectId) } returns board
                 every { groupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns groupMember
-                every { postRepository.findByBoardId(boardObjectId.toHexString()) } returns posts
+                every { postRepository.findByBoardIdLteId(boardObjectId.toHexString(), null, 10) } returns posts
 
                 // When
                 val result = postService.getBoardPostsWithCursor(

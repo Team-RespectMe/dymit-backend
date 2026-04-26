@@ -15,7 +15,7 @@
 """
 
 import os
-from typing import Iterable
+from typing import Any, Iterable
 
 from bson import ObjectId
 from pymongo import MongoClient, UpdateOne
@@ -62,6 +62,10 @@ class MongoStudyInfoConnection:
             upsert=True,
         )
         return result.upserted_id
+
+    def delete_many_by_filter(self, condition: dict[str, Any]) -> int:
+        result = self.collection.delete_many(condition)
+        return result.deleted_count
 
     def insert_many(
         self,

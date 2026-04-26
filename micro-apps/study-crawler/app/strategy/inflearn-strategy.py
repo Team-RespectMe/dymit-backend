@@ -24,6 +24,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
 
+from app.db.mongodb_connection import MongoStudyInfoConnection
 from app.dto.study_info import StudyInfo
 from app.simple_http.http_parser import extract_root_element_html
 from app.simple_http.http_request import fetch_page_source
@@ -145,8 +146,16 @@ class InflearnStrategy(Strategy):
             created_at=self._to_utc_iso8601(created_raw),
         )
 
+    @staticmethod
+    def _clear_inflearn_documents() -> int:
+        connection = MongoStudyInfoConnection()
+        deleted_count = connection.delete_many_by_filter({"type": "INFLEARN"})
+        logger.info("Deleted INFLEARN documents count=%s", deleted_count)
+        return deleted_count
+
     def apply(self, soup: BeautifulSoup) -> list[StudyInfo]:
         _ = soup
+        self._clear_inflearn_documents()
         _, start_page, end_page = self._get_pagination()
         results: list[StudyInfo] = []
         for page in range(start_page, end_page + 1):

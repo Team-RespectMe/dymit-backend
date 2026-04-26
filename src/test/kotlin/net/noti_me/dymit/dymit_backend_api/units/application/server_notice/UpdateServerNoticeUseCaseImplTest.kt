@@ -53,6 +53,7 @@ internal class UpdateServerNoticeUseCaseImplTest : BehaviorSpec() {
         Given("업데이트 할 공지가 주어진다.") {
             val command = UpdateServerNoticeCommand(
                 noticeId = target.id!!,
+                category = "일반",
                 title = "업데이트된 제목",
                 content = "업데이트된 내용"
             )

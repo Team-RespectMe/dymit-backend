@@ -45,6 +45,7 @@ internal class CreateServerNoticeUseCaseImplTest(
 
     given("정상 공지 생성 요청이 주어진다.") {
         val command = CreateServerNoticeCommand(
+            category = "일반",
             title = "공지 제목",
             content = "공지 내용"
         )

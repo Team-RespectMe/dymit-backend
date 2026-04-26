@@ -182,7 +182,7 @@ class PostTest : BehaviorSpec({
 
                 post.writer.nickname shouldBe "수정된 닉네임"
                 post.writer.image.type shouldBe ProfileImageType.PRESET
-                post.writer.image.url shouldBe "http://example.com/updated-image.jpg"
+                post.writer.image.url shouldBe updatedWriter.image.url
             }
         }
 

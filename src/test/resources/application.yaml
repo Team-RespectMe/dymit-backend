@@ -14,11 +14,19 @@ spring:
   data:
     mongodb:
       port: 0
+
+server:
+  port: 0
+
 de.flapdoodle.mongodb.embedded.version: 5.0.14
 
 test:
   id-token:
     google: ${DYMIT_TEST_ID_TOKEN_GOOGLE}
+
+firebase:
+  config:
+    path: ${DYMIT_FIREBASE_CONFIG_PATH:src/test/resources/firebase-test-credentials.json}
 
 jwt:
   secret: ${DYMIT_JWT_SECRET:secret}
@@ -29,6 +37,29 @@ jwt:
     expiration: ${DYMIT_JWT_ACCESS_TOKEN_EXPIRATION:900000} # milliseconds
   refresh-token:
     expiration: ${DYMIT_JWT_REFRESH_TOKEN_EXPIRATION:2592000000} # milliseconds
+
+dymit:
+  oidc:
+    apple:
+      audience: ${DYMIT_OIDC_APPLE_AUDIENCE:test.apple.client.id}
+    google:
+      audience: ${DYMIT_OIDC_GOOGLE_AUDIENCE:test.google.client.id}
+    kakao:
+      audience: ${DYMIT_OIDC_KAKAO_AUDIENCE:test.kakao.client.id}
+
+cdn:
+  domain: ${DYMIT_CDN_DOMAIN:https://cdn.test.local}
+
+log-reporter:
+  discord:
+    webhook:
+      url: ${DYMIT_DISCORD_WEBHOOK_URL:https://discord.test.local/webhook}
+    quartz:
+      webhook:
+        url: ${DYMIT_DISCORD_QUARTZ_WEBHOOK_URL:https://discord.test.local/quartz-webhook}
+
+swagger:
+  domain: ${DYMIT_SWAGGER_DOMAIN:https://api.test.local}
 
 logging:
   level:

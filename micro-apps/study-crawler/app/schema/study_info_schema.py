@@ -26,7 +26,7 @@ class StudyInfoSchema:
     _id: ObjectId | None
     writer: str
     type: str
-    external_id: int
+    external_id: str
     url: str
     title: str
     content: str
@@ -50,7 +50,7 @@ class StudyInfoSchema:
             _id=None,
             writer=study_info.writer,
             type=source_type,
-            external_id=study_info.identifier,
+            external_id=str(study_info.identifier),
             url=study_info.url,
             title=study_info.title,
             content=study_info.content,

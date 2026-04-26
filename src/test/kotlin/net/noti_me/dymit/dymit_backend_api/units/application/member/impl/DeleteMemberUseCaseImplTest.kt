@@ -50,7 +50,7 @@ internal class DeleteMemberUseCaseImplTest(): BehaviorSpec() {
             every { loadMemberPort.loadById(memberId.toString()) } returns member
             every { loadMemberPort.loadById(otherId.toString()) } returns other
             every { loadGroupPort.loadByOwnerId(memberId.toString() ) } returns emptyList()
-            every { saveMemberPort.update(member) } returns member
+            every { saveMemberPort.update(any()) } answers { firstArg() }
         }
 
         Given("삭제할 회원의 ID가 주어진다.") {
