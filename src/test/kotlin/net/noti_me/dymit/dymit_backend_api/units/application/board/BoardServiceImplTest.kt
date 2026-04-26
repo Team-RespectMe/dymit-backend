@@ -404,7 +404,7 @@ class BoardServiceImplTest : BehaviorSpec({
         }
 
         When("다른 그룹의 게시판을 삭제하려고 하면") {
-            Then("현재 구현에서는 삭제가 수행된다") {
+            Then("ForbiddenException이 발생해야 한다") {
                 // Given
                 val otherGroupBoard = Board(
                     id = boardObjectId,
@@ -412,19 +412,19 @@ class BoardServiceImplTest : BehaviorSpec({
                     name = "otherBoard",
                     permissions = mutableSetOf()
                 )
-                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns ownerMember
+
+                every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupObjectId, memberObjectId) } returns null
                 every { boardRepository.findById(boardObjectId) } returns otherGroupBoard
-                every { boardRepository.delete(otherGroupBoard) } returns true
 
-                // When
-                boardService.removeBoard(
-                    memberInfo,
-                    groupObjectId.toHexString(),
-                    boardObjectId.toHexString()
-                )
-
-                // Then
-                verify { boardRepository.delete(otherGroupBoard) }
+                // When & Then
+                val exception = shouldThrow<ForbiddenException> {
+                    boardService.removeBoard(
+                        memberInfo,
+                        groupObjectId.toHexString(),
+                        boardObjectId.toHexString()
+                    )
+                }
+                exception.message shouldBe "권한이 없어 요청을 처리할 수 없습니다."
             }
         }
 
