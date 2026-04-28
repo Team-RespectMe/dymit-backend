@@ -1,0 +1,14 @@
+@startuml
+actor "모바일 앱" as App
+participant "API 서버" as Server
+
+App -> Server : POST /api/v1/auth/oidc \nOIDC 로그인 요청
+Server --> App : 404 NOT FOUND
+
+App -> Server : POST /api/v1/members \n회원가입 요청
+Server --> App : 회원가입 응답
+
+App -> Server : PUT /api/v1/members/{memberId}profile-image \n회원 프로필 이미지 업데이트 요청
+Server --> App : 회원 정보 반환
+
+@enduml
