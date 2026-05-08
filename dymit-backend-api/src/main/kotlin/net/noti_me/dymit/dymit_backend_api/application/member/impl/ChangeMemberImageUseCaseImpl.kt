@@ -66,13 +66,12 @@ class ChangeMemberImageUseCaseImpl(
             member = memberInfo,
             imageFile = imageFile
         )
-        val filePath = result.bucket + "/" + result.key
 
         return MemberProfileImageVo(
             type = ProfileImageType.EXTERNAL,
             fileSize = imageFile.size,
-            thumbnail = filePath,
-            original = filePath,
+            thumbnail = result.accessUrl,
+            original = result.accessUrl,
         )
     }
 

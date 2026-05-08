@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.dto
+package net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto
 
 /**
  * 스터디 모집 목록 조회 Query DTO입니다.

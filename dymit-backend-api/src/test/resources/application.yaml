@@ -49,6 +49,9 @@ dymit:
 
 cdn:
   domain: ${DYMIT_CDN_DOMAIN:https://cdn.test.local}
+  origin:
+    bucketName: ${DYMIT_S3_BUCKET_NAME:}
+    domain: ${DYMIT_S3_DOMAIN:}
 
 log-reporter:
   discord:

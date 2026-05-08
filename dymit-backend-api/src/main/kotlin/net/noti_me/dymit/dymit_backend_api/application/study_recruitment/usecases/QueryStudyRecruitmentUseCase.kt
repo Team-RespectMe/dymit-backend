@@ -1,6 +1,6 @@
-package net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.usecases
+package net.noti_me.dymit.dymit_backend_api.application.study_recruitment.usecases
 
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.dto.QueryStudyRecruitmentQuery
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
 import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
 
 /**

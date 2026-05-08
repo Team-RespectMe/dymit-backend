@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment.dto
 
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.dto.QueryStudyRecruitmentQuery
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
 
 /**
  * 스터디 모집 목록 조회 요청 DTO입니다.

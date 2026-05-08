@@ -1,7 +1,7 @@
-package net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment
+package net.noti_me.dymit.dymit_backend_api.application.study_recruitment
 
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.dto.QueryStudyRecruitmentQuery
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.usecases.QueryStudyRecruitmentUseCase
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.usecases.QueryStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
 import org.springframework.stereotype.Service
 

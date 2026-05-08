@@ -21,7 +21,9 @@ class Post(
     commentCount: Long = 0,
     createdAt: LocalDateTime?= null,
     updatedAt: LocalDateTime? = null,
-    isDeleted: Boolean = false
+    isDeleted: Boolean = false,
+    category: PostCategory = PostCategory.QUESTION,
+    scheduleId: ObjectId? = null
 ) : BaseAggregateRoot<Post>(
     id = id,
     createdAt = createdAt,
@@ -39,6 +41,12 @@ class Post(
         private set
 
     var commentCount = commentCount
+        private set
+
+    var category: PostCategory = category
+        private set
+
+    var scheduleId: ObjectId? = scheduleId
         private set
 
     fun setupCommentCount(newCount: Long) {
@@ -91,5 +99,18 @@ class Post(
             throw IllegalArgumentException("Cannot change writer to a different user")
         }
         this.writer = newWriter
+    }
+
+    fun updateCategory(
+        requesterId: String,
+        newCategory: PostCategory,
+        newScheduleId: ObjectId?
+    ) {
+        if (requesterId != writer.id.toHexString()) {
+            throw ForbiddenException(message = "본인의 게시글이 아닙니다.")
+        }
+
+        this.category = newCategory
+        this.scheduleId = newScheduleId
     }
 }

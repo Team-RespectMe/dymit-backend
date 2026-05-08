@@ -7,8 +7,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.dto.QueryStudyRecruitmentQuery
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.usecases.impl.QueryStudyRecruitmentUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.usecases.impl.QueryStudyRecruitmentUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_recruitment.StudyRecruitmentRepository
 import org.bson.types.ObjectId

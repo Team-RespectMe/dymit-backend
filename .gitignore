@@ -5,7 +5,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .env
-*.env
+*.en
+**/build/
+
 
 ### STS ###
 .apt_generated
@@ -40,3 +42,15 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Python Micro Apps ###
+micro-apps/**/__pycache__/
+micro-apps/**/*.py[cod]
+micro-apps/**/.pytest_cache/
+micro-apps/**/.venv/
+
+## AGENTS
+build/
+**/build/
+.agent-logs/
+**/.agent-logs/

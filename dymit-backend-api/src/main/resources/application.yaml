@@ -50,6 +50,9 @@ server:
 
 cdn: 
   domain: ${DYMIT_CDN_DOMAIN:http://localhost:8080}
+  origin:
+    bucketName: ${DYMIT_S3_BUCKET_NAME}
+    domain: ${DYMIT_S3_DOMAIN}
 
 firebase:
   config:

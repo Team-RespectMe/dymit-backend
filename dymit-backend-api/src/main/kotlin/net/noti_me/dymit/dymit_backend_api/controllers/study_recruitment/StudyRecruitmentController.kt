@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment
 
 import jakarta.annotation.security.RolesAllowed
-import net.noti_me.dymit.dymit_backend_api.adapter.study_recruitment.StudyRecruitmentServiceFacade
+import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.StudyRecruitmentServiceFacade
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -9,7 +9,6 @@ import net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment.dto.Que
 import net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment.dto.StudyRecruitmentResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
