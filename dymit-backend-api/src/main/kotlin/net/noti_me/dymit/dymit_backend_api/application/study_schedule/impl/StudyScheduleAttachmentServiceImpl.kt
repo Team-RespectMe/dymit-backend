@@ -43,7 +43,6 @@ class StudyScheduleAttachmentServiceImpl(
     private val fileUrlResolver: FileUrlResolver
 ) : StudyScheduleAttachmentService {
 
-    @Transactional
     override fun replaceAttachments(
         memberInfo: MemberInfo,
         command: ReplaceStudyScheduleAttachmentsCommand

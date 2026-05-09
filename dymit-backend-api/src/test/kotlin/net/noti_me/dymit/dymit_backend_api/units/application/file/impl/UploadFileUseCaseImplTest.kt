@@ -177,6 +177,45 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
             }
         }
 
+        Given("PNG 파일 업로드 요청이 주어지면") {
+            When("원본 파일과 썸네일 업로드가 모두 성공하면") {
+                Then("이미지로 처리하여 썸네일 메타데이터를 저장하고 응답에 포함한다") {
+                    val multipartFile = createPngMultipartFile()
+                    val command = FileUploadCommand(file = multipartFile).enforceFileApiPolicy()
+                    val savedStatuses = mutableListOf<UserFileStatus>()
+                    val savedFiles = mutableListOf<UserFile>()
+                    val uploadedPaths = mutableListOf<String>()
+
+                    stubRepositorySave(savedStatuses, savedFiles)
+                    every { s3FileService.upload(any(), any()) } answers {
+                        val path = secondArg<String>()
+                        uploadedPaths.add(path)
+                        FileUploadResult(
+                            path = path,
+                            accessUrl = "https://origin.example.com$path"
+                        )
+                    }
+
+                    val result = useCase.uploadFile(loginMember, command)
+
+                    result.status shouldBe UserFileStatus.UPLOADED
+                    result.originalFileName shouldBe "thumbnail-source.png"
+                    result.url shouldBe "https://cdn.example.com${result.path}"
+                    result.thumbnail?.path shouldStartWith "/dymit/thumbnails/"
+                    result.thumbnail?.url shouldBe "https://cdn.example.com${result.thumbnail!!.path}"
+                    uploadedPaths.size shouldBe 2
+                    uploadedPaths[0] shouldStartWith "/dymit/"
+                    uploadedPaths[1] shouldStartWith "/dymit/thumbnails/"
+                    savedStatuses.shouldContainExactly(
+                        UserFileStatus.REQUESTED,
+                        UserFileStatus.UPLOADED
+                    )
+                    savedFiles.first().thumbnailPath shouldStartWith "/dymit/thumbnails/"
+                    verify(exactly = 2) { s3FileService.upload(any(), any()) }
+                }
+            }
+        }
+
         Given("지원하지 않는 매직 넘버를 가진 파일 업로드 요청이 주어지면") {
             When("유즈케이스가 파일 형식을 검증하면") {
                 Then("BadRequestException 을 던지고 영속화나 업로드를 진행하지 않는다") {
@@ -185,14 +224,14 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
                         "forged.jpg",
                         "image/jpeg",
                         byteArrayOf(
-                            0x89.toByte(),
-                            0x50.toByte(),
-                            0x4E.toByte(),
                             0x47.toByte(),
-                            0x0D.toByte(),
-                            0x0A.toByte(),
-                            0x1A.toByte(),
-                            0x0A.toByte()
+                            0x49.toByte(),
+                            0x46.toByte(),
+                            0x38.toByte(),
+                            0x39.toByte(),
+                            0x61.toByte(),
+                            0x00.toByte(),
+                            0x00.toByte()
                         )
                     )
                     val command = FileUploadCommand(file = multipartFile).enforceFileApiPolicy()
@@ -271,6 +310,18 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
         return outputStream.toByteArray()
     }
 
+    private fun createPngBytes(): ByteArray {
+        val image = BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB)
+        val graphics = image.createGraphics()
+        graphics.color = Color(98, 76, 54)
+        graphics.fillRect(0, 0, image.width, image.height)
+        graphics.dispose()
+
+        val outputStream = ByteArrayOutputStream()
+        ImageIO.write(image, "png", outputStream)
+        return outputStream.toByteArray()
+    }
+
     private fun createPdfBytes(): ByteArray {
         return "%PDF-1.7\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF".toByteArray()
     }
@@ -290,6 +341,15 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
             "guide.pdf",
             "application/pdf",
             createPdfBytes()
+        )
+    }
+
+    private fun createPngMultipartFile(): MockMultipartFile {
+        return MockMultipartFile(
+            "file",
+            "thumbnail-source.png",
+            "image/png",
+            createPngBytes()
         )
     }
 }

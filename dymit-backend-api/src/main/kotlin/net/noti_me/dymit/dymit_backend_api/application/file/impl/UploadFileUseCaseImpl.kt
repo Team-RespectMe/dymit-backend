@@ -28,7 +28,7 @@ import kotlin.math.roundToInt
 /**
  * 파일 업로드 유즈케이스 구현체입니다.
  *
- * JPEG/JPG/PDF 파일만 허용하며, JPEG/JPG 업로드 시 JDK ImageIO를 이용해
+ * JPEG/JPG/PNG/PDF 파일만 허용하며, 이미지 업로드 시 JDK ImageIO를 이용해
  * 썸네일을 생성한 뒤 별도 경로에 함께 업로드합니다.
  *
  * @param userFileRepository 파일 메타데이터 저장소
@@ -179,6 +179,7 @@ class UploadFileUseCaseImpl(
      * 매직 넘버를 기준으로 허용된 파일 형식을 판별합니다.
      *
      * @param fileBytes 업로드 파일 바이트 배열
+     * @param command 업로드 요청 커맨드
      * @return 허용된 파일 형식, 아니면 null
      */
     private fun detectSupportedFileType(
@@ -192,6 +193,13 @@ class UploadFileUseCaseImpl(
             fileBytes.copyOfRange(0, JPEG_MAGIC.size).contentEquals(JPEG_MAGIC)
         ) {
             return SupportedFileType.JPEG
+        }
+
+        if ( SupportedFileType.PNG in allowedTypes &&
+            fileBytes.size >= PNG_MAGIC.size &&
+            fileBytes.copyOfRange(0, PNG_MAGIC.size).contentEquals(PNG_MAGIC)
+        ) {
+            return SupportedFileType.PNG
         }
 
         if ( SupportedFileType.PDF in allowedTypes &&
@@ -214,6 +222,7 @@ class UploadFileUseCaseImpl(
         return if ( command.enforceFileApiPolicy ) {
             setOf(
                 SupportedFileType.JPEG,
+                SupportedFileType.PNG,
                 SupportedFileType.PDF
             )
         } else {
@@ -229,21 +238,24 @@ class UploadFileUseCaseImpl(
      */
     private fun resolveUnsupportedFileTypeMessage(command: FileUploadCommand): String {
         return if ( command.enforceFileApiPolicy ) {
-            "지원하지 않는 파일 형식입니다. JPEG/JPG/PDF만 업로드할 수 있습니다."
+            "지원하지 않는 파일 형식입니다. JPEG/JPG/PNG/PDF만 업로드할 수 있습니다."
         } else {
             "지원하지 않는 파일 형식입니다. JPEG/JPG만 업로드할 수 있습니다."
         }
     }
 
     /**
-     * JPEG 이미지 바이트에서 썸네일을 생성합니다.
+     * 이미지 바이트에서 썸네일을 생성합니다.
      *
      * @param imageBytes 원본 이미지 바이트 배열
      * @return 생성된 썸네일 바이트 배열
      */
     private fun createThumbnailBytes(imageBytes: ByteArray): ByteArray {
-        val sourceImage = ImageIO.read(ByteArrayInputStream(imageBytes))
-            ?: throw BadRequestException(message = "유효하지 않은 JPEG 이미지입니다.")
+        val sourceImage = try {
+            ImageIO.read(ByteArrayInputStream(imageBytes))
+        } catch (exception: Exception) {
+            throw BadRequestException(message = "유효하지 않은 이미지입니다.")
+        } ?: throw BadRequestException(message = "유효하지 않은 이미지입니다.")
 
         val resizedImage = resizeImage(sourceImage)
         val outputStream = ByteArrayOutputStream()
@@ -412,6 +424,12 @@ class UploadFileUseCaseImpl(
             formatName = "jpg",
             isImage = true
         ),
+        PNG(
+            contentType = "image/png",
+            extension = "png",
+            formatName = "png",
+            isImage = true
+        ),
         PDF(
             contentType = "application/pdf",
             extension = "pdf",
@@ -460,6 +478,17 @@ class UploadFileUseCaseImpl(
             0xFF.toByte(),
             0xD8.toByte(),
             0xFF.toByte()
+        )
+
+        private val PNG_MAGIC = byteArrayOf(
+            0x89.toByte(),
+            0x50.toByte(),
+            0x4E.toByte(),
+            0x47.toByte(),
+            0x0D.toByte(),
+            0x0A.toByte(),
+            0x1A.toByte(),
+            0x0A.toByte()
         )
 
         private val PDF_MAGIC = byteArrayOf(

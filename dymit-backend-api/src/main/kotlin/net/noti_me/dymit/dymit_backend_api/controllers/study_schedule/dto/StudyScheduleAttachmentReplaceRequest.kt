@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.AssertTrue
+import jakarta.validation.constraints.NotEmpty
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.ReplaceStudyScheduleAttachmentsCommand
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import org.bson.types.ObjectId
@@ -28,6 +29,7 @@ class StudyScheduleAttachmentReplaceRequest(
      */
     @AssertTrue(message = "fileIds에는 유효한 ObjectId만 포함할 수 있습니다.")
     fun hasValidFileIds(): Boolean {
+        if ( fileIds.isEmpty() ) return true
         return fileIds.all(ObjectId::isValid)
     }
 
