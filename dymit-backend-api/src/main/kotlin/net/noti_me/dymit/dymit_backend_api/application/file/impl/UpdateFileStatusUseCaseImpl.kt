@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.file.impl
 
+import net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileDto
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.UpdateFileStatusCommand
 import net.noti_me.dymit.dymit_backend_api.application.file.usecases.UpdateFileStatusUseCase
@@ -8,19 +9,28 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.configs.CDNConfig
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 /**
  * 파일 상태 갱신 유즈케이스 구현체입니다.
  *
  * @param userFileRepository 파일 메타데이터 저장소
- * @param cdnConfig CDN 설정 정보
+ * @param fileUrlResolver 파일 URL 생성기
  */
 @Service
-class UpdateFileStatusUseCaseImpl(
+class UpdateFileStatusUseCaseImpl @Autowired constructor(
     private val userFileRepository: UserFileRepository,
-    private val cdnConfig: CDNConfig
+    private val fileUrlResolver: FileUrlResolver
 ) : UpdateFileStatusUseCase {
+
+    constructor(
+        userFileRepository: UserFileRepository,
+        cdnConfig: CDNConfig
+    ) : this(
+        userFileRepository = userFileRepository,
+        fileUrlResolver = FileUrlResolver(cdnConfig)
+    )
 
     override fun updateStatus(command: UpdateFileStatusCommand): FileDto {
         val userFile = userFileRepository.findById(command.fileId)
@@ -33,8 +43,8 @@ class UpdateFileStatusUseCaseImpl(
         if ( userFile.status == command.status ) {
             return FileDto.from(
                 userFile = userFile,
-                url = buildAccessUrl(userFile.path),
-                thumbnailUrl = buildOptionalAccessUrl(userFile.thumbnailPath)
+                url = fileUrlResolver.resolve(userFile.path),
+                thumbnailUrl = fileUrlResolver.resolveOrNull(userFile.thumbnailPath)
             )
         }
 
@@ -42,8 +52,8 @@ class UpdateFileStatusUseCaseImpl(
         val updatedUserFile = userFileRepository.save(userFile)
         return FileDto.from(
             userFile = updatedUserFile,
-            url = buildAccessUrl(updatedUserFile.path),
-            thumbnailUrl = buildOptionalAccessUrl(updatedUserFile.thumbnailPath)
+            url = fileUrlResolver.resolve(updatedUserFile.path),
+            thumbnailUrl = fileUrlResolver.resolveOrNull(updatedUserFile.thumbnailPath)
         )
     }
 
@@ -51,16 +61,8 @@ class UpdateFileStatusUseCaseImpl(
         return when (current) {
             UserFileStatus.REQUESTED -> next == UserFileStatus.UPLOADED || next == UserFileStatus.FAILED
             UserFileStatus.UPLOADED -> next == UserFileStatus.LINKED || next == UserFileStatus.FAILED
-            UserFileStatus.LINKED -> false
+            UserFileStatus.LINKED -> next == UserFileStatus.UPLOADED
             UserFileStatus.FAILED -> false
         }
-    }
-
-    private fun buildAccessUrl(path: String): String {
-        return cdnConfig.getDomain().trimEnd('/') + path
-    }
-
-    private fun buildOptionalAccessUrl(path: String?): String? {
-        return path?.let(::buildAccessUrl)
     }
 }

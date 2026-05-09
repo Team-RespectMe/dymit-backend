@@ -4,6 +4,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.file.UserFile
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Repository
 
 /**
@@ -26,5 +28,14 @@ class MongoUserFileRepository(
         } catch (exception: IllegalArgumentException) {
             null
         }
+    }
+
+    override fun findByIds(fileIds: List<ObjectId>): List<UserFile> {
+        if ( fileIds.isEmpty() ) {
+            return emptyList()
+        }
+
+        val query = Query(Criteria.where("_id").`in`(fileIds))
+        return mongoTemplate.find(query, UserFile::class.java)
     }
 }

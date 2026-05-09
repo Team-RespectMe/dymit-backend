@@ -61,6 +61,35 @@ internal class UpdateFileStatusUseCaseImplTest : BehaviorSpec() {
             }
         }
 
+        Given("이미 LINKED 상태인 파일이 있으면") {
+            val userFile = UserFile(
+                id = ObjectId.get(),
+                memberId = ObjectId.get(),
+                originalFileName = "linked.pdf",
+                storedFileName = "FILE_2026_05_01_20_10_11.pdf",
+                path = "/dymit/A/B/FILE_2026_05_01_20_10_11.pdf",
+                status = UserFileStatus.LINKED,
+                contentType = "application/pdf",
+                fileSize = 512L
+            )
+            every { userFileRepository.findById(userFile.identifier) } returns userFile
+            every { userFileRepository.save(any()) } answers { firstArg() }
+
+            When("UPLOADED 상태로 갱신하면") {
+                val command = UpdateFileStatusCommand(
+                    fileId = userFile.identifier,
+                    status = UserFileStatus.UPLOADED
+                )
+
+                Then("허용된 상태 전이로 처리된다") {
+                    val result = useCase.updateStatus(command)
+
+                    result.status shouldBe UserFileStatus.UPLOADED
+                    result.url shouldBe "https://cdn.example.com${userFile.path}"
+                }
+            }
+        }
+
         Given("REQUESTED 상태 파일이 있으면") {
             val userFile = UserFile(
                 id = ObjectId.get(),

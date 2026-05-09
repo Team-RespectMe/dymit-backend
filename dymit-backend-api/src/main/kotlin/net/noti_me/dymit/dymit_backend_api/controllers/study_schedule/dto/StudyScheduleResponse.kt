@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDetailDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.vo.LocationVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
 import java.time.LocalDateTime
 
 @Schema(
@@ -51,7 +52,7 @@ class StudyScheduleResponse(
 
     companion object {
         fun from(dto: StudyScheduleDetailDto) : StudyScheduleResponse {
-            return StudyScheduleResponse(
+            val response = StudyScheduleResponse(
                 id = dto.id,
                 session = dto.session,
                 title = dto.title,
@@ -64,6 +65,8 @@ class StudyScheduleResponse(
                 },
                 attending = dto.attending
             )
+            response._links["attachments"] = HateoasLink("/api/v1/study-schedules/${dto.id}/attachments")
+            return response
         }
     }
 }
