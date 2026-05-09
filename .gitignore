@@ -54,5 +54,7 @@ build/
 **/build/
 .agent-logs/
 **/.agent-logs/
-.agent-dev/
-**/.agent-dev/
+.agent-dev/logs/
+**/.agent-dev/logs/
+.agent-dev/tasks/
+**/.agent-dev/tasks/
