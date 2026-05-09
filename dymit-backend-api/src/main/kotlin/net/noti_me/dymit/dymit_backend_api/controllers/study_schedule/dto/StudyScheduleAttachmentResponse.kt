@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleAttachmentDto
+import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.files.dto.FileThumbnailResponse
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import java.time.LocalDateTime
@@ -20,7 +21,7 @@ import java.time.LocalDateTime
  * @param attachedAt 첨부 생성 시각
  */
 @Schema(description = "스터디 일정 첨부 파일 응답")
-data class StudyScheduleAttachmentResponse(
+class StudyScheduleAttachmentResponse(
     @Schema(description = "파일 ID")
     val fileId: String,
     @Schema(description = "원본 파일명")
@@ -39,7 +40,7 @@ data class StudyScheduleAttachmentResponse(
     val status: UserFileStatus,
     @Schema(description = "첨부 생성 시각", example = "2030-10-01T10:00:00")
     val attachedAt: LocalDateTime
-) {
+): BaseResponse() {
 
     companion object {
 

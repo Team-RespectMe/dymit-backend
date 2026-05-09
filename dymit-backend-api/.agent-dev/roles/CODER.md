@@ -41,6 +41,8 @@ CODER Agent는 PM이 작성한 BACKLOG의 TASK를 직접 구현하는 역할을 
   - 컨트롤러의 모든 요청과 응답은 각 컨트롤러 패키지 내부에서 dto 패키지에 정의하여 사용하며 ~Request, ~Response 형태로 클래스 작명합니다.
     - Request 객체는 연관되는 서비스 레이어 호출 시 필요한 Command 객체로 변환하는 메서드를 가지고 있어야합니다. toCommand 같은 형태로 작성합니다.
     - Response 객체는 from 메서드 등을 정의하여 Service Layer의 반환 객환 객체를 응답으로 변환합니다. 
+    - Response 객체는 반드시 BaseResponse 를 상속받아 이용합니다. 그렇지 않으면 Envelop Pattern이 동작하지 않습니다. 
+    - 리스트 응답은 ListResponse 객체를 이용합니다.
 - 서비스 레이어는 기본적으로 application 패키지 내에 각 도메인 별로 패키지를 분리하여 작성합니다. 예시) user, study, application 등
   - 서비스 레이어로 진입할 때는 ~Command, ~Query 형태의 Dto를 생성하여 매개변수로 전달받습니다.
     - 단 로그인 사용자 정보등은 컨트롤러 단에서 자동 주입되어 들어오니 그대로 사용해도 됩니다. 다른 코드를 참고하세요.
