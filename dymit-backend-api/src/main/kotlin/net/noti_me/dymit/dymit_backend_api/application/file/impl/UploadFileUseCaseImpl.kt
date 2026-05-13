@@ -13,17 +13,12 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileReposi
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
-import javax.imageio.ImageIO
-import kotlin.math.roundToInt
 
 /**
  * 파일 업로드 유즈케이스 구현체입니다.
@@ -251,48 +246,12 @@ class UploadFileUseCaseImpl(
      * @return 생성된 썸네일 바이트 배열
      */
     private fun createThumbnailBytes(imageBytes: ByteArray): ByteArray {
-        val sourceImage = try {
-            ImageIO.read(ByteArrayInputStream(imageBytes))
-        } catch (exception: Exception) {
-            throw BadRequestException(message = "유효하지 않은 이미지입니다.")
-        } ?: throw BadRequestException(message = "유효하지 않은 이미지입니다.")
-
-        val resizedImage = resizeImage(sourceImage)
-        val outputStream = ByteArrayOutputStream()
-        val isWritten = ImageIO.write(resizedImage, SupportedFileType.JPEG.formatName, outputStream)
-
-        if ( !isWritten ) {
-            throw InternalServerError(message = "썸네일 생성에 실패했습니다.")
-        }
-
-        return outputStream.toByteArray()
-    }
-
-    /**
-     * 지정된 최대 크기에 맞춰 이미지를 축소합니다.
-     *
-     * @param sourceImage 원본 이미지
-     * @return 리사이즈된 이미지
-     */
-    private fun resizeImage(sourceImage: BufferedImage): BufferedImage {
-        val scale = minOf(
-            THUMBNAIL_MAX_WIDTH.toDouble() / sourceImage.width.toDouble(),
-            THUMBNAIL_MAX_HEIGHT.toDouble() / sourceImage.height.toDouble(),
-            1.0
+        return ThumbnailImageProcessor.createThumbnailBytes(
+            imageBytes = imageBytes,
+            maxWidth = THUMBNAIL_MAX_WIDTH,
+            maxHeight = THUMBNAIL_MAX_HEIGHT,
+            outputFormat = SupportedFileType.JPEG.formatName
         )
-
-        val targetWidth = (sourceImage.width * scale).roundToInt().coerceAtLeast(1)
-        val targetHeight = (sourceImage.height * scale).roundToInt().coerceAtLeast(1)
-        val resizedImage = BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB)
-        val graphics = resizedImage.createGraphics()
-
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        graphics.drawImage(sourceImage, 0, 0, targetWidth, targetHeight, null)
-        graphics.dispose()
-
-        return resizedImage
     }
 
     /**

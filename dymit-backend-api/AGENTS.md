@@ -1,8 +1,7 @@
 # AGENTS.MD
 ---
 ## Project Overview
-이 프로젝트는 스터디 그룹 관리 어플리케이션 DYMIT의 백엔드 프로젝트이다.
-Kotlin 으로 작성되었으며 JVM 21 을 기준으로 작성되어있다.
+Dymit, The study group management application backend project.
 
 ## Global Commands
 
@@ -25,54 +24,58 @@ gradlew pushDockerImage
 
 ## Roles
 
-- 각 에이전트들은 프로젝트 하부에 정의된 자신의 역할에 맞는 roles/<RULE>.md 파일을 항상 포함 하여야 합니다.
-- 각 에이전트들은 자신의 작업 결과에 대한 로그를 .agent-logs/<RULE>_<BRANCHNAME>_YYYY_MM_DD_HH_MM_SS.md 형태로 남겨 다른 에이전트가 자신의 작업을 이해할 수 있도록 충분히 설명해야 합니다.
-- 각 에이전트는 로그를 최대한 간단히 작성해야합니다. 전체 파일을 최대 500자 내로 작성하세요
-- 각 에이전트는 자신의 역할.md 에 작성된 Allowed Actions 에 해당하는 작업만을 수행할 수 있습니다.
+- Each agent must always include the `roles/<RULE>.md` file that matches its role as defined under the project.
+- CODER and TESTER required to read roles/CODE.md
+- Each agent must leave a log of its work results in the following format so that other agents can sufficiently understand what was done:  
+  `.agent-logs/<RULE>_<BRANCHNAME>_YYYY_MM_DD_HH_MM_SS.md`
+- Each agent should keep its log as concise as possible. The entire file must be no more than 500 characters.
+- Each agent may only perform actions listed under **Allowed Actions** in its own role `.md` file.
 
 ### PM
- BACKLOGS.md 파일을 분석하여 필요한 작업 목록을 작성하고 이를 기반으로 coder, tester, reviewer 에게 작업을 할당합니다.
- 서브에이전트 실행을 하는 역할을 수행합니다. 서브에이전트들의 산출물을 보고 판단하여 작업 지속 여부를 판단합니다.
-### Coder 
-PM이 작성한 TASK를 직접 구현하는 역할을 수행합니다.
+
+The PM analyzes the `BACKLOGS.md` file, creates a list of required tasks, and assigns work to the coder, tester, and reviewer based on that list.
+
+The PM is responsible for running sub-agents. Based on the outputs from the sub-agents, the PM determines whether the work should continue.
+
+### Coder
+
+The Coder directly implements the tasks written by the PM.
+
 ### Tester
-PM이 작성한 TASK를 기준으로 Coder가 작성한 로직이 도메인 규칙을 모두 올바르게 구현하였는지 직접 테스트 코드를 작성합니다. 
+
+The Tester writes test code directly to verify whether the logic written by the Coder correctly implements all domain rules, based on the tasks written by the PM.
+
 ### Reviewer
-PM이 작성한 TASK들을 구현한 Coder Output / Tester Output 을 검증하고 main branch 병합에 문제가 없는지 판단합니다.
+
+The Reviewer verifies the Coder Output and Tester Output for the tasks implemented by the Coder, and determines whether there are any issues with merging into the main branch.
 
 ## Global Git Rules
-- 에이전트들은 브랜치의 생성, 스위치, 삭제, 병합, 푸시를 할 수 없습니다. 
-- 에이전트들은 변경사항을 커밋할 수 없습니다.
-- 에이전트들은 현재 브랜치에서만 작업할 수 있습니다. 
-- 에이전트들은 'git diff', 'git status' 를 inspection 을 위해 사용할 수 있습니다.  
-- 모든 sub-agent 들(Coder, Tester, Reviewer)는 현재 브랜치 기준으로만 작업합니다. 
+- Agents are not allowed to create, switch, delete, merge, or push branches.
+- Agents are not allowed to commit changes.
+- Agents may only work on the current branch.
+- Agents may use `git diff` and `git status` for inspection purposes.
+- All sub-agents — Coder, Tester, and Reviewer — must work only based on the current branch.
 
 ## Global Code Style
-- Kotlin Coding Convention 준수
-- 함수의 매개변수가 3개 이상이거나, 함수명이 길어져서 가독성이 떨어지는 경우 아래와 같은 형식으로 작성합니다.
-```kotlin 
-   fun functionName(
-         param1: Type1,
-         param2: Type2,
-         param3: Type3
-    ): ReturnType {
-         // function body
-    }
-```
-- if 문 반복문의 컨디션 부분은 괄호 시작과 끝에 공백을 추가합니다.
+- Follow the Kotlin Coding Conventions.
+- If a function has three or more parameters, or if the function name becomes long enough to reduce readability, write it in the following format:
 ```kotlin
-...
-if ( condition ) {
-
+fun functionName(
+    param1: Type1,
+    param2: Type2,
+    param3: Type3
+): ReturnType {
+    // function body
 }
 ```
-- class 선언 이후 한줄 개행을 합니다.
-- docs 생성을 위한 주석은 KDoc 스타일로 작성합니다.
-- docs 생성을 위해 클래스 정의 상단에 필드와 생성자에 대한 정보를 명시합니다.
-- docs 생성을 위해 메서드 상단에 동작과 매개변수와 반환형에 대한 정보를 명시합니다.
-- docs 생성을 위해 인터페이스 역시 상단에 어떤 기능을 하는 인터페이스인지 작성하고, 인터페이스 메서드에도 동작과 매개변수와 반환형에 대한 정보를 명시합니다.
-- 한 파일의 최대 크기는 500줄로 제한합니다. 그 이상은 파일을 분리하세요.
+- Need a space after 'if' and 'for, while' keywords. and begin, end of parenthesis.
+- Add one blank line after a class declaration.
+- Comments for documentation generation must be written in KDoc style.
+- For documentation generation, specify field and constructor information above class definitions.
+- For documentation generation, specify behavior, parameters, and return type above methods.
+- For documentation generation, also describe what each interface does above the interface definition, and specify behavior, parameters, and return type above interface methods.
+- The maximum size of a single file is limited to 500 lines. Split the file if it exceeds this limit.
 
 ## GLOBAL RULES
-- 사람이 읽는걸 대상으로 하는 파일은 한글로 작성한다.
-- 에이전트 간 통신은 영어로 작성한다.
+- Files intended to be read by humans must be written in Korean.
+- Communication between agents must be written in English.

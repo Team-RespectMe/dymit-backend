@@ -13,6 +13,10 @@ spring:
       username: ${DYMIT_MONGODB_USERNAME:test_admin}
       password: ${DYMIT_MONGODB_PASSWORD:test1234}
       authentication-database: ${DYMIT_MONGODB_AUTHENTICATION_DATABASE:dymit}
+  servlet:
+    multipart:
+      max-file-size: ${DYMIT_SERVER_MAX_FILE_SIZE:10MB}
+      max-request-size: ${DYMIT_SERVER_MAX_REQUEST_SIZE:10MB}
 
 jwt:
   secret: ${DYMIT_JWT_SECRET:secret}
@@ -43,9 +47,6 @@ server:
   servlet:
     encoding:
       force-response: true
-    multipart:
-      max-file-size: ${DYMIT_SERVER_MAX_FILE_SIZE:10MB}
-      max-request-size: ${DYMIT_SERVER_MAX_REQUEST_SIZE:10MB}
 
 cdn: 
   domain: ${DYMIT_CDN_DOMAIN:http://localhost:8080}

@@ -1,17 +1,15 @@
 # BACKLOG
 ---
-## TASK 3: File API 요구사항 변경 
+## TASK 3: Image Thumbnail Issue.
 
-**상태** 완료
+**STATUS** Done
 
-**배경**
+**BACKGROUND**
+아이폰에서 가로모드로 촬영한 이미지가 파일 업로드 API를 통해 전달되면 썸네일이 좌측으로 90도 돌아간 상태로 생성이 됩니다.
+가로가 더 긴 이미지에 대해서 이렇게 생성되는 것이 아닙니다. 아이폰 13 미니 기준으로 3024x4032 이미지인데 이렇게 생성되네요.
+회전이 되지않고 이미지만 비율을 유지한 상태로 축소만 된 이미지를 썸네일로 생성하도록 수정이 필요합니다.
 
-File API 에서 파일 업로드 시 지원 파일 목록에 PNG가 추가되어야 합니다.
-
-- 이미지 파일이므로 썸네일 생성 로직은 동일하게 적용되어야 합니다.
-- 이미지 처리 로직에서 아마 PNG 매직넘버 체크를 하는 부분만 추가되면 될 것 같으니 확인.
-
-**검토 대상**
+**REVIEW TARGET**
 - dymit-backend-api/src/main/kotlin/net/noti_me/dymit/dymit_backend_api/ports/file/**
 - dymit-backend-api/src/main/kotlin/net/noti_me/dymit/dymit_backend_api/controllers/files/**
 - dymit-backend-api/src/main/kotlin/net/noti_me/dymit/dymit_backend_api/domain/file/**

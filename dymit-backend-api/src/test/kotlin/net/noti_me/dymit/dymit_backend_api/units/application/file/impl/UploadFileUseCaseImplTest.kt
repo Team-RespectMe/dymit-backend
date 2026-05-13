@@ -24,8 +24,10 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import org.bson.types.ObjectId
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.web.multipart.MultipartFile
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
@@ -63,11 +65,16 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
                     val savedStatuses = mutableListOf<UserFileStatus>()
                     val savedFiles = mutableListOf<UserFile>()
                     val uploadedPaths = mutableListOf<String>()
+                    var uploadedThumbnailSize: Pair<Int, Int>? = null
 
                     stubRepositorySave(savedStatuses, savedFiles)
                     every { s3FileService.upload(any(), any()) } answers {
+                        val uploadedFile = firstArg<MultipartFile>()
                         val path = secondArg<String>()
                         uploadedPaths.add(path)
+                        if ( path.startsWith("/dymit/thumbnails/") ) {
+                            uploadedThumbnailSize = readImageSize(uploadedFile.bytes)
+                        }
                         FileUploadResult(
                             path = path,
                             accessUrl = "https://origin.example.com$path"
@@ -84,6 +91,7 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
                     uploadedPaths.size shouldBe 2
                     uploadedPaths[0] shouldStartWith "/dymit/"
                     uploadedPaths[1] shouldStartWith "/dymit/thumbnails/"
+                    uploadedThumbnailSize shouldBe Pair(320, 240)
                     savedStatuses.shouldContainExactly(
                         UserFileStatus.REQUESTED,
                         UserFileStatus.UPLOADED
@@ -173,6 +181,44 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
                         UserFileStatus.REQUESTED,
                         UserFileStatus.FAILED
                     )
+                }
+            }
+        }
+
+        Given("orientation 메타데이터가 포함된 JPEG 파일 업로드 요청이 주어지면") {
+            When("원본 파일과 썸네일 업로드가 모두 성공하면") {
+                Then("썸네일은 메타데이터 기준 표시 방향으로 보정된다") {
+                    val multipartFile = createJpegMultipartFileWithOrientation(
+                        orientationValue = 6,
+                        width = 120,
+                        height = 60
+                    )
+                    val command = FileUploadCommand(file = multipartFile).enforceFileApiPolicy()
+                    val savedStatuses = mutableListOf<UserFileStatus>()
+                    var uploadedThumbnailSize: Pair<Int, Int>? = null
+
+                    stubRepositorySave(savedStatuses)
+                    every { s3FileService.upload(any(), any()) } answers {
+                        val uploadedFile = firstArg<MultipartFile>()
+                        val path = secondArg<String>()
+                        if ( path.startsWith("/dymit/thumbnails/") ) {
+                            uploadedThumbnailSize = readImageSize(uploadedFile.bytes)
+                        }
+                        FileUploadResult(
+                            path = path,
+                            accessUrl = "https://origin.example.com$path"
+                        )
+                    }
+
+                    val result = useCase.uploadFile(loginMember, command)
+
+                    result.status shouldBe UserFileStatus.UPLOADED
+                    uploadedThumbnailSize shouldBe Pair(60, 120)
+                    savedStatuses.shouldContainExactly(
+                        UserFileStatus.REQUESTED,
+                        UserFileStatus.UPLOADED
+                    )
+                    verify(exactly = 2) { s3FileService.upload(any(), any()) }
                 }
             }
         }
@@ -298,16 +344,91 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
         )
     }
 
-    private fun createJpegBytes(): ByteArray {
-        val image = BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB)
+    private fun createJpegBytes(
+        width: Int = 640,
+        height: Int = 480,
+        color: Color = Color(12, 34, 56)
+    ): ByteArray {
+        val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
         val graphics = image.createGraphics()
-        graphics.color = Color(12, 34, 56)
+        graphics.color = color
         graphics.fillRect(0, 0, image.width, image.height)
         graphics.dispose()
 
         val outputStream = ByteArrayOutputStream()
         ImageIO.write(image, "jpg", outputStream)
         return outputStream.toByteArray()
+    }
+
+    private fun createJpegWithOrientationBytes(
+        orientationValue: Int,
+        width: Int,
+        height: Int
+    ): ByteArray {
+        val jpegBytes = createJpegBytes(
+            width = width,
+            height = height,
+            color = Color(120, 80, 40)
+        )
+        val exifSegmentData = createExifOrientationSegmentData(orientationValue)
+        val segmentLength = exifSegmentData.size + 2
+        val outputStream = ByteArrayOutputStream()
+
+        outputStream.write(jpegBytes, 0, 2)
+        outputStream.write(0xFF)
+        outputStream.write(0xE1)
+        outputStream.write(segmentLength shr 8)
+        outputStream.write(segmentLength and 0xFF)
+        outputStream.write(exifSegmentData)
+        outputStream.write(jpegBytes, 2, jpegBytes.size - 2)
+
+        return outputStream.toByteArray()
+    }
+
+    private fun createExifOrientationSegmentData(orientationValue: Int): ByteArray {
+        val orientationHigh = ((orientationValue shr 8) and 0xFF).toByte()
+        val orientationLow = (orientationValue and 0xFF).toByte()
+
+        return byteArrayOf(
+            0x45.toByte(),
+            0x78.toByte(),
+            0x69.toByte(),
+            0x66.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x4D.toByte(),
+            0x4D.toByte(),
+            0x00.toByte(),
+            0x2A.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x08.toByte(),
+            0x00.toByte(),
+            0x01.toByte(),
+            0x01.toByte(),
+            0x12.toByte(),
+            0x00.toByte(),
+            0x03.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x01.toByte(),
+            orientationHigh,
+            orientationLow,
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte(),
+            0x00.toByte()
+        )
+    }
+
+    private fun readImageSize(imageBytes: ByteArray): Pair<Int, Int> {
+        val image = ImageIO.read(ByteArrayInputStream(imageBytes))
+            ?: error("이미지 디코딩 결과가 null 입니다.")
+        return image.width to image.height
     }
 
     private fun createPngBytes(): ByteArray {
@@ -332,6 +453,23 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
             "thumbnail-source.jpg",
             "image/jpeg",
             createJpegBytes()
+        )
+    }
+
+    private fun createJpegMultipartFileWithOrientation(
+        orientationValue: Int,
+        width: Int,
+        height: Int
+    ): MockMultipartFile {
+        return MockMultipartFile(
+            "file",
+            "thumbnail-oriented.jpg",
+            "image/jpeg",
+            createJpegWithOrientationBytes(
+                orientationValue = orientationValue,
+                width = width,
+                height = height
+            )
         )
     }
 
