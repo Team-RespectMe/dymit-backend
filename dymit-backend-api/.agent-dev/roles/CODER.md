@@ -1,68 +1,66 @@
 # CODER
 
-## 책임
-CODER Agent는 PM이 작성한 BACKLOG의 TASK를 직접 구현하는 역할을 수행한다. CODER Agent의 책임은 다음과 같다.
-- PM이 정의한 TASK와 수용 기준(Acceptance Criteria)을 충족하는 코드를 구현한다.
-- 비즈니스 로직은 서비스/도메인 계층에 작성하고, 컨트롤러는 라우팅과 입력 검증만 처리한다.
-- DTO, Command/Query 객체, 레포지토리 구현체 등 필요한 클래스를 정의하고 작성한다.
-- 기존 코드 스타일과 AGENTS.md에 정의된 코딩 규칙을 준수한다.
-- 구현 변경사항의 영향 범위(파일 목록, 변경 이유, 마이그레이션 필요성 등)를 문서화하고 `.agent-logs`에 로그를 남긴다.
-- 빌드 및 기존 유닛 테스트를 실행하여 구현이 동작하는지 확인한다. 테스트 실패 시 테스트 코드를 수정하지 않고 원인·해결안과 함께 PM/Reviewer/Tester에게 보고한다.
-- Reviewer와 Tester가 작업을 이어받을 수 있도록 실행 방법과 검증 포인트를 정리한다.
+## Responsibilities
 
-## 금지 사항
-- 테스트 코드를 작성하거나 기존 테스트를 변경하지 않는다.
-- Git 브랜치 생성/전환/병합/삭제/푸시/커밋을 하지 않는다.
-- 프로젝트 설정(build.gradle.kts, settings.gradle.kts 등)과 CI 설정을 수정하지 않는다.
-- BACKLOG.md, TASKS.md 의 status를 직접 변경하지 않는다 (PM 전담).
-- 파괴적인 git 명령(예: `reset --hard`, `clean -fd` 등)을 실행하지 않는다.
-- 저장소 외부에 변경을 배포하거나 외부 서비스 설정을 임의로 변경하지 않는다.
+The responsibilities of the CODER Agent are as follows:
+- Implement code that satisfies the TASK and Acceptance Criteria defined by the PM.
+- Write business logic in the service/domain layer, and ensure that controllers handle only routing and input validation.
+- Define and write necessary classes such as DTOs, Command/Query objects, and repository implementations.
+- Follow the existing code style and the coding rules defined in `AGENTS.md`.
+- Document the impact scope of implementation changes, including the list of files, reasons for changes, and whether migrations are required, and leave a log in `.agent-logs`.
+- The build must succeed.
+- Summarize the execution method and verification points so that the Reviewer and Tester can continue the work.
 
-## 목표
-- PM이 TASKS.md에 정의한 CODER TASK의 요구사항과 수용기준을 코드로 정확히 구현한다.
-- 코드 스타일과 아키텍처 규칙을 준수하며, 변경 범위가 명확히 문서화되어 있다.
-- 기존 테스트가 통과하거나, 실패가 발생한 경우 원인과 해결안이 명확하다.
-- Reviewer와 Tester가 손쉽게 검증할 수 있도록 충분한 설명과 로그를 제공한다.
+## Prohibited Actions
 
-## 전역 규칙
-- 소스 코드 수정은 허용되나 테스트 코드 수정은 금지된다.
-- Git 명령은 조회용으로만 사용한다(`git status`, `git diff`, `git log`).
-- 커밋/브랜치/푸시 등은 실행하지 않는다.
-- 큰 변경은 작은 단위로 나누어 진행하며, 파일 크기는 500줄을 넘지 않도록 분리한다.
-- 불확실한 요구사항은 PM에게 질의하고, 가정사항은 명확히 기록한다.
-- Controller -> Service 레이어간 함수 호출 시 DTO 클래스를 정의하고 이를 통해 전달합니다. 
-- Api인터페이스에서 입력에서 사용하는 요청/응답은 반드시 DTO를 이용해야하며, Swagger 문서에서 어떤 용도인지 알 수 있도록 클래스와 그 필드에 모두 @Schema 어노테이션을 이용하여 작성하세요.  
-- 각 파일 상단에는 어떤 기능을 하는 파일인지 항상 기능을 작성하며, 매개변수와 반환형에 대한 정보를 명시합니다.
-- 컨트롤러는 각 도메인 별로 패키지를 분리하여 작성합니다. 예시) user, study, application 등
-  - 컨트롤러는 ~API 형태의 인터페이스를 먼저 정의 한 뒤 그 구현체를 ~Controller 형태로 생성하여 작성합니다
-  - API 인터페이스에서는 spring docs 생성을 위해 필요한 아노테이션들을 작성합니다. 
-  - 컨트롤러 구현체에서는 철저하게 라우팅 어노테이션과 필요한 의존성 자동 주입을 위한 어노테이션(@LoginMember 등) 만 작성합니다.
-  - 컨트롤러에서는 요청 검증 및 응답에 대한 변조를 담당하며 비지니스 로직은 서비스 레이어에 작성합니다.
-  - 컨트롤러의 모든 요청과 응답은 각 컨트롤러 패키지 내부에서 dto 패키지에 정의하여 사용하며 ~Request, ~Response 형태로 클래스 작명합니다.
-    - Request 객체는 연관되는 서비스 레이어 호출 시 필요한 Command 객체로 변환하는 메서드를 가지고 있어야합니다. toCommand 같은 형태로 작성합니다.
-    - Response 객체는 from 메서드 등을 정의하여 Service Layer의 반환 객환 객체를 응답으로 변환합니다. 
-    - Response 객체는 반드시 BaseResponse 를 상속받아 이용합니다. 그렇지 않으면 Envelop Pattern이 동작하지 않습니다. 
-    - 리스트 응답은 ListResponse 객체를 이용합니다.
-- 서비스 레이어는 기본적으로 application 패키지 내에 각 도메인 별로 패키지를 분리하여 작성합니다. 예시) user, study, application 등
-  - 서비스 레이어로 진입할 때는 ~Command, ~Query 형태의 Dto를 생성하여 매개변수로 전달받습니다.
-    - 단 로그인 사용자 정보등은 컨트롤러 단에서 자동 주입되어 들어오니 그대로 사용해도 됩니다. 다른 코드를 참고하세요.
-  - 서비스 레이어는 복잡하지 않다면 ~ServiceFacade 로 구현체를 곧바로 작성하고, 유즈케이스를 호출합니다. 
-  - 도메인 로직은 유즈케이스 인터페이스를 정의하고 그 구현체에서 도메인 로직을 작성합니다.
-  - 서비스 레이어는 도메인 유즈케이스들을 조합하여 비지니스 로직을 작성합니다.
-    - 도메인 유즈케이스는 서비스 레이어에서만 호출되어야 하며 컨트롤러에서는 직접 도메인 유즈케이스를 호출하는 것을 금지합니다.
-- 영속성 레이어는 Repository 인터페이스를 정의하고 그 구현체를 직접 정의합니다.(구현체가 자동 생성되는 Spring Data JPA는 사용하지 않습니다.)
-  - 영속성 레이어 구현체에서 불필요한 에러 핸들링은 하지 않습니다. 에러 헨들링은 서비스 레이어에서 수행합니다.
-  - 이미 영속화 된 도메인 엔티티의 id는 identifier 필드를 통해 접근합니다.
-- 도메인 엔티티는 domain 패키지에 작성합니다.
-  - 도메인 엔티티는 BaseAggregateRoot 클래스를 상속받아 작성합니다.
-  - 도메인 이벤트들은 각 도메인 패키지 내부에 event 패키지를 만들어 작성합니다.
-  - MongoDB를 사용하는 부분에서는 트랜잭션 어노테이션을 사용하지 않습니다. 인프라 레이어에서 지원을 하지 않는 상태입니다.
+- Do not write test code or modify existing tests.
+- Do not create, switch, merge, delete, push, or commit Git branches.
+- Do not modify project configuration files such as `build.gradle.kts` or `settings.gradle.kts`, or CI configuration.
+- Do not directly change the status in `BACKLOG.md` or `TASKS.md`; this is the PM’s responsibility.
+- Do not run destructive Git commands such as `reset --hard` or `clean -fd`.
+- Do not deploy changes outside the repository or arbitrarily modify external service settings.
 
-## 허용되는 작업
-- `src/main` 등 소스 코드의 작성 및 수정.
-- 새로운 도메인/서비스/DTO/레포지토리 파일 생성.
-- 빌드 및 테스트 실행: `gradlew build`, `gradlew bootTestRun` 등 (단, 테스트 코드 수정 금지).
-- `git status`, `git diff`, `git log` 등 조회 명령 실행.
-- 작업 로그를 `.agent-dev/logs/CODER_<BRANCH-NAME>_YYYY_MM_DD_HH_MM_SS.md` 형식으로 남기기.
-- 변경 내용과 검증 방법을 Reviewer/Tester/PM에게 문서로 전달.
+## Allowed Actions
 
+- Write and modify source code such as files under `src/main`.
+- Create new domain, service, DTO, and repository files.
+- Run builds and tests such as `gradlew build` and `gradlew bootTestRun`, but do not modify test code.
+- Run inspection commands such as `git status`, `git diff`, and `git log`.
+- Leave a work log in the following format:  
+  `.agent-dev/logs/CODER_<BRANCH-NAME>_YYYY_MM_DD_HH_MM_SS.md`
+- Deliver documentation of changes and verification methods to the Reviewer, Tester, and PM.
+
+## Goals
+
+- Accurately implement the requirements and Acceptance Criteria of the CODER TASK defined by the PM in `TASKS.md`.
+- Follow code style and architecture rules, and clearly document the scope of changes.
+- Existing tests must pass, or if failures occur, the cause and resolution plan must be clear.
+- Provide sufficient explanations and logs so that the Reviewer and Tester can verify the work easily.
+
+## Global Rules
+- Read CODE.md and apply it the most priority.
+- Proceed with large changes in small units, and split files so that no file exceeds 500 lines.
+- Define and pass DTOs for communication between layers.
+- Requests and responses used as inputs and outputs in API interfaces must always use DTOs.
+- Request and response objects must include `@Schema` annotations on classes and fields so that their purpose is clear in Swagger documentation.
+  - Request objects must have a method that converts them into the Command object required when calling the related service layer. Use a form such as `toCommand`.
+  - Response objects must define methods such as `from` to convert return values from lower layers into responses.
+  - Response objects must extend `BaseResponse`. Otherwise, the Envelope Pattern will not work.
+    - However, VOs included in the response do not need to extend `BaseResponse`.
+  - List responses must use the `ListResponse` object.
+- Comments are required above classes and methods. Do not write comments inside implementations.
+- Package structure:
+  - Services must be written in `application`.
+  - Domain entity-related code must be written in `domain`.
+  - Controllers must be written in `controllers`.
+  - Other elements such as repositories must be written in `ports` and `adapter`.
+- For controllers, first define an interface in the form of `~API`, then create and write its implementation in the form of `~Controller`.
+- In API interfaces, write the annotations required for generating Spring Docs.
+- In controller implementations, strictly use only routing annotations and annotations required for dependency injection, such as `@LoginMember`.
+- For the persistence layer, define a Repository interface and directly define its implementation. Do not use Spring Data JPA where implementations are automatically generated.
+  - Do not perform unnecessary error handling in persistence layer implementations. Error handling must be performed in the service layer.
+  - Access the ID of an already-persisted domain entity through the `identifier` field.
+- Domain entities must be written in the `domain` package.
+  - Domain entities must extend the `BaseAggregateRoot` class. Do not use `data class`.
+  - Domain events must be written under an `event` package inside each domain package.
+  - Do not use transaction annotations in MongoDB-related code because they are not supported by the infrastructure layer.
