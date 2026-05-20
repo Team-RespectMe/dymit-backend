@@ -141,7 +141,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
 
         Given("기존 첨부 2개 중 1개를 제거하는 교체 요청이 주어지면") {
             When("replaceAttachments를 호출하면") {
-                Then("제거된 파일 상태를 UPLOADED로 되돌린다") {
+                Then("제거된 파일 상태를 UNREFERENCED로 변경한다") {
                     val removedFileId = ObjectId.get()
                     val remainedFileId = ObjectId.get()
 
@@ -162,7 +162,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
                             scheduleId = scheduleId
                         )
                     } returns emptySet()
-                    every { fileServiceFacade.updateFileStatus(any()) } returns createFileDto(removedFileId, UserFileStatus.UPLOADED)
+                    every { fileServiceFacade.updateFileStatus(any()) } returns createFileDto(removedFileId, UserFileStatus.UNREFERENCED)
 
                     service.replaceAttachments(
                         memberInfo = memberInfo,
@@ -174,7 +174,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
 
                     verify(exactly = 1) {
                         fileServiceFacade.updateFileStatus(match {
-                            it.fileId == removedFileId.toHexString() && it.status == UserFileStatus.UPLOADED
+                            it.fileId == removedFileId.toHexString() && it.status == UserFileStatus.UNREFERENCED
                         })
                     }
                     verify(exactly = 0) {
@@ -194,7 +194,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
 
         Given("현재 일정에서 제거되지만 다른 일정에 여전히 첨부된 파일이 있으면") {
             When("replaceAttachments를 호출하면") {
-                Then("해당 파일은 UPLOADED로 강등하지 않는다") {
+                Then("해당 파일은 UNREFERENCED로 강등하지 않는다") {
                     val removedButStillLinkedFileId = ObjectId.get()
                     val remainedFileId = ObjectId.get()
 
@@ -232,7 +232,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
                     }
                     verify(exactly = 0) {
                         fileServiceFacade.updateFileStatus(match {
-                            it.fileId == removedButStillLinkedFileId.toHexString() && it.status == UserFileStatus.UPLOADED
+                            it.fileId == removedButStillLinkedFileId.toHexString() && it.status == UserFileStatus.UNREFERENCED
                         })
                     }
                 }
@@ -241,7 +241,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
 
         Given("빈 fileIds로 전체 해제 요청이 주어지면") {
             When("replaceAttachments를 호출하면") {
-                Then("모든 기존 파일을 UPLOADED로 되돌리고 첨부를 비운다") {
+                Then("모든 기존 파일을 UNREFERENCED로 변경하고 첨부를 비운다") {
                     val firstFileId = ObjectId.get()
                     val secondFileId = ObjectId.get()
 
@@ -259,7 +259,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
                             scheduleId = scheduleId
                         )
                     } returns emptySet()
-                    every { fileServiceFacade.updateFileStatus(any()) } returns createFileDto(firstFileId, UserFileStatus.UPLOADED)
+                    every { fileServiceFacade.updateFileStatus(any()) } returns createFileDto(firstFileId, UserFileStatus.UNREFERENCED)
 
                     val result = service.replaceAttachments(
                         memberInfo = memberInfo,
@@ -271,12 +271,12 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
 
                     verify(exactly = 1) {
                         fileServiceFacade.updateFileStatus(match {
-                            it.fileId == firstFileId.toHexString() && it.status == UserFileStatus.UPLOADED
+                            it.fileId == firstFileId.toHexString() && it.status == UserFileStatus.UNREFERENCED
                         })
                     }
                     verify(exactly = 1) {
                         fileServiceFacade.updateFileStatus(match {
-                            it.fileId == secondFileId.toHexString() && it.status == UserFileStatus.UPLOADED
+                            it.fileId == secondFileId.toHexString() && it.status == UserFileStatus.UNREFERENCED
                         })
                     }
                     verify(exactly = 1) {
@@ -401,6 +401,41 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
                     verify(exactly = 0) {
                         scheduleAttachmentRepository.replaceByScheduleId(any(), any())
                     }
+                }
+            }
+        }
+
+        Given("UNREFERENCED 상태 파일을 첨부하려고 하면") {
+            When("replaceAttachments를 호출하면") {
+                Then("첨부 가능하며 LINKED로 승격된다") {
+                    val fileId = ObjectId.get()
+
+                    stubMemberValidation(memberExists = true)
+                    every { scheduleAttachmentRepository.findByScheduleId(scheduleId) } returns emptyList()
+                    every { userFileRepository.findByIds(listOf(fileId)) } returnsMany listOf(
+                        listOf(createUserFile(id = fileId, status = UserFileStatus.UNREFERENCED)),
+                        listOf(createUserFile(id = fileId, status = UserFileStatus.LINKED))
+                    )
+                    every {
+                        scheduleAttachmentRepository.replaceByScheduleId(scheduleId = scheduleId, attachments = any())
+                    } answers { secondArg() }
+                    every { fileServiceFacade.updateFileStatus(any()) } returns createFileDto(fileId, UserFileStatus.LINKED)
+
+                    val result = service.replaceAttachments(
+                        memberInfo = memberInfo,
+                        command = ReplaceStudyScheduleAttachmentsCommand(
+                            scheduleId = scheduleId.toHexString(),
+                            fileIds = listOf(fileId.toHexString())
+                        )
+                    )
+
+                    verify(exactly = 1) {
+                        fileServiceFacade.updateFileStatus(match {
+                            it.fileId == fileId.toHexString() && it.status == UserFileStatus.LINKED
+                        })
+                    }
+                    result[0].status shouldBe UserFileStatus.LINKED
+                    result.map { it.fileId } shouldContainExactly listOf(fileId.toHexString())
                 }
             }
         }

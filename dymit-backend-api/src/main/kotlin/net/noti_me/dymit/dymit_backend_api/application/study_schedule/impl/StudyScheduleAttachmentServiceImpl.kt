@@ -56,8 +56,7 @@ class StudyScheduleAttachmentServiceImpl(
         val currentAttachments = scheduleAttachmentRepository.findByScheduleId(scheduleId)
         val currentFileIds = currentAttachments.map { it.fileId }.toSet()
         val requestedFileIdSet = requestedFileIds.toSet()
-
-        loadAndValidateRequestedFiles(requestedFileIds)
+        val requestedFiles = loadAndValidateRequestedFiles(requestedFileIds)
 
         val removedFileIds = currentFileIds.filter { it !in requestedFileIdSet }
         val linkedFileIds = requestedFileIdSet.filter { it !in currentFileIds }
@@ -73,13 +72,13 @@ class StudyScheduleAttachmentServiceImpl(
         }
         val filesToDowngrade = removedFileIds.filter { it !in attachedElsewhereFileIds }
 
-        updateFileStatuses(
+        val latestRequestedFileStatuses = updateFileStatuses(
             fileIds = linkedFileIds,
             status = UserFileStatus.LINKED
         )
         updateFileStatuses(
             fileIds = filesToDowngrade,
-            status = UserFileStatus.UPLOADED
+            status = UserFileStatus.UNREFERENCED
         )
 
         val finalAttachments = scheduleAttachmentRepository.replaceByScheduleId(
@@ -94,11 +93,7 @@ class StudyScheduleAttachmentServiceImpl(
 
         return buildAttachmentDtos(
             attachments = finalAttachments,
-            requestedFiles = if ( requestedFileIds.isEmpty() ) {
-                emptyList()
-            } else {
-                userFileRepository.findByIds(requestedFileIds)
-            }
+            requestedFiles = requestedFiles.applyLatestStatuses(latestRequestedFileStatuses)
         )
     }
 
@@ -152,7 +147,11 @@ class StudyScheduleAttachmentServiceImpl(
         }
 
         requestedFiles.forEach { userFile ->
-            if ( userFile.status != UserFileStatus.UPLOADED && userFile.status != UserFileStatus.LINKED ) {
+            if (
+                userFile.status != UserFileStatus.UPLOADED &&
+                userFile.status != UserFileStatus.LINKED &&
+                userFile.status != UserFileStatus.UNREFERENCED
+            ) {
                 throw BadRequestException(message = "업로드 완료된 파일만 첨부할 수 있습니다.")
             }
         }
@@ -180,14 +179,23 @@ class StudyScheduleAttachmentServiceImpl(
     private fun updateFileStatuses(
         fileIds: List<ObjectId>,
         status: UserFileStatus
-    ) {
-        fileIds.forEach { fileId ->
+    ): Map<ObjectId, UserFileStatus> {
+        return fileIds.associateWith { fileId ->
             fileServiceFacade.updateFileStatus(
                 UpdateFileStatusCommand(
                     fileId = fileId.toHexString(),
                     status = status
                 )
-            )
+            ).status
         }
+    }
+
+    private fun List<UserFile>.applyLatestStatuses(
+        latestStatuses: Map<ObjectId, UserFileStatus>
+    ): List<UserFile> {
+        forEach { userFile ->
+            latestStatuses[userFile.id]?.let(userFile::updateStatus)
+        }
+        return this
     }
 }

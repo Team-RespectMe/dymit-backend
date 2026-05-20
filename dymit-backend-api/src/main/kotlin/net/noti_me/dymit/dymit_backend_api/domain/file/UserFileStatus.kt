@@ -7,5 +7,7 @@ enum class UserFileStatus {
     REQUESTED,
     UPLOADED,
     LINKED,
+    UNREFERENCED,
+    DELETED_IN_S3,
     FAILED
 }

@@ -62,20 +62,19 @@ internal class UpdateFileStatusUseCaseImplTest : BehaviorSpec() {
         }
 
         Given("이미 LINKED 상태인 파일이 있으면") {
-            val userFile = UserFile(
-                id = ObjectId.get(),
-                memberId = ObjectId.get(),
-                originalFileName = "linked.pdf",
-                storedFileName = "FILE_2026_05_01_20_10_11.pdf",
-                path = "/dymit/A/B/FILE_2026_05_01_20_10_11.pdf",
-                status = UserFileStatus.LINKED,
-                contentType = "application/pdf",
-                fileSize = 512L
-            )
-            every { userFileRepository.findById(userFile.identifier) } returns userFile
-            every { userFileRepository.save(any()) } answers { firstArg() }
-
             When("UPLOADED 상태로 갱신하면") {
+                val userFile = UserFile(
+                    id = ObjectId.get(),
+                    memberId = ObjectId.get(),
+                    originalFileName = "linked.pdf",
+                    storedFileName = "FILE_2026_05_01_20_10_11.pdf",
+                    path = "/dymit/A/B/FILE_2026_05_01_20_10_11.pdf",
+                    status = UserFileStatus.LINKED,
+                    contentType = "application/pdf",
+                    fileSize = 512L
+                )
+                every { userFileRepository.findById(userFile.identifier) } returns userFile
+                every { userFileRepository.save(any()) } answers { firstArg() }
                 val command = UpdateFileStatusCommand(
                     fileId = userFile.identifier,
                     status = UserFileStatus.UPLOADED
@@ -85,6 +84,32 @@ internal class UpdateFileStatusUseCaseImplTest : BehaviorSpec() {
                     val result = useCase.updateStatus(command)
 
                     result.status shouldBe UserFileStatus.UPLOADED
+                    result.url shouldBe "https://cdn.example.com${userFile.path}"
+                }
+            }
+
+            When("UNREFERENCED 상태로 갱신하면") {
+                val userFile = UserFile(
+                    id = ObjectId.get(),
+                    memberId = ObjectId.get(),
+                    originalFileName = "linked.pdf",
+                    storedFileName = "FILE_2026_05_01_20_10_11.pdf",
+                    path = "/dymit/A/B/FILE_2026_05_01_20_10_11.pdf",
+                    status = UserFileStatus.LINKED,
+                    contentType = "application/pdf",
+                    fileSize = 512L
+                )
+                every { userFileRepository.findById(userFile.identifier) } returns userFile
+                every { userFileRepository.save(any()) } answers { firstArg() }
+                val command = UpdateFileStatusCommand(
+                    fileId = userFile.identifier,
+                    status = UserFileStatus.UNREFERENCED
+                )
+
+                Then("허용된 상태 전이로 처리된다") {
+                    val result = useCase.updateStatus(command)
+
+                    result.status shouldBe UserFileStatus.UNREFERENCED
                     result.url shouldBe "https://cdn.example.com${userFile.path}"
                 }
             }
@@ -107,6 +132,58 @@ internal class UpdateFileStatusUseCaseImplTest : BehaviorSpec() {
                 val command = UpdateFileStatusCommand(
                     fileId = userFile.identifier,
                     status = UserFileStatus.LINKED
+                )
+
+                Then("허용되지 않은 상태 전이 예외가 발생한다") {
+                    shouldThrow<BadRequestException> {
+                        useCase.updateStatus(command)
+                    }
+                }
+            }
+        }
+
+        Given("UNREFERENCED 상태 파일이 있으면") {
+            When("LINKED 상태로 갱신하면") {
+                val userFile = UserFile(
+                    id = ObjectId.get(),
+                    memberId = ObjectId.get(),
+                    originalFileName = "unreferenced.pdf",
+                    storedFileName = "FILE_2026_05_02_21_10_11.pdf",
+                    path = "/dymit/A/B/FILE_2026_05_02_21_10_11.pdf",
+                    status = UserFileStatus.UNREFERENCED,
+                    contentType = "application/pdf",
+                    fileSize = 256L
+                )
+                every { userFileRepository.findById(userFile.identifier) } returns userFile
+                every { userFileRepository.save(any()) } answers { firstArg() }
+                val command = UpdateFileStatusCommand(
+                    fileId = userFile.identifier,
+                    status = UserFileStatus.LINKED
+                )
+
+                Then("허용된 상태 전이로 처리된다") {
+                    val result = useCase.updateStatus(command)
+
+                    result.status shouldBe UserFileStatus.LINKED
+                }
+            }
+
+            When("UPLOADED 상태로 갱신하면") {
+                val userFile = UserFile(
+                    id = ObjectId.get(),
+                    memberId = ObjectId.get(),
+                    originalFileName = "unreferenced.pdf",
+                    storedFileName = "FILE_2026_05_02_21_10_11.pdf",
+                    path = "/dymit/A/B/FILE_2026_05_02_21_10_11.pdf",
+                    status = UserFileStatus.UNREFERENCED,
+                    contentType = "application/pdf",
+                    fileSize = 256L
+                )
+                every { userFileRepository.findById(userFile.identifier) } returns userFile
+                every { userFileRepository.save(any()) } answers { firstArg() }
+                val command = UpdateFileStatusCommand(
+                    fileId = userFile.identifier,
+                    status = UserFileStatus.UPLOADED
                 )
 
                 Then("허용되지 않은 상태 전이 예외가 발생한다") {

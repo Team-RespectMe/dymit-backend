@@ -60,8 +60,20 @@ class UpdateFileStatusUseCaseImpl @Autowired constructor(
     private fun isAllowedTransition(current: UserFileStatus, next: UserFileStatus): Boolean {
         return when (current) {
             UserFileStatus.REQUESTED -> next == UserFileStatus.UPLOADED || next == UserFileStatus.FAILED
-            UserFileStatus.UPLOADED -> next == UserFileStatus.LINKED || next == UserFileStatus.FAILED
-            UserFileStatus.LINKED -> next == UserFileStatus.UPLOADED
+            UserFileStatus.UPLOADED -> {
+                next == UserFileStatus.LINKED ||
+                    next == UserFileStatus.FAILED ||
+                    next == UserFileStatus.DELETED_IN_S3
+            }
+            UserFileStatus.LINKED -> {
+                next == UserFileStatus.UPLOADED ||
+                    next == UserFileStatus.UNREFERENCED
+            }
+            UserFileStatus.UNREFERENCED -> {
+                next == UserFileStatus.LINKED ||
+                    next == UserFileStatus.DELETED_IN_S3
+            }
+            UserFileStatus.DELETED_IN_S3 -> false
             UserFileStatus.FAILED -> false
         }
     }
