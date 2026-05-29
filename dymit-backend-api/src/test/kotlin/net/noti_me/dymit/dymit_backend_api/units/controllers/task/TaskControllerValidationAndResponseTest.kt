@@ -1,0 +1,306 @@
+package net.noti_me.dymit.dymit_backend_api.units.controllers.task
+
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import jakarta.validation.Validation
+import jakarta.validation.Validator
+import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeSummaryDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAttachmentDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAttachmentDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskController
+import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskCommandRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionAttachmentRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCommandRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCommentCommandRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskUpdateRequest
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
+import org.bson.types.ObjectId
+import java.time.LocalDateTime
+
+internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
+
+    private val taskService = mockk<TaskService>()
+    private val controller = TaskController(taskService)
+    private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+
+    private val memberInfo = MemberInfo(
+        memberId = ObjectId.get().toHexString(),
+        nickname = "tester",
+        roles = listOf(MemberRole.ROLE_MEMBER)
+    )
+
+    init {
+        afterEach {
+            clearAllMocks()
+        }
+
+        Given("과제 생성 요청 검증") {
+            When("제목이 비어 있으면") {
+                Then("검증에 실패한다") {
+                    val request = TaskCommandRequest(
+                        relatedScheduleId = ObjectId.get().toHexString(),
+                        type = TaskType.PRE,
+                        title = "",
+                        description = "설명",
+                        attachmentFileIds = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2)
+                    )
+
+                    val violations = validator.validate(request)
+                    violations.map { it.message } shouldContain "과제 제목은 비어 있을 수 없습니다."
+                }
+            }
+        }
+
+        Given("과제 수정 요청 검증") {
+            When("제목이 비어 있으면") {
+                Then("검증에 실패한다") {
+                    val request = TaskUpdateRequest(
+                        title = "",
+                        description = "설명",
+                        attachmentFileIds = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2)
+                    )
+
+                    val violations = validator.validate(request)
+                    violations.map { it.message } shouldContain "과제 제목은 비어 있을 수 없습니다."
+                }
+            }
+        }
+
+        Given("댓글 생성 요청 검증") {
+            When("댓글 내용이 비어 있으면") {
+                Then("검증에 실패한다") {
+                    val request = TaskSubmissionCommentCommandRequest(content = "")
+
+                    val violations = validator.validate(request)
+                    violations.map { it.message } shouldContain "댓글 내용은 비어 있을 수 없습니다."
+                }
+            }
+        }
+
+        Given("TaskController 응답 매핑") {
+            When("createTask를 호출하면") {
+                Then("서비스 DTO를 TaskResponse로 변환한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val request = TaskCommandRequest(
+                        relatedScheduleId = ObjectId.get().toHexString(),
+                        type = TaskType.PRE,
+                        title = "사전 과제",
+                        description = "설명",
+                        attachmentFileIds = listOf(ObjectId.get().toHexString()),
+                        expireAt = LocalDateTime.now().plusDays(2)
+                    )
+                    val dto = TaskDto(
+                        taskId = ObjectId.get().toHexString(),
+                        relatedScheduleId = request.relatedScheduleId,
+                        type = TaskType.PRE,
+                        title = "사전 과제",
+                        description = "설명",
+                        attachments = listOf(
+                            TaskAttachmentDto(
+                                fileId = request.attachmentFileIds.first(),
+                                originalFileName = "task.pdf",
+                                url = "https://cdn.example.com/task.pdf",
+                                thumbnailUrl = null,
+                                status = UserFileStatus.LINKED
+                            )
+                        ),
+                        expireAt = request.expireAt,
+                        assignees = listOf(
+                            TaskAssigneeSummaryDto(
+                                memberId = memberInfo.memberId,
+                                nickname = "tester",
+                                profileImageUrl = "https://example.com/profile.png",
+                                profileImageType = ProfileImageType.PRESET,
+                                status = TaskAssigneeStatus.NOT_SUBMITTED
+                            )
+                        )
+                    )
+
+                    every { taskService.createTask(memberInfo, groupId, any()) } returns dto
+
+                    val response = controller.createTask(memberInfo, groupId, request)
+
+                    verify(exactly = 1) { taskService.createTask(memberInfo, groupId, any()) }
+                    response.taskId shouldBe dto.taskId
+                    response.attachments[0].fileId shouldBe dto.attachments[0].fileId
+                    response.assignees[0].status shouldBe TaskAssigneeStatus.NOT_SUBMITTED
+                }
+            }
+
+            When("createSubmissionComment를 호출하면") {
+                Then("서비스 DTO를 TaskSubmissionCommentResponse로 변환한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val taskId = ObjectId.get().toHexString()
+                    val submissionId = ObjectId.get().toHexString()
+                    val request = TaskSubmissionCommentCommandRequest(content = "피드백")
+                    val dto = TaskSubmissionCommentDto(
+                        commentId = ObjectId.get().toHexString(),
+                        taskId = taskId,
+                        submissionId = submissionId,
+                        writerId = memberInfo.memberId,
+                        writerNickname = "tester",
+                        writerProfileImageUrl = "https://example.com/profile.png",
+                        writerProfileImageType = ProfileImageType.PRESET,
+                        content = "피드백",
+                        createdAt = LocalDateTime.now()
+                    )
+
+                    every {
+                        taskService.createSubmissionComment(
+                            memberInfo,
+                            groupId,
+                            taskId,
+                            submissionId,
+                            any()
+                        )
+                    } returns dto
+
+                    val response = controller.createSubmissionComment(
+                        memberInfo,
+                        groupId,
+                        taskId,
+                        submissionId,
+                        request
+                    )
+
+                    verify(exactly = 1) {
+                        taskService.createSubmissionComment(
+                            memberInfo,
+                            groupId,
+                            taskId,
+                            submissionId,
+                            any()
+                        )
+                    }
+                    response.commentId shouldBe dto.commentId
+                    response.writer.memberId shouldBe dto.writerId
+                    response.writer.nickname shouldBe dto.writerNickname
+                    response.writer.profileImageUrl shouldBe dto.writerProfileImageUrl
+                    response.writer.profileImageType shouldBe dto.writerProfileImageType
+                    response.content shouldBe "피드백"
+                }
+            }
+
+            When("createSubmission을 호출하면") {
+                Then("서비스 DTO를 TaskSubmissionResponse로 변환하고 member를 포함한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val taskId = ObjectId.get().toHexString()
+                    val request = TaskSubmissionCommandRequest(
+                        title = "제출 제목",
+                        content = "제출 본문",
+                        attachments = listOf(
+                            TaskSubmissionAttachmentRequest(
+                                type = TaskSubmitAttachmentType.URL,
+                                title = "참고 링크",
+                                url = "https://example.com/ref"
+                            )
+                        )
+                    )
+                    val dto = TaskSubmissionDto(
+                        submissionId = ObjectId.get().toHexString(),
+                        taskId = taskId,
+                        memberId = memberInfo.memberId,
+                        memberNickname = "tester",
+                        memberProfileImageUrl = "https://example.com/profile.png",
+                        memberProfileImageType = ProfileImageType.PRESET,
+                        title = request.title,
+                        content = request.content,
+                        attachments = listOf(
+                            TaskSubmissionAttachmentDto(
+                                type = TaskSubmitAttachmentType.URL,
+                                title = "참고 링크",
+                                url = "https://example.com/ref",
+                                fileId = null,
+                                fileUrl = null,
+                                originalFileName = null
+                            )
+                        ),
+                        createdAt = LocalDateTime.now()
+                    )
+
+                    every { taskService.createSubmission(memberInfo, groupId, taskId, any()) } returns dto
+
+                    val response = controller.createSubmission(
+                        memberInfo = memberInfo,
+                        groupId = groupId,
+                        taskId = taskId,
+                        request = request
+                    )
+
+                    verify(exactly = 1) { taskService.createSubmission(memberInfo, groupId, taskId, any()) }
+                    response.submissionId shouldBe dto.submissionId
+                    response.member.memberId shouldBe dto.memberId
+                    response.member.nickname shouldBe dto.memberNickname
+                    response.member.profileImageUrl shouldBe dto.memberProfileImageUrl
+                    response.member.profileImageType shouldBe dto.memberProfileImageType
+                    response.attachments.first().type shouldBe TaskSubmitAttachmentType.URL
+                }
+            }
+
+            When("updateTask를 호출하면") {
+                Then("TaskUpdateRequest를 UpdateTaskCommand로 전달하고 응답을 매핑한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val taskId = ObjectId.get().toHexString()
+                    val request = TaskUpdateRequest(
+                        title = "수정 과제",
+                        description = "수정 설명",
+                        attachmentFileIds = listOf(ObjectId.get().toHexString()),
+                        expireAt = LocalDateTime.now().plusDays(3)
+                    )
+                    val dto = TaskDto(
+                        taskId = taskId,
+                        relatedScheduleId = ObjectId.get().toHexString(),
+                        type = TaskType.POST,
+                        title = request.title,
+                        description = request.description,
+                        attachments = listOf(
+                            TaskAttachmentDto(
+                                fileId = request.attachmentFileIds.first(),
+                                originalFileName = "updated.pdf",
+                                url = "https://cdn.example.com/updated.pdf",
+                                thumbnailUrl = null,
+                                status = UserFileStatus.LINKED
+                            )
+                        ),
+                        expireAt = request.expireAt,
+                        assignees = listOf(
+                            TaskAssigneeSummaryDto(
+                                memberId = memberInfo.memberId,
+                                nickname = "tester",
+                                profileImageUrl = "https://example.com/profile.png",
+                                profileImageType = ProfileImageType.PRESET,
+                                status = TaskAssigneeStatus.SUBMITTED
+                            )
+                        )
+                    )
+
+                    every { taskService.updateTask(memberInfo, groupId, taskId, any()) } returns dto
+
+                    val response = controller.updateTask(memberInfo, groupId, taskId, request)
+
+                    verify(exactly = 1) { taskService.updateTask(memberInfo, groupId, taskId, any()) }
+                    response.taskId shouldBe dto.taskId
+                    response.title shouldBe "수정 과제"
+                    response.type shouldBe TaskType.POST
+                }
+            }
+        }
+    }
+}

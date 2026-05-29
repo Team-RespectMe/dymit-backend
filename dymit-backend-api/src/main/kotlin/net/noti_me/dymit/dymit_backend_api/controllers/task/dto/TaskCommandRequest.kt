@@ -1,0 +1,36 @@
+package net.noti_me.dymit.dymit_backend_api.controllers.task.dto
+
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskCommand
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
+import java.time.LocalDateTime
+
+@Schema(description = "과제 생성/수정 요청")
+class TaskCommandRequest(
+    @field:Schema(description = "연관 일정 ID", example = "682fabc1234567890abcdeff")
+    val relatedScheduleId: String,
+    @field:Schema(description = "과제 타입", allowableValues = ["PRE", "POST"], example = "PRE")
+    val type: TaskType,
+    @field:Schema(description = "과제 제목", example = "1회차 사전 과제")
+    @field:NotBlank(message = "과제 제목은 비어 있을 수 없습니다.")
+    val title: String,
+    @field:Schema(description = "과제 설명", example = "이번 주 학습 범위를 정리해 주세요.")
+    val description: String,
+    @field:Schema(description = "과제 첨부 파일 ID 목록", example = "[\"682fabc1234567890abcdeff\"]")
+    val attachmentFileIds: List<String> = emptyList(),
+    @field:Schema(description = "제출 마감 시각", example = "2030-06-01T23:59:59")
+    val expireAt: LocalDateTime
+) {
+
+    fun toCreateCommand(): CreateTaskCommand {
+        return CreateTaskCommand(
+            relatedScheduleId = relatedScheduleId,
+            type = type,
+            title = title,
+            description = description,
+            attachmentFileIds = attachmentFileIds,
+            expireAt = expireAt
+        )
+    }
+}
