@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.domain.user_feed
 enum class ResourceType {
     MEMBER,
     STUDY_GROUP,
+    TASK,
     STUDY_GROUP_OWNER,
     STUDY_GROUP_MEMBER,
     STUDY_GROUP_SCHEDULE,

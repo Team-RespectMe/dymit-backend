@@ -1,57 +1,72 @@
 package net.noti_me.dymit.dymit_backend_api.application.task
 
+import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedEvent
-import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 /**
- * 과제 이벤트 기반 푸시/피드 준비 더미 핸들러입니다.
+ * 과제 도메인 이벤트를 브로드캐스트 이벤트로 변환하는 핸들러입니다.
  */
 @Component
 @Async
-class TaskNotificationPreparationEventHandler {
+class TaskNotificationPreparationEventHandler(
+    private val support: TaskServiceSupport,
+    private val eventPublisher: ApplicationEventPublisher
+) {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
-
+    /**
+     * 과제 생성 이벤트를 수신해 브로드캐스트 이벤트를 발행합니다.
+     *
+     * @param event 과제 생성 이벤트
+     */
     @EventListener
     fun onTaskCreated(event: TaskCreatedEvent) {
-        logger.info(
-            "[TASK_DUMMY_LISTENER] created taskId={}, groupId={}, scheduleId={}, taskAggregateId={}, groupAggregateId={}",
-            event.taskId,
-            event.groupId,
-            event.scheduleId,
-            event.task.id,
-            event.group.id
+        eventPublisher.publishEvent(
+            TaskCreatedBroadcastEvent(
+                group = event.group,
+                task = event.task,
+                memberIds = support.loadAssigneeMemberIdsByTask(event.taskId)
+            )
         )
     }
 
+    /**
+     * 과제 수정 이벤트를 수신해 브로드캐스트 이벤트를 발행합니다.
+     *
+     * @param event 과제 수정 이벤트
+     */
     @EventListener
     fun onTaskModified(event: TaskModifiedEvent) {
-        logger.info(
-            "[TASK_DUMMY_LISTENER] modified taskId={}, groupId={}, scheduleId={}, taskAggregateId={}, groupAggregateId={}",
-            event.taskId,
-            event.groupId,
-            event.scheduleId,
-            event.task.id,
-            event.group.id
+        eventPublisher.publishEvent(
+            TaskModifiedBroadcastEvent(
+                group = event.group,
+                task = event.task,
+                memberIds = support.loadAssigneeMemberIdsByTask(event.taskId)
+            )
         )
     }
 
+    /**
+     * 과제 삭제 이벤트를 수신해 브로드캐스트 이벤트를 발행합니다.
+     *
+     * @param event 과제 삭제 이벤트
+     */
     @EventListener
     fun onTaskDeleted(event: TaskDeletedEvent) {
-        logger.info(
-            "[TASK_DUMMY_LISTENER] deleted taskId={}, groupId={}, scheduleId={}, taskAggregateId={}, groupAggregateId={}, assigneeMemberIds={}, byScheduleEvent={}",
-            event.taskId,
-            event.groupId,
-            event.scheduleId,
-            event.task.id,
-            event.group?.id,
-            event.assigneeMemberIds,
-            event.deletedByScheduleEvent
+        eventPublisher.publishEvent(
+            TaskDeletedBroadcastEvent(
+                group = event.group ?: support.loadGroup(event.groupId.toHexString()),
+                task = event.task,
+                memberIds = event.assigneeMemberIds
+            )
         )
     }
 }

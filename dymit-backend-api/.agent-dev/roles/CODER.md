@@ -38,6 +38,9 @@ The responsibilities of the CODER Agent are as follows:
 - Provide sufficient explanations and logs so that the Reviewer and Tester can verify the work easily.
 
 ## Global Rules
+- Use Port and Adapter pattern. check current project's directory structures
+- Application layer use, Usecase per one purpose. composited by service facade.
+- Usecase only one responsibility. do not make multi purposes usecase like ~CRUDUsecase.
 - Read CODE.md and apply it the most priority.
 - Proceed with large changes in small units, and split files so that no file exceeds 500 lines.
 - Define and pass DTOs for communication between layers.

@@ -87,7 +87,7 @@ When needed, the PM may delegate execution by role using the `codex` command. Th
 
 - PM: use the `gpt-5.4` model
 - CODER: use the `gpt-5.4` model
-- TESTER: use the `gpt-5.3-codex` model
+- TESTER: use the `gpt-5.4-mini` model
 - REVIEWER: use the `gpt-5.4-mini` model
 
 **Command-line Execution Examples**
