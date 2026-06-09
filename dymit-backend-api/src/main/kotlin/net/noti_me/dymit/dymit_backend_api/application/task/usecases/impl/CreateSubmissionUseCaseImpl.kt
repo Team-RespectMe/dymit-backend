@@ -8,7 +8,9 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 /**
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Service
 @Service
 class CreateSubmissionUseCaseImpl(
     private val support: TaskServiceSupport,
-    private val taskSubmissionRepository: TaskSubmissionRepository
+    private val taskSubmissionRepository: TaskSubmissionRepository,
+    private val eventPublisher: ApplicationEventPublisher
 ) : CreateSubmissionUseCase {
 
     override fun createSubmission(
@@ -28,15 +31,16 @@ class CreateSubmissionUseCaseImpl(
     ): TaskSubmissionDto {
         val groupIdObjectId = TaskUseCaseObjectIdParser.parse(groupId, "groupId")
         val memberId = TaskUseCaseObjectIdParser.parse(memberInfo.memberId, "memberId")
-        support.requireGroupMember(groupIdObjectId, memberId)
+        val member = support.requireGroupMember(groupIdObjectId, memberId)
 
         val task = support.loadTask(taskId)
+        val taskObjectId = requireNotNull(task.id)
         support.checkTaskInGroup(task, groupIdObjectId)
         support.checkTaskActionAllowedBySchedule(task)
         support.checkSubmissionUpdatable(task)
-        val assignee = support.requireTaskAssignee(task.id!!, memberId)
+        val assignee = support.requireTaskAssignee(taskObjectId, memberId)
 
-        if ( taskSubmissionRepository.findByTaskIdAndMemberId(task.id!!, memberId) != null ) {
+        if ( taskSubmissionRepository.findByTaskIdAndMemberId(taskObjectId, memberId) != null ) {
             throw ConflictException(message = "이미 제출한 과제입니다.")
         }
 
@@ -46,7 +50,7 @@ class CreateSubmissionUseCaseImpl(
 
         val saved = support.saveSubmission(
             TaskSubmission(
-                taskId = task.id!!,
+                taskId = taskObjectId,
                 memberId = memberId,
                 title = command.title,
                 content = command.content,
@@ -57,6 +61,16 @@ class CreateSubmissionUseCaseImpl(
         assignee.markSubmitted()
         support.saveAssignee(assignee)
         support.updateFileStatuses(fileIds, UserFileStatus.LINKED)
+        eventPublisher.publishEvent(
+            TaskSubmissionCreatedEvent(
+                taskId = taskObjectId,
+                groupId = groupIdObjectId,
+                scheduleId = task.relatedScheduleId,
+                task = task,
+                group = support.loadGroup(groupId),
+                member = member
+            )
+        )
 
         return support.toSubmissionDto(saved, groupIdObjectId)
     }

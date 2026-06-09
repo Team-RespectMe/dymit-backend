@@ -7,6 +7,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedBroadcas
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedBroadcastEvent
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
@@ -66,6 +68,24 @@ class TaskNotificationPreparationEventHandler(
                 group = event.group ?: support.loadGroup(event.groupId.toHexString()),
                 task = event.task,
                 memberIds = event.assigneeMemberIds
+            )
+        )
+    }
+
+    /**
+     * 과제 제출 생성 이벤트를 수신해 브로드캐스트 이벤트를 발행합니다.
+     *
+     * @param event 과제 제출 생성 이벤트
+     */
+    @EventListener
+    fun onTaskSubmissionCreated(event: TaskSubmissionCreatedEvent) {
+        eventPublisher.publishEvent(
+            TaskSubmissionCreatedBroadcastEvent(
+                group = event.group,
+                task = event.task,
+                member = event.member,
+                memberIds = support.loadAssigneeMemberIdsByTask(event.taskId)
+                    .filterNot { it == event.member.memberId }
             )
         )
     }

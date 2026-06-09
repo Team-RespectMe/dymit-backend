@@ -179,7 +179,11 @@ class TaskServiceImpl(
                 getGroupTasksUseCase = GetGroupTasksUseCaseImpl(support),
                 getTaskDetailUseCase = GetTaskDetailUseCaseImpl(support),
                 getTaskAssigneesUseCase = GetTaskAssigneesUseCaseImpl(support),
-                createSubmissionUseCase = CreateSubmissionUseCaseImpl(support, taskSubmissionRepository),
+                createSubmissionUseCase = CreateSubmissionUseCaseImpl(
+                    support,
+                    taskSubmissionRepository,
+                    eventPublisher
+                ),
                 updateSubmissionUseCase = UpdateSubmissionUseCaseImpl(support),
                 withdrawSubmissionUseCase = WithdrawSubmissionUseCaseImpl(support),
                 getTaskSubmissionsUseCase = GetTaskSubmissionsUseCaseImpl(support),

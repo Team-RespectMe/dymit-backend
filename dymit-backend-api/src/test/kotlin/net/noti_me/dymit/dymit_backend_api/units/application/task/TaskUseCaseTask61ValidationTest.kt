@@ -45,7 +45,7 @@ internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
     private val createTaskUseCase = CreateTaskUseCaseImpl(support, eventPublisher)
     private val updateTaskUseCase = UpdateTaskUseCaseImpl(support, eventPublisher)
     private val removeTaskUseCase = RemoveTaskUseCaseImpl(support, taskDeletionSupport)
-    private val createSubmissionUseCase = CreateSubmissionUseCaseImpl(support, taskSubmissionRepository)
+    private val createSubmissionUseCase = CreateSubmissionUseCaseImpl(support, taskSubmissionRepository, eventPublisher)
     private val updateSubmissionUseCase = UpdateSubmissionUseCaseImpl(support)
     private val withdrawSubmissionUseCase = WithdrawSubmissionUseCaseImpl(support)
 
