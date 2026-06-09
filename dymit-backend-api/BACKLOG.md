@@ -1,5 +1,17 @@
 # BACKLOG
 ---
+## TASK-60-1 신규 일정 참여 시 이벤트 핸들링 
+**STATUS** Done
+**BACKGROUND**
+신규 일정 참여 시 참여 대상에게 과제가 있음을 알려야 합니다.
+Push/Feed 모두 생성되어야 하므로 BroadCastEvent를 상속받은 Event를 정의하고 
+eventName은 TaskCreated 를 그대로 사용해도 될듯 합니다.
+TaskCreatedEvent와 피드/메시지는 완전히 동일하지만 전송 대상이 일정에 신규 참여한 사용자
+단일이라는 점만 다르므로 이를 적절하게 구현하십시오.
+
+**FILE**
+TaskScheduleSyncEventHandler
+
 ## TASK-60 과제 이벤트 핸들러 구현
 **STATUS** Done
 **BACKGROUND**
