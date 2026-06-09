@@ -198,7 +198,7 @@ internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
                         removeTaskUseCase.removeTask(memberInfo, groupId.toHexString(), task.identifier)
                     }.message shouldBe scheduleLockedMessage
 
-                    verify(exactly = 0) { taskDeletionSupport.cascadeDeleteTask(any(), any(), any()) }
+                    verify(exactly = 0) { taskDeletionSupport.cascadeDeleteTask(any(), any(), any(), any()) }
                 }
             }
 

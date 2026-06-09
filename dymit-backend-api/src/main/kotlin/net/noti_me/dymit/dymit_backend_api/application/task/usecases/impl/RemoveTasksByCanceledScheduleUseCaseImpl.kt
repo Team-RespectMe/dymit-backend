@@ -20,6 +20,12 @@ class RemoveTasksByCanceledScheduleUseCaseImpl(
         val groupIdObjectId = TaskUseCaseObjectIdParser.parse(groupId, "groupId")
 
         support.loadTasksBySchedule(scheduleObjectId, TaskType.PRE)
-            .forEach { task -> taskDeletionSupport.cascadeDeleteTask(task, groupIdObjectId, deletedByScheduleEvent = true) }
+            .forEach { task ->
+                taskDeletionSupport.cascadeDeleteTask(
+                    task = task,
+                    groupId = groupIdObjectId,
+                    deletedByScheduleEvent = true
+                )
+            }
     }
 }

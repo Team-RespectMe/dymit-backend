@@ -1,21 +1,26 @@
 # BACKLOG
 ---
-## TASK 48: 더이상 참조되지 않는 user file 엔티티 상태의 변경
 
+## TASK 58-2 이벤트 포함 객체 추가
 **STATUS** Done
-
 **BACKGROUND**
-스터디 일정에 공유된 파일이 공유 해제 되는 경우 해당 유저 파일의 상태 
-역시 어플리케이션 어느 영역에서도 참조되지 않음을 표기해야합니다.
-또한 S3에서 삭제된 파일 역시 삭제되었음을 status에 표기할 수 있어야 합니다.
-우선 이 작업에서는 스터디 일정 공유 파일(attachments) 서비스에 의해 첨부 파일 목록이
-제거되는 경우 이를 체크하여 유저 파일 엔티티의 상태를 더이상 참조되지 않는 다고 status를 업데이트 하는 로직을 추가하세요.
-그리고 이를 위한 적절한 상태들도 추가해두세요.
-기존 인터페이스와 호환되어야 합니다. 특히 엔티티의 기존 필드가 가질 수 있는 값을 완전히 변경하거나 하지 마십시오.
+TaskCreatedEvent, TaskModifiedEvent, TaskDeletedEvent 각 이벤트에 Task 객체를 포함시키는 것이 좋을듯 합니다. 
+그리고 각 이벤트 발행 유즈케이스에서 group 객체가 조회된다면 그것도 포함시키세요.
 
-**LOOK UP**
-application/study_schedule/StudyScheduleAttachmentService.kt
-application/study_schedule/impl/StudyScheduleAttachmentServiceImpl.kt
-application/file/usecases/**
-domain/file/UserFile.kt
-domain/file/UserFileStatus.kt
+## TASK 58 과제 생성, 수정, 삭제 시 이벤트 발행
+**STATUS** Done
+**BACKGROUND**
+과제 생성 시 발행 되어야 하는 이벤트 목록에 대해 발행 여부를 확인하고 
+발행되지 않았다면 다음 이벤트들을 각 유즈케이스의 구현 및 도메인 엔티티 중 적합한 부분에
+추가가 필요합니다.
+단, 이벤트는 유즈케이스 1회 실행 당 한번만 발행되어야 합니다.
+이름은 아래 제안한 것 외에 이미 사용하는 이벤트가 있다면 그걸로 대체해도 되며 더 적절한
+이름으로 사용해도 됩니다.
+- 과제 생성 이벤트 (TaskCreatedEvent)
+    - 참조 파일: CreateTaskUseCaseImpl
+- 과제 수정 이벤트 (TaskModifiedEvent)
+    - 참조 파일: UpdateTaskUseCaseImpl
+- 과제 삭제 이벤트 (TaskDeletedEvent)
+    - 참조 파일: RemoveTaskUseCaseImpl
+    - 이벤트에 포함되어야 하는 정보
+      - 과제 제출 대상자들의 사용자 ID

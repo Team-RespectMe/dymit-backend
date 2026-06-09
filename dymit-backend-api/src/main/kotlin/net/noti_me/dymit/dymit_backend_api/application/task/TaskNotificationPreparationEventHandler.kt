@@ -20,30 +20,37 @@ class TaskNotificationPreparationEventHandler {
     @EventListener
     fun onTaskCreated(event: TaskCreatedEvent) {
         logger.info(
-            "[TASK_DUMMY_LISTENER] created taskId={}, groupId={}, scheduleId={}",
+            "[TASK_DUMMY_LISTENER] created taskId={}, groupId={}, scheduleId={}, taskAggregateId={}, groupAggregateId={}",
             event.taskId,
             event.groupId,
-            event.scheduleId
+            event.scheduleId,
+            event.task.id,
+            event.group.id
         )
     }
 
     @EventListener
     fun onTaskModified(event: TaskModifiedEvent) {
         logger.info(
-            "[TASK_DUMMY_LISTENER] modified taskId={}, groupId={}, scheduleId={}",
+            "[TASK_DUMMY_LISTENER] modified taskId={}, groupId={}, scheduleId={}, taskAggregateId={}, groupAggregateId={}",
             event.taskId,
             event.groupId,
-            event.scheduleId
+            event.scheduleId,
+            event.task.id,
+            event.group.id
         )
     }
 
     @EventListener
     fun onTaskDeleted(event: TaskDeletedEvent) {
         logger.info(
-            "[TASK_DUMMY_LISTENER] deleted taskId={}, groupId={}, scheduleId={}, byScheduleEvent={}",
+            "[TASK_DUMMY_LISTENER] deleted taskId={}, groupId={}, scheduleId={}, taskAggregateId={}, groupAggregateId={}, assigneeMemberIds={}, byScheduleEvent={}",
             event.taskId,
             event.groupId,
             event.scheduleId,
+            event.task.id,
+            event.group?.id,
+            event.assigneeMemberIds,
             event.deletedByScheduleEvent
         )
     }

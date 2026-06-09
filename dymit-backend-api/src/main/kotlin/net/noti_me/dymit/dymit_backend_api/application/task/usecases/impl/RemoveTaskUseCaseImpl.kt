@@ -23,6 +23,11 @@ class RemoveTaskUseCaseImpl(
         val task = support.loadTask(taskId)
         support.checkTaskInGroup(task, groupIdObjectId)
         support.checkTaskActionAllowedBySchedule(task)
-        taskDeletionSupport.cascadeDeleteTask(task, groupIdObjectId, deletedByScheduleEvent = false)
+        taskDeletionSupport.cascadeDeleteTask(
+            task = task,
+            groupId = groupIdObjectId,
+            group = group,
+            deletedByScheduleEvent = false
+        )
     }
 }

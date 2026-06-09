@@ -50,7 +50,15 @@ class UpdateTaskUseCaseImpl(
         support.updateFileStatuses(linked, UserFileStatus.LINKED)
         support.downgradeOrphanedFiles(removed)
 
-        eventPublisher.publishEvent(TaskModifiedEvent(saved.id!!, groupIdObjectId, saved.relatedScheduleId))
+        eventPublisher.publishEvent(
+            TaskModifiedEvent(
+                taskId = saved.id!!,
+                groupId = groupIdObjectId,
+                scheduleId = saved.relatedScheduleId,
+                task = saved,
+                group = group
+            )
+        )
         return support.toTaskDto(saved, groupIdObjectId)
     }
 }

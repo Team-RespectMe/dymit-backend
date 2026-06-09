@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.impl
 
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedEvent
 import org.bson.types.ObjectId
@@ -23,24 +24,35 @@ class TaskDeletionSupport(
      *
      * @param task 삭제 대상 과제
      * @param groupId 스터디 그룹 ID
+     * @param group 조회된 스터디 그룹 aggregate
      * @param deletedByScheduleEvent 일정 취소 이벤트에 의한 삭제 여부
      */
-    fun cascadeDeleteTask(task: Task, groupId: ObjectId, deletedByScheduleEvent: Boolean) {
+    fun cascadeDeleteTask(
+        task: Task,
+        groupId: ObjectId,
+        group: StudyGroup? = null,
+        deletedByScheduleEvent: Boolean
+    ) {
+        val taskId = task.id!!
         val taskFileIds = task.attachments.map { it.fileId }
-        val submissions = support.loadSubmissionsByTask(task.id!!)
+        val assigneeMemberIds = support.loadAssigneeMemberIdsByTask(taskId).distinct()
+        val submissions = support.loadSubmissionsByTask(taskId)
         val submissionFileIds = submissions.flatMap { support.submissionAttachmentFileIds(it.attachments) }
 
-        support.removeCommentsByTask(task.id!!)
-        support.removeSubmissionsByTask(task.id!!)
-        support.removeAssigneesByTask(task.id!!)
-        support.removeTask(task.id!!)
+        support.removeCommentsByTask(taskId)
+        support.removeSubmissionsByTask(taskId)
+        support.removeAssigneesByTask(taskId)
+        support.removeTask(taskId)
         support.downgradeOrphanedFiles((taskFileIds + submissionFileIds).distinct())
 
         eventPublisher.publishEvent(
             TaskDeletedEvent(
-                taskId = task.id!!,
+                taskId = taskId,
                 groupId = groupId,
                 scheduleId = task.relatedScheduleId,
+                task = task,
+                group = group,
+                assigneeMemberIds = assigneeMemberIds,
                 deletedByScheduleEvent = deletedByScheduleEvent
             )
         )

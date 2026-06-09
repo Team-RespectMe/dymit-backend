@@ -118,6 +118,10 @@ class TaskServiceSupport(
         return taskSubmissionRepository.findByTaskId(taskId)
     }
 
+    fun loadAssigneeMemberIdsByTask(taskId: ObjectId): List<ObjectId> {
+        return taskAssigneeRepository.findByTaskId(taskId).map { it.memberId }
+    }
+
     fun loadSubmissionByTaskAndMember(taskId: ObjectId, memberId: ObjectId): TaskSubmission {
         return taskSubmissionRepository.findByTaskIdAndMemberId(taskId, memberId)
             ?: throw NotFoundException(message = "존재하지 않는 제출입니다.")

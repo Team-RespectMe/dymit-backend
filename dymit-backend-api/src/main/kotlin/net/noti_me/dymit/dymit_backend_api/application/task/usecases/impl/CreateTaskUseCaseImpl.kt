@@ -51,7 +51,15 @@ class CreateTaskUseCaseImpl(
         }
 
         support.updateFileStatuses(attachmentIds, UserFileStatus.LINKED)
-        eventPublisher.publishEvent(TaskCreatedEvent(saved.id!!, groupIdObjectId, schedule.id!!))
+        eventPublisher.publishEvent(
+            TaskCreatedEvent(
+                taskId = saved.id!!,
+                groupId = groupIdObjectId,
+                scheduleId = schedule.id!!,
+                task = saved,
+                group = group
+            )
+        )
         return support.toTaskDto(saved, groupIdObjectId)
     }
 }
