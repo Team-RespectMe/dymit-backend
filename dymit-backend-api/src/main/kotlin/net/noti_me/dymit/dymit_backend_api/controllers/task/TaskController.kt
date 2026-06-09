@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.task
 
+import io.swagger.v3.oas.annotations.tags.Tags
 import jakarta.annotation.security.RolesAllowed
 import jakarta.validation.Valid
 import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
@@ -39,7 +40,7 @@ class TaskController(
         @PathVariable groupId: String,
         @RequestBody @Valid @Sanitize request: TaskCommandRequest
     ): TaskResponse {
-        return TaskResponse.from(taskService.createTask(memberInfo, groupId, request.toCreateCommand()))
+        return TaskResponse.from(taskService.createTask(memberInfo, groupId, request.toCreateCommand()), groupId)
     }
 
     @PutMapping("/{groupId}/tasks/{taskId}")
@@ -51,7 +52,7 @@ class TaskController(
         @PathVariable taskId: String,
         @RequestBody @Valid @Sanitize request: TaskUpdateRequest
     ): TaskResponse {
-        return TaskResponse.from(taskService.updateTask(memberInfo, groupId, taskId, request.toCommand()))
+        return TaskResponse.from(taskService.updateTask(memberInfo, groupId, taskId, request.toCommand()), groupId)
     }
 
     @DeleteMapping("/{groupId}/tasks/{taskId}")
@@ -72,7 +73,7 @@ class TaskController(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String
     ): ListResponse<TaskResponse> {
-        return ListResponse.from(taskService.getGroupTasks(memberInfo, groupId).map { TaskResponse.from(it) })
+        return ListResponse.from(taskService.getGroupTasks(memberInfo, groupId).map { TaskResponse.from(it, groupId) })
     }
 
     @GetMapping("/{groupId}/tasks/{taskId}")
@@ -83,7 +84,7 @@ class TaskController(
         @PathVariable groupId: String,
         @PathVariable taskId: String
     ): TaskResponse {
-        return TaskResponse.from(taskService.getTaskDetail(memberInfo, groupId, taskId))
+        return TaskResponse.from(taskService.getTaskDetail(memberInfo, groupId, taskId), groupId)
     }
 
     @PostMapping("/{groupId}/tasks/{taskId}/submissions")
@@ -131,19 +132,34 @@ class TaskController(
         taskService.withdrawSubmission(memberInfo, groupId, taskId, submissionId)
     }
 
-    @GetMapping("/{groupId}/tasks/{taskId}/submissions")
+    @GetMapping("/{groupId}/tasks/{taskId}/assignees/{memberId}/submission")
     @ResponseStatus(HttpStatus.OK)
     @RolesAllowed("MEMBER", "ADMIN")
-    override fun getSubmissions(
+    override fun getSubmission(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
-        @PathVariable taskId: String
-    ): ListResponse<TaskSubmissionResponse> {
-        return ListResponse.from(
-            taskService.getTaskSubmissions(memberInfo, groupId, taskId)
-                .map { TaskSubmissionResponse.from(it) }
+        @PathVariable taskId: String,
+        @PathVariable memberId: String
+    ): TaskSubmissionResponse {
+        return TaskSubmissionResponse.from(
+            taskService.getTaskSubmission(memberInfo, groupId, taskId, memberId)
         )
     }
+
+    // 요청에 따라 제출 목록 조회 엔드포인트 노출을 중단합니다.
+    // @GetMapping("/{groupId}/tasks/{taskId}/submissions")
+    // @ResponseStatus(HttpStatus.OK)
+    // @RolesAllowed("MEMBER", "ADMIN")
+    // override fun getSubmissions(
+    //     @LoginMember memberInfo: MemberInfo,
+    //     @PathVariable groupId: String,
+    //     @PathVariable taskId: String
+    // ): ListResponse<TaskSubmissionResponse> {
+    //     return ListResponse.from(
+    //         taskService.getTaskSubmissions(memberInfo, groupId, taskId)
+    //             .map { TaskSubmissionResponse.from(it) }
+    //     )
+    // }
 
     @PostMapping("/{groupId}/tasks/{taskId}/submissions/{submissionId}/comments")
     @ResponseStatus(HttpStatus.CREATED)

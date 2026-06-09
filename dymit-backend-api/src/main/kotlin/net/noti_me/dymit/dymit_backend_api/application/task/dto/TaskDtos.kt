@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.task.dto
 
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
@@ -18,6 +19,8 @@ data class TaskDto(
     val description: String,
     val attachments: List<TaskAttachmentDto>,
     val expireAt: LocalDateTime,
+    val submittedAssigneeCount: Int,
+    val notSubmittedAssigneeCount: Int,
     val assignees: List<TaskAssigneeSummaryDto>
 )
 
@@ -84,4 +87,22 @@ data class TaskSubmissionCommentDto(
     val writerProfileImageType: ProfileImageType,
     val content: String,
     val createdAt: LocalDateTime?
+)
+
+/**
+ * 과제 제출 대상 조회 DTO입니다.
+ */
+data class TaskAssigneeDto(
+    val groupId: String = "",
+    val taskId: String,
+    val member: TaskAssigneeMemberDto
+)
+
+/**
+ * 과제 제출 대상 회원 조회 DTO입니다.
+ */
+data class TaskAssigneeMemberDto(
+    val id: String,
+    val nickname: String,
+    val profileImage: ProfileImageVo
 )

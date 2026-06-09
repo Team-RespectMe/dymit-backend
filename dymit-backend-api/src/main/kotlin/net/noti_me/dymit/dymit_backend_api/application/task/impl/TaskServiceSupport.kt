@@ -4,6 +4,8 @@ import net.noti_me.dymit.dymit_backend_api.application.file.FileServiceFacade
 import net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.UpdateFileStatusCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeSummaryDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeMemberDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAttachmentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAttachmentCommand
@@ -23,6 +25,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionComment
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
@@ -113,6 +116,11 @@ class TaskServiceSupport(
 
     fun loadSubmissionsByTask(taskId: ObjectId): List<TaskSubmission> {
         return taskSubmissionRepository.findByTaskId(taskId)
+    }
+
+    fun loadSubmissionByTaskAndMember(taskId: ObjectId, memberId: ObjectId): TaskSubmission {
+        return taskSubmissionRepository.findByTaskIdAndMemberId(taskId, memberId)
+            ?: throw NotFoundException(message = "존재하지 않는 제출입니다.")
     }
 
     fun loadCommentsBySubmission(submissionId: ObjectId): List<TaskSubmissionComment> {
@@ -353,6 +361,8 @@ class TaskServiceSupport(
                 )
             },
             expireAt = task.expireAt,
+            submittedAssigneeCount = assignees.count { it.status == TaskAssigneeStatus.SUBMITTED },
+            notSubmittedAssigneeCount = assignees.count { it.status == TaskAssigneeStatus.NOT_SUBMITTED },
             assignees = assignees.map { assignee ->
                 val member = members[assignee.memberId] ?: throw NotFoundException(message = "그룹 멤버 정보를 찾을 수 없습니다.")
                 TaskAssigneeSummaryDto(
@@ -364,6 +374,27 @@ class TaskServiceSupport(
                 )
             }
         )
+    }
+
+    fun toTaskAssigneeDtos(taskId: ObjectId, groupId: ObjectId): List<TaskAssigneeDto> {
+        val assignees = taskAssigneeRepository.findByTaskId(taskId)
+        val members = groupMemberRepository.findByGroupIdAndMemberIdsIn(groupId, assignees.map { it.memberId })
+            .associateBy { it.memberId }
+
+        return assignees.map { assignee ->
+            val member = members[assignee.memberId]
+                ?: throw NotFoundException(message = "그룹 멤버 정보를 찾을 수 없습니다.")
+
+            TaskAssigneeDto(
+                groupId = groupId.toHexString(),
+                taskId = assignee.taskId.toHexString(),
+                member = TaskAssigneeMemberDto(
+                    id = member.memberId.toHexString(),
+                    nickname = member.nickname,
+                    profileImage = member.profileImage
+                )
+            )
+        }
     }
 
     fun toSubmissionDto(submission: TaskSubmission, groupId: ObjectId): TaskSubmissionDto {

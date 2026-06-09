@@ -4,6 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommentCommand
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
@@ -17,7 +18,9 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.Create
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.DeleteSubmissionCommentUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetGroupTasksUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetSubmissionCommentsUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTaskAssigneesUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTaskDetailUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTaskSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTaskSubmissionsUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.RemoveAssigneeFromPreTasksUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.RemoveTaskUseCaseImpl
@@ -96,6 +99,15 @@ class TaskServiceImpl(
         return delegate.getTaskSubmissions(memberInfo, groupId, taskId)
     }
 
+    override fun getTaskSubmission(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        memberId: String
+    ): TaskSubmissionDto {
+        return delegate.getTaskSubmission(memberInfo, groupId, taskId, memberId)
+    }
+
     override fun createSubmissionComment(
         memberInfo: MemberInfo,
         groupId: String,
@@ -136,6 +148,10 @@ class TaskServiceImpl(
         return delegate.getSubmissionComments(memberInfo, groupId, taskId, submissionId)
     }
 
+    override fun getTaskAssignees(memberInfo: MemberInfo, taskId: String): List<TaskAssigneeDto> {
+        return delegate.getTaskAssignees(memberInfo, taskId)
+    }
+
     override fun addAssigneeToPreTasks(scheduleId: String, memberId: String) {
         delegate.addAssigneeToPreTasks(scheduleId, memberId)
     }
@@ -162,10 +178,12 @@ class TaskServiceImpl(
                 removeTaskUseCase = RemoveTaskUseCaseImpl(support, taskDeletionSupport),
                 getGroupTasksUseCase = GetGroupTasksUseCaseImpl(support),
                 getTaskDetailUseCase = GetTaskDetailUseCaseImpl(support),
+                getTaskAssigneesUseCase = GetTaskAssigneesUseCaseImpl(support),
                 createSubmissionUseCase = CreateSubmissionUseCaseImpl(support, taskSubmissionRepository),
                 updateSubmissionUseCase = UpdateSubmissionUseCaseImpl(support),
                 withdrawSubmissionUseCase = WithdrawSubmissionUseCaseImpl(support),
                 getTaskSubmissionsUseCase = GetTaskSubmissionsUseCaseImpl(support),
+                getTaskSubmissionUseCase = GetTaskSubmissionUseCaseImpl(support),
                 createSubmissionCommentUseCase = CreateSubmissionCommentUseCaseImpl(support),
                 updateSubmissionCommentUseCase = UpdateSubmissionCommentUseCaseImpl(support),
                 deleteSubmissionCommentUseCase = DeleteSubmissionCommentUseCaseImpl(support),

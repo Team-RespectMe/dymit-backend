@@ -13,8 +13,13 @@ import net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileDto
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
+import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -220,6 +225,57 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     }
 
                     exception.message shouldBe "taskId 형식이 올바르지 않습니다."
+                }
+            }
+        }
+
+        Given("과제 DTO 변환") {
+            When("제출 상태가 섞인 assignee 목록이 있으면") {
+                Then("제출/미제출 수를 계산해 DTO에 반영한다") {
+                    val groupId = ObjectId.get()
+                    val memberId1 = ObjectId.get()
+                    val memberId2 = ObjectId.get()
+                    val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
+                    val assignees = listOf(
+                        TaskAssignee(taskId = task.id!!, memberId = memberId1, status = TaskAssigneeStatus.SUBMITTED),
+                        TaskAssignee(taskId = task.id!!, memberId = memberId2, status = TaskAssigneeStatus.NOT_SUBMITTED),
+                        TaskAssignee(taskId = task.id!!, memberId = ObjectId.get(), status = TaskAssigneeStatus.NOT_SUBMITTED)
+                    )
+                    val members = listOf(
+                        StudyGroupMember(
+                            groupId = groupId,
+                            memberId = memberId1,
+                            nickname = "member-1",
+                            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/1.png")
+                        ),
+                        StudyGroupMember(
+                            groupId = groupId,
+                            memberId = memberId2,
+                            nickname = "member-2",
+                            profileImage = ProfileImageVo(ProfileImageType.EXTERNAL, "https://example.com/2.png")
+                        ),
+                        StudyGroupMember(
+                            groupId = groupId,
+                            memberId = assignees[2].memberId,
+                            nickname = "member-3",
+                            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/3.png")
+                        )
+                    )
+
+                    every { userFileRepository.findByIds(emptyList()) } returns emptyList()
+                    every { taskAssigneeRepository.findByTaskId(task.id!!) } returns assignees
+                    every {
+                        groupMemberRepository.findByGroupIdAndMemberIdsIn(
+                            groupId,
+                            assignees.map { it.memberId }
+                        )
+                    } returns members
+
+                    val result = support.toTaskDto(task, groupId)
+
+                    result.submittedAssigneeCount shouldBe 1
+                    result.notSubmittedAssigneeCount shouldBe 2
+                    result.assignees.size shouldBe 3
                 }
             }
         }

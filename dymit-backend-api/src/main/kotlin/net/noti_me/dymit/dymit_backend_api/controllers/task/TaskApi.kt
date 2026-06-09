@@ -87,13 +87,23 @@ interface TaskApi {
         submissionId: String
     )
 
-    @Operation(summary = "과제 제출 목록 조회", description = "그룹 멤버가 제출 목록을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "과제 제출 목록 조회 성공")
-    fun getSubmissions(
+    @Operation(summary = "과제 제출 단건 조회", description = "그룹 멤버가 대상자의 제출을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "과제 제출 조회 성공")
+    fun getSubmission(
         memberInfo: MemberInfo,
         groupId: String,
-        taskId: String
-    ): ListResponse<TaskSubmissionResponse>
+        taskId: String,
+        memberId: String
+    ): TaskSubmissionResponse
+
+    // 요청에 따라 제출 목록 조회 엔드포인트 노출을 중단합니다.
+    // @Operation(summary = "과제 제출 목록 조회", description = "그룹 멤버가 제출 목록을 조회합니다.")
+    // @ApiResponse(responseCode = "200", description = "과제 제출 목록 조회 성공")
+    // fun getSubmissions(
+    //     memberInfo: MemberInfo,
+    //     groupId: String,
+    //     taskId: String
+    // ): ListResponse<TaskSubmissionResponse>
 
     @Operation(summary = "과제 제출 댓글 생성", description = "과제 대상자가 댓글을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "댓글이 생성되었습니다.")

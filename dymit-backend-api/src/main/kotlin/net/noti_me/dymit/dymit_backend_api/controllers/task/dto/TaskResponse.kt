@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeSumm
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAttachmentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
+import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
@@ -27,12 +28,23 @@ class TaskResponse(
     val attachments: List<TaskAttachmentResponse>,
     @field:Schema(description = "마감 시각")
     val expireAt: LocalDateTime,
+    @field:Schema(description = "제출 완료 대상자 수")
+    val submittedAssigneeCount: Int,
+    @field:Schema(description = "미제출 대상자 수")
+    val notSubmittedAssigneeCount: Int,
     @field:Schema(description = "대상자 상태 목록")
     val assignees: List<TaskAssigneeSummaryResponse>
 ) : BaseResponse() {
 
     companion object {
-        fun from(dto: TaskDto): TaskResponse {
+        /**
+         * 과제 조회 DTO를 응답으로 변환합니다.
+         *
+         * @param dto 과제 조회 DTO
+         * @param groupId 스터디 그룹 ID
+         * @return 과제 응답
+         */
+        fun from(dto: TaskDto, groupId: String): TaskResponse {
             return TaskResponse(
                 taskId = dto.taskId,
                 relatedScheduleId = dto.relatedScheduleId,
@@ -41,8 +53,12 @@ class TaskResponse(
                 description = dto.description,
                 attachments = dto.attachments.map { TaskAttachmentResponse.from(it) },
                 expireAt = dto.expireAt,
+                submittedAssigneeCount = dto.submittedAssigneeCount,
+                notSubmittedAssigneeCount = dto.notSubmittedAssigneeCount,
                 assignees = dto.assignees.map { TaskAssigneeSummaryResponse.from(it) }
-            )
+            ).also { response ->
+                response._links["self"] = HateoasLink("/api/v1/study-groups/$groupId/tasks/${dto.taskId}")
+            }
         }
     }
 }

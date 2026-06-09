@@ -17,6 +17,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAt
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskApi
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskController
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionAttachmentRequest
@@ -122,6 +123,8 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                             )
                         ),
                         expireAt = request.expireAt,
+                        submittedAssigneeCount = 0,
+                        notSubmittedAssigneeCount = 1,
                         assignees = listOf(
                             TaskAssigneeSummaryDto(
                                 memberId = memberInfo.memberId,
@@ -140,7 +143,10 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     verify(exactly = 1) { taskService.createTask(memberInfo, groupId, any()) }
                     response.taskId shouldBe dto.taskId
                     response.attachments[0].fileId shouldBe dto.attachments[0].fileId
+                    response.submittedAssigneeCount shouldBe 0
+                    response.notSubmittedAssigneeCount shouldBe 1
                     response.assignees[0].status shouldBe TaskAssigneeStatus.NOT_SUBMITTED
+                    response._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/${dto.taskId}"
                 }
             }
 
@@ -254,6 +260,60 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                 }
             }
 
+            When("getSubmission을 호출하면") {
+                Then("서비스 DTO를 TaskSubmissionResponse로 변환한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val taskId = ObjectId.get().toHexString()
+                    val submissionMemberId = ObjectId.get().toHexString()
+                    val dto = TaskSubmissionDto(
+                        submissionId = ObjectId.get().toHexString(),
+                        taskId = taskId,
+                        memberId = submissionMemberId,
+                        memberNickname = "submitter",
+                        memberProfileImageUrl = "https://example.com/submission-profile.png",
+                        memberProfileImageType = ProfileImageType.EXTERNAL,
+                        title = "조회 제출",
+                        content = "본문",
+                        attachments = listOf(
+                            TaskSubmissionAttachmentDto(
+                                type = TaskSubmitAttachmentType.FILE,
+                                title = "첨부",
+                                url = null,
+                                fileId = ObjectId.get().toHexString(),
+                                fileUrl = "https://cdn.example.com/attachment.pdf",
+                                originalFileName = "attachment.pdf"
+                            )
+                        ),
+                        createdAt = LocalDateTime.now()
+                    )
+
+                    every {
+                        taskService.getTaskSubmission(memberInfo, groupId, taskId, submissionMemberId)
+                    } returns dto
+
+                    val response = controller.getSubmission(memberInfo, groupId, taskId, submissionMemberId)
+
+                    verify(exactly = 1) {
+                        taskService.getTaskSubmission(memberInfo, groupId, taskId, submissionMemberId)
+                    }
+                    response.submissionId shouldBe dto.submissionId
+                    response.taskId shouldBe dto.taskId
+                    response.member.memberId shouldBe dto.memberId
+                    response.member.nickname shouldBe dto.memberNickname
+                    response.member.profileImageUrl shouldBe dto.memberProfileImageUrl
+                    response.member.profileImageType shouldBe dto.memberProfileImageType
+                    response.attachments.first().type shouldBe TaskSubmitAttachmentType.FILE
+                    response.attachments.first().fileUrl shouldBe "https://cdn.example.com/attachment.pdf"
+                }
+            }
+
+            When("getSubmissions가 활성 API에 남아 있는지 확인하면") {
+                Then("TaskApi와 TaskController에 노출되지 않는다") {
+                    TaskApi::class.java.methods.none { it.name == "getSubmissions" } shouldBe true
+                    TaskController::class.java.methods.none { it.name == "getSubmissions" } shouldBe true
+                }
+            }
+
             When("updateTask를 호출하면") {
                 Then("TaskUpdateRequest를 UpdateTaskCommand로 전달하고 응답을 매핑한다") {
                     val groupId = ObjectId.get().toHexString()
@@ -280,6 +340,8 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                             )
                         ),
                         expireAt = request.expireAt,
+                        submittedAssigneeCount = 1,
+                        notSubmittedAssigneeCount = 0,
                         assignees = listOf(
                             TaskAssigneeSummaryDto(
                                 memberId = memberInfo.memberId,
@@ -299,6 +361,46 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     response.taskId shouldBe dto.taskId
                     response.title shouldBe "수정 과제"
                     response.type shouldBe TaskType.POST
+                    response.submittedAssigneeCount shouldBe 1
+                    response.notSubmittedAssigneeCount shouldBe 0
+                    response._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/$taskId"
+                }
+            }
+
+            When("getTasks를 호출하면") {
+                Then("목록 응답 각 항목에 카운트와 self 링크를 포함한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val taskId = ObjectId.get().toHexString()
+                    val dto = TaskDto(
+                        taskId = taskId,
+                        relatedScheduleId = ObjectId.get().toHexString(),
+                        type = TaskType.PRE,
+                        title = "목록 과제",
+                        description = "설명",
+                        attachments = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2),
+                        submittedAssigneeCount = 1,
+                        notSubmittedAssigneeCount = 2,
+                        assignees = listOf(
+                            TaskAssigneeSummaryDto(
+                                memberId = memberInfo.memberId,
+                                nickname = "tester",
+                                profileImageUrl = "https://example.com/profile.png",
+                                profileImageType = ProfileImageType.PRESET,
+                                status = TaskAssigneeStatus.SUBMITTED
+                            )
+                        )
+                    )
+
+                    every { taskService.getGroupTasks(memberInfo, groupId) } returns listOf(dto)
+
+                    val response = controller.getTasks(memberInfo, groupId)
+
+                    verify(exactly = 1) { taskService.getGroupTasks(memberInfo, groupId) }
+                    response.items.size shouldBe 1
+                    response.items[0].submittedAssigneeCount shouldBe 1
+                    response.items[0].notSubmittedAssigneeCount shouldBe 2
+                    response.items[0]._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/$taskId"
                 }
             }
         }

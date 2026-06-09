@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.task
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommentCommand
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
@@ -45,6 +46,13 @@ interface TaskService {
 
     fun getTaskSubmissions(memberInfo: MemberInfo, groupId: String, taskId: String): List<TaskSubmissionDto>
 
+    fun getTaskSubmission(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        memberId: String
+    ): TaskSubmissionDto
+
     fun createSubmissionComment(
         memberInfo: MemberInfo,
         groupId: String,
@@ -76,6 +84,8 @@ interface TaskService {
         taskId: String,
         submissionId: String
     ): List<TaskSubmissionCommentDto>
+
+    fun getTaskAssignees(memberInfo: MemberInfo, taskId: String): List<TaskAssigneeDto>
 
     fun addAssigneeToPreTasks(scheduleId: String, memberId: String)
 

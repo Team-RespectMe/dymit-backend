@@ -4,6 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommentCommand
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
@@ -17,7 +18,9 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.CreateTaskU
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.DeleteSubmissionCommentUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetGroupTasksUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetSubmissionCommentsUseCase
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetTaskAssigneesUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetTaskDetailUseCase
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetTaskSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetTaskSubmissionsUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveAssigneeFromPreTasksUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveTaskUseCase
@@ -39,10 +42,12 @@ class TaskServiceFacade(
     private val removeTaskUseCase: RemoveTaskUseCase,
     private val getGroupTasksUseCase: GetGroupTasksUseCase,
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
+    private val getTaskAssigneesUseCase: GetTaskAssigneesUseCase,
     private val createSubmissionUseCase: CreateSubmissionUseCase,
     private val updateSubmissionUseCase: UpdateSubmissionUseCase,
     private val withdrawSubmissionUseCase: WithdrawSubmissionUseCase,
     private val getTaskSubmissionsUseCase: GetTaskSubmissionsUseCase,
+    private val getTaskSubmissionUseCase: GetTaskSubmissionUseCase,
     private val createSubmissionCommentUseCase: CreateSubmissionCommentUseCase,
     private val updateSubmissionCommentUseCase: UpdateSubmissionCommentUseCase,
     private val deleteSubmissionCommentUseCase: DeleteSubmissionCommentUseCase,
@@ -99,6 +104,15 @@ class TaskServiceFacade(
         return getTaskSubmissionsUseCase.getTaskSubmissions(memberInfo, groupId, taskId)
     }
 
+    override fun getTaskSubmission(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        memberId: String
+    ): TaskSubmissionDto {
+        return getTaskSubmissionUseCase.getTaskSubmission(memberInfo, groupId, taskId, memberId)
+    }
+
     override fun createSubmissionComment(
         memberInfo: MemberInfo,
         groupId: String,
@@ -144,6 +158,10 @@ class TaskServiceFacade(
         submissionId: String
     ): List<TaskSubmissionCommentDto> {
         return getSubmissionCommentsUseCase.getSubmissionComments(memberInfo, groupId, taskId, submissionId)
+    }
+
+    override fun getTaskAssignees(memberInfo: MemberInfo, taskId: String): List<TaskAssigneeDto> {
+        return getTaskAssigneesUseCase.getTaskAssignees(memberInfo, taskId)
     }
 
     override fun addAssigneeToPreTasks(scheduleId: String, memberId: String) {
