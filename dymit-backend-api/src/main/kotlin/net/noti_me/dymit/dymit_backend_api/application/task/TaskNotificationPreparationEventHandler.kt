@@ -7,6 +7,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedBroadcas
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedEvent
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCommentCreatedBroadcastEvent
+import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCommentCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedEvent
 import org.springframework.context.ApplicationEventPublisher
@@ -86,6 +88,23 @@ class TaskNotificationPreparationEventHandler(
                 member = event.member,
                 memberIds = support.loadAssigneeMemberIdsByTask(event.taskId)
                     .filterNot { it == event.member.memberId }
+            )
+        )
+    }
+
+    /**
+     * 과제 제출 댓글 생성 이벤트를 수신해 브로드캐스트 이벤트를 발행합니다.
+     *
+     * @param event 과제 제출 댓글 생성 이벤트
+     */
+    @EventListener
+    fun onTaskSubmissionCommentCreated(event: TaskSubmissionCommentCreatedEvent) {
+        eventPublisher.publishEvent(
+            TaskSubmissionCommentCreatedBroadcastEvent(
+                group = event.group,
+                task = event.task,
+                member = event.member,
+                assigneeMemberId = event.assigneeMemberId
             )
         )
     }

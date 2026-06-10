@@ -188,7 +188,7 @@ class TaskServiceImpl(
                 withdrawSubmissionUseCase = WithdrawSubmissionUseCaseImpl(support),
                 getTaskSubmissionsUseCase = GetTaskSubmissionsUseCaseImpl(support),
                 getTaskSubmissionUseCase = GetTaskSubmissionUseCaseImpl(support),
-                createSubmissionCommentUseCase = CreateSubmissionCommentUseCaseImpl(support),
+                createSubmissionCommentUseCase = CreateSubmissionCommentUseCaseImpl(support, eventPublisher),
                 updateSubmissionCommentUseCase = UpdateSubmissionCommentUseCaseImpl(support),
                 deleteSubmissionCommentUseCase = DeleteSubmissionCommentUseCaseImpl(support),
                 getSubmissionCommentsUseCase = GetSubmissionCommentsUseCaseImpl(support),
