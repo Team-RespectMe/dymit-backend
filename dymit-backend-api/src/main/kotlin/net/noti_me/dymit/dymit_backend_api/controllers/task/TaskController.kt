@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -132,17 +133,29 @@ class TaskController(
         taskService.withdrawSubmission(memberInfo, groupId, taskId, submissionId)
     }
 
-    @GetMapping("/{groupId}/tasks/{taskId}/assignees/{memberId}/submission")
+    @DeleteMapping("/{groupId}/tasks/{taskId}/submissions")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun withdrawCheckSubmissionByAssignee(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable taskId: String,
+        @RequestParam assigneeId: String
+    ) {
+        taskService.withdrawCheckSubmissionByAssignee(memberInfo, groupId, taskId, assigneeId)
+    }
+
+    @GetMapping("/{groupId}/tasks/{taskId}/submissions")
     @ResponseStatus(HttpStatus.OK)
     @RolesAllowed("MEMBER", "ADMIN")
     override fun getSubmission(
         @LoginMember memberInfo: MemberInfo,
         @PathVariable groupId: String,
         @PathVariable taskId: String,
-        @PathVariable memberId: String
+        @RequestParam assigneeId: String
     ): TaskSubmissionResponse {
         return TaskSubmissionResponse.from(
-            taskService.getTaskSubmission(memberInfo, groupId, taskId, memberId)
+            taskService.getTaskSubmission(memberInfo, groupId, taskId, assigneeId)
         )
     }
 

@@ -20,6 +20,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
@@ -285,6 +286,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     result.submittedAssigneeCount shouldBe 1
                     result.notSubmittedAssigneeCount shouldBe 2
                     result.assignees.size shouldBe 3
+                    result.submissionType shouldBe TaskSubmissionType.OUTPUT
                 }
             }
         }

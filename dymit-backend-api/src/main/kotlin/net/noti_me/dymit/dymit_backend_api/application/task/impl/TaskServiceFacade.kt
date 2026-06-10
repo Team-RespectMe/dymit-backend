@@ -28,6 +28,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveTasks
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateSubmissionCommentUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateTaskUseCase
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.WithdrawCheckSubmissionByAssigneeUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.WithdrawSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import org.springframework.stereotype.Service
@@ -46,6 +47,7 @@ class TaskServiceFacade(
     private val createSubmissionUseCase: CreateSubmissionUseCase,
     private val updateSubmissionUseCase: UpdateSubmissionUseCase,
     private val withdrawSubmissionUseCase: WithdrawSubmissionUseCase,
+    private val withdrawCheckSubmissionByAssigneeUseCase: WithdrawCheckSubmissionByAssigneeUseCase,
     private val getTaskSubmissionsUseCase: GetTaskSubmissionsUseCase,
     private val getTaskSubmissionUseCase: GetTaskSubmissionUseCase,
     private val createSubmissionCommentUseCase: CreateSubmissionCommentUseCase,
@@ -98,6 +100,20 @@ class TaskServiceFacade(
 
     override fun withdrawSubmission(memberInfo: MemberInfo, groupId: String, taskId: String, submissionId: String) {
         withdrawSubmissionUseCase.withdrawSubmission(memberInfo, groupId, taskId, submissionId)
+    }
+
+    override fun withdrawCheckSubmissionByAssignee(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        assigneeId: String
+    ) {
+        withdrawCheckSubmissionByAssigneeUseCase.withdrawCheckSubmissionByAssignee(
+            memberInfo,
+            groupId,
+            taskId,
+            assigneeId
+        )
     }
 
     override fun getTaskSubmissions(memberInfo: MemberInfo, groupId: String, taskId: String): List<TaskSubmissionDto> {

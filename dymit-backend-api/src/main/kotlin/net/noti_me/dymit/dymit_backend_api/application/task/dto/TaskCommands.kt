@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.dto
 
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import java.time.LocalDateTime
 
@@ -14,7 +15,8 @@ data class CreateTaskCommand(
     val description: String,
     val attachmentFileIds: List<String>,
     val expireAt: LocalDateTime,
-    val assigneeMemberIds: List<String> = emptyList()
+    val assigneeMemberIds: List<String> = emptyList(),
+    val submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 )
 
 /**

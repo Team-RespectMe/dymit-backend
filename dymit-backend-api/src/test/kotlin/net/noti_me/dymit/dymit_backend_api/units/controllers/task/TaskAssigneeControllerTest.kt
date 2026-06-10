@@ -39,7 +39,7 @@ internal class TaskAssigneeControllerTest : BehaviorSpec() {
 
         Given("과제 제출 대상 목록 조회 요청이 주어지면") {
             When("컨트롤러가 응답을 생성하면") {
-                Then("서비스 결과를 ListResponse와 HATEOAS 응답으로 변환한다") {
+                Then("서비스 결과를 ListResponse와 assigneeId 쿼리 기반 HATEOAS 응답으로 변환한다") {
                     val groupId = ObjectId.get().toHexString()
                     val taskId = ObjectId.get().toHexString()
                     val assigneeDto = TaskAssigneeDto(
@@ -66,8 +66,10 @@ internal class TaskAssigneeControllerTest : BehaviorSpec() {
                     response.items[0].member.id shouldBe assigneeDto.member.id
                     response.items[0].member.nickname shouldBe assigneeDto.member.nickname
                     response.items[0].member.profileImage.url shouldBe assigneeDto.member.profileImage.url
-                    response.items[0]._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/$taskId/assignees/${assigneeDto.member.id}/submission"
-                    response.items[0]._links["self"]?.href shouldNotBe "/api/v1/tasks/$taskId/assignees/${assigneeDto.member.id}/submissions"
+                    response.items[0]._links["self"]?.href shouldBe
+                        "/api/v1/study-groups/$groupId/tasks/$taskId/submissions?assigneeId=${assigneeDto.member.id}"
+                    response.items[0]._links["self"]?.href shouldNotBe
+                        "/api/v1/study-groups/$groupId/tasks/$taskId/assignees/${assigneeDto.member.id}/submission"
                 }
             }
         }

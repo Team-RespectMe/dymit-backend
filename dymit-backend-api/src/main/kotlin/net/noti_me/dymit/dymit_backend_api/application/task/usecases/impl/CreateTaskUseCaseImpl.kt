@@ -47,7 +47,8 @@ class CreateTaskUseCaseImpl(
                 title = command.title,
                 description = command.description,
                 attachments = attachmentIds.map { TaskAttachment(fileId = it) },
-                expireAt = expireAt
+                expireAt = expireAt,
+                submissionType = command.submissionType
             )
         )
         val savedTaskId = requireNotNull(saved.id)

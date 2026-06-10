@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.units.controllers.task
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -29,6 +30,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
@@ -82,6 +84,12 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     violations.map { it.message } shouldContain "과제 제목은 비어 있을 수 없습니다."
                 }
             }
+
+            When("submissionType을 포함하지 않으면") {
+                Then("수정 요청에는 제출 방식 필드가 없다") {
+                    TaskUpdateRequest::class.java.declaredFields.map { it.name } shouldNotContain "submissionType"
+                }
+            }
         }
 
         Given("댓글 생성 요청 검증") {
@@ -125,6 +133,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         expireAt = request.expireAt,
                         submittedAssigneeCount = 0,
                         notSubmittedAssigneeCount = 1,
+                        submissionType = TaskSubmissionType.CHECK,
                         assignees = listOf(
                             TaskAssigneeSummaryDto(
                                 memberId = memberInfo.memberId,
@@ -145,6 +154,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     response.attachments[0].fileId shouldBe dto.attachments[0].fileId
                     response.submittedAssigneeCount shouldBe 0
                     response.notSubmittedAssigneeCount shouldBe 1
+                    response.submissionType shouldBe TaskSubmissionType.CHECK
                     response.assignees[0].status shouldBe TaskAssigneeStatus.NOT_SUBMITTED
                     response._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/${dto.taskId}"
                 }
@@ -342,6 +352,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         expireAt = request.expireAt,
                         submittedAssigneeCount = 1,
                         notSubmittedAssigneeCount = 0,
+                        submissionType = TaskSubmissionType.OUTPUT,
                         assignees = listOf(
                             TaskAssigneeSummaryDto(
                                 memberId = memberInfo.memberId,
@@ -361,6 +372,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     response.taskId shouldBe dto.taskId
                     response.title shouldBe "수정 과제"
                     response.type shouldBe TaskType.POST
+                    response.submissionType shouldBe TaskSubmissionType.OUTPUT
                     response.submittedAssigneeCount shouldBe 1
                     response.notSubmittedAssigneeCount shouldBe 0
                     response._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/$taskId"
@@ -401,6 +413,49 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     response.items[0].submittedAssigneeCount shouldBe 1
                     response.items[0].notSubmittedAssigneeCount shouldBe 2
                     response.items[0]._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/$taskId"
+                }
+            }
+
+            When("getSubmission 경로를 확인하면") {
+                Then("assigneeId는 쿼리 파라미터로만 받는다") {
+                    val method = TaskController::class.java.methods.first { it.name == "getSubmission" }
+
+                    method.declaringClass shouldBe TaskController::class.java
+                    method.annotations.first { it.annotationClass.simpleName == "GetMapping" }.toString()
+                        .contains("/submissions") shouldBe true
+                    method.parameterAnnotations[3].any { it.annotationClass.simpleName == "RequestParam" } shouldBe true
+                    method.parameterAnnotations[3].any { it.annotationClass.simpleName == "PathVariable" } shouldBe false
+                    TaskApi::class.java.methods.none { it.name == "getSubmissions" } shouldBe true
+                    TaskController::class.java.methods.none { it.name == "getSubmissions" } shouldBe true
+                }
+            }
+
+            When("withdrawCheckSubmissionByAssignee를 호출하면") {
+                Then("check 전용 서비스 메서드로 위임한다") {
+                    val groupId = ObjectId.get().toHexString()
+                    val taskId = ObjectId.get().toHexString()
+                    val assigneeId = ObjectId.get().toHexString()
+
+                    every {
+                        taskService.withdrawCheckSubmissionByAssignee(
+                            memberInfo,
+                            groupId,
+                            taskId,
+                            assigneeId
+                        )
+                    } returns Unit
+
+                    controller.withdrawCheckSubmissionByAssignee(memberInfo, groupId, taskId, assigneeId)
+
+                    verify(exactly = 1) {
+                        taskService.withdrawCheckSubmissionByAssignee(
+                            memberInfo,
+                            groupId,
+                            taskId,
+                            assigneeId
+                        )
+                    }
+                    verify(exactly = 0) { taskService.withdrawSubmission(any(), any(), any(), any()) }
                 }
             }
         }

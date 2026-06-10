@@ -41,8 +41,6 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmission
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 
 /**
  * 과제 서비스 내부 공통 로직 지원 컴포넌트입니다.
@@ -61,11 +59,6 @@ class TaskServiceSupport(
     private val fileServiceFacade: FileServiceFacade,
     private val fileUrlResolver: FileUrlResolver
 ) {
-    companion object {
-        private val KOREA_ZONE_ID: ZoneId = ZoneId.of("Asia/Seoul")
-        private val UTC_ZONE_ID: ZoneId = ZoneOffset.UTC
-    }
-
     fun toObjectId(value: String, fieldName: String): ObjectId {
         if ( !ObjectId.isValid(value) ) {
             throw BadRequestException(message = "${fieldName} 형식이 올바르지 않습니다.")
@@ -192,7 +185,7 @@ class TaskServiceSupport(
         return if ( type == TaskType.PRE ) {
             schedule.scheduleAt
         } else {
-            normalizePostExpireAt(requestedExpireAt)
+            TaskExpireAtNormalizer.normalizePostExpireAt(requestedExpireAt)
         }
     }
 
@@ -204,7 +197,7 @@ class TaskServiceSupport(
         return if ( type == TaskType.PRE ) {
             currentExpireAt
         } else {
-            normalizePostExpireAt(requestedExpireAt)
+            TaskExpireAtNormalizer.normalizePostExpireAt(requestedExpireAt)
         }
     }
 
@@ -371,6 +364,7 @@ class TaskServiceSupport(
             type = task.type,
             title = task.title,
             description = task.description,
+            submissionType = task.submissionType,
             attachments = task.attachments.map { attachment ->
                 val file = files[attachment.fileId] ?: throw NotFoundException(message = "존재하지 않는 파일입니다.")
                 TaskAttachmentDto(
@@ -487,17 +481,5 @@ class TaskServiceSupport(
             throw NotFoundException(message = "존재하지 않는 파일이 포함되어 있습니다.")
         }
         return files
-    }
-
-    private fun normalizePostExpireAt(requestedExpireAt: LocalDateTime): LocalDateTime {
-        val endOfDayKst = requestedExpireAt.toLocalDate().atTime(23, 59, 59)
-        return kstToUtc0(endOfDayKst)
-    }
-
-    private fun kstToUtc0(dateTime: LocalDateTime): LocalDateTime {
-        return dateTime
-            .atZone(KOREA_ZONE_ID)
-            .withZoneSameInstant(UTC_ZONE_ID)
-            .toLocalDateTime()
     }
 }

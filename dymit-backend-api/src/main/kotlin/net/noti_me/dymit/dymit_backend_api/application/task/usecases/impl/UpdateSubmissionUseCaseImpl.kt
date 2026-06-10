@@ -4,9 +4,11 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDt
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.UpdateTaskSubmissionCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateSubmissionUseCase
+import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import org.springframework.stereotype.Service
 
 /**
@@ -32,6 +34,10 @@ class UpdateSubmissionUseCaseImpl(
         support.checkTaskInGroup(task, groupIdObjectId)
         support.checkSubmissionUpdatable(task)
         support.requireTaskAssignee(task.id!!, memberId)
+
+        if ( task.submissionType == TaskSubmissionType.CHECK ) {
+            throw BadRequestException(message = "체크형 과제 제출은 수정할 수 없습니다.")
+        }
 
         val submission = support.loadSubmission(submissionId)
         if ( submission.taskId != task.id || submission.memberId != memberId ) {

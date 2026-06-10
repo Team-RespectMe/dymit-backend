@@ -16,6 +16,7 @@ import java.time.LocalDateTime
  * @param description 과제 설명
  * @param attachments 과제 첨부 파일 목록
  * @param expireAt 제출 마감 시각
+ * @param submissionType 과제 제출 방식
  */
 @Document(collection = "tasks")
 class Task(
@@ -29,7 +30,8 @@ class Task(
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false,
-    id: ObjectId? = null
+    id: ObjectId? = null,
+    submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 ) : BaseAggregateRoot<Task>(
     id = id,
     createdAt = createdAt,
@@ -51,6 +53,8 @@ class Task(
 
     var expireAt: LocalDateTime = expireAt
         private set
+
+    val submissionType: TaskSubmissionType = submissionType
 
     init {
         validate(

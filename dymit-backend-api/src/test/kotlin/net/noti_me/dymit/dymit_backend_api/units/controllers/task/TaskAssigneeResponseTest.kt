@@ -34,11 +34,13 @@ internal class TaskAssigneeResponseTest : BehaviorSpec({
         When("TaskAssigneeResponse로 변환하면") {
             val response = TaskAssigneeResponse.from(dto)
 
-            Then("단건 제출 조회 링크를 노출하고 목록 조회 경로는 사용하지 않는다") {
+            Then("assigneeId 쿼리 파라미터 기반 단건 제출 조회 링크를 노출한다") {
                 response.taskId shouldBe taskId
                 response.member.id shouldBe memberId
-                response._links["self"]?.href shouldBe "/api/v1/study-groups/$groupId/tasks/$taskId/assignees/$memberId/submission"
-                response._links["self"]?.href shouldNotBe "/api/v1/tasks/$taskId/assignees/$memberId/submissions"
+                response._links["self"]?.href shouldBe
+                    "/api/v1/study-groups/$groupId/tasks/$taskId/submissions?assigneeId=$memberId"
+                response._links["self"]?.href shouldNotBe
+                    "/api/v1/study-groups/$groupId/tasks/$taskId/assignees/$memberId/submission"
             }
         }
     }

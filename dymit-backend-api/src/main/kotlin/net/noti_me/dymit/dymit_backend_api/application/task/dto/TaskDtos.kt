@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import java.time.LocalDateTime
 
@@ -21,7 +22,8 @@ data class TaskDto(
     val expireAt: LocalDateTime,
     val submittedAssigneeCount: Int,
     val notSubmittedAssigneeCount: Int,
-    val assignees: List<TaskAssigneeSummaryDto>
+    val assignees: List<TaskAssigneeSummaryDto>,
+    val submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 )
 
 /**

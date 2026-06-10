@@ -6,20 +6,27 @@ import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAttachment
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
 internal class TaskTest : BehaviorSpec({
 
-    fun createTask(attachments: List<TaskAttachment>, description: String, expireAt: LocalDateTime): Task {
+    fun createTask(
+        attachments: List<TaskAttachment>,
+        description: String,
+        expireAt: LocalDateTime,
+        submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
+    ): Task {
         return Task(
             relatedScheduleId = ObjectId.get(),
             type = TaskType.PRE,
             title = "과제 제목",
             description = description,
             attachments = attachments,
-            expireAt = expireAt
+            expireAt = expireAt,
+            submissionType = submissionType
         )
     }
 
@@ -63,6 +70,39 @@ internal class TaskTest : BehaviorSpec({
                 )
 
                 task.expireAt.isBefore(LocalDateTime.now()) shouldBe true
+            }
+        }
+
+        `when`("submissionType을 CHECK로 생성하면") {
+            then("도메인에 그대로 보존된다") {
+                val task = createTask(
+                    attachments = emptyList(),
+                    description = "정상 설명",
+                    expireAt = LocalDateTime.now().plusHours(1),
+                    submissionType = TaskSubmissionType.CHECK
+                )
+
+                task.submissionType shouldBe TaskSubmissionType.CHECK
+            }
+        }
+
+        `when`("과제를 수정해도") {
+            then("submissionType은 변경되지 않는다") {
+                val task = createTask(
+                    attachments = emptyList(),
+                    description = "정상 설명",
+                    expireAt = LocalDateTime.now().plusHours(1),
+                    submissionType = TaskSubmissionType.CHECK
+                )
+
+                task.update(
+                    title = "수정 제목",
+                    description = "수정 설명",
+                    attachments = emptyList(),
+                    expireAt = LocalDateTime.now().plusHours(2)
+                )
+
+                task.submissionType shouldBe TaskSubmissionType.CHECK
             }
         }
     }

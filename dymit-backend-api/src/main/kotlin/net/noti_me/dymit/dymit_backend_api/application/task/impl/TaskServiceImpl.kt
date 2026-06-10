@@ -28,6 +28,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.Remove
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateSubmissionCommentUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateTaskUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawCheckSubmissionByAssigneeUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionCommentRepository
@@ -93,6 +94,15 @@ class TaskServiceImpl(
 
     override fun withdrawSubmission(memberInfo: MemberInfo, groupId: String, taskId: String, submissionId: String) {
         delegate.withdrawSubmission(memberInfo, groupId, taskId, submissionId)
+    }
+
+    override fun withdrawCheckSubmissionByAssignee(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        assigneeId: String
+    ) {
+        delegate.withdrawCheckSubmissionByAssignee(memberInfo, groupId, taskId, assigneeId)
     }
 
     override fun getTaskSubmissions(memberInfo: MemberInfo, groupId: String, taskId: String): List<TaskSubmissionDto> {
@@ -186,6 +196,7 @@ class TaskServiceImpl(
                 ),
                 updateSubmissionUseCase = UpdateSubmissionUseCaseImpl(support),
                 withdrawSubmissionUseCase = WithdrawSubmissionUseCaseImpl(support),
+                withdrawCheckSubmissionByAssigneeUseCase = WithdrawCheckSubmissionByAssigneeUseCaseImpl(support),
                 getTaskSubmissionsUseCase = GetTaskSubmissionsUseCaseImpl(support),
                 getTaskSubmissionUseCase = GetTaskSubmissionUseCaseImpl(support),
                 createSubmissionCommentUseCase = CreateSubmissionCommentUseCaseImpl(support, eventPublisher),

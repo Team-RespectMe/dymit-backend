@@ -1,9 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
+import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskCheckSubmissionDtoFactory
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetTaskSubmissionUseCase
+import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import org.springframework.stereotype.Service
 
 /**
@@ -22,13 +26,21 @@ class GetTaskSubmissionUseCaseImpl(
     ): TaskSubmissionDto {
         val groupIdObjectId = TaskUseCaseObjectIdParser.parse(groupId, "groupId")
         val requesterMemberId = TaskUseCaseObjectIdParser.parse(memberInfo.memberId, "memberId")
-        val assigneeMemberId = TaskUseCaseObjectIdParser.parse(memberId, "memberId")
+        val assigneeMemberId = TaskUseCaseObjectIdParser.parse(memberId, "assigneeId")
 
         support.requireGroupMember(groupIdObjectId, requesterMemberId)
 
         val task = support.loadTask(taskId)
         support.checkTaskInGroup(task, groupIdObjectId)
-        support.requireGroupMember(groupIdObjectId, assigneeMemberId)
+        val assigneeMember = support.requireGroupMember(groupIdObjectId, assigneeMemberId)
+
+        if ( task.submissionType == TaskSubmissionType.CHECK ) {
+            val assignee = support.requireTaskAssignee(task.id!!, assigneeMemberId)
+            if ( assignee.status != TaskAssigneeStatus.SUBMITTED ) {
+                throw NotFoundException(message = "존재하지 않는 제출입니다.")
+            }
+            return TaskCheckSubmissionDtoFactory.from(task.identifier, assignee, assigneeMember)
+        }
 
         val submission = support.loadSubmissionByTaskAndMember(task.id!!, assigneeMemberId)
         return support.toSubmissionDto(submission, groupIdObjectId)

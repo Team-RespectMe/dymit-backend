@@ -87,13 +87,22 @@ interface TaskApi {
         submissionId: String
     )
 
+    @Operation(summary = "체크형 과제 제출 철회", description = "과제 대상자가 assigneeId 기준으로 체크형 제출을 철회합니다.")
+    @ApiResponse(responseCode = "204", description = "체크형 과제 제출이 철회되었습니다.")
+    fun withdrawCheckSubmissionByAssignee(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        assigneeId: String
+    )
+
     @Operation(summary = "과제 제출 단건 조회", description = "그룹 멤버가 대상자의 제출을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "과제 제출 조회 성공")
     fun getSubmission(
         memberInfo: MemberInfo,
         groupId: String,
         taskId: String,
-        memberId: String
+        assigneeId: String
     ): TaskSubmissionResponse
 
     // 요청에 따라 제출 목록 조회 엔드포인트 노출을 중단합니다.

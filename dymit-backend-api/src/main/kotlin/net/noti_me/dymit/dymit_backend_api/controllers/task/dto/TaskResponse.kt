@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import java.time.LocalDateTime
 
@@ -24,6 +25,8 @@ class TaskResponse(
     val title: String,
     @field:Schema(description = "과제 설명")
     val description: String,
+    @field:Schema(description = "과제 제출 방식")
+    val submissionType: TaskSubmissionType,
     @field:Schema(description = "첨부 목록")
     val attachments: List<TaskAttachmentResponse>,
     @field:Schema(description = "마감 시각")
@@ -51,6 +54,7 @@ class TaskResponse(
                 type = dto.type,
                 title = dto.title,
                 description = dto.description,
+                submissionType = dto.submissionType,
                 attachments = dto.attachments.map { TaskAttachmentResponse.from(it) },
                 expireAt = dto.expireAt,
                 submittedAssigneeCount = dto.submittedAssigneeCount,

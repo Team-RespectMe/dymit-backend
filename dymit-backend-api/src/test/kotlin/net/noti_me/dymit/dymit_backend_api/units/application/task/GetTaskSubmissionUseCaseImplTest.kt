@@ -19,7 +19,10 @@ import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
@@ -167,6 +170,112 @@ internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
                     verify(exactly = 1) { support.requireGroupMember(groupId, requesterMemberId) }
                     verify(exactly = 1) { support.requireGroupMember(groupId, assigneeMemberId) }
                     verify(exactly = 1) { support.loadSubmissionByTaskAndMember(taskId, assigneeMemberId) }
+                    verify(exactly = 0) { support.toSubmissionDto(any(), any()) }
+                }
+            }
+
+            When("체크형 과제의 대상자가 제출 상태이면") {
+                Then("실제 TaskSubmission 조회 없이 synthetic DTO를 반환한다") {
+                    val groupId = ObjectId.get()
+                    val taskId = ObjectId.get()
+                    val requesterMemberId = ObjectId.get()
+                    val assigneeMemberId = ObjectId.get()
+                    val requester = createMemberInfo(
+                        createMemberEntity(
+                            id = requesterMemberId,
+                            nickname = "requester"
+                        )
+                    )
+                    val task = Task(
+                        relatedScheduleId = ObjectId.get(),
+                        type = TaskType.POST,
+                        title = "체크 과제",
+                        description = "설명",
+                        attachments = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2),
+                        id = taskId,
+                        submissionType = TaskSubmissionType.CHECK
+                    )
+                    val assigneeMember = StudyGroupMember(
+                        groupId = groupId,
+                        memberId = assigneeMemberId,
+                        nickname = "submitter"
+                    )
+                    val assignee = TaskAssignee(
+                        id = ObjectId.get(),
+                        taskId = taskId,
+                        memberId = assigneeMemberId,
+                        status = TaskAssigneeStatus.SUBMITTED
+                    )
+
+                    every { support.loadTask(taskId.toHexString()) } returns task
+                    every { support.checkTaskInGroup(task, groupId) } just runs
+                    every { support.requireGroupMember(groupId, requesterMemberId) } returns mockk()
+                    every { support.requireGroupMember(groupId, assigneeMemberId) } returns assigneeMember
+                    every { support.requireTaskAssignee(taskId, assigneeMemberId) } returns assignee
+
+                    val result = useCase.getTaskSubmission(
+                        memberInfo = requester,
+                        groupId = groupId.toHexString(),
+                        taskId = taskId.toHexString(),
+                        memberId = assigneeMemberId.toHexString()
+                    )
+
+                    verify(exactly = 1) { support.requireTaskAssignee(taskId, assigneeMemberId) }
+                    verify(exactly = 0) { support.loadSubmissionByTaskAndMember(any(), any()) }
+                    result.submissionId shouldBe assignee.identifier
+                    result.taskId shouldBe taskId.toHexString()
+                    result.memberId shouldBe assigneeMemberId.toHexString()
+                    result.title shouldBe ""
+                    result.content shouldBe ""
+                }
+            }
+
+            When("체크형 과제의 대상자가 미제출 상태이면") {
+                Then("실제 TaskSubmission 조회 없이 NotFoundException이 발생한다") {
+                    val groupId = ObjectId.get()
+                    val taskId = ObjectId.get()
+                    val requesterMemberId = ObjectId.get()
+                    val assigneeMemberId = ObjectId.get()
+                    val requester = createMemberInfo(
+                        createMemberEntity(
+                            id = requesterMemberId,
+                            nickname = "requester"
+                        )
+                    )
+                    val task = Task(
+                        relatedScheduleId = ObjectId.get(),
+                        type = TaskType.POST,
+                        title = "체크 과제",
+                        description = "설명",
+                        attachments = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2),
+                        id = taskId,
+                        submissionType = TaskSubmissionType.CHECK
+                    )
+                    val assignee = TaskAssignee(
+                        taskId = taskId,
+                        memberId = assigneeMemberId,
+                        status = TaskAssigneeStatus.NOT_SUBMITTED
+                    )
+
+                    every { support.loadTask(taskId.toHexString()) } returns task
+                    every { support.checkTaskInGroup(task, groupId) } just runs
+                    every { support.requireGroupMember(groupId, requesterMemberId) } returns mockk()
+                    every { support.requireGroupMember(groupId, assigneeMemberId) } returns mockk()
+                    every { support.requireTaskAssignee(taskId, assigneeMemberId) } returns assignee
+
+                    shouldThrow<NotFoundException> {
+                        useCase.getTaskSubmission(
+                            memberInfo = requester,
+                            groupId = groupId.toHexString(),
+                            taskId = taskId.toHexString(),
+                            memberId = assigneeMemberId.toHexString()
+                        )
+                    }.message shouldBe "존재하지 않는 제출입니다."
+
+                    verify(exactly = 1) { support.requireTaskAssignee(taskId, assigneeMemberId) }
+                    verify(exactly = 0) { support.loadSubmissionByTaskAndMember(any(), any()) }
                     verify(exactly = 0) { support.toSubmissionDto(any(), any()) }
                 }
             }

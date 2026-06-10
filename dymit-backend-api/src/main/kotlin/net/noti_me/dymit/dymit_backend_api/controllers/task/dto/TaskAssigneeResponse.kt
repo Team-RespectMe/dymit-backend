@@ -31,7 +31,7 @@ class TaskAssigneeResponse(
                 member = TaskAssigneeMemberResponse.from(dto.member)
             ).also { response ->
                 response._links["self"] = HateoasLink(
-                    "/api/v1/study-groups/${dto.groupId}/tasks/${dto.taskId}/assignees/${dto.member.id}/submission"
+                    "/api/v1/study-groups/${dto.groupId}/tasks/${dto.taskId}/submissions?assigneeId=${dto.member.id}"
                 )
             }
         }

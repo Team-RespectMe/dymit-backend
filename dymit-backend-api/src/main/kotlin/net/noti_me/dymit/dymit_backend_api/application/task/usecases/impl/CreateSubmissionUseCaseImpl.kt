@@ -2,12 +2,15 @@ package net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskSubmissionCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
+import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskCheckSubmissionDtoFactory
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.CreateSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionRepository
 import org.springframework.context.ApplicationEventPublisher
@@ -38,6 +41,16 @@ class CreateSubmissionUseCaseImpl(
         support.checkTaskInGroup(task, groupIdObjectId)
         support.checkSubmissionUpdatable(task)
         val assignee = support.requireTaskAssignee(taskObjectId, memberId)
+
+        if ( task.submissionType == TaskSubmissionType.CHECK ) {
+            if ( assignee.status == TaskAssigneeStatus.SUBMITTED ) {
+                throw ConflictException(message = "이미 제출한 과제입니다.")
+            }
+
+            assignee.markSubmitted()
+            val savedAssignee = support.saveAssignee(assignee)
+            return TaskCheckSubmissionDtoFactory.from(task.identifier, savedAssignee, member)
+        }
 
         if ( taskSubmissionRepository.findByTaskIdAndMemberId(taskObjectId, memberId) != null ) {
             throw ConflictException(message = "이미 제출한 과제입니다.")

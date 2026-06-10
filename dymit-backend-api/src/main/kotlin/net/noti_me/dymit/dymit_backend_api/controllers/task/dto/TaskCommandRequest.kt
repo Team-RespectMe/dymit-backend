@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.task.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskCommand
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import java.time.LocalDateTime
 
@@ -22,7 +23,9 @@ class TaskCommandRequest(
     @field:Schema(description = "제출 마감 시각", example = "2030-06-01T23:59:59")
     val expireAt: LocalDateTime,
     @field:Schema(description = "과제 대상자 멤버 ID 목록. POST 과제에서만 사용됩니다.", example = "[\"682fabc1234567890abcdeff\"]")
-    val assigneeMemberIds: List<String> = emptyList()
+    val assigneeMemberIds: List<String> = emptyList(),
+    @field:Schema(description = "과제 제출 방식", allowableValues = ["CHECK", "OUTPUT"], example = "OUTPUT")
+    val submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 ) {
 
     fun toCreateCommand(): CreateTaskCommand {
@@ -33,7 +36,8 @@ class TaskCommandRequest(
             description = description,
             attachmentFileIds = attachmentFileIds,
             expireAt = expireAt,
-            assigneeMemberIds = assigneeMemberIds
+            assigneeMemberIds = assigneeMemberIds,
+            submissionType = submissionType
         )
     }
 }

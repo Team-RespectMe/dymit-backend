@@ -44,6 +44,13 @@ interface TaskService {
 
     fun withdrawSubmission(memberInfo: MemberInfo, groupId: String, taskId: String, submissionId: String)
 
+    fun withdrawCheckSubmissionByAssignee(
+        memberInfo: MemberInfo,
+        groupId: String,
+        taskId: String,
+        assigneeId: String
+    )
+
     fun getTaskSubmissions(memberInfo: MemberInfo, groupId: String, taskId: String): List<TaskSubmissionDto>
 
     fun getTaskSubmission(
