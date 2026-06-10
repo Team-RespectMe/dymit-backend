@@ -36,7 +36,6 @@ class CreateSubmissionUseCaseImpl(
         val task = support.loadTask(taskId)
         val taskObjectId = requireNotNull(task.id)
         support.checkTaskInGroup(task, groupIdObjectId)
-        support.checkTaskActionAllowedBySchedule(task)
         support.checkSubmissionUpdatable(task)
         val assignee = support.requireTaskAssignee(taskObjectId, memberId)
 

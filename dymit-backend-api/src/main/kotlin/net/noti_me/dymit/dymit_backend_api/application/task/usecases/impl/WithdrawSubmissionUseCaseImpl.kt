@@ -21,7 +21,6 @@ class WithdrawSubmissionUseCaseImpl(
 
         val task = support.loadTask(taskId)
         support.checkTaskInGroup(task, groupIdObjectId)
-        support.checkTaskActionAllowedBySchedule(task)
         support.checkSubmissionUpdatable(task)
 
         val assignee = support.requireTaskAssignee(task.id!!, memberId)
@@ -32,8 +31,9 @@ class WithdrawSubmissionUseCaseImpl(
         }
 
         val fileIds = support.submissionAttachmentFileIds(submission.attachments)
-        support.removeCommentsBySubmission(submission.id!!)
-        support.removeSubmissionById(submission.id!!)
+        val submissionIdObjectId = requireNotNull(submission.id)
+        support.removeCommentsBySubmission(submissionIdObjectId)
+        support.removeSubmissionById(submissionIdObjectId)
 
         assignee.markNotSubmitted()
         support.saveAssignee(assignee)

@@ -20,7 +20,9 @@ class TaskCommandRequest(
     @field:Schema(description = "과제 첨부 파일 ID 목록", example = "[\"682fabc1234567890abcdeff\"]")
     val attachmentFileIds: List<String> = emptyList(),
     @field:Schema(description = "제출 마감 시각", example = "2030-06-01T23:59:59")
-    val expireAt: LocalDateTime
+    val expireAt: LocalDateTime,
+    @field:Schema(description = "과제 대상자 멤버 ID 목록. POST 과제에서만 사용됩니다.", example = "[\"682fabc1234567890abcdeff\"]")
+    val assigneeMemberIds: List<String> = emptyList()
 ) {
 
     fun toCreateCommand(): CreateTaskCommand {
@@ -30,7 +32,8 @@ class TaskCommandRequest(
             title = title,
             description = description,
             attachmentFileIds = attachmentFileIds,
-            expireAt = expireAt
+            expireAt = expireAt,
+            assigneeMemberIds = assigneeMemberIds
         )
     }
 }

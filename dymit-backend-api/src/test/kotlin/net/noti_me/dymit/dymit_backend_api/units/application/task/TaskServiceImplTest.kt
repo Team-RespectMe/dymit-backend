@@ -135,7 +135,7 @@ internal class TaskServiceImplTest : BehaviorSpec() {
                     val task = createTask(taskId)
 
                     every { support.loadTask(taskId.toHexString()) } returns task
-                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException("마감된 과제는 제출/수정/철회할 수 없습니다.")
+                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException(message = "마감된 과제는 제출/수정/철회할 수 없습니다.")
 
                     shouldThrow<BadRequestException> {
                         service.createSubmission(
@@ -157,7 +157,7 @@ internal class TaskServiceImplTest : BehaviorSpec() {
                     val task = createTask(taskId)
 
                     every { support.loadTask(taskId.toHexString()) } returns task
-                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException("마감된 과제는 제출/수정/철회할 수 없습니다.")
+                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException(message = "마감된 과제는 제출/수정/철회할 수 없습니다.")
 
                     shouldThrow<BadRequestException> {
                         service.updateSubmission(
@@ -180,7 +180,7 @@ internal class TaskServiceImplTest : BehaviorSpec() {
                     val task = createTask(taskId)
 
                     every { support.loadTask(taskId.toHexString()) } returns task
-                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException("마감된 과제는 제출/수정/철회할 수 없습니다.")
+                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException(message = "마감된 과제는 제출/수정/철회할 수 없습니다.")
 
                     shouldThrow<BadRequestException> {
                         service.withdrawSubmission(

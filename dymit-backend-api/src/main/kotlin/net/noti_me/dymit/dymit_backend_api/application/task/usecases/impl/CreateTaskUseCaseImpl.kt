@@ -28,34 +28,42 @@ class CreateTaskUseCaseImpl(
         support.checkOwner(memberInfo, group)
 
         val schedule = support.loadSchedule(command.relatedScheduleId)
+        val scheduleId = requireNotNull(schedule.id)
         support.checkScheduleInGroup(schedule, groupIdObjectId)
-        support.validateTaskTypeWithSchedule(command.type, schedule)
-        val expireAt = support.normalizeExpireAtForCreate(command.type, command.expireAt, schedule)
+        val resolvedType = support.resolveTaskTypeBySchedule(schedule)
+        val expireAt = support.normalizeExpireAtForCreate(resolvedType, command.expireAt, schedule)
 
         val attachmentIds = support.toObjectIds(command.attachmentFileIds.distinct(), "attachmentFileIds")
+        val assigneeMemberIds = support.toObjectIds(command.assigneeMemberIds.distinct(), "assigneeMemberIds")
         support.validateTaskAttachmentFiles(attachmentIds)
+        if ( resolvedType != TaskType.PRE ) {
+            support.validateAssigneeMembersInGroup(groupIdObjectId, assigneeMemberIds)
+        }
 
         val saved = support.saveTask(
             Task(
-                relatedScheduleId = schedule.id!!,
-                type = command.type,
+                relatedScheduleId = scheduleId,
+                type = resolvedType,
                 title = command.title,
                 description = command.description,
                 attachments = attachmentIds.map { TaskAttachment(fileId = it) },
                 expireAt = expireAt
             )
         )
+        val savedTaskId = requireNotNull(saved.id)
 
         if ( saved.type == TaskType.PRE ) {
-            support.initializeAssigneesForPreTask(saved.id!!, schedule.id!!)
+            support.initializeAssigneesForPreTask(savedTaskId, scheduleId)
+        } else {
+            support.initializeAssignees(savedTaskId, assigneeMemberIds)
         }
 
         support.updateFileStatuses(attachmentIds, UserFileStatus.LINKED)
         eventPublisher.publishEvent(
             TaskCreatedEvent(
-                taskId = saved.id!!,
+                taskId = savedTaskId,
                 groupId = groupIdObjectId,
-                scheduleId = schedule.id!!,
+                scheduleId = scheduleId,
                 task = saved,
                 group = group
             )

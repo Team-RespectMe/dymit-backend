@@ -32,7 +32,7 @@ internal class TaskTest : BehaviorSpec({
                     createTask(
                         attachments = attachments,
                         description = "설명",
-                        expireAt = LocalDateTime.now().plusHours(25)
+                        expireAt = LocalDateTime.now().plusHours(1)
                     )
                 }
 
@@ -46,7 +46,7 @@ internal class TaskTest : BehaviorSpec({
                     createTask(
                         attachments = emptyList(),
                         description = "a".repeat(4001),
-                        expireAt = LocalDateTime.now().plusHours(25)
+                        expireAt = LocalDateTime.now().plusHours(1)
                     )
                 }
 
@@ -54,32 +54,15 @@ internal class TaskTest : BehaviorSpec({
             }
         }
 
-        `when`("마감 시각이 현재 시각 기준 24시간 이전이면") {
-            then("BadRequestException이 발생한다") {
-                val exception = shouldThrow<BadRequestException> {
-                    createTask(
-                        attachments = emptyList(),
-                        description = "설명",
-                        expireAt = LocalDateTime.now().plusHours(23)
-                    )
-                }
-
-                exception.message shouldBe "마감일은 현재 시각 기준 24시간 이후여야 합니다."
-            }
-        }
-
-        `when`("첨부 5개와 24시간 이상 마감 시각을 사용하면") {
-            then("정상 생성된다") {
-                val attachments = List(5) { TaskAttachment(fileId = ObjectId.get()) }
-
+        `when`("마감 시각이 이미 지난 값이어도") {
+            then("도메인 생성은 허용된다") {
                 val task = createTask(
-                    attachments = attachments,
+                    attachments = emptyList(),
                     description = "정상 설명",
-                    expireAt = LocalDateTime.now().plusHours(25)
+                    expireAt = LocalDateTime.now().minusHours(1)
                 )
 
-                task.attachments.size shouldBe 5
-                task.description shouldBe "정상 설명"
+                task.expireAt.isBefore(LocalDateTime.now()) shouldBe true
             }
         }
     }

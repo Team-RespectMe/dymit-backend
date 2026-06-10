@@ -3,7 +3,6 @@ package net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskDeletionSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveTasksByCanceledScheduleUseCase
-import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import org.springframework.stereotype.Service
 
 /**
@@ -19,7 +18,7 @@ class RemoveTasksByCanceledScheduleUseCaseImpl(
         val scheduleObjectId = TaskUseCaseObjectIdParser.parse(scheduleId, "scheduleId")
         val groupIdObjectId = TaskUseCaseObjectIdParser.parse(groupId, "groupId")
 
-        support.loadTasksBySchedule(scheduleObjectId, TaskType.PRE)
+        support.loadTasksBySchedule(scheduleObjectId)
             .forEach { task ->
                 taskDeletionSupport.cascadeDeleteTask(
                     task = task,

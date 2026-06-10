@@ -58,7 +58,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = scheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().plusDays(2)
+                        scheduleAt = LocalDateTime.now().minusDays(1)
                     )
                     val savedTask = createTask(
                         taskId = taskId,
@@ -72,14 +72,17 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                         title = "과제 생성",
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
+                        assigneeMemberIds = emptyList(),
                         expireAt = LocalDateTime.now().plusDays(5)
                     )
                     val eventSlot = slot<Any>()
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
+                    every { support.resolveTaskTypeBySchedule(schedule) } returns TaskType.PRE
                     every { support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule) } returns schedule.scheduleAt
                     every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every { support.toObjectIds(emptyList(), "assigneeMemberIds") } returns emptyList()
                     every { support.saveTask(any()) } returns savedTask
                     every { support.toTaskDto(savedTask, groupId) } returns expectedDto
                     justRun { eventPublisher.publishEvent(any()) }
@@ -214,7 +217,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                     )
                     val eventSlot = slot<Any>()
 
-                    every { support.loadTasksBySchedule(scheduleId, TaskType.PRE) } returns listOf(task)
+                    every { support.loadTasksBySchedule(scheduleId) } returns listOf(task)
                     every { support.loadAssigneeMemberIdsByTask(taskId) } returns listOf(assigneeId, assigneeId)
                     every { support.loadSubmissionsByTask(taskId) } returns emptyList()
                     every { support.removeCommentsByTask(taskId) } answers { Unit }

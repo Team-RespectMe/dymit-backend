@@ -22,7 +22,6 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.Update
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateTaskUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
-import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
@@ -35,7 +34,7 @@ import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import java.time.LocalDateTime
 
-internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
+internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
 
     private val support = mockk<TaskServiceSupport>(relaxed = true)
     private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
@@ -54,12 +53,14 @@ internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
             clearAllMocks()
         }
 
-        Given("TASK 61 생성/수정 24시간 제약") {
-            When("생성 시 최종 마감일이 현재 시각 기준 24시간 미만이면") {
-                Then("BadRequestException이 발생하고 저장되지 않는다") {
+        Given("TASK-62 생성 규칙") {
+            When("연관 일정이 요청 시점보다 이후면") {
+                Then("요청 type을 무시하고 POST 과제로 저장하며 요청 대상자를 초기화한다") {
                     val ownerId = ObjectId.get()
                     val groupId = ObjectId.get()
                     val scheduleId = ObjectId.get()
+                    val assigneeId1 = ObjectId.get()
+                    val assigneeId2 = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
                     val schedule = StudySchedule(
@@ -69,29 +70,47 @@ internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
                     )
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
-                        type = TaskType.POST,
+                        type = TaskType.PRE,
                         title = "과제 제목",
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(1)
+                        assigneeMemberIds = listOf(assigneeId1.toHexString(), assigneeId2.toHexString()),
+                        expireAt = LocalDateTime.of(2026, 6, 11, 8, 0, 0)
+                    )
+                    val savedTask = createTask(
+                        type = TaskType.POST,
+                        expireAt = LocalDateTime.of(2026, 6, 11, 14, 59, 59),
+                        scheduleId = scheduleId
                     )
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
-                    every { support.normalizeExpireAtForCreate(TaskType.POST, command.expireAt, schedule) } returns LocalDateTime.now().plusHours(23)
+                    every { support.resolveTaskTypeBySchedule(schedule) } returns TaskType.POST
+                    every {
+                        support.normalizeExpireAtForCreate(TaskType.POST, command.expireAt, schedule)
+                    } returns savedTask.expireAt
                     every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every {
+                        support.toObjectIds(command.assigneeMemberIds, "assigneeMemberIds")
+                    } returns listOf(assigneeId1, assigneeId2)
                     every { support.validateTaskAttachmentFiles(emptyList()) } just runs
+                    every { support.validateAssigneeMembersInGroup(groupId, listOf(assigneeId1, assigneeId2)) } just runs
+                    every {
+                        support.saveTask(match { task ->
+                            task.type == TaskType.POST && task.expireAt == savedTask.expireAt
+                        })
+                    } returns savedTask
+                    every { support.toTaskDto(savedTask, groupId) } returns mockk()
 
-                    shouldThrow<BadRequestException> {
-                        createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
-                    }.message shouldBe "마감일은 현재 시각 기준 24시간 이후여야 합니다."
+                    createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
 
-                    verify(exactly = 0) { support.saveTask(any()) }
+                    verify(exactly = 1) { support.initializeAssignees(savedTask.id!!, listOf(assigneeId1, assigneeId2)) }
+                    verify(exactly = 0) { support.initializeAssigneesForPreTask(any(), any()) }
                 }
             }
 
-            When("PRE 생성에서 요청 expireAt이 달라도 최종 마감일(scheduleAt)이 24시간 미만이면") {
-                Then("BadRequestException이 발생하고 저장되지 않는다") {
+            When("연관 일정이 요청 시점보다 이전이면") {
+                Then("요청 type과 대상자 목록을 무시하고 PRE 과제로 저장하며 일정 참여자를 초기화한다") {
                     val ownerId = ObjectId.get()
                     val groupId = ObjectId.get()
                     val scheduleId = ObjectId.get()
@@ -100,191 +119,162 @@ internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = scheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().plusHours(23)
+                        scheduleAt = LocalDateTime.now().minusDays(1)
                     )
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
-                        type = TaskType.PRE,
+                        type = TaskType.POST,
                         title = "과제 제목",
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(7)
+                        assigneeMemberIds = listOf(ObjectId.get().toHexString()),
+                        expireAt = LocalDateTime.now().plusDays(3)
+                    )
+                    val savedTask = createTask(
+                        type = TaskType.PRE,
+                        expireAt = schedule.scheduleAt,
+                        scheduleId = scheduleId
                     )
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
-                    every { support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule) } returns schedule.scheduleAt
-                    every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
-                    every { support.validateTaskAttachmentFiles(emptyList()) } just runs
-
-                    shouldThrow<BadRequestException> {
-                        createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
-                    }.message shouldBe "마감일은 현재 시각 기준 24시간 이후여야 합니다."
-
-                    verify(exactly = 0) { support.saveTask(any()) }
-                }
-            }
-
-            When("POST 과제 수정 시 정규화된 마감일이 현재 시각 기준 24시간 미만이면") {
-                Then("BadRequestException이 발생하고 저장되지 않는다") {
-                    val ownerId = ObjectId.get()
-                    val groupId = ObjectId.get()
-                    val memberInfo = createMemberInfo(ownerId)
-                    val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().plusDays(3))
-                    val command = UpdateTaskCommand(
-                        title = "수정 제목",
-                        description = "수정 설명",
-                        attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(1)
-                    )
-
-                    every { support.loadGroup(groupId.toHexString()) } returns group
-                    every { support.loadTask(task.identifier) } returns task
+                    every { support.resolveTaskTypeBySchedule(schedule) } returns TaskType.PRE
                     every {
-                        support.normalizeExpireAtForUpdate(task.type, command.expireAt, task.expireAt)
-                    } returns LocalDateTime.now().plusHours(23)
+                        support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule)
+                    } returns schedule.scheduleAt
                     every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every { support.toObjectIds(command.assigneeMemberIds, "assigneeMemberIds") } returns listOf(ObjectId.get())
                     every { support.validateTaskAttachmentFiles(emptyList()) } just runs
+                    every {
+                        support.saveTask(match { task ->
+                            task.type == TaskType.PRE && task.expireAt == schedule.scheduleAt
+                        })
+                    } returns savedTask
+                    every { support.toTaskDto(savedTask, groupId) } returns mockk()
 
-                    shouldThrow<BadRequestException> {
-                        updateTaskUseCase.updateTask(memberInfo, groupId.toHexString(), task.identifier, command)
-                    }.message shouldBe "마감일은 현재 시각 기준 24시간 이후여야 합니다."
+                    createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
 
-                    verify(exactly = 0) { support.saveTask(any()) }
+                    verify(exactly = 1) { support.initializeAssigneesForPreTask(savedTask.id!!, scheduleId) }
+                    verify(exactly = 0) { support.initializeAssignees(any(), any()) }
+                    verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
                 }
             }
         }
 
-        Given("TASK 61 일정 만료 잠금") {
-            val scheduleLockedMessage = "이미 지난 일정의 과제는 수정/삭제/제출/철회할 수 없습니다."
+        Given("TASK-62 수정/삭제 잠금 규칙") {
+            val expiredMessage = "마감된 과제는 수정/삭제할 수 없습니다."
 
-            When("과제 수정 시 연관 일정이 만료되었으면") {
+            When("과제 수정 시 마감일이 지났으면") {
                 Then("BadRequestException이 발생한다") {
                     val ownerId = ObjectId.get()
                     val groupId = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(2))
+                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadTask(task.identifier) } returns task
-                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = scheduleLockedMessage)
+                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = expiredMessage)
 
                     shouldThrow<BadRequestException> {
                         updateTaskUseCase.updateTask(
-                            memberInfo = memberInfo,
-                            groupId = groupId.toHexString(),
-                            taskId = task.identifier,
-                            command = UpdateTaskCommand("제목", "설명", emptyList(), LocalDateTime.now().plusDays(3))
+                            memberInfo,
+                            groupId.toHexString(),
+                            task.identifier,
+                            UpdateTaskCommand("제목", "설명", emptyList(), LocalDateTime.now().plusDays(1))
                         )
-                    }.message shouldBe scheduleLockedMessage
+                    }.message shouldBe expiredMessage
                 }
             }
 
-            When("과제 삭제 시 연관 일정이 만료되었으면") {
-                Then("BadRequestException이 발생하고 삭제 처리를 수행하지 않는다") {
+            When("과제 삭제 시 마감일이 지났으면") {
+                Then("BadRequestException이 발생하고 cascade delete를 호출하지 않는다") {
                     val ownerId = ObjectId.get()
                     val groupId = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(2))
+                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadTask(task.identifier) } returns task
-                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = scheduleLockedMessage)
+                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = expiredMessage)
 
                     shouldThrow<BadRequestException> {
                         removeTaskUseCase.removeTask(memberInfo, groupId.toHexString(), task.identifier)
-                    }.message shouldBe scheduleLockedMessage
+                    }.message shouldBe expiredMessage
 
                     verify(exactly = 0) { taskDeletionSupport.cascadeDeleteTask(any(), any(), any(), any()) }
                 }
             }
+        }
 
-            When("제출 생성 시 연관 일정이 만료되었으면") {
+        Given("TASK-62 제출 잠금 규칙") {
+            val expiredMessage = "마감된 과제는 제출/수정/철회할 수 없습니다."
+
+            When("과제 제출 생성 시 마감일이 지났으면") {
                 Then("BadRequestException이 발생한다") {
                     val groupId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(2))
-                    val command = CreateTaskSubmissionCommand("제출 제목", "제출 본문", emptyList())
+                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
 
                     every { support.requireGroupMember(groupId, memberId) } returns mockk()
                     every { support.loadTask(task.identifier) } returns task
-                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = scheduleLockedMessage)
+                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException(message = expiredMessage)
 
                     shouldThrow<BadRequestException> {
-                        createSubmissionUseCase.createSubmission(memberInfo, groupId.toHexString(), task.identifier, command)
-                    }.message shouldBe scheduleLockedMessage
+                        createSubmissionUseCase.createSubmission(
+                            memberInfo,
+                            groupId.toHexString(),
+                            task.identifier,
+                            CreateTaskSubmissionCommand("제목", "본문", emptyList())
+                        )
+                    }.message shouldBe expiredMessage
                 }
             }
 
-            When("제출 수정 시 연관 일정이 만료되었으면") {
+            When("과제 제출 수정 시 마감일이 지났으면") {
                 Then("BadRequestException이 발생한다") {
                     val groupId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(2))
+                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
 
                     every { support.requireGroupMember(groupId, memberId) } returns mockk()
                     every { support.loadTask(task.identifier) } returns task
-                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = scheduleLockedMessage)
+                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException(message = expiredMessage)
 
                     shouldThrow<BadRequestException> {
                         updateSubmissionUseCase.updateSubmission(
-                            memberInfo = memberInfo,
-                            groupId = groupId.toHexString(),
-                            taskId = task.identifier,
-                            submissionId = ObjectId.get().toHexString(),
-                            command = UpdateTaskSubmissionCommand("수정 제목", "수정 본문", emptyList())
+                            memberInfo,
+                            groupId.toHexString(),
+                            task.identifier,
+                            ObjectId.get().toHexString(),
+                            UpdateTaskSubmissionCommand("제목", "본문", emptyList())
                         )
-                    }.message shouldBe scheduleLockedMessage
+                    }.message shouldBe expiredMessage
                 }
             }
 
-            When("제출 철회 시 연관 일정이 만료되었으면") {
+            When("과제 제출 철회 시 마감일이 지났으면") {
                 Then("BadRequestException이 발생한다") {
                     val groupId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(2))
+                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
 
                     every { support.requireGroupMember(groupId, memberId) } returns mockk()
                     every { support.loadTask(task.identifier) } returns task
-                    every { support.checkTaskActionAllowedBySchedule(task) } throws BadRequestException(message = scheduleLockedMessage)
+                    every { support.checkSubmissionUpdatable(task) } throws BadRequestException(message = expiredMessage)
 
                     shouldThrow<BadRequestException> {
                         withdrawSubmissionUseCase.withdrawSubmission(
-                            memberInfo = memberInfo,
-                            groupId = groupId.toHexString(),
-                            taskId = task.identifier,
-                            submissionId = ObjectId.get().toHexString()
+                            memberInfo,
+                            groupId.toHexString(),
+                            task.identifier,
+                            ObjectId.get().toHexString()
                         )
-                    }.message shouldBe scheduleLockedMessage
-                }
-            }
-        }
-
-        Given("회귀 검증") {
-            When("이미 제출한 과제를 다시 제출하면") {
-                Then("기존 충돌 예외를 유지한다") {
-                    val groupId = ObjectId.get()
-                    val memberId = ObjectId.get()
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(2))
-                    val assignee = TaskAssignee(taskId = task.id!!, memberId = memberId)
-                    val memberInfo = createMemberInfo(memberId)
-                    val command = CreateTaskSubmissionCommand("제목", "본문", emptyList())
-
-                    every { support.requireGroupMember(groupId, memberId) } returns mockk()
-                    every { support.loadTask(task.identifier) } returns task
-                    every { support.checkSubmissionUpdatable(task) } just runs
-                    every { support.requireTaskAssignee(task.id!!, memberId) } returns assignee
-                    every { taskSubmissionRepository.findByTaskIdAndMemberId(task.id!!, memberId) } returns mockk()
-
-                    shouldThrow<ConflictException> {
-                        createSubmissionUseCase.createSubmission(memberInfo, groupId.toHexString(), task.identifier, command)
-                    }.message shouldBe "이미 제출한 과제입니다."
+                    }.message shouldBe expiredMessage
                 }
             }
         }
@@ -298,10 +288,14 @@ internal class TaskUseCaseTask61ValidationTest : BehaviorSpec() {
         )
     }
 
-    private fun createTask(type: TaskType, expireAt: LocalDateTime): Task {
+    private fun createTask(
+        type: TaskType,
+        expireAt: LocalDateTime,
+        scheduleId: ObjectId = ObjectId.get()
+    ): Task {
         return Task(
             id = ObjectId.get(),
-            relatedScheduleId = ObjectId.get(),
+            relatedScheduleId = scheduleId,
             type = type,
             title = "과제 제목",
             description = "과제 설명",

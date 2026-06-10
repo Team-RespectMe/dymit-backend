@@ -30,7 +30,6 @@ class UpdateSubmissionUseCaseImpl(
 
         val task = support.loadTask(taskId)
         support.checkTaskInGroup(task, groupIdObjectId)
-        support.checkTaskActionAllowedBySchedule(task)
         support.checkSubmissionUpdatable(task)
         support.requireTaskAssignee(task.id!!, memberId)
 

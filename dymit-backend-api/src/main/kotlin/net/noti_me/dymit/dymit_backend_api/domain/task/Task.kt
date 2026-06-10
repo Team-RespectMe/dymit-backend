@@ -68,15 +68,13 @@ class Task(
         title: String,
         description: String,
         attachments: List<TaskAttachment>,
-        expireAt: LocalDateTime,
-        validateExpireAt: Boolean = true
+        expireAt: LocalDateTime
     ) {
         validate(
             title = title,
             description = description,
             attachments = attachments,
-            expireAt = expireAt,
-            validateExpireAt = validateExpireAt
+            expireAt = expireAt
         )
 
         this.title = title
@@ -90,8 +88,7 @@ class Task(
         title: String,
         description: String,
         attachments: List<TaskAttachment>,
-        expireAt: LocalDateTime,
-        validateExpireAt: Boolean = true
+        @Suppress("UNUSED_PARAMETER") expireAt: LocalDateTime
     ) {
         if ( title.isBlank() ) {
             throw BadRequestException(message = "과제 제목은 비어 있을 수 없습니다.")
@@ -107,10 +104,6 @@ class Task(
 
         if ( attachments.size > 5 ) {
             throw BadRequestException(message = "과제 첨부 파일은 최대 5개까지 가능합니다.")
-        }
-
-        if ( validateExpireAt && expireAt.isBefore(LocalDateTime.now().plusHours(24)) ) {
-            throw BadRequestException(message = "마감일은 현재 시각 기준 24시간 이후여야 합니다.")
         }
     }
 }

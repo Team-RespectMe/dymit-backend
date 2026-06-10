@@ -7,7 +7,6 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateTaskU
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAttachment
-import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -39,8 +38,7 @@ class UpdateTaskUseCaseImpl(
             title = command.title,
             description = command.description,
             attachments = newAttachmentIds.map { TaskAttachment(fileId = it) },
-            expireAt = expireAt,
-            validateExpireAt = task.type == TaskType.POST
+            expireAt = expireAt
         )
         val saved = support.saveTask(task)
 

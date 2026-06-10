@@ -108,6 +108,10 @@ class TaskServiceSupport(
         return taskRepository.findByRelatedScheduleIdAndType(scheduleId, type)
     }
 
+    fun loadTasksBySchedule(scheduleId: ObjectId): List<Task> {
+        return taskRepository.findByRelatedScheduleId(scheduleId)
+    }
+
     fun loadTasksByGroup(groupId: ObjectId): List<Task> {
         val schedules = studyScheduleRepository.loadByGroupIdOrderByScheduleAtDesc(groupId)
         val scheduleIds = schedules.mapNotNull { it.id }
@@ -157,11 +161,8 @@ class TaskServiceSupport(
     }
 
     fun checkTaskActionAllowedBySchedule(task: Task) {
-        val schedule = studyScheduleRepository.loadById(task.relatedScheduleId)
-            ?: throw NotFoundException(message = "연관 일정을 찾을 수 없습니다.")
-
-        if ( schedule.scheduleAt.isBefore(LocalDateTime.now()) ) {
-            throw BadRequestException(message = "이미 지난 일정의 과제는 수정/삭제/제출/철회할 수 없습니다.")
+        if ( task.expireAt.isBefore(LocalDateTime.now()) ) {
+            throw BadRequestException(message = "마감된 과제는 수정/삭제할 수 없습니다.")
         }
     }
 
@@ -175,13 +176,11 @@ class TaskServiceSupport(
             ?: throw ForbiddenException(message = "과제 대상자만 제출/댓글을 변경할 수 있습니다.")
     }
 
-    fun validateTaskTypeWithSchedule(type: TaskType, schedule: StudySchedule) {
-        if ( type == TaskType.PRE && !schedule.scheduleAt.isAfter(LocalDateTime.now()) ) {
-            throw BadRequestException(message = "사전 과제는 시작 전 일정에만 등록할 수 있습니다.")
-        }
-
-        if ( type == TaskType.POST && !schedule.scheduleAt.isBefore(LocalDateTime.now()) ) {
-            throw BadRequestException(message = "사후 과제는 시작 시간이 지난 일정에만 등록할 수 있습니다.")
+    fun resolveTaskTypeBySchedule(schedule: StudySchedule): TaskType {
+        return if ( schedule.scheduleAt.isAfter(LocalDateTime.now()) ) {
+            TaskType.POST
+        } else {
+            TaskType.PRE
         }
     }
 
@@ -219,6 +218,24 @@ class TaskServiceSupport(
         val participants = scheduleParticipantRepository.getByScheduleId(scheduleId)
         val assignees = participants.map { TaskAssignee(taskId = taskId, memberId = it.memberId) }
         taskAssigneeRepository.saveAll(assignees)
+    }
+
+    fun initializeAssignees(taskId: ObjectId, memberIds: List<ObjectId>) {
+        val assignees = memberIds.distinct().map { memberId ->
+            TaskAssignee(taskId = taskId, memberId = memberId)
+        }
+        taskAssigneeRepository.saveAll(assignees)
+    }
+
+    fun validateAssigneeMembersInGroup(groupId: ObjectId, memberIds: List<ObjectId>) {
+        if ( memberIds.isEmpty() ) {
+            return
+        }
+
+        val members = groupMemberRepository.findByGroupIdAndMemberIdsIn(groupId, memberIds.distinct())
+        if ( members.size != memberIds.distinct().size ) {
+            throw BadRequestException(message = "과제 대상자는 모두 그룹 멤버여야 합니다.")
+        }
     }
 
     fun addAssigneeIfAbsent(taskId: ObjectId, memberId: ObjectId) {

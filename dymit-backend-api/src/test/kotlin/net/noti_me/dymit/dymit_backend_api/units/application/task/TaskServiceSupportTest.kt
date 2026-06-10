@@ -66,41 +66,33 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
             clearAllMocks()
         }
 
-        Given("과제 타입과 일정 시간 검증") {
-            When("PRE 과제인데 일정이 이미 시작된 경우") {
-                Then("BadRequestException이 발생한다") {
-                    val startedSchedule = StudySchedule(
-                        id = ObjectId.get(),
-                        groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.now().minusHours(1)
-                    )
-
-                    val exception = shouldThrow<BadRequestException> {
-                        support.validateTaskTypeWithSchedule(TaskType.PRE, startedSchedule)
-                    }
-
-                    exception.message shouldBe "사전 과제는 시작 전 일정에만 등록할 수 있습니다."
-                }
-            }
-
-            When("POST 과제인데 일정이 아직 시작 전인 경우") {
-                Then("BadRequestException이 발생한다") {
+        Given("TASK-62 과제 타입 자동 결정") {
+            When("일정이 아직 시작 전이면") {
+                Then("POST 타입으로 결정된다") {
                     val upcomingSchedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
                         scheduleAt = LocalDateTime.now().plusHours(1)
                     )
 
-                    val exception = shouldThrow<BadRequestException> {
-                        support.validateTaskTypeWithSchedule(TaskType.POST, upcomingSchedule)
-                    }
+                    support.resolveTaskTypeBySchedule(upcomingSchedule) shouldBe TaskType.POST
+                }
+            }
 
-                    exception.message shouldBe "사후 과제는 시작 시간이 지난 일정에만 등록할 수 있습니다."
+            When("일정이 이미 시작되었으면") {
+                Then("PRE 타입으로 결정된다") {
+                    val startedSchedule = StudySchedule(
+                        id = ObjectId.get(),
+                        groupId = ObjectId.get(),
+                        scheduleAt = LocalDateTime.now().minusHours(1)
+                    )
+
+                    support.resolveTaskTypeBySchedule(startedSchedule) shouldBe TaskType.PRE
                 }
             }
         }
 
-        Given("TASK 61 생성/수정 마감 시각 규칙") {
+        Given("TASK-62 생성/수정 마감 시각 규칙") {
             When("PRE 생성 요청의 expireAt(KST)이 연관 일정 시간(UTC0)과 일치하면") {
                 Then("정상적으로 일정 시간으로 변환된다") {
                     val scheduleAtUtc0 = LocalDateTime.of(2026, 6, 10, 0, 0, 0)
@@ -183,36 +175,53 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
             }
         }
 
-        Given("TASK 61 일정 만료 잠금 검증") {
-            When("연관 일정이 이미 지난 과제면") {
-                Then("수정/삭제/제출/철회 공통 제약 예외가 발생한다") {
-                    val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
-                    every { studyScheduleRepository.loadById(task.relatedScheduleId) } returns StudySchedule(
-                        id = task.relatedScheduleId,
-                        groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.now().minusMinutes(1)
-                    )
+        Given("TASK-62 마감일 잠금 검증") {
+            When("과제 마감일이 이미 지났으면") {
+                Then("수정/삭제 제약 예외가 발생한다") {
+                    val task = createTask(expireAt = LocalDateTime.now().minusMinutes(1))
 
                     val exception = shouldThrow<BadRequestException> {
                         support.checkTaskActionAllowedBySchedule(task)
                     }
 
-                    exception.message shouldBe "이미 지난 일정의 과제는 수정/삭제/제출/철회할 수 없습니다."
+                    exception.message shouldBe "마감된 과제는 수정/삭제할 수 없습니다."
                 }
             }
 
-            When("연관 일정이 아직 지나지 않았으면") {
+            When("과제 마감일이 지나지 않았으면") {
                 Then("잠금 없이 통과한다") {
                     val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
-                    every { studyScheduleRepository.loadById(task.relatedScheduleId) } returns StudySchedule(
-                        id = task.relatedScheduleId,
-                        groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.now().plusMinutes(1)
-                    )
 
                     shouldNotThrowAny {
                         support.checkTaskActionAllowedBySchedule(task)
                     }
+                }
+            }
+        }
+
+        Given("POST 과제 대상자 검증") {
+            When("요청 대상자 중 그룹 멤버가 아닌 사용자가 있으면") {
+                Then("BadRequestException이 발생한다") {
+                    val groupId = ObjectId.get()
+                    val memberId1 = ObjectId.get()
+                    val memberId2 = ObjectId.get()
+
+                    every {
+                        groupMemberRepository.findByGroupIdAndMemberIdsIn(groupId, listOf(memberId1, memberId2))
+                    } returns listOf(
+                        StudyGroupMember(
+                            groupId = groupId,
+                            memberId = memberId1,
+                            nickname = "member-1",
+                            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/1.png")
+                        )
+                    )
+
+                    val exception = shouldThrow<BadRequestException> {
+                        support.validateAssigneeMembersInGroup(groupId, listOf(memberId1, memberId2))
+                    }
+
+                    exception.message shouldBe "과제 대상자는 모두 그룹 멤버여야 합니다."
                 }
             }
         }
