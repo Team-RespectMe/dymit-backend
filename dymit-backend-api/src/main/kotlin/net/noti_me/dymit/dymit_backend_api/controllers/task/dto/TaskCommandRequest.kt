@@ -4,15 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.CreateTaskCommand
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
-import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import java.time.LocalDateTime
 
-@Schema(description = "과제 생성/수정 요청")
+@Schema(description = "과제 생성 요청")
 class TaskCommandRequest(
     @field:Schema(description = "연관 일정 ID", example = "682fabc1234567890abcdeff")
     val relatedScheduleId: String,
-    @field:Schema(description = "과제 타입", allowableValues = ["PRE", "POST"], example = "PRE")
-    val type: TaskType,
     @field:Schema(description = "과제 제목", example = "1회차 사전 과제")
     @field:NotBlank(message = "과제 제목은 비어 있을 수 없습니다.")
     val title: String,
@@ -31,7 +28,6 @@ class TaskCommandRequest(
     fun toCreateCommand(): CreateTaskCommand {
         return CreateTaskCommand(
             relatedScheduleId = relatedScheduleId,
-            type = type,
             title = title,
             description = description,
             attachmentFileIds = attachmentFileIds,

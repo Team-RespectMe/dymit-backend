@@ -2,7 +2,6 @@ package net.noti_me.dymit.dymit_backend_api.application.task.dto
 
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
-import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import java.time.LocalDateTime
 
 /**
@@ -10,7 +9,6 @@ import java.time.LocalDateTime
  */
 data class CreateTaskCommand(
     val relatedScheduleId: String,
-    val type: TaskType,
     val title: String,
     val description: String,
     val attachmentFileIds: List<String>,

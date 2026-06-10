@@ -21,6 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskApi
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskController
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskCommandRequest
+import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskResponse
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionAttachmentRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCommentCommandRequest
@@ -57,12 +58,13 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                 Then("검증에 실패한다") {
                     val request = TaskCommandRequest(
                         relatedScheduleId = ObjectId.get().toHexString(),
-                        type = TaskType.PRE,
                         title = "",
                         description = "설명",
                         attachmentFileIds = emptyList(),
                         expireAt = LocalDateTime.now().plusDays(2)
                     )
+
+                    TaskCommandRequest::class.java.declaredFields.map { it.name } shouldNotContain "type"
 
                     val violations = validator.validate(request)
                     violations.map { it.message } shouldContain "과제 제목은 비어 있을 수 없습니다."
@@ -109,7 +111,6 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     val groupId = ObjectId.get().toHexString()
                     val request = TaskCommandRequest(
                         relatedScheduleId = ObjectId.get().toHexString(),
-                        type = TaskType.PRE,
                         title = "사전 과제",
                         description = "설명",
                         attachmentFileIds = listOf(ObjectId.get().toHexString()),
@@ -150,7 +151,9 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                     val response = controller.createTask(memberInfo, groupId, request)
 
                     verify(exactly = 1) { taskService.createTask(memberInfo, groupId, any()) }
+                    TaskResponse::class.java.declaredFields.map { it.name } shouldContain "type"
                     response.taskId shouldBe dto.taskId
+                    response.type shouldBe dto.type
                     response.attachments[0].fileId shouldBe dto.attachments[0].fileId
                     response.submittedAssigneeCount shouldBe 0
                     response.notSubmittedAssigneeCount shouldBe 1

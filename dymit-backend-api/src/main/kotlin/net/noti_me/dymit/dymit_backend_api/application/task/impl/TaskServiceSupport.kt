@@ -169,11 +169,21 @@ class TaskServiceSupport(
             ?: throw ForbiddenException(message = "과제 대상자만 제출/댓글을 변경할 수 있습니다.")
     }
 
-    fun resolveTaskTypeBySchedule(schedule: StudySchedule): TaskType {
-        return if ( schedule.scheduleAt.isAfter(LocalDateTime.now()) ) {
-            TaskType.POST
-        } else {
+    fun resolveTaskTypeBySchedule(schedule: StudySchedule, requestedAt: LocalDateTime): TaskType {
+        return if ( schedule.scheduleAt.isAfter(requestedAt) ) {
             TaskType.PRE
+        } else {
+            TaskType.POST
+        }
+    }
+
+    fun resolveTaskTypeBySchedule(schedule: StudySchedule): TaskType {
+        return resolveTaskTypeBySchedule(schedule, LocalDateTime.now())
+    }
+
+    fun validatePreTaskCreatable(schedule: StudySchedule, requestedAt: LocalDateTime) {
+        if ( requestedAt.isAfter(schedule.scheduleAt.minusHours(24)) ) {
+            throw BadRequestException(message = "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다.")
         }
     }
 

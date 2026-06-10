@@ -68,7 +68,6 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                     val expectedDto = createTaskDto(savedTask)
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
-                        type = TaskType.PRE,
                         title = "과제 생성",
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
@@ -79,7 +78,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
-                    every { support.resolveTaskTypeBySchedule(schedule) } returns TaskType.PRE
+                    every { support.resolveTaskTypeBySchedule(schedule, any()) } returns TaskType.PRE
                     every { support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule) } returns schedule.scheduleAt
                     every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
                     every { support.toObjectIds(emptyList(), "assigneeMemberIds") } returns emptyList()

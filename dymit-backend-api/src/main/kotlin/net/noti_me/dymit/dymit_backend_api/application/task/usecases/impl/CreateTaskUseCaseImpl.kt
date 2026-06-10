@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 /**
  * 과제 생성 유즈케이스 구현체입니다.
@@ -30,7 +31,11 @@ class CreateTaskUseCaseImpl(
         val schedule = support.loadSchedule(command.relatedScheduleId)
         val scheduleId = requireNotNull(schedule.id)
         support.checkScheduleInGroup(schedule, groupIdObjectId)
-        val resolvedType = support.resolveTaskTypeBySchedule(schedule)
+        val requestedAt = LocalDateTime.now()
+        val resolvedType = support.resolveTaskTypeBySchedule(schedule, requestedAt)
+        if ( resolvedType == TaskType.PRE ) {
+            support.validatePreTaskCreatable(schedule, requestedAt)
+        }
         val expireAt = support.normalizeExpireAtForCreate(resolvedType, command.expireAt, schedule)
 
         val attachmentIds = support.toObjectIds(command.attachmentFileIds.distinct(), "attachmentFileIds")

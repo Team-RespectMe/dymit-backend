@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.units.application.task
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.collections.shouldNotContain
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
@@ -53,9 +54,15 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
             clearAllMocks()
         }
 
-        Given("TASK-62 생성 규칙") {
-            When("연관 일정이 요청 시점보다 이후면") {
-                Then("요청 type을 무시하고 POST 과제로 저장하며 요청 대상자를 초기화한다") {
+        Given("TASK-64.2 생성 규칙") {
+            When("생성 커맨드 필드를 확인하면") {
+                Then("type 필드는 없다") {
+                    CreateTaskCommand::class.java.declaredFields.map { it.name } shouldNotContain "type"
+                }
+            }
+
+            When("연관 일정이 24시간보다 더 남아 있으면") {
+                Then("PRE 과제로 저장하고 일정 참여자를 대상자로 초기화한다") {
                     val ownerId = ObjectId.get()
                     val groupId = ObjectId.get()
                     val scheduleId = ObjectId.get()
@@ -70,7 +77,6 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     )
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
-                        type = TaskType.PRE,
                         title = "과제 제목",
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
@@ -78,14 +84,108 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                         expireAt = LocalDateTime.of(2026, 6, 11, 8, 0, 0)
                     )
                     val savedTask = createTask(
-                        type = TaskType.POST,
-                        expireAt = LocalDateTime.of(2026, 6, 11, 14, 59, 59),
+                        type = TaskType.PRE,
+                        expireAt = schedule.scheduleAt,
                         scheduleId = scheduleId
                     )
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
-                    every { support.resolveTaskTypeBySchedule(schedule) } returns TaskType.POST
+                    every { support.resolveTaskTypeBySchedule(schedule, any()) } returns TaskType.PRE
+                    every { support.validatePreTaskCreatable(schedule, any()) } just runs
+                    every {
+                        support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule)
+                    } returns schedule.scheduleAt
+                    every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every {
+                        support.toObjectIds(command.assigneeMemberIds, "assigneeMemberIds")
+                    } returns listOf(assigneeId1, assigneeId2)
+                    every { support.validateTaskAttachmentFiles(emptyList()) } just runs
+                    every {
+                        support.saveTask(match { task ->
+                            task.type == TaskType.PRE && task.expireAt == schedule.scheduleAt
+                        })
+                    } returns savedTask
+                    every { support.toTaskDto(savedTask, groupId) } returns mockk()
+
+                    createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
+
+                    verify(exactly = 1) { support.validatePreTaskCreatable(schedule, any()) }
+                    verify(exactly = 1) { support.initializeAssigneesForPreTask(savedTask.id!!, scheduleId) }
+                    verify(exactly = 0) { support.initializeAssignees(any(), any()) }
+                    verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
+                }
+            }
+
+            When("연관 일정이 24시간 이내로 남아 있으면") {
+                Then("BadRequestException이 발생하고 저장하지 않는다") {
+                    val ownerId = ObjectId.get()
+                    val groupId = ObjectId.get()
+                    val scheduleId = ObjectId.get()
+                    val memberInfo = createMemberInfo(ownerId)
+                    val group = StudyGroup(id = groupId, ownerId = ownerId)
+                    val schedule = StudySchedule(
+                        id = scheduleId,
+                        groupId = groupId,
+                        scheduleAt = LocalDateTime.now().plusHours(23)
+                    )
+                    val command = CreateTaskCommand(
+                        relatedScheduleId = scheduleId.toHexString(),
+                        title = "과제 제목",
+                        description = "과제 설명",
+                        attachmentFileIds = emptyList(),
+                        assigneeMemberIds = listOf(ObjectId.get().toHexString()),
+                        expireAt = LocalDateTime.now().plusDays(1)
+                    )
+
+                    every { support.loadGroup(groupId.toHexString()) } returns group
+                    every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
+                    every { support.resolveTaskTypeBySchedule(schedule, any()) } returns TaskType.PRE
+                    every {
+                        support.validatePreTaskCreatable(schedule, any())
+                    } throws BadRequestException(message = "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다.")
+
+                    shouldThrow<BadRequestException> {
+                        createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
+                    }.message shouldBe "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다."
+
+                    verify(exactly = 0) { support.saveTask(any()) }
+                    verify(exactly = 0) { support.initializeAssigneesForPreTask(any(), any()) }
+                    verify(exactly = 0) { support.initializeAssignees(any(), any()) }
+                }
+            }
+
+            When("연관 일정이 이미 시작되었으면") {
+                Then("POST 과제로 저장하고 요청 대상자를 검증해 초기화한다") {
+                    val ownerId = ObjectId.get()
+                    val groupId = ObjectId.get()
+                    val scheduleId = ObjectId.get()
+                    val assigneeId1 = ObjectId.get()
+                    val assigneeId2 = ObjectId.get()
+                    val memberInfo = createMemberInfo(ownerId)
+                    val group = StudyGroup(id = groupId, ownerId = ownerId)
+                    val schedule = StudySchedule(
+                        id = scheduleId,
+                        groupId = groupId,
+                        scheduleAt = LocalDateTime.now().minusDays(1)
+                    )
+                    val command = CreateTaskCommand(
+                        relatedScheduleId = scheduleId.toHexString(),
+                        title = "과제 제목",
+                        description = "과제 설명",
+                        attachmentFileIds = emptyList(),
+                        assigneeMemberIds = listOf(assigneeId1.toHexString(), assigneeId2.toHexString()),
+                        expireAt = LocalDateTime.now().plusDays(3)
+                    )
+                    val savedTask = createTask(
+                        type = TaskType.POST,
+                        expireAt = LocalDateTime.now().plusDays(3),
+                        scheduleId = scheduleId
+                    )
+
+                    every { support.loadGroup(groupId.toHexString()) } returns group
+                    every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
+                    every { support.resolveTaskTypeBySchedule(schedule, any()) } returns TaskType.POST
                     every {
                         support.normalizeExpireAtForCreate(TaskType.POST, command.expireAt, schedule)
                     } returns savedTask.expireAt
@@ -104,59 +204,10 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
 
                     createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
 
+                    verify(exactly = 0) { support.validatePreTaskCreatable(any(), any()) }
+                    verify(exactly = 1) { support.validateAssigneeMembersInGroup(groupId, listOf(assigneeId1, assigneeId2)) }
                     verify(exactly = 1) { support.initializeAssignees(savedTask.id!!, listOf(assigneeId1, assigneeId2)) }
                     verify(exactly = 0) { support.initializeAssigneesForPreTask(any(), any()) }
-                }
-            }
-
-            When("연관 일정이 요청 시점보다 이전이면") {
-                Then("요청 type과 대상자 목록을 무시하고 PRE 과제로 저장하며 일정 참여자를 초기화한다") {
-                    val ownerId = ObjectId.get()
-                    val groupId = ObjectId.get()
-                    val scheduleId = ObjectId.get()
-                    val memberInfo = createMemberInfo(ownerId)
-                    val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val schedule = StudySchedule(
-                        id = scheduleId,
-                        groupId = groupId,
-                        scheduleAt = LocalDateTime.now().minusDays(1)
-                    )
-                    val command = CreateTaskCommand(
-                        relatedScheduleId = scheduleId.toHexString(),
-                        type = TaskType.POST,
-                        title = "과제 제목",
-                        description = "과제 설명",
-                        attachmentFileIds = emptyList(),
-                        assigneeMemberIds = listOf(ObjectId.get().toHexString()),
-                        expireAt = LocalDateTime.now().plusDays(3)
-                    )
-                    val savedTask = createTask(
-                        type = TaskType.PRE,
-                        expireAt = schedule.scheduleAt,
-                        scheduleId = scheduleId
-                    )
-
-                    every { support.loadGroup(groupId.toHexString()) } returns group
-                    every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
-                    every { support.resolveTaskTypeBySchedule(schedule) } returns TaskType.PRE
-                    every {
-                        support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule)
-                    } returns schedule.scheduleAt
-                    every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
-                    every { support.toObjectIds(command.assigneeMemberIds, "assigneeMemberIds") } returns listOf(ObjectId.get())
-                    every { support.validateTaskAttachmentFiles(emptyList()) } just runs
-                    every {
-                        support.saveTask(match { task ->
-                            task.type == TaskType.PRE && task.expireAt == schedule.scheduleAt
-                        })
-                    } returns savedTask
-                    every { support.toTaskDto(savedTask, groupId) } returns mockk()
-
-                    createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
-
-                    verify(exactly = 1) { support.initializeAssigneesForPreTask(savedTask.id!!, scheduleId) }
-                    verify(exactly = 0) { support.initializeAssignees(any(), any()) }
-                    verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
                 }
             }
         }

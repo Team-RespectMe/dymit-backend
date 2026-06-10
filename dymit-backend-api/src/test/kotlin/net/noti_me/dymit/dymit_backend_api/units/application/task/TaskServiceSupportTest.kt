@@ -67,28 +67,73 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
             clearAllMocks()
         }
 
-        Given("TASK-62 과제 타입 자동 결정") {
+        Given("TASK-64.2 과제 타입 자동 결정") {
             When("일정이 아직 시작 전이면") {
-                Then("POST 타입으로 결정된다") {
+                Then("PRE 타입으로 결정된다") {
+                    val requestedAt = LocalDateTime.of(2026, 6, 11, 10, 0, 0)
                     val upcomingSchedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.now().plusHours(1)
+                        scheduleAt = requestedAt.plusHours(1)
                     )
 
-                    support.resolveTaskTypeBySchedule(upcomingSchedule) shouldBe TaskType.POST
+                    support.resolveTaskTypeBySchedule(upcomingSchedule, requestedAt) shouldBe TaskType.PRE
+                }
+            }
+
+            When("일정 시작 시각과 요청 시각이 같으면") {
+                Then("POST 타입으로 결정된다") {
+                    val requestedAt = LocalDateTime.of(2026, 6, 11, 10, 0, 0)
+                    val startedSchedule = StudySchedule(
+                        id = ObjectId.get(),
+                        groupId = ObjectId.get(),
+                        scheduleAt = requestedAt
+                    )
+
+                    support.resolveTaskTypeBySchedule(startedSchedule, requestedAt) shouldBe TaskType.POST
                 }
             }
 
             When("일정이 이미 시작되었으면") {
-                Then("PRE 타입으로 결정된다") {
+                Then("POST 타입으로 결정된다") {
+                    val requestedAt = LocalDateTime.of(2026, 6, 11, 10, 0, 0)
                     val startedSchedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.now().minusHours(1)
+                        scheduleAt = requestedAt.minusHours(1)
                     )
 
-                    support.resolveTaskTypeBySchedule(startedSchedule) shouldBe TaskType.PRE
+                    support.resolveTaskTypeBySchedule(startedSchedule, requestedAt) shouldBe TaskType.POST
+                }
+            }
+
+            When("요청 시각이 일정 시작 24시간 전과 정확히 같으면") {
+                Then("사전 과제 생성 검증을 통과한다") {
+                    val schedule = StudySchedule(
+                        id = ObjectId.get(),
+                        groupId = ObjectId.get(),
+                        scheduleAt = LocalDateTime.of(2026, 6, 12, 10, 0, 0)
+                    )
+
+                    shouldNotThrowAny {
+                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusHours(24))
+                    }
+                }
+            }
+
+            When("요청 시각이 일정 시작 24시간 전보다 늦으면") {
+                Then("BadRequestException이 발생한다") {
+                    val schedule = StudySchedule(
+                        id = ObjectId.get(),
+                        groupId = ObjectId.get(),
+                        scheduleAt = LocalDateTime.of(2026, 6, 12, 10, 0, 0)
+                    )
+
+                    val exception = shouldThrow<BadRequestException> {
+                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusHours(24).plusMinutes(1))
+                    }
+
+                    exception.message shouldBe "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다."
                 }
             }
         }
