@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.UpdateTaskComman
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.UpdateTaskSubmissionCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.UpdateTaskSubmissionCommentCommand
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 
 /**
  * 과제 서비스 인터페이스입니다.
@@ -95,6 +96,8 @@ interface TaskService {
     fun getTaskAssignees(memberInfo: MemberInfo, taskId: String): List<TaskAssigneeDto>
 
     fun addAssigneeToPreTasks(scheduleId: String, memberId: String)
+
+    fun syncParticipatedScheduleTasks(scheduleId: String, memberId: String): List<Task>
 
     fun removeAssigneeFromPreTasks(scheduleId: String, memberId: String)
 

@@ -341,7 +341,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     every { support.saveTask(task) } returns task
                     every { support.loadAssigneeMemberIdsByTask(task.id!!) } returns listOf(removedMemberId, keptMemberId)
                     every { support.removeAssigneeWithSubmissionCleanup(task.id!!, removedMemberId) } just runs
-                    every { support.addAssigneeIfAbsent(task.id!!, addedMemberId) } just runs
+                    every { support.addAssigneeIfAbsent(task.id!!, addedMemberId) } returns true
                     every { support.toTaskDto(task, groupId) } returns mockk()
 
                     updateTaskUseCase.updateTask(memberInfo, groupId.toHexString(), task.identifier, command)

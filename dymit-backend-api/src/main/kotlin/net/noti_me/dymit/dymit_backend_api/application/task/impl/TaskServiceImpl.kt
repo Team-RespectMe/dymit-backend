@@ -25,12 +25,14 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTas
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.RemoveAssigneeFromPreTasksUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.RemoveTaskUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.RemoveTasksByCanceledScheduleUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.SyncParticipatedScheduleTasksUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateSubmissionCommentUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.UpdateTaskUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawCheckSubmissionByAssigneeUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionRepository
 import org.springframework.context.ApplicationEventPublisher
@@ -166,6 +168,10 @@ class TaskServiceImpl(
         delegate.addAssigneeToPreTasks(scheduleId, memberId)
     }
 
+    override fun syncParticipatedScheduleTasks(scheduleId: String, memberId: String): List<Task> {
+        return delegate.syncParticipatedScheduleTasks(scheduleId, memberId)
+    }
+
     override fun removeAssigneeFromPreTasks(scheduleId: String, memberId: String) {
         delegate.removeAssigneeFromPreTasks(scheduleId, memberId)
     }
@@ -204,6 +210,7 @@ class TaskServiceImpl(
                 deleteSubmissionCommentUseCase = DeleteSubmissionCommentUseCaseImpl(support),
                 getSubmissionCommentsUseCase = GetSubmissionCommentsUseCaseImpl(support),
                 addAssigneeToPreTasksUseCase = AddAssigneeToPreTasksUseCaseImpl(support),
+                syncParticipatedScheduleTasksUseCase = SyncParticipatedScheduleTasksUseCaseImpl(support),
                 removeAssigneeFromPreTasksUseCase = RemoveAssigneeFromPreTasksUseCaseImpl(support),
                 removeTasksByCanceledScheduleUseCase = RemoveTasksByCanceledScheduleUseCaseImpl(
                     support,

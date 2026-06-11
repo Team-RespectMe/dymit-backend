@@ -4,7 +4,6 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupp
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleCancelParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleCanceledEvent
-import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedBroadcastEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
@@ -29,12 +28,10 @@ class TaskScheduleSyncEventHandler(
      */
     @EventListener
     fun onScheduleParticipated(event: ScheduleParticipateEvent) {
-        taskService.addAssigneeToPreTasks(
+        taskService.syncParticipatedScheduleTasks(
             scheduleId = event.schedule.identifier,
             memberId = event.member.memberId.toHexString()
         )
-
-        support.loadTasksBySchedule(event.schedule.id!!, TaskType.PRE)
             .forEach { task ->
                 eventPublisher.publishEvent(
                     TaskCreatedBroadcastEvent(

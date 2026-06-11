@@ -241,11 +241,12 @@ class TaskServiceSupport(
         }
     }
 
-    fun addAssigneeIfAbsent(taskId: ObjectId, memberId: ObjectId) {
+    fun addAssigneeIfAbsent(taskId: ObjectId, memberId: ObjectId): Boolean {
         if ( taskAssigneeRepository.existsByTaskIdAndMemberId(taskId, memberId) ) {
-            return
+            return false
         }
         taskAssigneeRepository.save(TaskAssignee(taskId = taskId, memberId = memberId))
+        return true
     }
 
     fun removeAssignee(taskId: ObjectId, memberId: ObjectId) {

@@ -25,12 +25,14 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.GetTaskSubm
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveAssigneeFromPreTasksUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveTaskUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.RemoveTasksByCanceledScheduleUseCase
+import net.noti_me.dymit.dymit_backend_api.application.task.usecases.SyncParticipatedScheduleTasksUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateSubmissionCommentUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateTaskUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.WithdrawCheckSubmissionByAssigneeUseCase
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.WithdrawSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import org.springframework.stereotype.Service
 
 /**
@@ -55,6 +57,7 @@ class TaskServiceFacade(
     private val deleteSubmissionCommentUseCase: DeleteSubmissionCommentUseCase,
     private val getSubmissionCommentsUseCase: GetSubmissionCommentsUseCase,
     private val addAssigneeToPreTasksUseCase: AddAssigneeToPreTasksUseCase,
+    private val syncParticipatedScheduleTasksUseCase: SyncParticipatedScheduleTasksUseCase,
     private val removeAssigneeFromPreTasksUseCase: RemoveAssigneeFromPreTasksUseCase,
     private val removeTasksByCanceledScheduleUseCase: RemoveTasksByCanceledScheduleUseCase
 ) : TaskService {
@@ -182,6 +185,10 @@ class TaskServiceFacade(
 
     override fun addAssigneeToPreTasks(scheduleId: String, memberId: String) {
         addAssigneeToPreTasksUseCase.addAssigneeToPreTasks(scheduleId, memberId)
+    }
+
+    override fun syncParticipatedScheduleTasks(scheduleId: String, memberId: String): List<Task> {
+        return syncParticipatedScheduleTasksUseCase.syncParticipatedScheduleTasks(scheduleId, memberId)
     }
 
     override fun removeAssigneeFromPreTasks(scheduleId: String, memberId: String) {

@@ -5,9 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.application.task.TaskScheduleSyncEventHandler
 import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
@@ -37,8 +35,8 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
         }
 
         Given("일정 참여 이벤트 핸들러") {
-            When("기존 사전 과제가 여러 개 있으면") {
-                Then("대상자를 동기화하고 신규 참여자 1명에게 과제 생성 브로드캐스트를 과제별로 발행한다") {
+            When("동기화 결과로 신규 assignee가 반영된 사전 과제가 여러 개 반환되면") {
+                Then("반환된 과제들에 대해서만 신규 참여자 1명에게 과제 생성 브로드캐스트를 과제별로 발행한다") {
                     val group = createGroup("스터디")
                     val schedule = createSchedule(group.id!!)
                     val member = createMember(group.id!!, "새 멤버")
@@ -47,16 +45,16 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
                     val event = ScheduleParticipateEvent(group = group, schedule = schedule, member = member)
                     val publishedEvents = mutableListOf<TaskCreatedBroadcastEvent>()
 
-                    every { support.loadTasksBySchedule(schedule.id!!, TaskType.PRE) } returns listOf(task1, task2)
-                    justRun { taskService.addAssigneeToPreTasks(schedule.identifier, member.memberId.toHexString()) }
-                    justRun { eventPublisher.publishEvent(capture(publishedEvents)) }
+                    every {
+                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
+                    } returns listOf(task1, task2)
+                    every { eventPublisher.publishEvent(capture(publishedEvents)) } returns Unit
 
                     handler.onScheduleParticipated(event)
 
                     verify(exactly = 1) {
-                        taskService.addAssigneeToPreTasks(schedule.identifier, member.memberId.toHexString())
+                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
                     }
-                    verify(exactly = 1) { support.loadTasksBySchedule(schedule.id!!, TaskType.PRE) }
                     verify(exactly = 2) { eventPublisher.publishEvent(any<TaskCreatedBroadcastEvent>()) }
                     publishedEvents.map { it.memberIds.single() } shouldContainExactly listOf(member.memberId, member.memberId)
                     publishedEvents.map { it.toPushMessages().single().data["taskId"] } shouldContainExactly listOf(
@@ -69,22 +67,22 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
                 }
             }
 
-            When("기존 사전 과제가 없으면") {
-                Then("대상자만 동기화하고 브로드캐스트는 발행하지 않는다") {
+            When("동기화 결과가 비어 있으면") {
+                Then("브로드캐스트는 발행하지 않는다") {
                     val group = createGroup("스터디")
                     val schedule = createSchedule(group.id!!)
                     val member = createMember(group.id!!, "새 멤버")
                     val event = ScheduleParticipateEvent(group = group, schedule = schedule, member = member)
 
-                    every { support.loadTasksBySchedule(schedule.id!!, TaskType.PRE) } returns emptyList()
-                    justRun { taskService.addAssigneeToPreTasks(schedule.identifier, member.memberId.toHexString()) }
+                    every {
+                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
+                    } returns emptyList()
 
                     handler.onScheduleParticipated(event)
 
                     verify(exactly = 1) {
-                        taskService.addAssigneeToPreTasks(schedule.identifier, member.memberId.toHexString())
+                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
                     }
-                    verify(exactly = 1) { support.loadTasksBySchedule(schedule.id!!, TaskType.PRE) }
                     verify(exactly = 0) { eventPublisher.publishEvent(any<TaskCreatedBroadcastEvent>()) }
                 }
             }
