@@ -256,6 +256,21 @@ class TaskServiceSupport(
         taskAssigneeRepository.deleteByTaskId(taskId)
     }
 
+    /**
+     * 과제 대상자를 제거하면서 제출, 댓글, 고아 첨부 파일을 함께 정리합니다.
+     *
+     * @param taskId 과제 ID
+     * @param memberId 제거할 멤버 ID
+     */
+    fun removeAssigneeWithSubmissionCleanup(taskId: ObjectId, memberId: ObjectId) {
+        val removedSubmission = removeSubmissionAndCommentsByTaskAndMember(taskId, memberId)
+        if ( removedSubmission != null ) {
+            val fileIds = submissionAttachmentFileIds(removedSubmission.attachments)
+            downgradeOrphanedFiles(fileIds)
+        }
+        removeAssignee(taskId, memberId)
+    }
+
     fun removeSubmissionAndCommentsByTaskAndMember(taskId: ObjectId, memberId: ObjectId): TaskSubmission? {
         val deleted = taskSubmissionRepository.deleteByTaskIdAndMemberId(taskId, memberId)
         if ( deleted != null ) {

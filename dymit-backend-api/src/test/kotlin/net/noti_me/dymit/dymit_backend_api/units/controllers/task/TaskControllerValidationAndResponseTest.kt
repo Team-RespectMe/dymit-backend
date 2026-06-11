@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -17,6 +18,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAttachmentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.UpdateTaskCommand
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskApi
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskController
@@ -89,7 +91,10 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
 
             When("submissionType을 포함하지 않으면") {
                 Then("수정 요청에는 제출 방식 필드가 없다") {
-                    TaskUpdateRequest::class.java.declaredFields.map { it.name } shouldNotContain "submissionType"
+                    val fields = TaskUpdateRequest::class.java.declaredFields.map { it.name }
+
+                    fields shouldNotContain "submissionType"
+                    fields shouldContain "assigneeMemberIds"
                 }
             }
         }
@@ -331,11 +336,13 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                 Then("TaskUpdateRequest를 UpdateTaskCommand로 전달하고 응답을 매핑한다") {
                     val groupId = ObjectId.get().toHexString()
                     val taskId = ObjectId.get().toHexString()
+                    val commandSlot = slot<UpdateTaskCommand>()
                     val request = TaskUpdateRequest(
                         title = "수정 과제",
                         description = "수정 설명",
                         attachmentFileIds = listOf(ObjectId.get().toHexString()),
-                        expireAt = LocalDateTime.now().plusDays(3)
+                        expireAt = LocalDateTime.now().plusDays(3),
+                        assigneeMemberIds = listOf(ObjectId.get().toHexString())
                     )
                     val dto = TaskDto(
                         taskId = taskId,
@@ -367,11 +374,12 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         )
                     )
 
-                    every { taskService.updateTask(memberInfo, groupId, taskId, any()) } returns dto
+                    every { taskService.updateTask(memberInfo, groupId, taskId, capture(commandSlot)) } returns dto
 
                     val response = controller.updateTask(memberInfo, groupId, taskId, request)
 
                     verify(exactly = 1) { taskService.updateTask(memberInfo, groupId, taskId, any()) }
+                    commandSlot.captured.assigneeMemberIds shouldBe request.assigneeMemberIds
                     response.taskId shouldBe dto.taskId
                     response.title shouldBe "수정 과제"
                     response.type shouldBe TaskType.POST

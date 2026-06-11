@@ -24,7 +24,8 @@ data class UpdateTaskCommand(
     val title: String,
     val description: String,
     val attachmentFileIds: List<String>,
-    val expireAt: LocalDateTime
+    val expireAt: LocalDateTime,
+    val assigneeMemberIds: List<String>? = null
 )
 
 /**

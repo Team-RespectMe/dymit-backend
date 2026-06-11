@@ -28,7 +28,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
-import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionRepository
 import org.bson.types.ObjectId
@@ -111,6 +110,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
 
                     verify(exactly = 1) { support.validatePreTaskCreatable(schedule, any()) }
+                    verify(exactly = 0) { support.toObjectIds(command.assigneeMemberIds, "assigneeMemberIds") }
                     verify(exactly = 1) { support.initializeAssigneesForPreTask(savedTask.id!!, scheduleId) }
                     verify(exactly = 0) { support.initializeAssignees(any(), any()) }
                     verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
@@ -232,9 +232,127 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                             memberInfo,
                             groupId.toHexString(),
                             task.identifier,
-                            UpdateTaskCommand("제목", "설명", emptyList(), LocalDateTime.now().plusDays(1))
+                            UpdateTaskCommand(
+                                "제목",
+                                "설명",
+                                emptyList(),
+                                LocalDateTime.now().plusDays(1)
+                            )
                         )
                     }.message shouldBe expiredMessage
+                }
+            }
+
+            When("PRE 과제를 수정하면서 대상자 목록을 보내면") {
+                Then("대상자 목록을 무시하고 대상자를 변경하지 않는다") {
+                    val ownerId = ObjectId.get()
+                    val groupId = ObjectId.get()
+                    val assigneeId = ObjectId.get()
+                    val memberInfo = createMemberInfo(ownerId)
+                    val group = StudyGroup(id = groupId, ownerId = ownerId)
+                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(1))
+                    val command = UpdateTaskCommand(
+                        title = "수정 제목",
+                        description = "수정 설명",
+                        attachmentFileIds = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(3),
+                        assigneeMemberIds = listOf(assigneeId.toHexString())
+                    )
+
+                    every { support.loadGroup(groupId.toHexString()) } returns group
+                    every { support.loadTask(task.identifier) } returns task
+                    every { support.checkTaskActionAllowedBySchedule(task) } just runs
+                    every { support.normalizeExpireAtForUpdate(TaskType.PRE, command.expireAt, task.expireAt) } returns task.expireAt
+                    every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every { support.validateTaskAttachmentFiles(emptyList()) } just runs
+                    every { support.saveTask(task) } returns task
+                    every { support.toTaskDto(task, groupId) } returns mockk()
+
+                    updateTaskUseCase.updateTask(memberInfo, groupId.toHexString(), task.identifier, command)
+
+                    verify(exactly = 0) { support.toObjectIds(command.assigneeMemberIds!!, "assigneeMemberIds") }
+                    verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
+                    verify(exactly = 0) { support.loadAssigneeMemberIdsByTask(any()) }
+                    verify(exactly = 0) { support.addAssigneeIfAbsent(any(), any()) }
+                    verify(exactly = 0) { support.removeAssigneeWithSubmissionCleanup(any(), any()) }
+                }
+            }
+
+            When("POST 과제를 수정하면서 assigneeMemberIds를 null로 보내면") {
+                Then("기존 대상자를 유지하고 대상자 검증과 동기화를 수행하지 않는다") {
+                    val ownerId = ObjectId.get()
+                    val groupId = ObjectId.get()
+                    val memberInfo = createMemberInfo(ownerId)
+                    val group = StudyGroup(id = groupId, ownerId = ownerId)
+                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().plusDays(1))
+                    val command = UpdateTaskCommand("수정 제목", "수정 설명", emptyList(), LocalDateTime.now().plusDays(2), null)
+
+                    every { support.loadGroup(groupId.toHexString()) } returns group
+                    every { support.loadTask(task.identifier) } returns task
+                    every { support.checkTaskActionAllowedBySchedule(task) } just runs
+                    every { support.normalizeExpireAtForUpdate(TaskType.POST, command.expireAt, task.expireAt) } returns command.expireAt
+                    every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every { support.validateTaskAttachmentFiles(emptyList()) } just runs
+                    every { support.saveTask(task) } returns task
+                    every { support.toTaskDto(task, groupId) } returns mockk()
+
+                    updateTaskUseCase.updateTask(memberInfo, groupId.toHexString(), task.identifier, command)
+
+                    verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
+                    verify(exactly = 0) { support.loadAssigneeMemberIdsByTask(any()) }
+                    verify(exactly = 0) { support.addAssigneeIfAbsent(any(), any()) }
+                    verify(exactly = 0) { support.removeAssigneeWithSubmissionCleanup(any(), any()) }
+                }
+            }
+
+            When("POST 과제를 수정하면서 대상자를 바꾸면") {
+                Then("대상자를 검증하고 추가/삭제를 동기화하며 제거된 제출 데이터를 정리한다") {
+                    val ownerId = ObjectId.get()
+                    val groupId = ObjectId.get()
+                    val removedMemberId = ObjectId.get()
+                    val keptMemberId = ObjectId.get()
+                    val addedMemberId = ObjectId.get()
+                    val memberInfo = createMemberInfo(ownerId)
+                    val group = StudyGroup(id = groupId, ownerId = ownerId)
+                    val task = createTask(
+                        type = TaskType.POST,
+                        expireAt = LocalDateTime.now().plusDays(1)
+                    )
+                    val command = UpdateTaskCommand(
+                        title = "수정 제목",
+                        description = "수정 설명",
+                        attachmentFileIds = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2),
+                        assigneeMemberIds = listOf(keptMemberId.toHexString(), addedMemberId.toHexString())
+                    )
+
+                    every { support.loadGroup(groupId.toHexString()) } returns group
+                    every { support.loadTask(task.identifier) } returns task
+                    every { support.checkTaskActionAllowedBySchedule(task) } just runs
+                    every {
+                        support.normalizeExpireAtForUpdate(TaskType.POST, command.expireAt, task.expireAt)
+                    } returns command.expireAt
+                    every {
+                        support.toObjectIds(command.assigneeMemberIds!!, "assigneeMemberIds")
+                    } returns listOf(keptMemberId, addedMemberId)
+                    every { support.validateAssigneeMembersInGroup(groupId, listOf(keptMemberId, addedMemberId)) } just runs
+                    every { support.toObjectIds(emptyList(), "attachmentFileIds") } returns emptyList()
+                    every { support.validateTaskAttachmentFiles(emptyList()) } just runs
+                    every { support.saveTask(task) } returns task
+                    every { support.loadAssigneeMemberIdsByTask(task.id!!) } returns listOf(removedMemberId, keptMemberId)
+                    every { support.removeAssigneeWithSubmissionCleanup(task.id!!, removedMemberId) } just runs
+                    every { support.addAssigneeIfAbsent(task.id!!, addedMemberId) } just runs
+                    every { support.toTaskDto(task, groupId) } returns mockk()
+
+                    updateTaskUseCase.updateTask(memberInfo, groupId.toHexString(), task.identifier, command)
+
+                    verify(exactly = 1) {
+                        support.validateAssigneeMembersInGroup(groupId, listOf(keptMemberId, addedMemberId))
+                    }
+                    verify(exactly = 1) { support.removeAssigneeWithSubmissionCleanup(task.id!!, removedMemberId) }
+                    verify(exactly = 1) { support.addAssigneeIfAbsent(task.id!!, addedMemberId) }
+                    verify(exactly = 0) { support.removeAssigneeWithSubmissionCleanup(task.id!!, keptMemberId) }
+                    verify(exactly = 0) { support.addAssigneeIfAbsent(task.id!!, keptMemberId) }
                 }
             }
 

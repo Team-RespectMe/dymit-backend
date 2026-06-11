@@ -39,7 +39,11 @@ class CreateTaskUseCaseImpl(
         val expireAt = support.normalizeExpireAtForCreate(resolvedType, command.expireAt, schedule)
 
         val attachmentIds = support.toObjectIds(command.attachmentFileIds.distinct(), "attachmentFileIds")
-        val assigneeMemberIds = support.toObjectIds(command.assigneeMemberIds.distinct(), "assigneeMemberIds")
+        val assigneeMemberIds = if ( resolvedType == TaskType.POST ) {
+            support.toObjectIds(command.assigneeMemberIds.distinct(), "assigneeMemberIds")
+        } else {
+            emptyList()
+        }
         support.validateTaskAttachmentFiles(attachmentIds)
         if ( resolvedType != TaskType.PRE ) {
             support.validateAssigneeMembersInGroup(groupIdObjectId, assigneeMemberIds)

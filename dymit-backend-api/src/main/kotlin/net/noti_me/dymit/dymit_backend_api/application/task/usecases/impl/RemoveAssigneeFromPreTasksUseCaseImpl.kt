@@ -19,12 +19,7 @@ class RemoveAssigneeFromPreTasksUseCaseImpl(
 
         support.loadTasksBySchedule(scheduleObjectId, TaskType.PRE)
             .forEach { task ->
-                val removedSubmission = support.removeSubmissionAndCommentsByTaskAndMember(task.id!!, memberObjectId)
-                if ( removedSubmission != null ) {
-                    val fileIds = support.submissionAttachmentFileIds(removedSubmission.attachments)
-                    support.downgradeOrphanedFiles(fileIds)
-                }
-                support.removeAssignee(task.id!!, memberObjectId)
+                support.removeAssigneeWithSubmissionCleanup(task.id!!, memberObjectId)
             }
     }
 }
