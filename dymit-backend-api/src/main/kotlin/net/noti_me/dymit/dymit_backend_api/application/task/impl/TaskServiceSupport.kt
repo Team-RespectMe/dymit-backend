@@ -154,7 +154,7 @@ class TaskServiceSupport(
     }
 
     fun checkTaskActionAllowedBySchedule(task: Task) {
-        if ( task.expireAt.isBefore(LocalDateTime.now()) ) {
+        if ( TaskExpireAtNormalizer.isExpired(task.expireAt) ) {
             throw BadRequestException(message = "마감된 과제는 수정/삭제할 수 없습니다.")
         }
     }
@@ -170,7 +170,7 @@ class TaskServiceSupport(
     }
 
     fun resolveTaskTypeBySchedule(schedule: StudySchedule, requestedAt: LocalDateTime): TaskType {
-        return if ( schedule.scheduleAt.isAfter(requestedAt) ) {
+        return if ( TaskExpireAtNormalizer.toKst(schedule.scheduleAt).isAfter(TaskExpireAtNormalizer.toKst(requestedAt)) ) {
             TaskType.PRE
         } else {
             TaskType.POST
@@ -178,11 +178,11 @@ class TaskServiceSupport(
     }
 
     fun resolveTaskTypeBySchedule(schedule: StudySchedule): TaskType {
-        return resolveTaskTypeBySchedule(schedule, LocalDateTime.now())
+        return resolveTaskTypeBySchedule(schedule, TaskExpireAtNormalizer.currentUtcDateTime())
     }
 
     fun validatePreTaskCreatable(schedule: StudySchedule, requestedAt: LocalDateTime) {
-        if ( requestedAt.isAfter(schedule.scheduleAt.minusHours(24)) ) {
+        if ( TaskExpireAtNormalizer.toKst(requestedAt).isAfter(TaskExpireAtNormalizer.toKst(schedule.scheduleAt).minusHours(24)) ) {
             throw BadRequestException(message = "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다.")
         }
     }
@@ -212,7 +212,7 @@ class TaskServiceSupport(
     }
 
     fun checkSubmissionUpdatable(task: Task) {
-        if ( task.expireAt.isBefore(LocalDateTime.now()) ) {
+        if ( TaskExpireAtNormalizer.isExpired(task.expireAt) ) {
             throw BadRequestException(message = "마감된 과제는 제출/수정/철회할 수 없습니다.")
         }
     }

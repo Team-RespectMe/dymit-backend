@@ -7,10 +7,13 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.verify
+import io.mockk.unmockkObject
 import net.noti_me.dymit.dymit_backend_api.application.file.FileServiceFacade
 import net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver
 import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileDto
+import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskExpireAtNormalizer
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
@@ -61,9 +64,14 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         fileServiceFacade = fileServiceFacade,
         fileUrlResolver = fileUrlResolver
     )
+    private var taskExpireAtNormalizerMocked = false
 
     init {
         afterEach {
+            if (taskExpireAtNormalizerMocked) {
+                unmockkObject(TaskExpireAtNormalizer)
+                taskExpireAtNormalizerMocked = false
+            }
             clearAllMocks()
         }
 
@@ -224,7 +232,9 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         Given("TASK-62 마감일 잠금 검증") {
             When("과제 마감일이 이미 지났으면") {
                 Then("수정/삭제 제약 예외가 발생한다") {
-                    val task = createTask(expireAt = LocalDateTime.now().minusMinutes(1))
+                    mockTaskExpireAtNormalizer(LocalDateTime.of(2026, 6, 15, 15, 0, 0))
+
+                    val task = createTask(expireAt = LocalDateTime.of(2026, 6, 15, 14, 59, 59))
 
                     val exception = shouldThrow<BadRequestException> {
                         support.checkTaskActionAllowedBySchedule(task)
@@ -236,7 +246,9 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
             When("과제 마감일이 지나지 않았으면") {
                 Then("잠금 없이 통과한다") {
-                    val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
+                    mockTaskExpireAtNormalizer(LocalDateTime.of(2026, 6, 15, 14, 59, 58))
+
+                    val task = createTask(expireAt = LocalDateTime.of(2026, 6, 15, 14, 59, 59))
 
                     shouldNotThrowAny {
                         support.checkTaskActionAllowedBySchedule(task)
@@ -368,6 +380,14 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                 }
             }
         }
+    }
+
+    private fun mockTaskExpireAtNormalizer(currentUtcDateTime: LocalDateTime) {
+        mockkObject(TaskExpireAtNormalizer)
+        taskExpireAtNormalizerMocked = true
+        every { TaskExpireAtNormalizer.currentUtcDateTime() } returns currentUtcDateTime
+        every { TaskExpireAtNormalizer.isExpired(any()) } answers { callOriginal() }
+        every { TaskExpireAtNormalizer.toKst(any()) } answers { callOriginal() }
     }
 
     private fun createFileDto(fileId: String, status: UserFileStatus): FileDto {

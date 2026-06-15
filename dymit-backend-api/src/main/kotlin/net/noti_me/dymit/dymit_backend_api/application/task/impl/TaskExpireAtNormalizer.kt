@@ -24,4 +24,30 @@ object TaskExpireAtNormalizer {
             .withZoneSameInstant(utcZoneId)
             .toLocalDateTime()
     }
+
+    /**
+     * UTC 기준 현재 시각을 반환합니다.
+     *
+     * @return UTC 기준 현재 시각
+     */
+    fun currentUtcDateTime(): LocalDateTime = LocalDateTime.now(utcZoneId)
+
+    /**
+     * UTC 기준 저장 값을 KST 기준 시각으로 변환합니다.
+     *
+     * @param utcDateTime UTC 기준 시각
+     * @return KST 기준 시각
+     */
+    fun toKst(utcDateTime: LocalDateTime): LocalDateTime = utcDateTime
+        .atZone(utcZoneId)
+        .withZoneSameInstant(koreaZoneId)
+        .toLocalDateTime()
+
+    /**
+     * 저장된 마감 시각이 현재 기준으로 만료되었는지 확인합니다.
+     *
+     * @param expireAtUtc UTC 기준 저장 마감 시각
+     * @return 만료 여부
+     */
+    fun isExpired(expireAtUtc: LocalDateTime): Boolean = toKst(expireAtUtc).isBefore(toKst(currentUtcDateTime()))
 }
