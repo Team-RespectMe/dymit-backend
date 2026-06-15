@@ -1,4 +1,4 @@
-rootProject.name = "dymit-backend-api"
+rootProject.name = "dymit-backend"
 
 include("dymit-backend-api")
 project(":dymit-backend-api").projectDir = file("dymit-backend-api")

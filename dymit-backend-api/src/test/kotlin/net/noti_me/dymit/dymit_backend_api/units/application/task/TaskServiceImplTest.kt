@@ -21,6 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
@@ -245,77 +246,143 @@ internal class TaskServiceImplTest : BehaviorSpec() {
 
         Given("댓글 권한 검증") {
             When("대상자가 아닌 멤버가 댓글 생성을 시도하면") {
-                Then("ForbiddenException이 발생한다") {
+                Then("그룹 멤버라면 댓글을 생성하고 대상자 검증을 호출하지 않는다") {
                     val groupId = ObjectId.get()
                     val taskId = ObjectId.get()
                     val submissionId = ObjectId.get()
                     val memberId = ObjectId.get()
+                    val assigneeMemberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
+                    val member = mockk<StudyGroupMember>(relaxed = true)
                     val task = createTask(taskId)
+                    val submission = TaskSubmission(
+                        id = submissionId,
+                        taskId = taskId,
+                        memberId = assigneeMemberId,
+                        title = "제출",
+                        content = "본문",
+                        attachments = emptyList()
+                    )
+                    val savedComment = TaskSubmissionComment(
+                        id = ObjectId.get(),
+                        taskId = taskId,
+                        submissionId = submissionId,
+                        writerId = memberId,
+                        content = "댓글"
+                    )
+                    val commentDto = TaskSubmissionCommentDto(
+                        commentId = savedComment.identifier,
+                        taskId = taskId.toHexString(),
+                        submissionId = submissionId.toHexString(),
+                        writerId = memberId.toHexString(),
+                        writerNickname = "tester",
+                        writerProfileImageUrl = "https://example.com/profile.png",
+                        writerProfileImageType = ProfileImageType.PRESET,
+                        content = "댓글",
+                        createdAt = savedComment.createdAt
+                    )
 
+                    every { support.requireGroupMember(groupId, memberId) } returns member
                     every { support.loadTask(taskId.toHexString()) } returns task
-                    every { support.requireTaskAssignee(taskId, memberId) } throws ForbiddenException("과제 대상자만 제출/댓글을 변경할 수 있습니다.")
+                    every { support.loadSubmission(submissionId.toHexString()) } returns submission
+                    every { support.saveComment(any()) } returns savedComment
+                    every { support.toCommentDto(savedComment, groupId) } returns commentDto
 
-                    shouldThrow<ForbiddenException> {
-                        service.createSubmissionComment(
-                            memberInfo,
-                            groupId.toHexString(),
-                            taskId.toHexString(),
-                            submissionId.toHexString(),
-                            CreateTaskSubmissionCommentCommand("댓글")
-                        )
-                    }
+                    val result = service.createSubmissionComment(
+                        memberInfo,
+                        groupId.toHexString(),
+                        taskId.toHexString(),
+                        submissionId.toHexString(),
+                        CreateTaskSubmissionCommentCommand("댓글")
+                    )
+
+                    result shouldBe commentDto
+                    verify(exactly = 0) { support.requireTaskAssignee(any(), any()) }
                 }
             }
 
             When("대상자가 아닌 멤버가 댓글 수정을 시도하면") {
-                Then("ForbiddenException이 발생한다") {
+                Then("본인 댓글이면 수정하고 대상자 검증을 호출하지 않는다") {
                     val groupId = ObjectId.get()
                     val taskId = ObjectId.get()
                     val submissionId = ObjectId.get()
                     val commentId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
+                    val member = mockk<StudyGroupMember>(relaxed = true)
                     val task = createTask(taskId)
+                    val comment = TaskSubmissionComment(
+                        id = commentId,
+                        taskId = taskId,
+                        submissionId = submissionId,
+                        writerId = memberId,
+                        content = "댓글"
+                    )
+                    val commentDto = TaskSubmissionCommentDto(
+                        commentId = comment.identifier,
+                        taskId = taskId.toHexString(),
+                        submissionId = submissionId.toHexString(),
+                        writerId = memberId.toHexString(),
+                        writerNickname = "tester",
+                        writerProfileImageUrl = "https://example.com/profile.png",
+                        writerProfileImageType = ProfileImageType.PRESET,
+                        content = "수정",
+                        createdAt = comment.createdAt
+                    )
 
+                    every { support.requireGroupMember(groupId, memberId) } returns member
                     every { support.loadTask(taskId.toHexString()) } returns task
-                    every { support.requireTaskAssignee(taskId, memberId) } throws ForbiddenException("과제 대상자만 제출/댓글을 변경할 수 있습니다.")
+                    every { support.loadComment(commentId.toHexString()) } returns comment
+                    every { support.saveComment(comment) } returns comment
+                    every { support.toCommentDto(comment, groupId) } returns commentDto
 
-                    shouldThrow<ForbiddenException> {
-                        service.updateSubmissionComment(
-                            memberInfo,
-                            groupId.toHexString(),
-                            taskId.toHexString(),
-                            submissionId.toHexString(),
-                            commentId.toHexString(),
-                            UpdateTaskSubmissionCommentCommand("수정")
-                        )
-                    }
+                    val result = service.updateSubmissionComment(
+                        memberInfo,
+                        groupId.toHexString(),
+                        taskId.toHexString(),
+                        submissionId.toHexString(),
+                        commentId.toHexString(),
+                        UpdateTaskSubmissionCommentCommand("수정")
+                    )
+
+                    result shouldBe commentDto
+                    verify(exactly = 0) { support.requireTaskAssignee(any(), any()) }
                 }
             }
 
             When("대상자가 아닌 멤버가 댓글 삭제를 시도하면") {
-                Then("ForbiddenException이 발생한다") {
+                Then("본인 댓글이면 삭제하고 대상자 검증을 호출하지 않는다") {
                     val groupId = ObjectId.get()
                     val taskId = ObjectId.get()
                     val submissionId = ObjectId.get()
                     val commentId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
+                    val member = mockk<StudyGroupMember>(relaxed = true)
                     val task = createTask(taskId)
+                    val comment = TaskSubmissionComment(
+                        id = commentId,
+                        taskId = taskId,
+                        submissionId = submissionId,
+                        writerId = memberId,
+                        content = "댓글"
+                    )
 
+                    every { support.requireGroupMember(groupId, memberId) } returns member
                     every { support.loadTask(taskId.toHexString()) } returns task
-                    every { support.requireTaskAssignee(taskId, memberId) } throws ForbiddenException("과제 대상자만 제출/댓글을 변경할 수 있습니다.")
+                    every { support.loadComment(commentId.toHexString()) } returns comment
+                    every { support.deleteComment(commentId) } just runs
 
-                    shouldThrow<ForbiddenException> {
-                        service.deleteSubmissionComment(
-                            memberInfo,
-                            groupId.toHexString(),
-                            taskId.toHexString(),
-                            submissionId.toHexString(),
-                            commentId.toHexString()
-                        )
-                    }
+                    service.deleteSubmissionComment(
+                        memberInfo,
+                        groupId.toHexString(),
+                        taskId.toHexString(),
+                        submissionId.toHexString(),
+                        commentId.toHexString()
+                    )
+
+                    verify(exactly = 1) { support.deleteComment(commentId) }
+                    verify(exactly = 0) { support.requireTaskAssignee(any(), any()) }
                 }
             }
         }

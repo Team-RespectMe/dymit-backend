@@ -28,7 +28,6 @@ class DeleteSubmissionCommentUseCaseImpl(
 
         val task = support.loadTask(taskId)
         support.checkTaskInGroup(task, groupIdObjectId)
-        support.requireTaskAssignee(task.id!!, memberId)
 
         val comment = support.loadComment(commentId)
         if ( comment.taskId != task.id || comment.submissionId != submissionObjectId ) {

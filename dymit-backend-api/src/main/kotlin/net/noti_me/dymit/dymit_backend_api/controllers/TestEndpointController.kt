@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController
 @ConditionalOnProperty(
     value = ["dymit.debug-endpoint.enabled"],
     havingValue = "true",
-    matchIfMissing = false)
+    matchIfMissing = false
+)
 @Tag(name = "Debug Endpoint", description = "디버그용 엔드포인트")
 class TestEndpointController(
     private val loadMemberPort: LoadMemberPort

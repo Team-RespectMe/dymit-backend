@@ -22,10 +22,10 @@ class HealthCheckController(
     }
 
 
-/*     @GetMapping("api/v1/test/discord/quartz")
-    fun testDiscordQuartzLogging(): String {
-        discordQuartzLogger.log("Test Quartz Log", "This is a test log message from HealthCheckController.")
-        return "Discord Quartz logging test messages have been sent."
-    } */
+    /*     @GetMapping("api/v1/test/discord/quartz")
+        fun testDiscordQuartzLogging(): String {
+            discordQuartzLogger.log("Test Quartz Log", "This is a test log message from HealthCheckController.")
+            return "Discord Quartz logging test messages have been sent."
+        } */
 }
 

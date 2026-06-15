@@ -34,7 +34,6 @@ class CreateSubmissionCommentUseCaseImpl(
         val task = support.loadTask(taskId)
         val taskObjectId = requireNotNull(task.id)
         support.checkTaskInGroup(task, groupIdObjectId)
-        support.requireTaskAssignee(taskObjectId, memberId)
 
         val submission = support.loadSubmission(submissionId)
         val submissionObjectId = requireNotNull(submission.id)
