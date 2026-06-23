@@ -266,7 +266,7 @@ class StudyScheduleServiceImpl(
         )
 
         val participant = participantRepository.save(scheduleMember)
-        if (schedule.isRoleAssigned(participant.memberId)) {
+//        if (schedule.isRoleAssigned(participant.memberId)) {
             eventPublisher.publishEvent(
                 ScheduleParticipateEvent(
                     group = loadStudyGroupPort.loadByGroupId(groupId)!!,
@@ -274,7 +274,7 @@ class StudyScheduleServiceImpl(
                     member = groupMember
                 )
             )
-        }
+//        }
         schedule.increaseParticipantCount()
         studyScheduleRepository.save(schedule)
 
@@ -306,7 +306,7 @@ class StudyScheduleServiceImpl(
         val participant = participantRepository.getByScheduleIdAndMemberId(schedule.id!!, ObjectId(memberInfo.memberId))
             ?: throw IllegalArgumentException("해당 스케줄에 참여하지 않은 멤버입니다.")
 
-        if (schedule.isRoleAssigned(participant.memberId)) {
+//        if (schedule.isRoleAssigned(participant.memberId)) {
             groupMemberRepository.findByGroupIdAndMemberId(
                 groupId = ObjectId(groupId),
                 memberId = ObjectId(memberInfo.memberId)
@@ -319,7 +319,7 @@ class StudyScheduleServiceImpl(
                     )
                 )
             }
-        }
+//        }
 
 //        studyScheduleRepository.delete(schedule)
         participantRepository.delete(participant)
