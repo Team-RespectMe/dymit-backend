@@ -14,7 +14,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskAssigneeController
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import org.bson.types.ObjectId
 
@@ -29,7 +29,7 @@ internal class TaskAssigneeControllerTest : BehaviorSpec() {
     private val memberInfo = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "tester",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     init {

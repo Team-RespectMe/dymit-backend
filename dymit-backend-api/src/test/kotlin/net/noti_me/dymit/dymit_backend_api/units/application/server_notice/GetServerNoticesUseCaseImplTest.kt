@@ -6,7 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.impl.GetNoticesUseCaseImpl
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.server_notice.ServerNoticeRepository
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity

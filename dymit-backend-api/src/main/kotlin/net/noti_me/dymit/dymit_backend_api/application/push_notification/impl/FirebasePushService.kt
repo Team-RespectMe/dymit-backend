@@ -6,10 +6,10 @@ import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.MulticastMessage
 import com.google.firebase.messaging.Notification
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.PushService
-import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken
+import net.noti_me.dymit.dymit_backend_api.member.domain.DeviceToken
 import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory

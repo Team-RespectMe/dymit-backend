@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.units.application.member.impl
+package net.noti_me.dymit.dymit_backend_api.units.member.application.impl
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -6,16 +6,16 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.auth.usecases.AuthServiceFacade
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.CreateMemberCommand
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.MemberCreateResult
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.CreateMemberUseCaseImpl
-import net.noti_me.dymit.dymit_backend_api.application.oidc.OidcAuthenticationProvider
-import net.noti_me.dymit.dymit_backend_api.application.oidc.idToken.CommonOidcIdTokenPayload
+import net.noti_me.dymit.dymit_backend_api.member.application.dto.CreateMemberCommand
+import net.noti_me.dymit.dymit_backend_api.member.application.dto.MemberCreateResult
+import net.noti_me.dymit.dymit_backend_api.member.application.impl.CreateMemberUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.common.security.oidc.OidcAuthenticationProvider
+import net.noti_me.dymit.dymit_backend_api.common.security.oidc.OidcProvider
+import net.noti_me.dymit.dymit_backend_api.common.security.oidc.idToken.CommonOidcIdTokenPayload
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
-import net.noti_me.dymit.dymit_backend_api.controllers.auth.dto.OidcProvider
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtService
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
@@ -30,7 +30,7 @@ internal class CreateMemberUseCaseImplTest(): BehaviorSpec() {
         mockk<OidcAuthenticationProvider>()
     )
 
-    private val authServiceFacade = mockk<AuthServiceFacade>()
+    private val jwtService = mockk<JwtService>(relaxed = true)
 
     private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
 
@@ -38,7 +38,7 @@ internal class CreateMemberUseCaseImplTest(): BehaviorSpec() {
         loadMemberPort = loadMemberPort,
         saveMemberPort = saveMemberPort,
         oidcAuthenticationProviders = oidcAuthenticationProviders,
-        authService = authServiceFacade,
+        jwtService = jwtService,
         eventPublisher = eventPublisher
     )
 
@@ -113,11 +113,6 @@ internal class CreateMemberUseCaseImplTest(): BehaviorSpec() {
                 every { loadMemberPort.loadByOidcIdentity(any()) } returns null
                 every { loadMemberPort.existsByNickname(member.nickname) } returns false
                 every { saveMemberPort.persist(any()) } returns member
-                every { authServiceFacade.loginByOidcToken(
-                    provider = OidcProvider.GOOGLE,
-                    idToken = "SampleToken"
-                ) } returns mockk()
-
                 Then("사용자가 생성되고, MemberCreateResult가 반환된다.") {
                     val result = usecase.createMember(command)
                     result::class shouldBe MemberCreateResult::class

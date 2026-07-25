@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.application.admin.dto.AdminPushNotifi
 import net.noti_me.dymit.dymit_backend_api.application.admin.usecases.SendPushUseCase
 import net.noti_me.dymit.dymit_backend_api.application.push_notification.PushService
 import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 

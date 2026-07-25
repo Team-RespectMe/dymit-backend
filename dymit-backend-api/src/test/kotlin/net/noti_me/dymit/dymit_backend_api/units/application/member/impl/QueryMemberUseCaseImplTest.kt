@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.units.application.member.impl
+package net.noti_me.dymit.dymit_backend_api.units.member.application.impl
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -6,10 +6,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.QueryMemberUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.member.application.impl.QueryMemberUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 import org.bson.types.ObjectId

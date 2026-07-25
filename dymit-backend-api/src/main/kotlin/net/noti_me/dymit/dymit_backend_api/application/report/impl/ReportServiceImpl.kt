@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.application.report.ReportService
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.report.ProcessStatus
 import net.noti_me.dymit.dymit_backend_api.domain.report.Report
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.report.ReportRepository
@@ -77,7 +77,7 @@ class ReportServiceImpl(
      * @throws ForbiddenException 어드민 권한이 없는 경우
      */
     private fun validateAdminRole(memberInfo: MemberInfo) {
-        if (!memberInfo.roles.contains(MemberRole.ROLE_ADMIN)) {
+        if (!memberInfo.roles.contains(MemberRole.ROLE_ADMIN.name)) {
             throw ForbiddenException(message="어드민 권한이 필요합니다.")
         }
     }

@@ -9,7 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeedQueryHistory
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedQueryHistoryRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository

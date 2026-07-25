@@ -18,7 +18,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFile
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
@@ -68,7 +68,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
     private val memberInfo = MemberInfo(
         memberId = memberId.toHexString(),
         nickname = "tester",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     private val schedule = StudySchedule(

@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.configs
 
-import net.noti_me.dymit.dymit_backend_api.application.member.batch.DailyMemberStatusJob
+import net.noti_me.dymit.dymit_backend_api.member.application.batch.DailyMemberStatusJob
 import net.noti_me.dymit.dymit_backend_api.application.reminder.DailyScheduleReminderJob
 import net.noti_me.dymit.dymit_backend_api.application.reminder.HourlyScheduleReminderJob
 import org.quartz.CronScheduleBuilder

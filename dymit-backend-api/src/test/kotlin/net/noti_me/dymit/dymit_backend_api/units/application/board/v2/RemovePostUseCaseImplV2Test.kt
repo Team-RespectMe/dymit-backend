@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostCategory
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
@@ -46,7 +46,7 @@ internal class RemovePostUseCaseImplV2Test : BehaviorSpec({
         return MemberInfo(
             memberId = memberId.toHexString(),
             nickname = "member",
-            roles = listOf(MemberRole.ROLE_MEMBER)
+            roles = listOf(MemberRole.ROLE_MEMBER.name)
         )
     }
 

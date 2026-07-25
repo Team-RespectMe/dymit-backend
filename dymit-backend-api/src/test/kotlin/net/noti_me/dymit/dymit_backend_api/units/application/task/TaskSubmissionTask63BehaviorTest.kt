@@ -21,7 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
@@ -60,7 +60,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                     val memberInfo = MemberInfo(
                         memberId = memberId.toHexString(),
                         nickname = "submitter",
-                        roles = listOf(MemberRole.ROLE_MEMBER)
+                        roles = listOf(MemberRole.ROLE_MEMBER.name)
                     )
                     val member = StudyGroupMember(
                         groupId = groupId,
@@ -156,7 +156,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                             memberInfo = MemberInfo(
                                 memberId = memberId.toHexString(),
                                 nickname = "submitter",
-                                roles = listOf(MemberRole.ROLE_MEMBER)
+                                roles = listOf(MemberRole.ROLE_MEMBER.name)
                             ),
                             groupId = groupId.toHexString(),
                             taskId = taskId.toHexString(),
@@ -204,7 +204,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                         memberInfo = MemberInfo(
                             memberId = memberId.toHexString(),
                             nickname = "submitter",
-                            roles = listOf(MemberRole.ROLE_MEMBER)
+                            roles = listOf(MemberRole.ROLE_MEMBER.name)
                         ),
                         groupId = groupId.toHexString(),
                         taskId = taskId.toHexString(),
@@ -293,7 +293,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                         memberInfo = MemberInfo(
                             memberId = memberId.toHexString(),
                             nickname = "submitter",
-                            roles = listOf(MemberRole.ROLE_MEMBER)
+                            roles = listOf(MemberRole.ROLE_MEMBER.name)
                         ),
                         groupId = groupId.toHexString(),
                         taskId = taskId.toHexString(),

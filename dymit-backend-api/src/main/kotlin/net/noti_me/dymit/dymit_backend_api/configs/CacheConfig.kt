@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.configs
 
-import net.noti_me.dymit.dymit_backend_api.application.auth.dto.JwtClaims
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtClaims
 import org.ehcache.jsr107.EhcacheCachingProvider
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.jcache.JCacheCacheManager

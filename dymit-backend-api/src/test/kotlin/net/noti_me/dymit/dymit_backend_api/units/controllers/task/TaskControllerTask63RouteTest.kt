@@ -10,7 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskController
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import org.bson.types.ObjectId
@@ -27,7 +27,7 @@ internal class TaskControllerTask63RouteTest : BehaviorSpec() {
     private val memberInfo = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "tester",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     init {

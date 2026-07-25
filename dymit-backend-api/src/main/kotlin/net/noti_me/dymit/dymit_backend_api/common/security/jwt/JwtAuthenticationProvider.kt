@@ -1,10 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.common.security.jwt
 
 import com.auth0.jwt.exceptions.JWTVerificationException
-import net.noti_me.dymit.dymit_backend_api.application.auth.jwt.JwtService
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
 import org.slf4j.LoggerFactory
-import org.springframework.security.authentication.AuthenticationProvider import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.AuthenticationProvider
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 
@@ -33,21 +32,22 @@ class JwtAuthenticationProvider(
             }
 
             // "roles" 클레임을 문자열 리스트로 변환합니다.
-            val roles = jwt.roles
-                .map { rolename ->
-                    // 각 역할을 매칭되는 MemberRole로 변환한다.
-                    when (rolename) {
-                        "ROLE_MEMBER" -> MemberRole.ROLE_MEMBER
-                        "ROLE_ADMIN" -> MemberRole.ROLE_ADMIN
-                        else -> throw BadCredentialsException("JWT-002")
-                    }
+            val roles = jwt.roles.map { roleName ->
+                when (roleName) {
+                    "ROLE_MEMBER", "ROLE_ADMIN" -> roleName
+                    else -> throw BadCredentialsException("JWT-002")
                 }
+            }
 
             // 문자열 리스트를 GrantedAuthority 리스트로 변환합니다.
-            val authorities = roles.map { SimpleGrantedAuthority(it.name) }
+            val authorities = roles.map { SimpleGrantedAuthority(it) }
 
             // 인증된 사용자 정보를 담을 Principal 객체를 생성합니다.
-            val principal = MemberInfo.from(jwt)
+            val principal = MemberInfo.of(
+                memberId = jwt.memberId,
+                nickname = jwt.nickname,
+                roles = roles
+            )
             // 인증 완료를 나타내는 새로운 AuthenticationToken을 생성하여 반환합니다.
             return JwtAuthenticationToken(principal, null, authorities)
         } catch (e: JWTVerificationException) {

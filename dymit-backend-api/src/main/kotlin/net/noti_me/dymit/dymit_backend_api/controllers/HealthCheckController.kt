@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers
 
 import net.noti_me.dymit.dymit_backend_api.common.logging.discord.DiscordQuartzLogger
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController

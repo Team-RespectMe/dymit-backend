@@ -8,9 +8,9 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.JWKKey
-import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.JWKList
-import net.noti_me.dymit.dymit_backend_api.application.auth.oidc.GoogleJwksProvider
+import net.noti_me.dymit.dymit_backend_api.common.security.oidc.JWKKey
+import net.noti_me.dymit.dymit_backend_api.common.security.oidc.JWKList
+import net.noti_me.dymit.dymit_backend_api.common.security.oidc.GoogleJwksProvider
 import net.noti_me.dymit.dymit_backend_api.common.errors.InternalServerError
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono

@@ -8,7 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.impl.GetNoticeUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.server_notice.ServerNoticeRepository
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.units.domain.server_notice.ServerNoticeTest

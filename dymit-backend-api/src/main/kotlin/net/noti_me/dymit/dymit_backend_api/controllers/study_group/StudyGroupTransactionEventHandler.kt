@@ -1,8 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.study_group
 
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberNicknameChangedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberNicknameChangedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo 
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
 import org.bson.types.ObjectId

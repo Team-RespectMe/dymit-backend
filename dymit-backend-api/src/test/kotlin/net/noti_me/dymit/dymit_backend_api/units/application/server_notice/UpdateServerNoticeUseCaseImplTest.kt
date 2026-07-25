@@ -12,9 +12,9 @@ import net.noti_me.dymit.dymit_backend_api.application.server_notice.dto.UpdateS
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.impl.DeleteNoticeUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.impl.UpdateNoticeUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.server_notice.ServerNoticeRepository
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo

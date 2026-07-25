@@ -1,9 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.supports
 
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.OidcIdentity
 import org.bson.types.ObjectId
 
 fun createOidcIdentity(

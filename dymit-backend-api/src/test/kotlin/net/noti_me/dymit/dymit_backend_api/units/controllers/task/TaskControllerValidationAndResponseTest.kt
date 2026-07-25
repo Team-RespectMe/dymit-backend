@@ -30,7 +30,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskUpdateRequest
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
@@ -47,7 +47,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
     private val memberInfo = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "tester",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     init {

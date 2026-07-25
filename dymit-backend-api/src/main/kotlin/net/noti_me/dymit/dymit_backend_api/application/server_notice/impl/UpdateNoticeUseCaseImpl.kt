@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.application.server_notice.usecases.Up
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.server_notice.ServerNoticeRepository
 import org.springframework.stereotype.Service
 

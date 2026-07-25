@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.ports.persistence.board
 
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import org.bson.types.ObjectId
 
 interface PostRepository {

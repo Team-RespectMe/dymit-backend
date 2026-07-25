@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.server_notice.impl
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.usecases.DeleteNoticeUseCase
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.server_notice.ServerNoticeRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service

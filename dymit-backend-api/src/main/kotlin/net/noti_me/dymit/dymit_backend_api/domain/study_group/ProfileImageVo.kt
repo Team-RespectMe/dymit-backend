@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_group
 
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 
 class ProfileImageVo(
     val type: ProfileImageType = ProfileImageType.PRESET,

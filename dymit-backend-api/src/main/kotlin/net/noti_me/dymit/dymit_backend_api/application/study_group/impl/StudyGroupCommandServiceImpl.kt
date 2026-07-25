@@ -19,7 +19,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
@@ -27,7 +27,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberJoinEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupMemberLeaveEvent
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository

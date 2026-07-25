@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupp
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTaskAssigneesUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
@@ -56,7 +56,7 @@ internal class GetTaskAssigneesUseCaseImplTest : BehaviorSpec() {
                     val memberInfo = MemberInfo(
                         memberId = memberId.toHexString(),
                         nickname = "tester",
-                        roles = listOf(MemberRole.ROLE_MEMBER)
+                        roles = listOf(MemberRole.ROLE_MEMBER.name)
                     )
                     val assignees = listOf(
                         TaskAssigneeDto(

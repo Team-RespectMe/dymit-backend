@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.units.domain.member
+package net.noti_me.dymit.dymit_backend_api.units.member.domain
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -8,12 +8,12 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.member.DeviceToken
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.member.RefreshToken
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.OidcIdentity
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.DeviceToken
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.RefreshToken
 import org.bson.types.ObjectId
 import java.time.Instant
 import java.time.LocalDateTime

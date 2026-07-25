@@ -2,8 +2,8 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group
 
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberCreatedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberDeletedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberCreatedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupOwnerMissingEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
@@ -29,7 +29,11 @@ class TransactionEventListener(
     @EventListener(classes=[MemberCreatedEvent::class])
     fun onMemberCreated(event: MemberCreatedEvent) {
         // 회원 소유의 스터디 그룹을 1개 생성한다.
-        val memberInfo = MemberInfo.from(event.member)
+        val memberInfo = MemberInfo.of(
+            memberId = event.member.identifier,
+            nickname = event.member.nickname,
+            roles = event.member.roles.map { it.name }
+        )
         val command = StudyGroupCreateCommand(
             name = "${event.member.nickname}님의 스터디 그룹",
             description = "자동 생성된 스터디 그룹입니다.",
@@ -69,4 +73,3 @@ class TransactionEventListener(
         } while( groupMembers.size > FETCH_GROUP_MEMBER_LIMITS) 
     }
 }
-

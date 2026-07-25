@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.application.admin.impl
 
 import net.noti_me.dymit.dymit_backend_api.application.admin.dto.DailyMemberStatusDto
 import net.noti_me.dymit.dymit_backend_api.application.admin.usecases.GetDailyMemberStatusUseCase
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.DailyMemberStatusRepository
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.DailyMemberStatusRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 

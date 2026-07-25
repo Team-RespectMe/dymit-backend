@@ -18,8 +18,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
@@ -243,7 +243,7 @@ class PostServiceImplTest : BehaviorSpec({
         memberInfo = MemberInfo(
             memberId = memberObjectId.toHexString(),
             nickname = "testUser",
-            roles = listOf(MemberRole.ROLE_MEMBER)
+            roles = listOf(MemberRole.ROLE_MEMBER.name)
         )
 
         groupMember = createGroupMember(memberObjectId, GroupMemberRole.MEMBER)

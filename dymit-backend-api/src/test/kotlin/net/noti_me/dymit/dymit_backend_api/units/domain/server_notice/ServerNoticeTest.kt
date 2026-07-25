@@ -7,8 +7,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNot
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import org.bson.types.ObjectId

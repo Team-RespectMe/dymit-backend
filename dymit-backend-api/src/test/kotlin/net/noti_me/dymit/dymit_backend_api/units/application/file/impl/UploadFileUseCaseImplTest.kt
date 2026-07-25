@@ -20,7 +20,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.configs.CDNConfig
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFile
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import org.bson.types.ObjectId
 import org.springframework.mock.web.MockMultipartFile
@@ -48,7 +48,7 @@ internal class UploadFileUseCaseImplTest : BehaviorSpec() {
     private val loginMember = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "member",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     init {

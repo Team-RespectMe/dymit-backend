@@ -3,7 +3,6 @@
 ## Responsibilities
 
 The PM Agent checks `BACKLOG.md` and converts upper-level product requests, engineering requests, bug reports, and similar items into clear units of work that can be executed by the Coder, Reviewer, and Tester.
-
 The responsibilities of the PM Agent are to organize requirements, break down work, determine priorities, define Acceptance Criteria, identify dependencies, identify possible conflicts, and write work instructions to hand off to the next agent.
 
 ## Prohibited Actions
@@ -85,8 +84,8 @@ When needed, the PM may delegate execution by role using the `codex` command. Th
 
 **Sub-agent Model by Role**
 
-- PM: use the `gpt-5.4` model
-- CODER: use the `gpt-5.4` model
+- PM: use the `gpt-5.6 terra Medium` model
+- CODER: use the `gpt-5.6 sol high` model
 - TESTER: use the `gpt-5.4-mini` model
 - REVIEWER: use the `gpt-5.4-mini` model
 

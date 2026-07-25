@@ -14,7 +14,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupp
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.CreateSubmissionCommentUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
@@ -49,7 +49,7 @@ internal class TaskSubmissionCommentEventPublicationTest : BehaviorSpec() {
                     val memberInfo = MemberInfo(
                         memberId = writerId.toHexString(),
                         nickname = "댓글작성자",
-                        roles = listOf(MemberRole.ROLE_MEMBER)
+                        roles = listOf(MemberRole.ROLE_MEMBER.name)
                     )
                     val group = StudyGroup(
                         id = groupId,
@@ -139,7 +139,7 @@ internal class TaskSubmissionCommentEventPublicationTest : BehaviorSpec() {
                     val memberInfo = MemberInfo(
                         memberId = writerId.toHexString(),
                         nickname = "댓글작성자",
-                        roles = listOf(MemberRole.ROLE_MEMBER)
+                        roles = listOf(MemberRole.ROLE_MEMBER.name)
                     )
                     val writer = StudyGroupMember(
                         groupId = groupId,

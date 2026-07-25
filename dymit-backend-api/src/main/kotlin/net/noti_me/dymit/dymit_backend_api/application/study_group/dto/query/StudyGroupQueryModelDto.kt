@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query
 import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.InviteCodeVo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
 import java.time.LocalDateTime

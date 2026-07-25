@@ -13,7 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.StudyScheduleAttachmentController
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.StudyScheduleAttachmentReplaceRequest
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -26,7 +26,7 @@ internal class StudyScheduleAttachmentControllerTest : BehaviorSpec() {
     private val memberInfo = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "tester",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     init {

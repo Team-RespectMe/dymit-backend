@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtAuthenticationToken
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 
 internal class JwtAuthenticationTokenTest : AnnotationSpec() {
 
@@ -29,7 +29,7 @@ internal class JwtAuthenticationTokenTest : AnnotationSpec() {
         val principal = MemberInfo(
             memberId = "memberId",
             nickname = "nickname",
-            roles = listOf(MemberRole.ROLE_MEMBER)
+            roles = listOf(MemberRole.ROLE_MEMBER.name)
         )
         val credentials: String? = null
 

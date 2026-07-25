@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.domain.study_group
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime

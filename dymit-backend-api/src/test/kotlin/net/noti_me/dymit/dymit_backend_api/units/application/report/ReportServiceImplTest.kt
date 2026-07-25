@@ -11,7 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.application.report.impl.ReportService
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.report.ProcessStatus
 import net.noti_me.dymit.dymit_backend_api.domain.report.Report
 import net.noti_me.dymit.dymit_backend_api.domain.report.ReportedResource
@@ -42,7 +42,7 @@ class ReportServiceImplTest : BehaviorSpec({
         return MemberInfo(
             memberId = testMemberId.toHexString(),
             nickname = "testUser",
-            roles = listOf(MemberRole.ROLE_MEMBER)
+            roles = listOf(MemberRole.ROLE_MEMBER.name)
         )
     }
 
@@ -53,7 +53,7 @@ class ReportServiceImplTest : BehaviorSpec({
         return MemberInfo(
             memberId = testAdminMemberId.toHexString(),
             nickname = "adminUser",
-            roles = listOf(MemberRole.ROLE_ADMIN)
+            roles = listOf(MemberRole.ROLE_ADMIN.name)
         )
     }
 

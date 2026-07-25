@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.domain.server_notice
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 

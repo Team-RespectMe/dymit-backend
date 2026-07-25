@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.configs
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import net.noti_me.dymit.dymit_backend_api.application.auth.jwt.JwtService
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtService
 import net.noti_me.dymit.dymit_backend_api.common.security.exceptions.JwtAccessDeniedHandler
 import net.noti_me.dymit.dymit_backend_api.common.security.exceptions.JwtEntrypointUnauthorizedHandler
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtAuthenticationFilter

@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.units.application.member.impl
+package net.noti_me.dymit.dymit_backend_api.units.member.application.impl
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -7,16 +7,16 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.file.usecases.UploadProfileImageUseCase
-import net.noti_me.dymit.dymit_backend_api.application.member.dto.UpdateMemberProfileImageCommand
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.ChangeMemberImageUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.member.application.dto.UpdateMemberProfileImageCommand
+import net.noti_me.dymit.dymit_backend_api.member.application.impl.ChangeMemberImageUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberPresetImage
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberPresetImage
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.SaveMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 import org.bson.types.ObjectId

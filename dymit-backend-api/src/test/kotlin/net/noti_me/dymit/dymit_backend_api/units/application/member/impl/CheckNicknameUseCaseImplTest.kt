@@ -1,13 +1,13 @@
-package net.noti_me.dymit.dymit_backend_api.units.application.member.impl
+package net.noti_me.dymit.dymit_backend_api.units.member.application.impl
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.member.impl.CheckNicknameUseCaseImpl
+import net.noti_me.dymit.dymit_backend_api.member.application.impl.CheckNicknameUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.member.LoadMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 
 internal class CheckNicknameUseCaseImplTest(): BehaviorSpec() {
 

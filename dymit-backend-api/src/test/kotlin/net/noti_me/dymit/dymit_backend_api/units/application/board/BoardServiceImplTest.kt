@@ -16,8 +16,8 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
@@ -56,7 +56,7 @@ class BoardServiceImplTest : BehaviorSpec({
         memberInfo = MemberInfo(
             memberId = memberObjectId.toHexString(),
             nickname = "testUser",
-            roles = listOf(MemberRole.ROLE_MEMBER)
+            roles = listOf(MemberRole.ROLE_MEMBER.name)
         )
 
         // 다양한 권한을 가진 멤버들 생성

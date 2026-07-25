@@ -39,7 +39,7 @@ class JwtAuthenticationToken(
             return null
         }
         return (principal as MemberInfo).roles.map {
-            SimpleGrantedAuthority(it.name)
+            SimpleGrantedAuthority(it)
         }
     }
 

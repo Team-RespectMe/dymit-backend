@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.supports
 
-import net.noti_me.dymit.dymit_backend_api.application.auth.jwt.JwtService
-import net.noti_me.dymit.dymit_backend_api.configs.JwtConfig
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtService
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.JwtConfig
 
 //class JwtSupport {
 

@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.common
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 

@@ -1,8 +1,8 @@
-package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo.member
+package net.noti_me.dymit.dymit_backend_api.units.member.adapter.out.persistence
 
-import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.member.MongoSaveMemberAdapter
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import net.noti_me.dymit.dymit_backend_api.member.adapter.out.persistence.MongoSaveMemberAdapter
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.OidcIdentity
 import org.springframework.data.mongodb.core.MongoTemplate
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.core.extensions.Extension

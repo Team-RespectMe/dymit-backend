@@ -10,7 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.StudyRe
 import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment.StudyRecruitmentController
-import net.noti_me.dymit.dymit_backend_api.domain.member.MemberRole
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
 import org.bson.types.ObjectId
 
@@ -29,7 +29,7 @@ internal class StudyRecruitmentControllerTest : BehaviorSpec() {
     private val memberInfo = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "member",
-        roles = listOf(MemberRole.ROLE_MEMBER)
+        roles = listOf(MemberRole.ROLE_MEMBER.name)
     )
 
     init {

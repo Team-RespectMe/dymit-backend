@@ -1,14 +1,14 @@
-package net.noti_me.dymit.dymit_backend_api.units.adapter.persistence.mongo.member
+package net.noti_me.dymit.dymit_backend_api.units.member.adapter.out.persistence
 
 import io.kotest.core.extensions.Extension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import net.noti_me.dymit.dymit_backend_api.adapters.persistence.mongo.member.MongoLoadMemberAdapter
+import net.noti_me.dymit.dymit_backend_api.member.adapter.out.persistence.MongoLoadMemberAdapter
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.OidcIdentity
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.OidcIdentity
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.MongoTemplate

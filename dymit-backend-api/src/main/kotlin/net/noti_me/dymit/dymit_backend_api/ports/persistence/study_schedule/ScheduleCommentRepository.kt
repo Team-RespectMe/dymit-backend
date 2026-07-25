@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule
 
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleComment
 import org.bson.types.ObjectId
 import java.util.*

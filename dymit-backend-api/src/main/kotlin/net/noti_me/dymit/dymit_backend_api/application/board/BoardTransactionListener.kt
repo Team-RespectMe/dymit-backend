@@ -1,8 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.application.board
 
-import net.noti_me.dymit.dymit_backend_api.domain.member.Member
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberNicknameChangedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.Member
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberNicknameChangedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
 import org.springframework.context.event.EventListener

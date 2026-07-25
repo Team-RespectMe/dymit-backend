@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_group
 
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberForceDeletedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.member.events.MemberProfileImageChangedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberForceDeletedEvent
+import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_group.events.GroupOwnerMissingEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
