@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
@@ -78,7 +78,7 @@ class TaskAttachmentResponse(
     @field:Schema(description = "썸네일 URL")
     val thumbnailUrl: String?,
     @field:Schema(description = "파일 상태")
-    val status: UserFileStatus
+    val status: TaskFileStatusDto
 ) {
 
     companion object {

@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupp
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.CreateSubmissionUseCase
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
@@ -72,7 +72,7 @@ class CreateSubmissionUseCaseImpl(
 
         assignee.markSubmitted()
         support.saveAssignee(assignee)
-        support.updateFileStatuses(fileIds, UserFileStatus.LINKED)
+        support.updateFileStatuses(fileIds, TaskFileStatusDto.LINKED)
         eventPublisher.publishEvent(
             TaskSubmissionCreatedEvent(
                 taskId = taskObjectId,

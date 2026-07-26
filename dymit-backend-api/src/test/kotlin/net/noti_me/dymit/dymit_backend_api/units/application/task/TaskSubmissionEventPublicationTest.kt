@@ -14,7 +14,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupp
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.CreateSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
@@ -113,7 +113,7 @@ internal class TaskSubmissionEventPublicationTest : BehaviorSpec() {
                     every { support.validateSubmissionAttachmentFiles(emptyList()) } answers { Unit }
                     every { support.saveSubmission(any()) } returns savedSubmission
                     every { support.saveAssignee(assignee) } returns assignee
-                    every { support.updateFileStatuses(emptyList(), UserFileStatus.LINKED) } answers { Unit }
+                    every { support.updateFileStatuses(emptyList(), TaskFileStatusDto.LINKED) } answers { Unit }
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.toSubmissionDto(savedSubmission, groupId) } returns expectedDto
                     justRun { eventPublisher.publishEvent(any()) }

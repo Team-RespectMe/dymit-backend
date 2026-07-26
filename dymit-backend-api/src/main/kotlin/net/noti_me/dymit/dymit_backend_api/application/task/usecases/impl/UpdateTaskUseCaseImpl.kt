@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.UpdateTaskComman
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateTaskUseCase
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedEvent
@@ -55,7 +55,7 @@ class UpdateTaskUseCaseImpl(
         val newAttachmentSet = newAttachmentIds.toSet()
         val linked = newAttachmentSet.filter { !oldAttachmentIds.contains(it) }
         val removed = oldAttachmentIds.filter { !newAttachmentSet.contains(it) }
-        support.updateFileStatuses(linked, UserFileStatus.LINKED)
+        support.updateFileStatuses(linked, TaskFileStatusDto.LINKED)
         support.downgradeOrphanedFiles(removed)
 
         eventPublisher.publishEvent(

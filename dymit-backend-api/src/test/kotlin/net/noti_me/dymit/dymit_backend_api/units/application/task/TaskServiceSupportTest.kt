@@ -10,14 +10,11 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import io.mockk.unmockkObject
-import net.noti_me.dymit.dymit_backend_api.application.file.FileServiceFacade
-import net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver
-import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileDto
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskExpireAtNormalizer
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
@@ -25,7 +22,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.TaskFilePort
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
@@ -45,9 +43,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
     private val taskAssigneeRepository = mockk<TaskAssigneeRepository>()
     private val taskSubmissionRepository = mockk<TaskSubmissionRepository>()
     private val taskSubmissionCommentRepository = mockk<TaskSubmissionCommentRepository>()
-    private val userFileRepository = mockk<UserFileRepository>()
-    private val fileServiceFacade = mockk<FileServiceFacade>()
-    private val fileUrlResolver = mockk<FileUrlResolver>()
+    private val taskFilePort = mockk<TaskFilePort>()
 
     private val support = TaskServiceSupport(
         loadStudyGroupPort = loadStudyGroupPort,
@@ -57,9 +53,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         taskAssigneeRepository = taskAssigneeRepository,
         taskSubmissionRepository = taskSubmissionRepository,
         taskSubmissionCommentRepository = taskSubmissionCommentRepository,
-        userFileRepository = userFileRepository,
-        fileServiceFacade = fileServiceFacade,
-        fileUrlResolver = fileUrlResolver
+        taskFilePort = taskFilePort
     )
     private var taskExpireAtNormalizerMocked = false
 
@@ -326,7 +320,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                         )
                     )
 
-                    every { userFileRepository.findByIds(emptyList()) } returns emptyList()
+                    every { taskFilePort.loadByIds(emptyList()) } returns emptyList()
                     every { taskAssigneeRepository.findByTaskId(task.id!!) } returns assignees
                     every {
                         groupMemberRepository.findByGroupIdAndMemberIdsIn(
@@ -351,16 +345,14 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     val fileId = ObjectId.get()
                     every { taskRepository.findAttachedFileIds(listOf(fileId)) } returns emptySet()
                     every { taskSubmissionRepository.findAttachedFileIds(listOf(fileId)) } returns emptySet()
-                    every { fileServiceFacade.updateFileStatus(any()) } returns createFileDto(fileId.toHexString(), UserFileStatus.UNREFERENCED)
+                    every { taskFilePort.updateStatus(fileId, TaskFileStatusDto.UNREFERENCED) } returns TaskFileStatusDto.UNREFERENCED
 
                     support.downgradeOrphanedFiles(listOf(fileId))
 
                     verify(exactly = 1) { taskRepository.findAttachedFileIds(listOf(fileId)) }
                     verify(exactly = 1) { taskSubmissionRepository.findAttachedFileIds(listOf(fileId)) }
                     verify(exactly = 1) {
-                        fileServiceFacade.updateFileStatus(match {
-                            it.fileId == fileId.toHexString() && it.status == UserFileStatus.UNREFERENCED
-                        })
+                        taskFilePort.updateStatus(fileId, TaskFileStatusDto.UNREFERENCED)
                     }
                 }
             }
@@ -373,7 +365,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
                     support.downgradeOrphanedFiles(listOf(fileId))
 
-                    verify(exactly = 0) { fileServiceFacade.updateFileStatus(any()) }
+                    verify(exactly = 0) { taskFilePort.updateStatus(any(), any()) }
                 }
             }
         }
@@ -385,17 +377,6 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         every { TaskExpireAtNormalizer.currentUtcDateTime() } returns currentUtcDateTime
         every { TaskExpireAtNormalizer.isExpired(any()) } answers { callOriginal() }
         every { TaskExpireAtNormalizer.toKst(any()) } answers { callOriginal() }
-    }
-
-    private fun createFileDto(fileId: String, status: UserFileStatus): FileDto {
-        return FileDto(
-            fileId = fileId,
-            status = status,
-            originalFileName = "test.txt",
-            path = "/files/test.txt",
-            url = "https://cdn.example.com/files/test.txt",
-            thumbnail = null
-        )
     }
 
     private fun createTask(expireAt: LocalDateTime): net.noti_me.dymit.dymit_backend_api.domain.task.Task {

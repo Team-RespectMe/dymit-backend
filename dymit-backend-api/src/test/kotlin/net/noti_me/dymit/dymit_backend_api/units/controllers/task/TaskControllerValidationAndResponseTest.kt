@@ -29,7 +29,7 @@ import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskSubmissionCommentCommandRequest
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskUpdateRequest
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
@@ -133,7 +133,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                                 originalFileName = "task.pdf",
                                 url = "https://cdn.example.com/task.pdf",
                                 thumbnailUrl = null,
-                                status = UserFileStatus.LINKED
+                                status = TaskFileStatusDto.LINKED
                             )
                         ),
                         expireAt = request.expireAt,
@@ -356,7 +356,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                                 originalFileName = "updated.pdf",
                                 url = "https://cdn.example.com/updated.pdf",
                                 thumbnailUrl = null,
-                                status = UserFileStatus.LINKED
+                                status = TaskFileStatusDto.LINKED
                             )
                         ),
                         expireAt = request.expireAt,

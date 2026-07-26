@@ -1,7 +1,5 @@
 package net.noti_me.dymit.dymit_backend_api.member.application.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.file.dto.FileUploadResult
-import net.noti_me.dymit.dymit_backend_api.application.file.usecases.UploadProfileImageUseCase
 import net.noti_me.dymit.dymit_backend_api.member.application.usecases.ChangeMemberImageUseCase
 import net.noti_me.dymit.dymit_backend_api.member.application.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.member.application.dto.UpdateMemberProfileImageCommand
@@ -15,6 +13,9 @@ import net.noti_me.dymit.dymit_backend_api.member.domain.MemberPresetImage
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.SaveMemberPort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.`out`.file.MemberProfileFilePort
+import net.noti_me.dymit.dymit_backend_api.member.application.port.`out`.file.dto.MemberProfileFileUploadCommand
+import net.noti_me.dymit.dymit_backend_api.member.application.port.`out`.file.dto.MemberProfileFileUploadDto
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
@@ -23,7 +24,7 @@ import java.util.UUID
 class ChangeMemberImageUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
-    private val uploadProfileImageUseCase: UploadProfileImageUseCase
+    private val memberProfileFilePort: MemberProfileFilePort
 ) : ChangeMemberImageUseCase {
 
     override fun changeProfileImage(
@@ -62,9 +63,13 @@ class ChangeMemberImageUseCaseImpl(
 
 
     private fun processExternalImageUpload(memberInfo: MemberInfo, imageFile: MultipartFile): MemberProfileImageVo {
-        val result: FileUploadResult = uploadProfileImageUseCase.upload(
-            member = memberInfo,
-            imageFile = imageFile
+        val result: MemberProfileFileUploadDto = memberProfileFilePort.upload(
+            MemberProfileFileUploadCommand(
+                memberId = memberInfo.memberId,
+                nickname = memberInfo.nickname,
+                roles = memberInfo.roles,
+                imageFile = imageFile
+            )
         )
 
         return MemberProfileImageVo(

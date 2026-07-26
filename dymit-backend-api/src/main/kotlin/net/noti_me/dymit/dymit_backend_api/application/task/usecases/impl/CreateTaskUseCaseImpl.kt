@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskExpireAtNor
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.CreateTaskUseCase
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
@@ -68,7 +68,7 @@ class CreateTaskUseCaseImpl(
             support.initializeAssignees(savedTaskId, assigneeMemberIds)
         }
 
-        support.updateFileStatuses(attachmentIds, UserFileStatus.LINKED)
+        support.updateFileStatuses(attachmentIds, TaskFileStatusDto.LINKED)
         eventPublisher.publishEvent(
             TaskCreatedEvent(
                 taskId = savedTaskId,

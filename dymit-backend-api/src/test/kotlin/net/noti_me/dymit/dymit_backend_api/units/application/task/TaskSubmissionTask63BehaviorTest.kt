@@ -20,7 +20,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.Withdr
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
@@ -285,7 +285,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                     every { support.submissionAttachmentFileIds(newAttachments) } returns listOf(newFileId)
                     every { support.validateSubmissionAttachmentFiles(listOf(newFileId)) } just runs
                     every { support.saveSubmission(any()) } returns submission
-                    every { support.updateFileStatuses(listOf(newFileId), UserFileStatus.LINKED) } just runs
+                    every { support.updateFileStatuses(listOf(newFileId), TaskFileStatusDto.LINKED) } just runs
                     every { support.downgradeOrphanedFiles(listOf(oldFileId)) } just runs
                     every { support.toSubmissionDto(submission, groupId) } returns expectedDto
 
@@ -312,7 +312,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                     )
 
                     verify(exactly = 1) { support.saveSubmission(any()) }
-                    verify(exactly = 1) { support.updateFileStatuses(listOf(newFileId), UserFileStatus.LINKED) }
+                    verify(exactly = 1) { support.updateFileStatuses(listOf(newFileId), TaskFileStatusDto.LINKED) }
                     verify(exactly = 1) { support.downgradeOrphanedFiles(listOf(oldFileId)) }
                     result shouldBe expectedDto
                 }

@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import net.noti_me.dymit.dymit_backend_api.application.file.usecases.UploadProfileImageUseCase
+import net.noti_me.dymit.dymit_backend_api.member.application.port.`out`.file.MemberProfileFilePort
 import net.noti_me.dymit.dymit_backend_api.member.application.dto.UpdateMemberProfileImageCommand
 import net.noti_me.dymit.dymit_backend_api.member.application.impl.ChangeMemberImageUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
@@ -27,12 +27,12 @@ internal class ChangeMemberImageUseCaseImplTest(): BehaviorSpec() {
 
     private val saveMemberPort = mockk<SaveMemberPort>()
 
-    private val uploadProfileImageUseCase = mockk<UploadProfileImageUseCase>()
+    private val memberProfileFilePort = mockk<MemberProfileFilePort>()
 
     private val usecase = ChangeMemberImageUseCaseImpl(
         loadMemberPort = loadMemberPort,
         saveMemberPort = saveMemberPort,
-        uploadProfileImageUseCase = uploadProfileImageUseCase
+        memberProfileFilePort = memberProfileFilePort
     )
 
     private val memberId = ObjectId.get()

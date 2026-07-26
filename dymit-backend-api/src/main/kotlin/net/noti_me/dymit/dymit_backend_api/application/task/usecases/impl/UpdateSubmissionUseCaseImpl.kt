@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.UpdateSubmi
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
 import org.springframework.stereotype.Service
 
@@ -59,7 +59,7 @@ class UpdateSubmissionUseCaseImpl(
         val newFileSet = newFileIds.toSet()
         val linked = newFileSet.filter { !oldFileIds.contains(it) }
         val removed = oldFileIds.filter { !newFileSet.contains(it) }
-        support.updateFileStatuses(linked, UserFileStatus.LINKED)
+        support.updateFileStatuses(linked, TaskFileStatusDto.LINKED)
         support.downgradeOrphanedFiles(removed)
 
         return support.toSubmissionDto(saved, groupIdObjectId)

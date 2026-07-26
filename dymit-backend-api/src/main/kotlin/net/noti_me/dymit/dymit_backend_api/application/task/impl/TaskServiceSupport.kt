@@ -1,8 +1,5 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.file.FileServiceFacade
-import net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver
-import net.noti_me.dymit.dymit_backend_api.application.file.dto.UpdateFileStatusCommand
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeSummaryDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeMemberDto
@@ -16,8 +13,6 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFile
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
@@ -30,13 +25,15 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionRepository
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.TaskFilePort
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileDto
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -53,9 +50,7 @@ class TaskServiceSupport(
     private val taskAssigneeRepository: TaskAssigneeRepository,
     private val taskSubmissionRepository: TaskSubmissionRepository,
     private val taskSubmissionCommentRepository: TaskSubmissionCommentRepository,
-    private val userFileRepository: UserFileRepository,
-    private val fileServiceFacade: FileServiceFacade,
-    private val fileUrlResolver: FileUrlResolver
+    private val taskFilePort: TaskFilePort
 ) {
     fun toObjectId(value: String, fieldName: String): ObjectId {
         if ( !ObjectId.isValid(value) ) {
@@ -321,7 +316,10 @@ class TaskServiceSupport(
     fun validateTaskAttachmentFiles(fileIds: List<ObjectId>) {
         val files = loadFiles(fileIds)
         files.forEach { file ->
-            if ( file.status != UserFileStatus.UPLOADED && file.status != UserFileStatus.LINKED && file.status != UserFileStatus.UNREFERENCED ) {
+            if ( file.status != TaskFileStatusDto.UPLOADED &&
+                file.status != TaskFileStatusDto.LINKED &&
+                file.status != TaskFileStatusDto.UNREFERENCED
+            ) {
                 throw BadRequestException(message = "업로드된 파일만 첨부할 수 있습니다.")
             }
         }
@@ -330,7 +328,10 @@ class TaskServiceSupport(
     fun validateSubmissionAttachmentFiles(fileIds: List<ObjectId>) {
         val files = loadFiles(fileIds)
         files.forEach { file ->
-            if ( file.status != UserFileStatus.UPLOADED && file.status != UserFileStatus.LINKED && file.status != UserFileStatus.UNREFERENCED ) {
+            if ( file.status != TaskFileStatusDto.UPLOADED &&
+                file.status != TaskFileStatusDto.LINKED &&
+                file.status != TaskFileStatusDto.UNREFERENCED
+            ) {
                 throw BadRequestException(message = "업로드된 파일만 첨부할 수 있습니다.")
             }
         }
@@ -352,14 +353,10 @@ class TaskServiceSupport(
             .map { it.fileId!! }
     }
 
-    fun updateFileStatuses(fileIds: Collection<ObjectId>, status: UserFileStatus) {
+    fun updateFileStatuses(fileIds: Collection<ObjectId>, status: TaskFileStatusDto) {
         fileIds.distinct().forEach { fileId ->
-            fileServiceFacade.updateFileStatus(
-                UpdateFileStatusCommand(
-                    fileId = fileId.toHexString(),
-                    status = status
-                )
-            )
+            taskFilePort.updateStatus(fileId, status)
+                ?: throw NotFoundException(message = "존재하지 않는 파일입니다.")
         }
     }
 
@@ -373,11 +370,11 @@ class TaskServiceSupport(
         val submissionReferences = taskSubmissionRepository.findAttachedFileIds(targets)
         val referenced = taskReferences + submissionReferences
         val orphaned = targets.filter { !referenced.contains(it) }
-        updateFileStatuses(orphaned, UserFileStatus.UNREFERENCED)
+        updateFileStatuses(orphaned, TaskFileStatusDto.UNREFERENCED)
     }
 
     fun toTaskDto(task: Task, groupId: ObjectId): TaskDto {
-        val files = userFileRepository.findByIds(task.attachments.map { it.fileId }).associateBy { it.id!! }
+        val files = taskFilePort.loadByIds(task.attachments.map { it.fileId }).associateBy { it.id }
         val assignees = taskAssigneeRepository.findByTaskId(task.id!!)
         val members = groupMemberRepository.findByGroupIdAndMemberIdsIn(groupId, assignees.map { it.memberId })
             .associateBy { it.memberId }
@@ -394,8 +391,8 @@ class TaskServiceSupport(
                 TaskAttachmentDto(
                     fileId = file.identifier,
                     originalFileName = file.originalFileName,
-                    url = fileUrlResolver.resolve(file.path),
-                    thumbnailUrl = fileUrlResolver.resolveOrNull(file.thumbnailPath),
+                    url = file.url,
+                    thumbnailUrl = file.thumbnailUrl,
                     status = file.status
                 )
             },
@@ -441,7 +438,7 @@ class TaskServiceSupport(
             ?: throw NotFoundException(message = "그룹 멤버 정보를 찾을 수 없습니다.")
 
         val fileIds = submissionAttachmentFileIds(submission.attachments)
-        val files = userFileRepository.findByIds(fileIds).associateBy { it.id!! }
+        val files = taskFilePort.loadByIds(fileIds).associateBy { it.id }
 
         return TaskSubmissionDto(
             submissionId = submission.identifier,
@@ -469,7 +466,7 @@ class TaskServiceSupport(
                         title = attachment.title,
                         url = null,
                         fileId = file.identifier,
-                        fileUrl = fileUrlResolver.resolve(file.path),
+                        fileUrl = file.url,
                         originalFileName = file.originalFileName
                     )
                 }
@@ -495,12 +492,12 @@ class TaskServiceSupport(
         )
     }
 
-    private fun loadFiles(fileIds: List<ObjectId>): List<UserFile> {
+    private fun loadFiles(fileIds: List<ObjectId>): List<TaskFileDto> {
         if ( fileIds.isEmpty() ) {
             return emptyList()
         }
 
-        val files = userFileRepository.findByIds(fileIds)
+        val files = taskFilePort.loadByIds(fileIds)
         if ( files.size != fileIds.size ) {
             throw NotFoundException(message = "존재하지 않는 파일이 포함되어 있습니다.")
         }

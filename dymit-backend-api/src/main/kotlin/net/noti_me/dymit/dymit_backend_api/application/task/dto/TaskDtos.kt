@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.dto
 
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
@@ -34,7 +34,7 @@ data class TaskAttachmentDto(
     val originalFileName: String,
     val url: String,
     val thumbnailUrl: String?,
-    val status: UserFileStatus
+    val status: TaskFileStatusDto
 )
 
 /**

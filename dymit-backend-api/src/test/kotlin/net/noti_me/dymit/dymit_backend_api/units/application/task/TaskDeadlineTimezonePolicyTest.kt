@@ -34,7 +34,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.TaskFilePort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
@@ -55,9 +55,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
     private val taskAssigneeRepository = mockk<TaskAssigneeRepository>()
     private val taskSubmissionRepository = mockk<TaskSubmissionRepository>()
     private val taskSubmissionCommentRepository = mockk<TaskSubmissionCommentRepository>()
-    private val userFileRepository = mockk<UserFileRepository>()
-    private val fileServiceFacade = mockk<net.noti_me.dymit.dymit_backend_api.application.file.FileServiceFacade>()
-    private val fileUrlResolver = mockk<net.noti_me.dymit.dymit_backend_api.application.file.FileUrlResolver>()
+    private val taskFilePort = mockk<TaskFilePort>()
 
     private val support = spyk(
         TaskServiceSupport(
@@ -68,9 +66,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
             taskAssigneeRepository = taskAssigneeRepository,
             taskSubmissionRepository = taskSubmissionRepository,
             taskSubmissionCommentRepository = taskSubmissionCommentRepository,
-            userFileRepository = userFileRepository,
-            fileServiceFacade = fileServiceFacade,
-            fileUrlResolver = fileUrlResolver
+            taskFilePort = taskFilePort
         )
     )
     private val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
