@@ -23,7 +23,8 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.Update
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType as ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
@@ -283,7 +284,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
             groupId = groupId,
             memberId = memberId,
             nickname = "tester",
-            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/profile.png")
+            profileImage = ProfileImageVo(StudyGroupProfileImageType.PRESET, "https://example.com/profile.png")
         )
     }
 

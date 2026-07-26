@@ -27,10 +27,10 @@ class StudyScheduleMemberEventAdapter(
     }
 
     private fun Member.toScheduleEventDto(): StudyScheduleMemberEventDto {
-        return StudyScheduleMemberEventDto(
+        return StudyScheduleMemberEventDto.of(
             memberId = identifier,
             nickname = nickname,
-            profileImageType = profileImage.type,
+            profileImageType = profileImage.type.name,
             profileImageUrl = profileImage.thumbnail
         )
     }

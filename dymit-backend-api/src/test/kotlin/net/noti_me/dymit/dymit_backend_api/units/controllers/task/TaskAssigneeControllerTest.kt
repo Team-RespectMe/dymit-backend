@@ -13,9 +13,9 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeMemb
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.task.TaskAssigneeController
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskProfileImageDto
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
-import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import org.bson.types.ObjectId
 
 /**
@@ -48,8 +48,8 @@ internal class TaskAssigneeControllerTest : BehaviorSpec() {
                         member = TaskAssigneeMemberDto(
                             id = ObjectId.get().toHexString(),
                             nickname = "member-1",
-                            profileImage = ProfileImageVo(
-                                type = ProfileImageType.PRESET,
+                            profileImage = TaskProfileImageDto(
+                                type = TaskProfileImageType.PRESET,
                                 url = "https://example.com/profile.png"
                             )
                         )

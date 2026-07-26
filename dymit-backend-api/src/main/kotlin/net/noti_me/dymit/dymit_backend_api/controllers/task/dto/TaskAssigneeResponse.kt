@@ -5,7 +5,6 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeMemberDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
-import net.noti_me.dymit.dymit_backend_api.controllers.common.ProfileImageResponse
 
 /**
  * 과제 제출 대상 응답입니다.
@@ -48,7 +47,7 @@ class TaskAssigneeMemberResponse(
     @field:Schema(description = "회원 닉네임")
     val nickname: String,
     @field:Schema(description = "프로필 이미지 정보")
-    val profileImage: ProfileImageResponse
+    val profileImage: TaskProfileImageResponse
 ) {
     companion object {
         /**
@@ -61,7 +60,7 @@ class TaskAssigneeMemberResponse(
             return TaskAssigneeMemberResponse(
                 id = dto.id,
                 nickname = dto.nickname,
-                profileImage = ProfileImageResponse.of(dto.profileImage.type, dto.profileImage.url)
+                profileImage = TaskProfileImageResponse.of(dto.profileImage.type, dto.profileImage.url)
             )
         }
     }

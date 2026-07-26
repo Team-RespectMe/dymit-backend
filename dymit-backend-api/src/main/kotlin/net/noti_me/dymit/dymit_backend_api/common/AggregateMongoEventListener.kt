@@ -5,7 +5,6 @@ import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
 
 @Component
 class AggregateMongoEventListener(

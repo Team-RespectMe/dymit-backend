@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType as ProfileImageType
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate

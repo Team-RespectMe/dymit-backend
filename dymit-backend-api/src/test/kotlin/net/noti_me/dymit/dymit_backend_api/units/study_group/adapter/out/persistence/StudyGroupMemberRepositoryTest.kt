@@ -12,7 +12,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.study_group.adapter.out.persistence.MongoStudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType as ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupMember

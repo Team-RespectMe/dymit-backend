@@ -12,17 +12,13 @@ import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastPushable
 import net.noti_me.dymit.dymit_backend_api.common.event.GroupPushable
 import net.noti_me.dymit.dymit_backend_api.common.event.Pushable
-import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.push_notification.adapter.`in`.event.PushEventAdapter
-import net.noti_me.dymit.dymit_backend_api.push_notification.adapter.`in`.web.AdminPushNotificationController
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.SendGroupPushService
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.SendPersonalPushService
-import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.admin.SendAdminPushUseCase
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.group.SendGroupPushUseCase
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.group.dto.SendGroupPushCommand
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.personal.SendPersonalPushUseCase
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.personal.dto.SendPersonalPushCommand
-import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.web.dto.AdminPushNotificationRequest
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.out.delivery.SendPushNotificationPort
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.out.delivery.dto.PushDeliveryDto
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.out.member.LoadPushMemberPort
@@ -36,9 +32,6 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventGroupDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventScheduleDto
 import org.bson.types.ObjectId
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 
 internal class PushNotificationModuleTest : BehaviorSpec() {
 
@@ -172,25 +165,6 @@ internal class PushNotificationModuleTest : BehaviorSpec() {
             }
         }
 
-        given("an admin push request") {
-            `when`("the web adapter receives it") {
-                then("it preserves the existing route and maps the request to the admin command") {
-                    val useCase = mockk<SendAdminPushUseCase>()
-                    val controller = AdminPushNotificationController(useCase)
-                    val command = slot<net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.admin.dto.SendAdminPushCommand>()
-                    val request = AdminPushNotificationRequest("notice", listOf(ObjectId.get().toHexString()))
-                    every { useCase.execute(capture(command)) } just runs
-
-                    controller.sendPushNotifications(MemberInfo.of(ObjectId.get().toHexString(), "admin", listOf("ROLE_ADMIN")), request)
-
-                    command.captured.message shouldBe "notice"
-                    command.captured.memberIds shouldBe request.receiverIds
-                    val method = AdminPushNotificationController::class.java.methods.single { it.name == "sendPushNotifications" }
-                    method.getAnnotation(PostMapping::class.java).value.toList() shouldBe listOf("/api/v1/admin/push-notifications")
-                    method.getAnnotation(ResponseStatus::class.java).value shouldBe HttpStatus.CREATED
-                }
-            }
-        }
     }
 
     private fun personalCommand(memberId: ObjectId): SendPersonalPushCommand {

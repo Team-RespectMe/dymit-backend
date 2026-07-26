@@ -4,11 +4,11 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.InviteCod
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.events.StudyGroupProfileImageDeleteEvent
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.events.StudyGroupOwnerChangedEvent
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -182,7 +182,7 @@ class StudyGroup(
             throw ForbiddenException(message="그룹 소유자만 프로필 이미지를 삭제할 수 있습니다.")
         }
 
-        if ( this.profileImage.type == ProfileImageType.EXTERNAL ) {
+        if ( this.profileImage.type == StudyGroupProfileImageType.EXTERNAL ) {
             val event = StudyGroupProfileImageDeleteEvent(
                 thumbnail = this.profileImage.thumbnail,
                 original = this.profileImage.original,
@@ -191,7 +191,7 @@ class StudyGroup(
             this.registerEvent(event)
         }
 
-        this.profileImage = GroupProfileImageVo(type = ProfileImageType.PRESET,)
+        this.profileImage = GroupProfileImageVo(type = StudyGroupProfileImageType.PRESET,)
     }
 
     /**

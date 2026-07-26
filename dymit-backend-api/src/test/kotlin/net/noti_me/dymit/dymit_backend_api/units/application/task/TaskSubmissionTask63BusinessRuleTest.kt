@@ -22,7 +22,8 @@ import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.Withdr
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.WithdrawSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType as ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
@@ -380,7 +381,7 @@ internal class TaskSubmissionTask63BusinessRuleTest : BehaviorSpec() {
             memberId = memberId,
             nickname = "tester",
             profileImage = ProfileImageVo(
-                type = ProfileImageType.PRESET,
+                type = StudyGroupProfileImageType.PRESET,
                 url = "https://example.com/profile.png"
             )
         )

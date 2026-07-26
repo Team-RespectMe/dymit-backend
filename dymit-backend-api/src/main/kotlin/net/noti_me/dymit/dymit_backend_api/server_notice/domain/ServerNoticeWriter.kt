@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.server_notice.domain
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNoticeProfileImageType
 import org.bson.types.ObjectId
 
 /**
@@ -23,7 +23,7 @@ data class ServerNoticeWriter(
         fun of(
             id: ObjectId,
             nickname: String,
-            imageType: ProfileImageType,
+            imageType: ServerNoticeProfileImageType,
             imageUrl: String
         ): ServerNoticeWriter {
             return ServerNoticeWriter(
@@ -42,6 +42,6 @@ data class ServerNoticeWriter(
  * 서버 공지 작성자의 프로필 이미지 값입니다.
  */
 data class ServerNoticeWriterImage(
-    val type: ProfileImageType,
+    val type: ServerNoticeProfileImageType,
     val url: String
 )

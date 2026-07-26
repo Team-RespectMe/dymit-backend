@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.controllers.task.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 
 @Schema(description = "과제 멤버 정보")
 class MemberVo(
@@ -12,5 +12,5 @@ class MemberVo(
     @field:Schema(description = "프로필 이미지 URL")
     val profileImageUrl: String,
     @field:Schema(description = "프로필 이미지 타입")
-    val profileImageType: ProfileImageType
+    val profileImageType: TaskProfileImageType
 )

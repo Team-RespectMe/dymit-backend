@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberNicknameChangedEvent
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageChangedEvent
@@ -97,7 +97,7 @@ class Member(
     }
 
     fun deleteProfileImage() {
-        if ( this.profileImage.type == ProfileImageType.EXTERNAL ) {
+        if ( this.profileImage.type == MemberProfileImageType.EXTERNAL ) {
             val event = MemberProfileImageDeletedEvent(
                 thumbnail = this.profileImage.thumbnail,
                 original = this.profileImage.original,
@@ -107,7 +107,7 @@ class Member(
         }
 
         this.profileImage = MemberProfileImageVo(
-            type = ProfileImageType.PRESET,
+            type = MemberProfileImageType.PRESET,
             fileSize = 0L,
             width = 0,
             height = 0
@@ -159,7 +159,7 @@ class Member(
         this.deviceTokens.clear()
         this.refreshTokens.clear()
         this.profileImage = MemberProfileImageVo(
-            type = ProfileImageType.PRESET,
+            type = MemberProfileImageType.PRESET,
         )
         super.markAsDeleted()
         updateLastAccessedAt()

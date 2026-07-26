@@ -15,7 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupp
 import net.noti_me.dymit.dymit_backend_api.application.task.usecases.impl.GetTaskSubmissionUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType as ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task

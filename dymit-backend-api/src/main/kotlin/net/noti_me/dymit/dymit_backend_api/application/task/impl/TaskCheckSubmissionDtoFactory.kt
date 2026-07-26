@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.task.impl
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 
 /**
  * 체크형 과제 제출 응답 DTO 생성기입니다.
@@ -24,7 +25,7 @@ object TaskCheckSubmissionDtoFactory {
             memberId = member.memberId.toHexString(),
             memberNickname = member.nickname,
             memberProfileImageUrl = member.profileImage.url,
-            memberProfileImageType = member.profileImage.type,
+            memberProfileImageType = TaskProfileImageType.valueOf(member.profileImage.type.name),
             title = "",
             content = "",
             attachments = emptyList(),

@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.member.domain
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageType
 
 /**
  * 멤버 프로필 이미지 VO
@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
  * @param height 프로필 이미지 높이
  */
 class MemberProfileImageVo(
-    val type: ProfileImageType = ProfileImageType.PRESET,
+    val type: MemberProfileImageType = MemberProfileImageType.PRESET,
     val thumbnail: String = MemberPresetImage.CHECK.thumbnail,
     val original: String = MemberPresetImage.CHECK.original,
     val fileSize: Long = 0L,

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 import java.time.LocalDateTime
 
 @Schema(description = "과제 제출 댓글 응답")
@@ -36,7 +36,7 @@ class TaskSubmissionCommentResponse(
         get() = writer.profileImageUrl
 
     @get:JsonIgnore
-    val writerProfileImageType: ProfileImageType
+    val writerProfileImageType: TaskProfileImageType
         get() = writer.profileImageType
 
     companion object {

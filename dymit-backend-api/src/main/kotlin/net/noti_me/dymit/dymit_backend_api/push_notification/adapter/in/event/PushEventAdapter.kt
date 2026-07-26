@@ -7,6 +7,8 @@ import net.noti_me.dymit.dymit_backend_api.common.event.GroupPushable
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalImportantEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalPushEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.Pushable
+import net.noti_me.dymit.dymit_backend_api.common.event.push.PersonalPushEventData
+import net.noti_me.dymit.dymit_backend_api.common.event.push.PersonalPushMessagesEvent
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.group.SendGroupPushUseCase
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.group.dto.SendGroupPushCommand
 import net.noti_me.dymit.dymit_backend_api.push_notification.application.port.`in`.personal.SendPersonalPushUseCase
@@ -57,6 +59,16 @@ class PushEventAdapter(
     @EventListener(classes = [BroadcastPushable::class])
     fun handleBroadcastPushEvent(event: BroadcastPushable) {
         event.toPushMessages().forEach { message ->
+            sendPersonalPushUseCase.execute(message.toCommand())
+        }
+    }
+
+    /**
+     * 모듈 독립 푸시 이벤트의 각 메시지를 개인 전송 명령으로 변환합니다.
+     */
+    @EventListener(classes = [PersonalPushMessagesEvent::class])
+    fun handlePersonalPushMessagesEvent(event: PersonalPushMessagesEvent) {
+        event.toPersonalPushMessages().forEach { message ->
             sendPersonalPushUseCase.execute(message.toCommand())
         }
     }
@@ -221,6 +233,17 @@ class PushEventAdapter(
     }
 
     private fun PersonalPushMessage.toCommand(): SendPersonalPushCommand {
+        return SendPersonalPushCommand(
+            memberId = memberId,
+            eventName = eventName,
+            title = title,
+            body = body,
+            image = image,
+            data = data
+        )
+    }
+
+    private fun PersonalPushEventData.toCommand(): SendPersonalPushCommand {
         return SendPersonalPushCommand(
             memberId = memberId,
             eventName = eventName,

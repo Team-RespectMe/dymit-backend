@@ -8,7 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotImplementedException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberPresetImage
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
@@ -39,13 +39,13 @@ class ChangeMemberImageUseCaseImpl(
             ?: throw NotFoundException(message = "존재하지 않는 멤버입니다.")
 
         val imageVo = when ( command.type ) {
-            ProfileImageType.EXTERNAL -> {
+            MemberProfileImageType.EXTERNAL -> {
                 if ( command.imageFile == null ) {
                     throw BadRequestException(message = "외부 이미지 업로드를 위한 이미지 파일이 필요합니다.")
                 }
                 processExternalImageUpload(loginMember, command.imageFile)
             }
-            ProfileImageType.PRESET -> {
+            MemberProfileImageType.PRESET -> {
                 if ( command.preset == null ) {
                     throw BadRequestException(message = "프리셋 이미지 이름이 필요합니다.")
                 }
@@ -73,7 +73,7 @@ class ChangeMemberImageUseCaseImpl(
         )
 
         return MemberProfileImageVo(
-            type = ProfileImageType.EXTERNAL,
+            type = MemberProfileImageType.EXTERNAL,
             fileSize = imageFile.size,
             thumbnail = result.accessUrl,
             original = result.accessUrl,
@@ -82,7 +82,7 @@ class ChangeMemberImageUseCaseImpl(
 
     private fun processPresetImageSelection(presetImage: MemberPresetImage ): MemberProfileImageVo {
         return MemberProfileImageVo(
-            type = ProfileImageType.PRESET,
+            type = MemberProfileImageType.PRESET,
             thumbnail = presetImage.thumbnail,
             original = presetImage.original,
             fileSize = 0L,

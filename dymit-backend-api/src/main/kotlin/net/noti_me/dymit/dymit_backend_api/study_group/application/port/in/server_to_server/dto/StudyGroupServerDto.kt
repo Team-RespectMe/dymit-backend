@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -11,15 +11,32 @@ enum class StudyGroupMemberRoleDto {
 }
 
 data class StudyGroupProfileImageDto(
-    val type: ProfileImageType = ProfileImageType.PRESET,
+    val type: StudyGroupProfileImageType = StudyGroupProfileImageType.PRESET,
     val url: String = ""
 )
 
 data class StudyGroupImageDto(
-    val type: ProfileImageType = ProfileImageType.PRESET,
+    val type: StudyGroupProfileImageType = StudyGroupProfileImageType.PRESET,
     val original: String = "",
     val thumbnail: String = ""
-)
+) {
+    companion object {
+        /**
+         * 외부 모듈의 프로필 이미지 값을 스터디 그룹 이미지 DTO로 변환합니다.
+         */
+        fun of(
+            type: String,
+            original: String,
+            thumbnail: String
+        ): StudyGroupImageDto {
+            return StudyGroupImageDto(
+                type = StudyGroupProfileImageType.valueOf(type),
+                original = original,
+                thumbnail = thumbnail
+            )
+        }
+    }
+}
 
 data class StudyGroupRecentPostDto(
     val postId: String,

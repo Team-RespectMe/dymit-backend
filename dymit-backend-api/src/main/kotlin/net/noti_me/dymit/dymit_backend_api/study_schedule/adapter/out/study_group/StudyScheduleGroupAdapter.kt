@@ -47,8 +47,8 @@ class StudyScheduleGroupAdapter(
             ownerId = ownerId,
             name = name,
             description = description,
-            profileImage = StudyScheduleGroupImageDto(
-                type = profileImage.type,
+            profileImage = StudyScheduleGroupImageDto.of(
+                type = profileImage.type.name,
                 original = profileImage.original,
                 thumbnail = profileImage.thumbnail
             ),
@@ -63,11 +63,11 @@ class StudyScheduleGroupAdapter(
             ownerId = ownerId,
             name = name,
             description = description,
-            profileImage = StudyGroupImageDto(
-                    type = profileImage.type,
-                    original = profileImage.original,
-                    thumbnail = profileImage.thumbnail
-                ),
+            profileImage = StudyGroupImageDto.of(
+                type = profileImage.type.name,
+                original = profileImage.original,
+                thumbnail = profileImage.thumbnail
+            ),
             memberCount = memberCount,
             createdAt = createdAt
         )
@@ -79,8 +79,8 @@ class StudyScheduleGroupAdapter(
             groupId = groupId,
             memberId = memberId,
             nickname = nickname,
-            profileImage = StudyScheduleGroupProfileImageDto(
-                type = profileImage.type,
+            profileImage = StudyScheduleGroupProfileImageDto.of(
+                type = profileImage.type.name,
                 url = profileImage.url
             ),
             role = StudyScheduleGroupMemberRoleDto.valueOf(role.name),

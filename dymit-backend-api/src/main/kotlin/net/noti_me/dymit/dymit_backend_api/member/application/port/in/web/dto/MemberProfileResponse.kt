@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.member.application.dto.MemberDto
 import net.noti_me.dymit.dymit_backend_api.member.application.dto.MemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.controllers.common.ProfileImageResponse
 import net.noti_me.dymit.dymit_backend_api.member.domain.OidcIdentity
 
 @Schema(description = "회원 프로필 응답")

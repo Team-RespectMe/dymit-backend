@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.feed.domain
 
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.mapping.Document

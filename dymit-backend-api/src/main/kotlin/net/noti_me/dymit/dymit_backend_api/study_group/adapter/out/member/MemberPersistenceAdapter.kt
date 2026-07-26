@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.adapter.out.member
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.member.LoadStudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.member.dto.StudyGroupMemberData
 import org.bson.Document
@@ -38,12 +38,12 @@ class MemberPersistenceAdapter(
         )
     }
 
-    private fun Any?.toProfileImageType(): ProfileImageType =
+    private fun Any?.toProfileImageType(): StudyGroupProfileImageType =
         when (this) {
-            is ProfileImageType -> this
-            is String -> runCatching { ProfileImageType.valueOf(this) }
-                .getOrDefault(ProfileImageType.PRESET)
-            else -> ProfileImageType.PRESET
+            is StudyGroupProfileImageType -> this
+            is String -> runCatching { StudyGroupProfileImageType.valueOf(this) }
+                .getOrDefault(StudyGroupProfileImageType.PRESET)
+            else -> StudyGroupProfileImageType.PRESET
         }
 
     private fun Any?.toLocalDateTime(): LocalDateTime? =

@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.domain.task
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document

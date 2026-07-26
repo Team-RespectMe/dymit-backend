@@ -12,6 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.server_notice.application.port.`out`.
 import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNotice
+import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNoticeProfileImageType
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import org.bson.types.ObjectId
 
@@ -132,7 +133,7 @@ internal class ServerNoticeTest : BehaviorSpec({
                     writer = ServerNoticeWriter.of(
                         id = writer.id!!,
                         nickname = writer.nickname,
-                        imageType = writer.profileImage.type,
+                        imageType = ServerNoticeProfileImageType.valueOf(writer.profileImage.type.name),
                         imageUrl = writer.profileImage.thumbnail
                     ),
                     title = title,
@@ -146,7 +147,7 @@ internal class ServerNoticeTest : BehaviorSpec({
             return ServerNoticeMemberDto(
                 id = member.id!!,
                 nickname = member.nickname,
-                imageType = member.profileImage.type,
+                imageType = ServerNoticeProfileImageType.valueOf(member.profileImage.type.name),
                 imageUrl = member.profileImage.thumbnail,
                 admin = member.roles.contains(MemberRole.ROLE_ADMIN)
             )
@@ -158,7 +159,7 @@ private fun Member.toServerNoticeRequester(): ServerNoticeRequester {
     return ServerNoticeRequester(
         id = id!!,
         nickname = nickname,
-        imageType = profileImage.type,
+        imageType = ServerNoticeProfileImageType.valueOf(profileImage.type.name),
         imageUrl = profileImage.thumbnail,
         admin = roles.contains(MemberRole.ROLE_ADMIN)
     )

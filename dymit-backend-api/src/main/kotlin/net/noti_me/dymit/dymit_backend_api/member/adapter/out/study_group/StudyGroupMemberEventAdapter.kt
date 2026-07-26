@@ -50,11 +50,11 @@ class StudyGroupMemberEventAdapter(
         studyGroupMemberEventPort.memberProfileImageChanged(event.member.toStudyGroupEventDto())
     }
 
-    private fun Member.toStudyGroupEventDto() = StudyGroupMemberEventDto(
+    private fun Member.toStudyGroupEventDto() = StudyGroupMemberEventDto.of(
         memberId = identifier,
         nickname = nickname,
         roles = roles.map { it.name },
-        profileImageType = profileImage.type,
+        profileImageType = profileImage.type.name,
         profileImageUrl = profileImage.thumbnail
     )
 }

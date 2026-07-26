@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAttachmentDt
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
@@ -103,7 +103,7 @@ class TaskAssigneeSummaryResponse(
     @field:Schema(description = "프로필 이미지 URL")
     val profileImageUrl: String,
     @field:Schema(description = "프로필 이미지 타입")
-    val profileImageType: ProfileImageType,
+    val profileImageType: TaskProfileImageType,
     @field:Schema(description = "제출 상태")
     val status: TaskAssigneeStatus
 ) {

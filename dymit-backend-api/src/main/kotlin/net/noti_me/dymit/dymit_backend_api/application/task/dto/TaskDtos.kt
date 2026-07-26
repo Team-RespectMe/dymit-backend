@@ -1,8 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.dto
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
-import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
@@ -44,7 +43,7 @@ data class TaskAssigneeSummaryDto(
     val memberId: String,
     val nickname: String,
     val profileImageUrl: String,
-    val profileImageType: ProfileImageType,
+    val profileImageType: TaskProfileImageType,
     val status: TaskAssigneeStatus
 )
 
@@ -57,7 +56,7 @@ data class TaskSubmissionDto(
     val memberId: String,
     val memberNickname: String,
     val memberProfileImageUrl: String,
-    val memberProfileImageType: ProfileImageType,
+    val memberProfileImageType: TaskProfileImageType,
     val title: String,
     val content: String,
     val attachments: List<TaskSubmissionAttachmentDto>,
@@ -86,7 +85,7 @@ data class TaskSubmissionCommentDto(
     val writerId: String,
     val writerNickname: String,
     val writerProfileImageUrl: String,
-    val writerProfileImageType: ProfileImageType,
+    val writerProfileImageType: TaskProfileImageType,
     val content: String,
     val createdAt: LocalDateTime?
 )
@@ -106,5 +105,13 @@ data class TaskAssigneeDto(
 data class TaskAssigneeMemberDto(
     val id: String,
     val nickname: String,
-    val profileImage: ProfileImageVo
+    val profileImage: TaskProfileImageDto
+)
+
+/**
+ * 과제 모듈이 사용하는 프로필 이미지 DTO입니다.
+ */
+data class TaskProfileImageDto(
+    val type: TaskProfileImageType,
+    val url: String
 )

@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudyScheduleProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.study_group.dto.StudyScheduleGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleRole
 import org.bson.types.ObjectId
@@ -8,7 +8,7 @@ import org.bson.types.ObjectId
 class ScheduleRoleDto(
     val memberId: String = "",
     val nickname: String = "",
-    val image: ProfileImageVo = ProfileImageVo(type = ProfileImageType.PRESET, url = "0"),
+    val image: ProfileImageVo = ProfileImageVo(type = StudyScheduleProfileImageType.PRESET, url = "0"),
     val roles : List<String>,
     val color: String = "#FF3357"
 ) {

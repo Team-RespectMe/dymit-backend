@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.study_group.dto
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudyScheduleProfileImageType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -11,15 +11,44 @@ enum class StudyScheduleGroupMemberRoleDto {
 }
 
 data class StudyScheduleGroupProfileImageDto(
-    val type: ProfileImageType = ProfileImageType.PRESET,
+    val type: StudyScheduleProfileImageType = StudyScheduleProfileImageType.PRESET,
     val url: String = ""
-)
+) {
+    companion object {
+        /**
+         * 외부 모듈의 프로필 이미지 값을 일정 모듈 DTO로 변환합니다.
+         */
+        fun of(type: String, url: String): StudyScheduleGroupProfileImageDto {
+            return StudyScheduleGroupProfileImageDto(
+                type = StudyScheduleProfileImageType.valueOf(type),
+                url = url
+            )
+        }
+    }
+}
 
 data class StudyScheduleGroupImageDto(
-    val type: ProfileImageType = ProfileImageType.PRESET,
+    val type: StudyScheduleProfileImageType = StudyScheduleProfileImageType.PRESET,
     val original: String = "",
     val thumbnail: String = ""
-)
+) {
+    companion object {
+        /**
+         * 외부 모듈의 그룹 이미지 값을 일정 모듈 DTO로 변환합니다.
+         */
+        fun of(
+            type: String,
+            original: String,
+            thumbnail: String
+        ): StudyScheduleGroupImageDto {
+            return StudyScheduleGroupImageDto(
+                type = StudyScheduleProfileImageType.valueOf(type),
+                original = original,
+                thumbnail = thumbnail
+            )
+        }
+    }
+}
 
 data class StudyScheduleGroupDto(
     val id: ObjectId? = null,

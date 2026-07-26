@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.server_notice.adapter.`out`.member
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNoticeProfileImageType
 import net.noti_me.dymit.dymit_backend_api.server_notice.application.port.`out`.member.ServerNoticeMemberPort
 import net.noti_me.dymit.dymit_backend_api.server_notice.application.port.`out`.member.dto.ServerNoticeMemberDto
 import org.bson.Document
@@ -34,7 +34,7 @@ class MongoServerNoticeMemberAdapter(
         return ServerNoticeMemberDto(
             id = member.getObjectId("_id"),
             nickname = member.getString("nickname"),
-            imageType = ProfileImageType.valueOf(profileImage.getString("type")),
+            imageType = ServerNoticeProfileImageType.valueOf(profileImage.getString("type")),
             imageUrl = profileImage.getString("thumbnail"),
             admin = ADMIN_ROLE in roles
         )

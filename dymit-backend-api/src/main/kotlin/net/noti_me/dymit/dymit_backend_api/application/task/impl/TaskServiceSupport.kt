@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAt
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAttachmentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskProfileImageDto
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
@@ -25,6 +26,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
@@ -405,7 +407,7 @@ class TaskServiceSupport(
                     memberId = member.memberId.toHexString(),
                     nickname = member.nickname,
                     profileImageUrl = member.profileImage.url,
-                    profileImageType = member.profileImage.type,
+                    profileImageType = TaskProfileImageType.valueOf(member.profileImage.type.name),
                     status = assignee.status
                 )
             }
@@ -427,7 +429,10 @@ class TaskServiceSupport(
                 member = TaskAssigneeMemberDto(
                     id = member.memberId.toHexString(),
                     nickname = member.nickname,
-                    profileImage = member.profileImage
+                    profileImage = TaskProfileImageDto(
+                        type = TaskProfileImageType.valueOf(member.profileImage.type.name),
+                        url = member.profileImage.url
+                    )
                 )
             )
         }
@@ -446,7 +451,7 @@ class TaskServiceSupport(
             memberId = submission.memberId.toHexString(),
             memberNickname = member.nickname,
             memberProfileImageUrl = member.profileImage.url,
-            memberProfileImageType = member.profileImage.type,
+            memberProfileImageType = TaskProfileImageType.valueOf(member.profileImage.type.name),
             title = submission.title,
             content = submission.content,
             attachments = submission.attachments.map { attachment ->
@@ -486,7 +491,7 @@ class TaskServiceSupport(
             writerId = member.memberId.toHexString(),
             writerNickname = member.nickname,
             writerProfileImageUrl = member.profileImage.url,
-            writerProfileImageType = member.profileImage.type,
+            writerProfileImageType = TaskProfileImageType.valueOf(member.profileImage.type.name),
             content = comment.content,
             createdAt = comment.createdAt
         )

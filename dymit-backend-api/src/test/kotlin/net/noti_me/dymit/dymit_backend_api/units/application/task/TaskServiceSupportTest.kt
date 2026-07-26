@@ -13,7 +13,8 @@ import io.mockk.unmockkObject
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskExpireAtNormalizer
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType as ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
@@ -262,7 +263,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                             groupId = groupId,
                             memberId = memberId1,
                             nickname = "member-1",
-                            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/1.png")
+                            profileImage = ProfileImageVo(StudyGroupProfileImageType.PRESET, "https://example.com/1.png")
                         )
                     )
 
@@ -304,19 +305,19 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                             groupId = groupId,
                             memberId = memberId1,
                             nickname = "member-1",
-                            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/1.png")
+                            profileImage = ProfileImageVo(StudyGroupProfileImageType.PRESET, "https://example.com/1.png")
                         ),
                         StudyGroupMember(
                             groupId = groupId,
                             memberId = memberId2,
                             nickname = "member-2",
-                            profileImage = ProfileImageVo(ProfileImageType.EXTERNAL, "https://example.com/2.png")
+                            profileImage = ProfileImageVo(StudyGroupProfileImageType.EXTERNAL, "https://example.com/2.png")
                         ),
                         StudyGroupMember(
                             groupId = groupId,
                             memberId = assignees[2].memberId,
                             nickname = "member-3",
-                            profileImage = ProfileImageVo(ProfileImageType.PRESET, "https://example.com/3.png")
+                            profileImage = ProfileImageVo(StudyGroupProfileImageType.PRESET, "https://example.com/3.png")
                         )
                     )
 

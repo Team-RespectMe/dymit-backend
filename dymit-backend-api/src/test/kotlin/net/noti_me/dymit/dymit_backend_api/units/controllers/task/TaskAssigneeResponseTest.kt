@@ -6,8 +6,8 @@ import io.kotest.matchers.shouldNotBe
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeMemberDto
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskAssigneeResponse
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskProfileImageDto
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 
 /**
  * 과제 제출 대상 응답 HATEOAS 단위 테스트입니다.
@@ -24,8 +24,8 @@ internal class TaskAssigneeResponseTest : BehaviorSpec({
             member = TaskAssigneeMemberDto(
                 id = memberId,
                 nickname = "member-1",
-                profileImage = ProfileImageVo(
-                    type = ProfileImageType.PRESET,
+                profileImage = TaskProfileImageDto(
+                    type = TaskProfileImageType.PRESET,
                     url = "https://example.com/profile.png"
                 )
             )

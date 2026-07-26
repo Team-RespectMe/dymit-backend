@@ -13,7 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.board.StudyGroupBoardPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.member.LoadStudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
@@ -146,9 +146,9 @@ class StudyGroupCommandServiceImpl(
     }
 
     private fun createImageVo(command: StudyGroupImageUpdateCommand): GroupProfileImageVo {
-        return if ( command.type == ProfileImageType.PRESET ) {
+        return if ( command.type == StudyGroupProfileImageType.PRESET ) {
             GroupProfileImageVo(
-                type = ProfileImageType.PRESET,
+                type = StudyGroupProfileImageType.PRESET,
                 thumbnail = command.value!!.thumbnail,
                 original = command.value!!.original,
             )

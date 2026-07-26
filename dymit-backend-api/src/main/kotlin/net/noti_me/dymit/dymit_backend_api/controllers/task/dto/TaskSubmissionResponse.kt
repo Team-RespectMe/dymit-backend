@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionAttachmentDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskSubmissionDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.domain.task.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import java.time.LocalDateTime
 
@@ -40,7 +40,7 @@ class TaskSubmissionResponse(
         get() = member.profileImageUrl
 
     @get:JsonIgnore
-    val memberProfileImageType: ProfileImageType
+    val memberProfileImageType: TaskProfileImageType
         get() = member.profileImageType
 
     companion object {

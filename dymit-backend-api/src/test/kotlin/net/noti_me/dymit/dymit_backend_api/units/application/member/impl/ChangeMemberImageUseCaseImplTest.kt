@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.member.application.impl.ChangeMemberI
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageType as ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberPresetImage
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort

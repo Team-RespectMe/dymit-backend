@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.server_notice.domain
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNoticeProfileImageType
 import org.bson.types.ObjectId
 
 /**
@@ -15,7 +15,7 @@ import org.bson.types.ObjectId
 data class ServerNoticeRequester(
     val id: ObjectId,
     val nickname: String,
-    val imageType: ProfileImageType,
+    val imageType: ServerNoticeProfileImageType,
     val imageUrl: String,
     val admin: Boolean
 )

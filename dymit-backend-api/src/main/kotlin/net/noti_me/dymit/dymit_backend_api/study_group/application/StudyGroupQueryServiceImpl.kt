@@ -9,7 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.Stu
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.board.StudyGroupBoardPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.member.LoadStudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.member.dto.StudyGroupMemberData
@@ -177,7 +177,7 @@ class StudyGroupQueryServiceImpl(
     private fun unknownMember(memberId: String) = StudyGroupMemberData(
         id = memberId,
         nickname = "Unknown",
-        profileImageType = ProfileImageType.PRESET,
+        profileImageType = StudyGroupProfileImageType.PRESET,
         profileImageThumbnail = DEFAULT_MEMBER_THUMBNAIL,
         profileImageOriginal = DEFAULT_MEMBER_ORIGINAL,
         roles = emptyList(),

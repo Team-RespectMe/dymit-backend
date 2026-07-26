@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.domain
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime

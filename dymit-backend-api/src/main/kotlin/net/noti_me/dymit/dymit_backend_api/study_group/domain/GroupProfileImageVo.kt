@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.domain
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 
 /**
  * 스터디 그룹의 프로필 이미지를 나타내는 Value Object
@@ -11,7 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
  * height : 프로필 이미지의 높이 (픽셀 단위)
  */
 data class GroupProfileImageVo (
-    val type: ProfileImageType = ProfileImageType.PRESET,// 프로필 이미지 타입, 기본값은 'preset'
+    val type: StudyGroupProfileImageType = StudyGroupProfileImageType.PRESET,// 프로필 이미지 타입, 기본값은 'preset'
     val original: String = GroupPresetImage.STUDY.original,
     val thumbnail: String = GroupPresetImage.STUDY.thumbnail,
     val fileSize: Long = 0L,

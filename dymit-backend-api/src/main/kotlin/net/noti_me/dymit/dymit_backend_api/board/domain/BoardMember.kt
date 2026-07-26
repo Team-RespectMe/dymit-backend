@@ -1,6 +1,5 @@
 package net.noti_me.dymit.dymit_backend_api.board.domain
 
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import org.bson.types.ObjectId
 
 /**
@@ -39,8 +38,3 @@ data class BoardProfileImage(
     val type: BoardProfileImageType = BoardProfileImageType.PRESET,
     val url: String = ""
 )
-
-/**
- * 게시판 작성자 프로필 이미지 종류입니다.
- */
-typealias BoardProfileImageType = ProfileImageType

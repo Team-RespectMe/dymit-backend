@@ -1,8 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.configs
 
 import net.noti_me.dymit.dymit_backend_api.member.application.batch.DailyMemberStatusJob
-import net.noti_me.dymit.dymit_backend_api.application.reminder.DailyScheduleReminderJob
-import net.noti_me.dymit.dymit_backend_api.application.reminder.HourlyScheduleReminderJob
+import net.noti_me.dymit.dymit_backend_api.reminder.application.usecase.DailyScheduleReminderJob
+import net.noti_me.dymit.dymit_backend_api.reminder.application.usecase.HourlyScheduleReminderJob
 import org.quartz.CronScheduleBuilder
 import org.quartz.JobBuilder
 import org.quartz.JobDetail
@@ -82,4 +82,3 @@ class QuartzConfig {
             .build()
     }
 }
-

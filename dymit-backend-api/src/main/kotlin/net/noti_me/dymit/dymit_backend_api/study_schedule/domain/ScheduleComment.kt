@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_schedule.domain
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleCommentWriter
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.study_group.dto.StudyScheduleGroupMemberDto as StudyGroupMember
 import org.bson.types.ObjectId

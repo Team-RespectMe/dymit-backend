@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
+import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageType as ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.adapter.out.study_group.StudyGroupMemberEventAdapter
 import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
@@ -15,6 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberCreatedEve
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberForceDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberEventPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberEventDto
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import org.bson.types.ObjectId
 
 internal class StudyGroupMemberEventAdapterTest : BehaviorSpec() {
@@ -46,7 +47,7 @@ internal class StudyGroupMemberEventAdapterTest : BehaviorSpec() {
                     dto.captured.memberId shouldBe member.identifier
                     dto.captured.nickname shouldBe member.nickname
                     dto.captured.roles shouldBe listOf(MemberRole.ROLE_MEMBER.name)
-                    dto.captured.profileImageType shouldBe ProfileImageType.EXTERNAL
+                    dto.captured.profileImageType shouldBe StudyGroupProfileImageType.EXTERNAL
                     dto.captured.profileImageUrl shouldBe "thumbnail"
                 }
             }
