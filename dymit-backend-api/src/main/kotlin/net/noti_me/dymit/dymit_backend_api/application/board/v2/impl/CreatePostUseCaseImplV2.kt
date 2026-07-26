@@ -14,7 +14,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.PostReposi
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -29,7 +29,7 @@ class CreatePostUseCaseImplV2(
     private val loadGroupPort: StudyGroupQueryPort,
     private val saveGroupPort: StudyGroupCommandPort,
     private val groupMemberRepository: StudyGroupMemberPort,
-    private val scheduleParticipantRepository: ScheduleParticipantRepository,
+    private val scheduleParticipantRepository: StudyScheduleQueryPort,
     private val eventPublisher: ApplicationEventPublisher
 ) : CreatePostUseCaseV2 {
 

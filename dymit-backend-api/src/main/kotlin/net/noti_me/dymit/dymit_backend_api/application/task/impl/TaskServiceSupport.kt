@@ -20,7 +20,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.file.UserFile
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
@@ -32,8 +33,6 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionCommentRepository
@@ -49,8 +48,7 @@ import java.time.LocalDateTime
 class TaskServiceSupport(
     private val loadStudyGroupPort: StudyGroupQueryPort,
     private val groupMemberRepository: StudyGroupMemberPort,
-    private val studyScheduleRepository: StudyScheduleRepository,
-    private val scheduleParticipantRepository: ScheduleParticipantRepository,
+    private val studyScheduleQueryPort: StudyScheduleQueryPort,
     private val taskRepository: TaskRepository,
     private val taskAssigneeRepository: TaskAssigneeRepository,
     private val taskSubmissionRepository: TaskSubmissionRepository,
@@ -78,7 +76,7 @@ class TaskServiceSupport(
     }
 
     fun loadSchedule(scheduleId: String): StudySchedule {
-        return studyScheduleRepository.loadById(toObjectId(scheduleId, "relatedScheduleId"))
+        return studyScheduleQueryPort.loadById(toObjectId(scheduleId, "relatedScheduleId"))
             ?: throw NotFoundException(message = "존재하지 않는 일정입니다.")
     }
 
@@ -106,8 +104,8 @@ class TaskServiceSupport(
     }
 
     fun loadTasksByGroup(groupId: ObjectId): List<Task> {
-        val schedules = studyScheduleRepository.loadByGroupIdOrderByScheduleAtDesc(groupId)
-        val scheduleIds = schedules.mapNotNull { it.id }
+        val schedules = studyScheduleQueryPort.loadByGroupIdOrderByScheduleAtDesc(groupId)
+        val scheduleIds = schedules.map { it.id }
         return taskRepository.findByRelatedScheduleIds(scheduleIds)
     }
 
@@ -129,7 +127,7 @@ class TaskServiceSupport(
     }
 
     fun loadScheduleParticipantIds(scheduleId: ObjectId): List<ObjectId> {
-        return scheduleParticipantRepository.getByScheduleId(scheduleId).map { it.memberId }
+        return studyScheduleQueryPort.getParticipantMemberIds(scheduleId)
     }
 
     fun checkOwner(memberInfo: MemberInfo, group: StudyGroup) {
@@ -145,7 +143,7 @@ class TaskServiceSupport(
     }
 
     fun checkTaskInGroup(task: Task, groupId: ObjectId) {
-        val schedule = studyScheduleRepository.loadById(task.relatedScheduleId)
+        val schedule = studyScheduleQueryPort.loadById(task.relatedScheduleId)
             ?: throw NotFoundException(message = "연관 일정을 찾을 수 없습니다.")
 
         if ( schedule.groupId != groupId ) {
@@ -218,8 +216,8 @@ class TaskServiceSupport(
     }
 
     fun initializeAssigneesForPreTask(taskId: ObjectId, scheduleId: ObjectId) {
-        val participants = scheduleParticipantRepository.getByScheduleId(scheduleId)
-        val assignees = participants.map { TaskAssignee(taskId = taskId, memberId = it.memberId) }
+        val participantIds = studyScheduleQueryPort.getParticipantMemberIds(scheduleId)
+        val assignees = participantIds.map { TaskAssignee(taskId = taskId, memberId = it) }
         taskAssigneeRepository.saveAll(assignees)
     }
 

@@ -28,7 +28,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.PostReposi
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
 import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
@@ -40,7 +40,7 @@ internal class UpdatePostUseCaseImplV2Test : BehaviorSpec({
     val loadStudyGroupPort = mockk<StudyGroupQueryPort>()
     val saveStudyGroupPort = mockk<StudyGroupCommandPort>(relaxed = true)
     val studyGroupMemberRepository = mockk<StudyGroupMemberPort>()
-    val scheduleParticipantRepository = mockk<ScheduleParticipantRepository>()
+    val scheduleParticipantRepository = mockk<StudyScheduleQueryPort>()
 
     val useCase = UpdatePostUseCaseImplV2(
         postRepository = postRepository,
@@ -197,7 +197,7 @@ internal class UpdatePostUseCaseImplV2Test : BehaviorSpec({
                 every { postRepository.findById(postId.toHexString()) } returns post
                 every { loadStudyGroupPort.loadByGroupId(groupId.toHexString()) } returns createStudyGroup(post.identifier)
                 every { studyGroupMemberRepository.findByGroupIdAndMemberId(groupId, memberId) } returns member
-                every { scheduleParticipantRepository.existsByScheduleIdAndMemberId(scheduleId, memberId) } returns false
+                every { scheduleParticipantRepository.existsParticipant(scheduleId, memberId) } returns false
                 val command = PostCommandV2(
                     groupId = groupId.toHexString(),
                     boardId = boardId.toHexString(),

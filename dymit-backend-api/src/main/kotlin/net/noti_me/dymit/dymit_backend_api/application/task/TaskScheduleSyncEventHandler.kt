@@ -1,9 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.application.task
 
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleCancelParticipateEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleParticipateEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleCanceledEvent
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleCanceledEventDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipatedEventDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipationCanceledEventDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedBroadcastEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
@@ -27,17 +27,17 @@ class TaskScheduleSyncEventHandler(
      * @param event 일정 참여 이벤트
      */
     @EventListener
-    fun onScheduleParticipated(event: ScheduleParticipateEvent) {
+    fun onScheduleParticipated(event: StudyScheduleParticipatedEventDto) {
         taskService.syncParticipatedScheduleTasks(
-            scheduleId = event.schedule.identifier,
-            memberId = event.member.memberId.toHexString()
+            scheduleId = event.schedule.id,
+            memberId = event.member.memberId
         )
             .forEach { task ->
                 eventPublisher.publishEvent(
                     TaskCreatedBroadcastEvent(
-                        group = event.group,
+                        group = support.loadGroup(event.group.id),
                         task = task,
-                        memberIds = listOf(event.member.memberId)
+                        memberIds = listOf(org.bson.types.ObjectId(event.member.memberId))
                     )
                 )
             }
@@ -49,10 +49,10 @@ class TaskScheduleSyncEventHandler(
      * @param event 일정 참여 취소 이벤트
      */
     @EventListener
-    fun onScheduleParticipateCanceled(event: ScheduleCancelParticipateEvent) {
+    fun onScheduleParticipateCanceled(event: StudyScheduleParticipationCanceledEventDto) {
         taskService.removeAssigneeFromPreTasks(
-            scheduleId = event.schedule.identifier,
-            memberId = event.member.memberId.toHexString()
+            scheduleId = event.schedule.id,
+            memberId = event.member.memberId
         )
     }
 
@@ -62,10 +62,10 @@ class TaskScheduleSyncEventHandler(
      * @param event 일정 취소 이벤트
      */
     @EventListener
-    fun onScheduleCanceled(event: StudyScheduleCanceledEvent) {
+    fun onScheduleCanceled(event: StudyScheduleCanceledEventDto) {
         taskService.removeTasksByCanceledSchedule(
-            scheduleId = event.schedule.identifier,
-            groupId = event.group.identifier
+            scheduleId = event.schedule.id,
+            groupId = event.group.id
         )
     }
 }

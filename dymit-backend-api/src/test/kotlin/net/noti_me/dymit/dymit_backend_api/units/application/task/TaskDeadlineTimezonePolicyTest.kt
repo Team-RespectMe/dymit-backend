@@ -28,7 +28,7 @@ import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
@@ -37,8 +37,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionCommentRepository
@@ -51,8 +50,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
 
     private val loadStudyGroupPort = mockk<StudyGroupQueryPort>()
     private val groupMemberRepository = mockk<StudyGroupMemberPort>()
-    private val studyScheduleRepository = mockk<StudyScheduleRepository>()
-    private val scheduleParticipantRepository = mockk<ScheduleParticipantRepository>()
+    private val studyScheduleQueryPort = mockk<StudyScheduleQueryPort>()
     private val taskRepository = mockk<TaskRepository>()
     private val taskAssigneeRepository = mockk<TaskAssigneeRepository>()
     private val taskSubmissionRepository = mockk<TaskSubmissionRepository>()
@@ -65,8 +63,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
         TaskServiceSupport(
             loadStudyGroupPort = loadStudyGroupPort,
             groupMemberRepository = groupMemberRepository,
-            studyScheduleRepository = studyScheduleRepository,
-            scheduleParticipantRepository = scheduleParticipantRepository,
+            studyScheduleQueryPort = studyScheduleQueryPort,
             taskRepository = taskRepository,
             taskAssigneeRepository = taskAssigneeRepository,
             taskSubmissionRepository = taskSubmissionRepository,
@@ -270,7 +267,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
 
     private fun stubTaskInGroup(task: Task, groupId: ObjectId) {
         every { taskRepository.findById(task.id!!) } returns task
-        every { studyScheduleRepository.loadById(task.relatedScheduleId) } returns StudySchedule(
+        every { studyScheduleQueryPort.loadById(task.relatedScheduleId) } returns StudySchedule(
             id = task.relatedScheduleId,
             groupId = groupId,
             scheduleAt = LocalDateTime.of(2026, 6, 15, 0, 0, 0)

@@ -20,7 +20,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmissionType
@@ -28,8 +28,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskSubmissionCommentRepository
@@ -41,8 +40,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
     private val loadStudyGroupPort = mockk<StudyGroupQueryPort>()
     private val groupMemberRepository = mockk<StudyGroupMemberPort>()
-    private val studyScheduleRepository = mockk<StudyScheduleRepository>()
-    private val scheduleParticipantRepository = mockk<ScheduleParticipantRepository>()
+    private val studyScheduleQueryPort = mockk<StudyScheduleQueryPort>()
     private val taskRepository = mockk<TaskRepository>()
     private val taskAssigneeRepository = mockk<TaskAssigneeRepository>()
     private val taskSubmissionRepository = mockk<TaskSubmissionRepository>()
@@ -54,8 +52,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
     private val support = TaskServiceSupport(
         loadStudyGroupPort = loadStudyGroupPort,
         groupMemberRepository = groupMemberRepository,
-        studyScheduleRepository = studyScheduleRepository,
-        scheduleParticipantRepository = scheduleParticipantRepository,
+        studyScheduleQueryPort = studyScheduleQueryPort,
         taskRepository = taskRepository,
         taskAssigneeRepository = taskAssigneeRepository,
         taskSubmissionRepository = taskSubmissionRepository,

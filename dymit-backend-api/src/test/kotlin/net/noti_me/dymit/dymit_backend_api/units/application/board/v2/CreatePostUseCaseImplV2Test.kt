@@ -30,7 +30,7 @@ import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.PostReposi
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
 import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
@@ -42,7 +42,7 @@ internal class CreatePostUseCaseImplV2Test : BehaviorSpec({
     val loadStudyGroupPort = mockk<StudyGroupQueryPort>()
     val saveStudyGroupPort = mockk<StudyGroupCommandPort>(relaxed = true)
     val studyGroupMemberRepository = mockk<StudyGroupMemberPort>()
-    val scheduleParticipantRepository = mockk<ScheduleParticipantRepository>()
+    val scheduleParticipantRepository = mockk<StudyScheduleQueryPort>()
     val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
 
     val useCase = CreatePostUseCaseImplV2(
@@ -175,7 +175,7 @@ internal class CreatePostUseCaseImplV2Test : BehaviorSpec({
                 val regularMember = groupMember(GroupMemberRole.MEMBER)
                 setupCommonMocks(regularMember)
                 every {
-                    scheduleParticipantRepository.existsByScheduleIdAndMemberId(scheduleId, regularMember.memberId)
+                    scheduleParticipantRepository.existsParticipant(scheduleId, regularMember.memberId)
                 } returns true
                 val command = PostCommandV2(
                     groupId = groupId.toHexString(),
@@ -197,7 +197,7 @@ internal class CreatePostUseCaseImplV2Test : BehaviorSpec({
                 val regularMember = groupMember(GroupMemberRole.MEMBER)
                 setupCommonMocks(regularMember)
                 every {
-                    scheduleParticipantRepository.existsByScheduleIdAndMemberId(scheduleId, regularMember.memberId)
+                    scheduleParticipantRepository.existsParticipant(scheduleId, regularMember.memberId)
                 } returns false
                 val command = PostCommandV2(
                     groupId = groupId.toHexString(),
@@ -251,7 +251,7 @@ internal class CreatePostUseCaseImplV2Test : BehaviorSpec({
                     studyGroupMemberRepository.findByGroupIdAndMemberId(groupId, regularMember.memberId)
                 } returns regularMember
                 every {
-                    scheduleParticipantRepository.existsByScheduleIdAndMemberId(scheduleId, regularMember.memberId)
+                    scheduleParticipantRepository.existsParticipant(scheduleId, regularMember.memberId)
                 } returns false
                 val command = PostCommandV2(
                     groupId = groupId.toHexString(),

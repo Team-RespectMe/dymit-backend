@@ -11,10 +11,11 @@ import net.noti_me.dymit.dymit_backend_api.application.task.TaskScheduleSyncEven
 import net.noti_me.dymit.dymit_backend_api.application.task.TaskService
 import net.noti_me.dymit.dymit_backend_api.application.task.impl.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
-import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleLocation
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleParticipateEvent
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventGroupDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventMemberDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventScheduleDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipatedEventDto
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedBroadcastEvent
@@ -42,21 +43,25 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
                     val member = createMember(group.id!!, "새 멤버")
                     val task1 = createTask(schedule.id!!, "사전 과제 1")
                     val task2 = createTask(schedule.id!!, "사전 과제 2")
-                    val event = ScheduleParticipateEvent(group = group, schedule = schedule, member = member)
+                    val event = createParticipatedEvent(group, schedule, member)
                     val publishedEvents = mutableListOf<TaskCreatedBroadcastEvent>()
 
+                    every { support.loadGroup(group.identifier) } returns group
                     every {
-                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
+                        taskService.syncParticipatedScheduleTasks(schedule.id.toHexString(), member.memberId)
                     } returns listOf(task1, task2)
                     every { eventPublisher.publishEvent(capture(publishedEvents)) } returns Unit
 
                     handler.onScheduleParticipated(event)
 
                     verify(exactly = 1) {
-                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
+                        taskService.syncParticipatedScheduleTasks(schedule.id.toHexString(), member.memberId)
                     }
                     verify(exactly = 2) { eventPublisher.publishEvent(any<TaskCreatedBroadcastEvent>()) }
-                    publishedEvents.map { it.memberIds.single() } shouldContainExactly listOf(member.memberId, member.memberId)
+                    publishedEvents.map { it.memberIds.single() } shouldContainExactly listOf(
+                        ObjectId(member.memberId),
+                        ObjectId(member.memberId)
+                    )
                     publishedEvents.map { it.toPushMessages().single().data["taskId"] } shouldContainExactly listOf(
                         task1.identifier,
                         task2.identifier
@@ -72,16 +77,16 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
                     val group = createGroup("스터디")
                     val schedule = createSchedule(group.id!!)
                     val member = createMember(group.id!!, "새 멤버")
-                    val event = ScheduleParticipateEvent(group = group, schedule = schedule, member = member)
+                    val event = createParticipatedEvent(group, schedule, member)
 
                     every {
-                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
+                        taskService.syncParticipatedScheduleTasks(schedule.id.toHexString(), member.memberId)
                     } returns emptyList()
 
                     handler.onScheduleParticipated(event)
 
                     verify(exactly = 1) {
-                        taskService.syncParticipatedScheduleTasks(schedule.identifier, member.memberId.toHexString())
+                        taskService.syncParticipatedScheduleTasks(schedule.id.toHexString(), member.memberId)
                     }
                     verify(exactly = 0) { eventPublisher.publishEvent(any<TaskCreatedBroadcastEvent>()) }
                 }
@@ -103,19 +108,36 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
             id = ObjectId.get(),
             groupId = groupId,
             title = "일정",
-            description = "설명",
-            location = ScheduleLocation(),
             session = 1L,
             scheduleAt = LocalDateTime.now().plusDays(1)
         )
     }
 
-    private fun createMember(groupId: ObjectId, nickname: String): StudyGroupMember {
-        return StudyGroupMember(
-            id = ObjectId.get(),
-            groupId = groupId,
-            memberId = ObjectId.get(),
+    private fun createMember(groupId: ObjectId, nickname: String): StudyScheduleEventMemberDto {
+        return StudyScheduleEventMemberDto(
+            memberId = ObjectId.get().toHexString(),
             nickname = nickname
+        )
+    }
+
+    private fun createParticipatedEvent(
+        group: StudyGroup,
+        schedule: StudySchedule,
+        member: StudyScheduleEventMemberDto
+    ): StudyScheduleParticipatedEventDto {
+        return StudyScheduleParticipatedEventDto(
+            group = StudyScheduleEventGroupDto(
+                id = group.identifier,
+                ownerId = group.ownerId.toHexString(),
+                name = group.name,
+                profileImageThumbnail = group.profileImage.thumbnail
+            ),
+            schedule = StudyScheduleEventScheduleDto(
+                id = schedule.id.toHexString(),
+                groupId = schedule.groupId.toHexString(),
+                session = schedule.session
+            ),
+            member = member
         )
     }
 

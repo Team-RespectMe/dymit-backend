@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardCategoryWritePolicy
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostCategory
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
 import org.bson.types.ObjectId
 
 /**
@@ -19,7 +19,7 @@ object PostCategoryPermissionValidatorV2 {
         groupMember: StudyGroupMember,
         category: PostCategory,
         scheduleId: String?,
-        scheduleParticipantRepository: ScheduleParticipantRepository,
+        scheduleParticipantRepository: StudyScheduleQueryPort,
         forceRetrospectiveParticipantCheck: Boolean = false
     ): ObjectId? {
         if (!board.canWriteByCategory(groupMember, category)) {
@@ -46,7 +46,7 @@ object PostCategoryPermissionValidatorV2 {
             if (normalizedScheduleId == null) {
                 throw BadRequestException(message = "회고 카테고리 작성 시 scheduleId는 필수입니다.")
             }
-            val isParticipant = scheduleParticipantRepository.existsByScheduleIdAndMemberId(
+            val isParticipant = scheduleParticipantRepository.existsParticipant(
                 scheduleId = normalizedScheduleId,
                 memberId = groupMember.memberId
             )

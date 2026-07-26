@@ -2,10 +2,9 @@ package net.noti_me.dymit.dymit_backend_api.application.reminder
 
 import org.quartz.DisallowConcurrentExecution
 import org.springframework.stereotype.Component
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.application.reminder.events.HourlyScheduleReminderEvent
 import net.noti_me.dymit.dymit_backend_api.common.logging.discord.DiscordQuartzLogger
 import org.bson.types.ObjectId
@@ -26,9 +25,8 @@ import java.time.LocalDateTime
 @DisallowConcurrentExecution
 class HourlyScheduleReminderJob(
     private val loadGroupPort: StudyGroupQueryPort,
-    private val studyScheduleRepository: StudyScheduleRepository,
+    private val studyScheduleQueryPort: StudyScheduleQueryPort,
     private val eventPublisher: ApplicationEventPublisher,
-    private val scheduleParticipantRepository: ScheduleParticipantRepository,
     private val quartzLogger: DiscordQuartzLogger
 ): Job {
 
@@ -49,7 +47,7 @@ class HourlyScheduleReminderJob(
         )
 
         do {
-            val schedules = studyScheduleRepository.findByScheduleAtBetweenCursorPagination(
+            val schedules = studyScheduleQueryPort.findByScheduleAtBetween(
                 start = start,
                 end = start.plusHours(1).withMinute(0).withSecond(0).withNano(0),
                 cursor = cursor,
@@ -73,8 +71,8 @@ class HourlyScheduleReminderJob(
     }
 
     private fun processSchedule(schedule: StudySchedule) {
-        val participants = scheduleParticipantRepository.getByScheduleId(schedule.id!!)
-        if ( participants.isEmpty() ) {
+        val participantIds = studyScheduleQueryPort.getParticipantMemberIds(schedule.id)
+        if ( participantIds.isEmpty() ) {
             logger.info("No participants for schedule ${schedule.id}, skipping...")
             return
         }
@@ -89,9 +87,8 @@ class HourlyScheduleReminderJob(
         val event = HourlyScheduleReminderEvent(
             group = group,
             schedule = schedule,
-            memberIds = participants.mapNotNull { it.memberId }.distinct()
+            memberIds = participantIds.distinct()
         )
         eventPublisher.publishEvent(event)
     }
 }
-

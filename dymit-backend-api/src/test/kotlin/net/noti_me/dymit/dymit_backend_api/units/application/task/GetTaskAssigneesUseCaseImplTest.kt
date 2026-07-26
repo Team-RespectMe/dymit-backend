@@ -15,7 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
-import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import org.bson.types.ObjectId
 import java.time.LocalDateTime

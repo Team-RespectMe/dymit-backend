@@ -1,0 +1,23 @@
+package net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto
+
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
+import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleLocation
+
+@Sanitize
+class LocationVo(
+    val type: ScheduleLocation.LocationType = ScheduleLocation.LocationType.OFFLINE,
+    val value: String = "임의의 장소",
+    val link: String? = null
+) {
+
+    companion object {
+
+        fun from(location: ScheduleLocation): LocationVo {
+            return LocationVo(
+                type = location.type,
+                value = location.value,
+                link = location.link
+            )
+        }
+    }
+}
