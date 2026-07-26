@@ -2,7 +2,6 @@ package net.noti_me.dymit.dymit_backend_api.domain.server_notice
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
-import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
@@ -11,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 class ServerNotice(
     id: ObjectId? = null,
     category: String,
-    val writer: Writer,
+    val writer: ServerNoticeWriter,
     title: String,
     content: String,
     link: Link? = null,
@@ -46,7 +45,12 @@ class ServerNotice(
             }
 
             return ServerNotice(
-                writer = Writer.from(writer),
+                writer = ServerNoticeWriter.of(
+                    id = writer.id!!,
+                    nickname = writer.nickname,
+                    imageType = writer.profileImage.type,
+                    imageUrl = writer.profileImage.thumbnail
+                ),
                 title = title,
                 content = content,
                 category = category,

@@ -2,7 +2,6 @@ package net.noti_me.dymit.dymit_backend_api.controllers.server_notice.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.dto.ServerNoticeDto
-import net.noti_me.dymit.dymit_backend_api.controllers.board.dto.WriterVo
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.Link
 import java.time.LocalDateTime
 

@@ -1,0 +1,136 @@
+package net.noti_me.dymit.dymit_backend_api.board.application.v1
+
+import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.CommentService
+import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.CommentCommand
+import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.CommentDto
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
+import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.board.domain.BoardAction
+import net.noti_me.dymit.dymit_backend_api.board.domain.PostComment
+import net.noti_me.dymit.dymit_backend_api.board.domain.Writer
+import net.noti_me.dymit.dymit_backend_api.board.application.event.PostCommentCreatedEvent
+import net.noti_me.dymit.dymit_backend_api.board.application.port.out.persistence.BoardRepository
+import net.noti_me.dymit.dymit_backend_api.board.application.port.out.persistence.CommentRepository
+import net.noti_me.dymit.dymit_backend_api.board.application.port.out.persistence.PostRepository
+import net.noti_me.dymit.dymit_backend_api.board.application.port.out.study_group.BoardStudyGroupPort
+import org.bson.types.ObjectId
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.stereotype.Service
+
+@Service
+class CommentServiceImpl(
+    private val studyGroupPort: BoardStudyGroupPort,
+    private val boardRepository: BoardRepository,
+    private val postRepository: PostRepository,
+    private val commentRepository: CommentRepository,
+    private val eventPublisher: ApplicationEventPublisher
+): CommentService {
+
+    override fun createComment(
+        memberInfo: MemberInfo,
+        command: CommentCommand
+    ): CommentDto {
+        val board = this.boardRepository.findById(ObjectId(command.boardId))
+            ?: throw NotFoundException(message="해당 게시판을 찾을 수 없습니다.")
+
+        val groupMember = studyGroupPort.loadMember(
+            ObjectId(command.groupId),
+            ObjectId(memberInfo.memberId)
+        )?.toDomain() ?: throw ForbiddenException(message="해당 그룹의 멤버가 아닙니다.")
+
+        val post = this.postRepository.findById(command.postId)
+            ?: throw NotFoundException(message="해당 게시글을 찾을 수 없습니다.")
+
+        if ( !board.hasPermission(groupMember, BoardAction.WRITE_COMMENT) ) {
+            throw ForbiddenException(message = "해당 게시판에 댓글 작성 권한이 없습니다.")
+        }
+
+        val comment = PostComment(
+            postId = ObjectId(command.postId),
+            writer = Writer.of(
+                id = groupMember.memberId,
+                nickname = groupMember.nickname,
+                imageUrl = groupMember.profileImage.url,
+                imageType = groupMember.profileImage.type
+            ),
+            content = command.content
+        )
+
+        val savedComment = this.commentRepository.save(comment)
+        val event = PostCommentCreatedEvent(
+            group = studyGroupPort.loadGroup(command.groupId)!!,
+            board = board,
+            post = post,
+            comment = savedComment
+        )
+
+        if ( memberInfo.memberId != post.writer.id.toHexString() ) {
+            eventPublisher.publishEvent(event)
+        }
+
+        post.increaseCommentCount()
+        postRepository.save(post)
+
+        return CommentDto.from(savedComment)
+    }
+
+    override fun updateComment(
+        memberInfo: MemberInfo,
+        commentId: String,
+        command: CommentCommand
+    ): CommentDto {
+        val comment = this.commentRepository.findById(commentId)
+            ?: throw NotFoundException(message="해당 댓글을 찾을 수 없습니다.")
+
+        val member = studyGroupPort.loadMember(
+            ObjectId(command.groupId),
+            ObjectId(memberInfo.memberId)
+        ) ?: throw ForbiddenException(message="해당 그룹의 멤버가 아닙니다.")
+
+        comment.updateContent(member.memberId.toHexString(), command.content)
+        val savedComment = this.commentRepository.save(comment)
+
+        return CommentDto.from(savedComment)
+    }
+
+    override fun removeComment(
+        memberInfo: MemberInfo,
+        commentId: String
+    ) {
+        val comment = this.commentRepository.findById(commentId)
+            ?: throw NotFoundException(message="해당 댓글을 찾을 수 없습니다.")
+
+        // 댓글 작성자만 삭제할 수 있도록 권한 체크
+        if (comment.writer.id.toHexString() != memberInfo.memberId) {
+            throw ForbiddenException(message="본인의 댓글만 삭제할 수 있습니다.")
+        }
+
+        
+        val deleteResult = this.commentRepository.delete(comment)
+        if (!deleteResult) {
+            throw RuntimeException("댓글 삭제에 실패했습니다.")
+        }
+        val post = postRepository.findById(comment.postId.toHexString())
+
+        if ( post != null ) {
+            post.decreaseCommentCount()
+            postRepository.save(post)
+        }
+    }
+
+    override fun getPostComments(
+        memberInfo: MemberInfo,
+        postId: String,
+        lastCommentId: String?,
+        size: Int
+    ): List<CommentDto> {
+//        val comments = this.commentRepository.findByPostId(postId)
+        val comments = this.commentRepository.findByPostIdLteId(
+            postId = postId,
+            lastId = lastCommentId,
+            size = size
+        )
+        return comments.map { CommentDto.from(it) }
+    }
+}

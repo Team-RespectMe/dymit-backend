@@ -1,15 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.application.server_notice.dto
 
-import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.Link
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
+import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNoticeWriter
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
 class ServerNoticeDto(
     val id: ObjectId,
     val category: String,
-    val writer: Writer,
+    val writer: ServerNoticeWriter,
     val title: String,
     val content: String,
     val link: Link?,

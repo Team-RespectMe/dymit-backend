@@ -1,0 +1,41 @@
+package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1
+
+import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.PostCommand
+import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.PostDto
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+
+interface PostService {
+
+    fun createPost(
+        memberInfo: MemberInfo,
+        command: PostCommand
+    ): PostDto
+
+    fun updatePost(
+        memberInfo: MemberInfo,
+        postId: String,
+        command: PostCommand
+    ): PostDto
+
+    fun removePost(
+        memberInfo: MemberInfo,
+        groupId: String,
+        boardId: String,
+        postId: String
+    )
+
+    fun getBoardPostsWithCursor(
+        memberInfo: MemberInfo,
+        groupId: String,
+        boardId: String,
+        cursor: String?,
+        size: Int
+    ): List<PostDto>
+
+    fun getPost(
+        memberInfo: MemberInfo,
+        groupId: String,
+        boardId: String,
+        postId: String
+    ): PostDto
+}

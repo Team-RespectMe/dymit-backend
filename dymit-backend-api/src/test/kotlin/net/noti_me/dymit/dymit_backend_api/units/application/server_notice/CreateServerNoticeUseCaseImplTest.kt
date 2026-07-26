@@ -10,7 +10,6 @@ import io.mockk.mockk
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.dto.CreateServerNoticeCommand
 import net.noti_me.dymit.dymit_backend_api.application.server_notice.impl.CreateNoticeUseCaseImpl
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort

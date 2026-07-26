@@ -6,7 +6,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNot
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
-import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
+import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNoticeWriter
 import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.domain.server_notice.ServerNotice
@@ -125,7 +125,12 @@ internal class ServerNoticeTest : BehaviorSpec({
                 ServerNotice(
                     id = id,
                     category = category,
-                    writer = Writer.from(writer),
+                    writer = ServerNoticeWriter.of(
+                        id = writer.id!!,
+                        nickname = writer.nickname,
+                        imageType = writer.profileImage.type,
+                        imageUrl = writer.profileImage.thumbnail
+                    ),
                     title = title,
                     content = content,
                 )
