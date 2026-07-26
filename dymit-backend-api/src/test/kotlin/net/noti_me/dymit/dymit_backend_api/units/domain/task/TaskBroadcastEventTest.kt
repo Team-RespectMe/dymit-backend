@@ -9,8 +9,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskCreatedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedBroadcastEvent
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskModifiedBroadcastEvent
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventIconType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResourceType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -25,15 +25,15 @@ internal class TaskBroadcastEventTest : BehaviorSpec({
                 val memberId2 = ObjectId.get()
                 val event = TaskCreatedBroadcastEvent(group, task, listOf(memberId1, memberId1, memberId2))
 
-                val feeds = event.toFeeds()
+                val feeds = event.toPersonalFeedData()
                 val pushes = event.toPushMessages()
 
-                feeds.map { it.memberId } shouldContainExactly listOf(memberId1, memberId2)
-                feeds.first().iconType shouldBe IconType.NOTICE
+                feeds.map { it.memberId } shouldContainExactly listOf(memberId1.toHexString(), memberId2.toHexString())
+                feeds.first().iconType shouldBe FeedEventIconType.NOTICE
                 feeds.first().eventName shouldBe "TASK_CREATED"
                 feeds.first().messages.single().text shouldBe "알고리즘 스터디에 새로운 과제가 추가되었어요."
-                feeds.first().associates.map { it.type } shouldContainExactly listOf(ResourceType.STUDY_GROUP, ResourceType.TASK)
-                feeds.first().associates.map { it.resourceId } shouldContainExactly listOf(group.identifier, task.identifier)
+                feeds.first().resources.map { it.type } shouldContainExactly listOf(FeedEventResourceType.STUDY_GROUP, FeedEventResourceType.TASK)
+                feeds.first().resources.map { it.resourceId } shouldContainExactly listOf(group.identifier, task.identifier)
                 pushes.map { it.memberId } shouldContainExactly listOf(memberId1, memberId2)
                 pushes.first().eventName shouldBe "TASK_CREATED"
                 pushes.first().title shouldBe group.name
@@ -54,13 +54,13 @@ internal class TaskBroadcastEventTest : BehaviorSpec({
                 val memberId = ObjectId.get()
                 val event = TaskModifiedBroadcastEvent(group, task, listOf(memberId))
 
-                val feed = event.toFeeds().single()
+                val feed = event.toPersonalFeedData().single()
                 val push = event.toPushMessages().single()
 
-                feed.iconType shouldBe IconType.CHECK
+                feed.iconType shouldBe FeedEventIconType.CHECK
                 feed.eventName shouldBe "TASK_MODIFIED"
                 feed.messages.single().text shouldBe "백엔드 스터디의 과제 ERD 정리에 수정된 내용이 있어요."
-                feed.associates.map { it.type } shouldContainExactly listOf(ResourceType.STUDY_GROUP, ResourceType.TASK)
+                feed.resources.map { it.type } shouldContainExactly listOf(FeedEventResourceType.STUDY_GROUP, FeedEventResourceType.TASK)
                 push.eventName shouldBe "TASK_MODIFIED"
                 push.title shouldBe group.name
                 push.body shouldBe "백엔드 스터디의 과제 ERD 정리에 수정된 내용이 있어요."
@@ -80,15 +80,15 @@ internal class TaskBroadcastEventTest : BehaviorSpec({
                 val memberId = ObjectId.get()
                 val event = TaskDeletedBroadcastEvent(group, task, listOf(memberId, memberId))
 
-                val feed = event.toFeeds().single()
+                val feed = event.toPersonalFeedData().single()
                 val push = event.toPushMessages().single()
 
                 event.memberIds shouldContainExactly listOf(memberId)
-                feed.iconType shouldBe IconType.NOTICE
+                feed.iconType shouldBe FeedEventIconType.NOTICE
                 feed.eventName shouldBe "TASK_DELETED"
                 feed.messages.single().text shouldBe "코틀린 스터디의 과제 리팩터링가 취소되었어요."
-                feed.associates.map { it.type } shouldContainExactly listOf(ResourceType.STUDY_GROUP)
-                feed.associates.single().resourceId shouldBe group.identifier
+                feed.resources.map { it.type } shouldContainExactly listOf(FeedEventResourceType.STUDY_GROUP)
+                feed.resources.single().resourceId shouldBe group.identifier
                 push.eventName shouldBe "TASK_DELETED"
                 push.title shouldBe group.name
                 push.body shouldBe "코틀린 스터디의 과제 리팩터링가 취소되었어요."

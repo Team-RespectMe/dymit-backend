@@ -76,7 +76,7 @@ internal class TaskSubmissionNotificationPreparationEventHandlerTest : BehaviorS
                     verify(exactly = 1) { eventPublisher.publishEvent(capture(slot)) }
                     val published = slot.captured
                     published.memberIds shouldContainExactly listOf(otherMemberId)
-                    published.toFeeds().single().associates.map { it.resourceId } shouldContainExactly listOf(
+                    published.toPersonalFeedData().single().resources.map { it.resourceId } shouldContainExactly listOf(
                         group.identifier,
                         task.identifier,
                         submitter.memberId.toHexString()

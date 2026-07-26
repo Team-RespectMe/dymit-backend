@@ -73,7 +73,7 @@ internal class TaskSubmissionCommentNotificationPreparationEventHandlerTest : Be
                     verify(exactly = 1) { eventPublisher.publishEvent(capture(slot)) }
                     val published = slot.captured
                     published.memberIds shouldContainExactly listOf(assigneeMemberId)
-                    published.toFeeds().single().associates.map { it.resourceId } shouldContainExactly listOf(
+                    published.toPersonalFeedData().single().resources.map { it.resourceId } shouldContainExactly listOf(
                         group.identifier,
                         task.identifier,
                         assigneeMemberId.toHexString()

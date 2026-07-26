@@ -1,14 +1,14 @@
 package net.noti_me.dymit.dymit_backend_api.application.reminder.events
 
 import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastEvent
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventIconType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventMessage
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResource
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResourceType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.PersonalFeedEventData
 import net.noti_me.dymit.dymit_backend_api.push_notification.domain.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import org.bson.types.ObjectId
 
 class DailyScheduleReminderEvent(
@@ -35,28 +35,28 @@ class DailyScheduleReminderEvent(
         }
     }
 
-    override fun processUserFeeds(): List<UserFeed> {
+    override fun processPersonalFeedData(): List<PersonalFeedEventData> {
         return memberIds.map { memberId ->
-            UserFeed(
-                memberId = memberId,
-                iconType = IconType.DATE,
+            PersonalFeedEventData(
+                memberId = memberId.toHexString(),
+                iconType = FeedEventIconType.DATE,
                 eventName = eventName,
                 messages = listOf(
-                    FeedMessage(
+                    FeedEventMessage(
                         text = "${group.name} ${schedule.session}회차 일정이 오늘 예정되어 있어요!",
                     )
                 ),
-                associates = listOf(
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP,
+                resources = listOf(
+                    FeedEventResource(
+                        type = FeedEventResourceType.STUDY_GROUP,
                         resourceId = group.id.toString()
                     ),
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP_SCHEDULE,
+                    FeedEventResource(
+                        type = FeedEventResourceType.STUDY_GROUP_SCHEDULE,
                         resourceId = schedule.id.toString()
                     ),
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP_OWNER,
+                    FeedEventResource(
+                        type = FeedEventResourceType.STUDY_GROUP_OWNER,
                         resourceId = memberId.toString()
                     )
                 )

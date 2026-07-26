@@ -60,7 +60,7 @@ internal class TaskNotificationPreparationEventHandlerTest : BehaviorSpec() {
                     verify(exactly = 1) { eventPublisher.publishEvent(capture(slot)) }
                     val published = slot.captured
                     published.memberIds shouldContainExactly listOf(memberId1, memberId2)
-                    published.toFeeds().first().eventName shouldBe "TASK_CREATED"
+                    published.toPersonalFeedData().first().eventName shouldBe "TASK_CREATED"
                 }
             }
         }
@@ -120,7 +120,7 @@ internal class TaskNotificationPreparationEventHandlerTest : BehaviorSpec() {
                     verify(exactly = 1) { eventPublisher.publishEvent(capture(slot)) }
                     val published = slot.captured
                     published.memberIds shouldContainExactly listOf(memberId1, memberId2)
-                    published.toFeeds().first().associates.single().resourceId shouldBe group.identifier
+                    published.toPersonalFeedData().first().resources.single().resourceId shouldBe group.identifier
                 }
             }
         }

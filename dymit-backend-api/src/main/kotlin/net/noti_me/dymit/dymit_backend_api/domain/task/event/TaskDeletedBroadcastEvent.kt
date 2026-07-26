@@ -1,14 +1,14 @@
 package net.noti_me.dymit.dymit_backend_api.domain.task.event
 
 import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastEvent
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventIconType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventMessage
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResource
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResourceType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.PersonalFeedEventData
 import net.noti_me.dymit.dymit_backend_api.push_notification.domain.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import org.bson.types.ObjectId
 
 /**
@@ -52,16 +52,16 @@ class TaskDeletedBroadcastEvent(
      *
      * @return 사용자 피드 목록
      */
-    override fun processUserFeeds(): List<UserFeed> {
+    override fun processPersonalFeedData(): List<PersonalFeedEventData> {
         return memberIds.map { memberId ->
-            UserFeed(
-                memberId = memberId,
-                iconType = IconType.NOTICE,
+            PersonalFeedEventData(
+                memberId = memberId.toHexString(),
+                iconType = FeedEventIconType.NOTICE,
                 eventName = eventName,
-                messages = listOf(FeedMessage(text = message)),
-                associates = listOf(
-                    AssociatedResource(
-                        type = ResourceType.STUDY_GROUP,
+                messages = listOf(FeedEventMessage(text = message)),
+                resources = listOf(
+                    FeedEventResource(
+                        type = FeedEventResourceType.STUDY_GROUP,
                         resourceId = group.identifier
                     )
                 )

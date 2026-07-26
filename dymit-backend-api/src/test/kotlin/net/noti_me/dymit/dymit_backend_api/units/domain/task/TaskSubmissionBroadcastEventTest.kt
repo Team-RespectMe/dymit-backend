@@ -8,8 +8,8 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.ser
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskSubmissionCreatedBroadcastEvent
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.IconType
-import net.noti_me.dymit.dymit_backend_api.domain.user_feed.ResourceType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventIconType
+import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResourceType
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -47,19 +47,19 @@ internal class TaskSubmissionBroadcastEventTest : BehaviorSpec({
                     memberIds = listOf(memberId1, memberId1, memberId2)
                 )
 
-                val feeds = event.toFeeds()
+                val feeds = event.toPersonalFeedData()
                 val pushes = event.toPushMessages()
 
                 event.memberIds shouldContainExactly listOf(memberId1, memberId2)
-                feeds.first().iconType shouldBe IconType.CHECK
+                feeds.first().iconType shouldBe FeedEventIconType.CHECK
                 feeds.first().eventName shouldBe "TASK_SUBMISSION_CREATED"
                 feeds.first().messages.single().text shouldBe "네트워크 스터디의 과제 주차 과제를 민수 님이 제출했어요."
-                feeds.first().associates.map { it.type } shouldContainExactly listOf(
-                    ResourceType.STUDY_GROUP,
-                    ResourceType.TASK,
-                    ResourceType.MEMBER
+                feeds.first().resources.map { it.type } shouldContainExactly listOf(
+                    FeedEventResourceType.STUDY_GROUP,
+                    FeedEventResourceType.TASK,
+                    FeedEventResourceType.MEMBER
                 )
-                feeds.first().associates.map { it.resourceId } shouldContainExactly listOf(
+                feeds.first().resources.map { it.resourceId } shouldContainExactly listOf(
                     group.identifier,
                     task.identifier,
                     submitter.memberId.toHexString()

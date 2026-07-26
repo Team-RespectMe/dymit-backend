@@ -67,7 +67,7 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
                         task2.identifier
                     )
                     publishedEvents.forEach { published ->
-                        published.toFeeds().single().eventName shouldBe "TASK_CREATED"
+                        published.toPersonalFeedData().single().eventName shouldBe "TASK_CREATED"
                     }
                 }
             }
