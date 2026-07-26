@@ -1,71 +1,75 @@
-package net.noti_me.dymit.dymit_backend_api.units.adapter.study_recruitment
+package net.noti_me.dymit.dymit_backend_api.units.study_recruitment.application
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.StudyRecruitmentServiceFacade
-import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
-import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.usecases.QueryStudyRecruitmentUseCase
-import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.QueryStudyRecruitmentService
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.QueryStudyRecruitmentCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.LoadStudyRecruitmentPort
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.dto.StudyRecruitmentPersistenceDto
 import org.bson.types.ObjectId
 
-/**
- * StudyRecruitmentServiceFacade 단위 테스트입니다.
- *
- * 서비스 파사드가 조회 사이즈를 size + 1로 확장해 유즈케이스에 위임하는지 검증합니다.
- */
+/** Query study recruitment service unit tests. */
 internal class StudyRecruitmentServiceFacadeTest : BehaviorSpec() {
 
-    private val queryStudyRecruitmentUseCase = mockk<QueryStudyRecruitmentUseCase>()
-
-    private val studyRecruitmentServiceFacade = StudyRecruitmentServiceFacade(
-        queryStudyRecruitmentUseCase = queryStudyRecruitmentUseCase
-    )
+    private val loadStudyRecruitmentPort = mockk<LoadStudyRecruitmentPort>()
+    private val service = QueryStudyRecruitmentService(loadStudyRecruitmentPort)
 
     init {
-        Given("스터디 모집 목록 조회 Query가 주어지면") {
-            val query = QueryStudyRecruitmentQuery(
-                cursor = ObjectId.get().toHexString(),
-                size = 20
-            )
-            val expected = listOf(createStudyRecruitment())
-            every {
-                queryStudyRecruitmentUseCase.queryStudyRecruitments(
-                    QueryStudyRecruitmentQuery(cursor = query.cursor, size = 21)
-                )
-            } returns expected
+        Given("a command with a valid cursor") {
+            val cursor = ObjectId.get()
+            val persistenceDto = createPersistenceDto("recruitment-id")
+            every { loadStudyRecruitmentPort.findByCursorOrderByIdDesc(cursor, 21) } returns listOf(persistenceDto)
 
-            When("서비스 파사드에서 목록 조회를 수행하면") {
-                val result = studyRecruitmentServiceFacade.getStudyRecruitments(query)
+            When("the use case executes") {
+                val result = service.execute(QueryStudyRecruitmentCommand(cursor.toHexString(), 20))
 
-                Then("유즈케이스에 size + 1로 전달하고 결과를 반환한다") {
-                    verify(exactly = 1) {
-                        queryStudyRecruitmentUseCase.queryStudyRecruitments(
-                            QueryStudyRecruitmentQuery(cursor = query.cursor, size = 21)
-                        )
-                    }
-                    result shouldBe expected
+                Then("it requests size plus one and maps output DTOs to input DTOs") {
+                    verify(exactly = 1) { loadStudyRecruitmentPort.findByCursorOrderByIdDesc(cursor, 21) }
+                    result.single().id shouldBe "recruitment-id"
+                    result.single().externalId shouldBe persistenceDto.externalId
                 }
             }
         }
 
-        afterEach {
-            clearAllMocks()
+        Given("a command without a cursor") {
+            every { loadStudyRecruitmentPort.findByCursorOrderByIdDesc(null, 6) } returns emptyList()
+
+            When("the use case executes") {
+                service.execute(QueryStudyRecruitmentCommand(size = 5))
+
+                Then("it delegates a null cursor to preserve first-page behavior") {
+                    verify(exactly = 1) { loadStudyRecruitmentPort.findByCursorOrderByIdDesc(null, 6) }
+                }
+            }
+        }
+
+        Given("an invalid cursor") {
+            When("the use case executes") {
+                Then("it rejects the cursor before querying the output port") {
+                    clearMocks(loadStudyRecruitmentPort)
+                    shouldThrow<IllegalArgumentException> {
+                        service.execute(QueryStudyRecruitmentCommand(cursor = "invalid-object-id"))
+                    }
+                    verify(exactly = 0) { loadStudyRecruitmentPort.findByCursorOrderByIdDesc(any(), any()) }
+                }
+            }
         }
     }
 
-    private fun createStudyRecruitment(): StudyRecruitment {
-        return StudyRecruitment(
-            id = ObjectId.get(),
-            externalId = "external-id",
-            type = "INFLEARN",
-            title = "title",
-            content = "content",
-            url = "https://example.com/recruitment",
-            writer = "writer"
-        )
-    }
+    private fun createPersistenceDto(id: String) = StudyRecruitmentPersistenceDto(
+        id = id,
+        externalId = "external-$id",
+        type = "INFLEARN",
+        title = "title",
+        content = "content",
+        url = "https://example.com/$id",
+        writer = "writer",
+        createdAt = null,
+        updatedAt = null
+    )
 }

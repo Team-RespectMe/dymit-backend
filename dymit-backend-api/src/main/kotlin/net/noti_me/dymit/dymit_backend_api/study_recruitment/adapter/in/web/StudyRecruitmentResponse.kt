@@ -1,10 +1,10 @@
-package net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment.dto
+package net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.web
 
-import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
 import java.time.LocalDateTime
 
 /**
- * 스터디 모집 목록 응답 DTO입니다.
+ * 스터디 모집 목록 응답입니다.
  *
  * @property id 모집글 식별자
  * @property externalId 외부 원본 시스템 식별자
@@ -31,14 +31,14 @@ data class StudyRecruitmentResponse(
     companion object {
 
         /**
-         * StudyRecruitment 도메인 엔티티를 응답 DTO로 변환합니다.
+         * 입력 포트 DTO를 웹 응답으로 변환합니다.
          *
-         * @param recruitment 스터디 모집 도메인 엔티티
-         * @return StudyRecruitmentResponse
+         * @param recruitment 입력 포트용 스터디 모집 정보
+         * @return 스터디 모집 응답
          */
-        fun from(recruitment: StudyRecruitment): StudyRecruitmentResponse {
+        fun from(recruitment: StudyRecruitmentDto): StudyRecruitmentResponse {
             return StudyRecruitmentResponse(
-                id = recruitment.identifier,
+                id = recruitment.id,
                 externalId = recruitment.externalId,
                 type = recruitment.type,
                 title = recruitment.title,

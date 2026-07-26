@@ -1,31 +1,26 @@
-package net.noti_me.dymit.dymit_backend_api.units.controllers.study_recruitment
+package net.noti_me.dymit.dymit_backend_api.units.study_recruitment.adapter.`in`.web
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.StudyRecruitmentServiceFacade
-import net.noti_me.dymit.dymit_backend_api.application.study_recruitment.dto.QueryStudyRecruitmentQuery
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.controllers.study_recruitment.StudyRecruitmentController
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_recruitment.StudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.web.StudyRecruitmentController
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.QueryStudyRecruitmentUseCase
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.QueryStudyRecruitmentCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
 import org.bson.types.ObjectId
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
-/**
- * StudyRecruitmentController 단위 테스트입니다.
- *
- * 컨트롤러가 요청 DTO를 Query DTO로 변환하고,
- * 서비스 결과를 응답 DTO와 ListResponse 형태로 변환하는지 검증합니다.
- */
+/** Study recruitment web adapter unit tests. */
 internal class StudyRecruitmentControllerTest : BehaviorSpec() {
 
-    private val studyRecruitmentServiceFacade = mockk<StudyRecruitmentServiceFacade>()
-
-    private val controller = StudyRecruitmentController(studyRecruitmentServiceFacade)
-
+    private val queryStudyRecruitmentUseCase = mockk<QueryStudyRecruitmentUseCase>()
+    private val controller = StudyRecruitmentController(queryStudyRecruitmentUseCase)
     private val memberInfo = MemberInfo(
         memberId = ObjectId.get().toHexString(),
         nickname = "member",
@@ -33,50 +28,47 @@ internal class StudyRecruitmentControllerTest : BehaviorSpec() {
     )
 
     init {
-        Given("스터디 모집 목록 조회 요청이 주어지면") {
-            val cursor: String? = null
-            val size = 2
-            val recruitments = listOf(
-                createStudyRecruitment("1"),
-                createStudyRecruitment("2")
-            )
+        afterEach { RequestContextHolder.resetRequestAttributes() }
+
+        Given("a recruitment list request with a following page") {
+            val requestedSize = 2
+            val returnedDtos = listOf(createDto("one"), createDto("two"), createDto("three"))
             every {
-                studyRecruitmentServiceFacade.getStudyRecruitments(
-                    QueryStudyRecruitmentQuery(cursor = cursor, size = size)
-                )
-            } returns recruitments
+                queryStudyRecruitmentUseCase.execute(QueryStudyRecruitmentCommand(cursor = null, size = requestedSize))
+            } returns returnedDtos
+            RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request()))
 
-            When("컨트롤러에서 목록을 조회하면") {
-                val result = controller.getStudyRecruitments(memberInfo, cursor, size)
+            When("the web adapter handles the request") {
+                val response = controller.getStudyRecruitments(memberInfo, null, requestedSize)
 
-                Then("서비스 파사드에 변환된 Query를 전달하고 응답 형식을 맞춰 반환한다") {
+                Then("it converts the query, maps DTOs, and returns the requested page with its cursor link") {
                     verify(exactly = 1) {
-                        studyRecruitmentServiceFacade.getStudyRecruitments(
-                            QueryStudyRecruitmentQuery(cursor = cursor, size = size)
-                        )
+                        queryStudyRecruitmentUseCase.execute(QueryStudyRecruitmentCommand(cursor = null, size = requestedSize))
                     }
-                    result.count shouldBe 2L
-                    result.items.size shouldBe 2
-                    result.items[0].externalId shouldBe "external-1"
-                    result.items[1].externalId shouldBe "external-2"
+                    response.count shouldBe 2L
+                    response.items.map { it.externalId } shouldBe listOf("external-one", "external-two")
+                    response._links["next"]?.href?.contains("cursor=two") shouldBe true
+                    response._links["next"]?.href?.contains("size=2") shouldBe true
                 }
             }
         }
-
-        afterEach {
-            clearAllMocks()
-        }
     }
 
-    private fun createStudyRecruitment(suffix: String): StudyRecruitment {
-        return StudyRecruitment(
-            id = ObjectId.get(),
-            externalId = "external-$suffix",
-            type = "INFLEARN",
-            title = "title-$suffix",
-            content = "content-$suffix",
-            url = "https://example.com/$suffix",
-            writer = "writer-$suffix"
-        )
+    private fun request() = MockHttpServletRequest("GET", "/api/v1/study-recruitments").apply {
+        serverName = "localhost"
+        serverPort = 80
+        servletPath = "/api/v1/study-recruitments"
     }
+
+    private fun createDto(id: String) = StudyRecruitmentDto(
+        id = id,
+        externalId = "external-$id",
+        type = "INFLEARN",
+        title = "title-$id",
+        content = "content-$id",
+        url = "https://example.com/$id",
+        writer = "writer-$id",
+        createdAt = null,
+        updatedAt = null
+    )
 }

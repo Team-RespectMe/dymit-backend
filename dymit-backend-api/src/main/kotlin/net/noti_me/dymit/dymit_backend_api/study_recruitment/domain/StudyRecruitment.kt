@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.domain.study_recruitment
+package net.noti_me.dymit.dymit_backend_api.study_recruitment.domain
 
 import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
@@ -63,7 +63,6 @@ class StudyRecruitment(
      * @param content 수정할 본문
      * @param url 수정할 원본 URL
      * @param writer 수정할 작성자명
-     * @return Unit
      */
     fun updateCore(
         title: String,
@@ -78,6 +77,12 @@ class StudyRecruitment(
         this.updatedAt = LocalDateTime.now()
     }
 
+    /**
+     * MongoDB 식별자를 기준으로 동일한 모집글인지 비교합니다.
+     *
+     * @param other 비교할 객체
+     * @return 동일한 식별자를 가진 모집글이면 true
+     */
     override fun equals(other: Any?): Boolean {
         if ( this === other ) return true
         if ( other !is StudyRecruitment ) return false
@@ -85,6 +90,11 @@ class StudyRecruitment(
         return id == other.id
     }
 
+    /**
+     * MongoDB 식별자를 기반으로 해시 코드를 반환합니다.
+     *
+     * @return 모집글 해시 코드
+     */
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
