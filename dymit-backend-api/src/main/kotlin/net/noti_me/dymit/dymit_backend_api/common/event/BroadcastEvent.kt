@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.common.event
 
-import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
+import net.noti_me.dymit.dymit_backend_api.push_notification.domain.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEvent
@@ -21,4 +21,3 @@ abstract class BroadcastEvent(
 
     abstract fun processUserFeeds(): List<UserFeed>
 }
-

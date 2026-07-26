@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.domain.task.event
 
 import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastEvent
-import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
+import net.noti_me.dymit.dymit_backend_api.push_notification.domain.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task

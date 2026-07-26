@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.reminder.events
 
 import net.noti_me.dymit.dymit_backend_api.common.event.BroadcastPushable
-import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
+import net.noti_me.dymit.dymit_backend_api.push_notification.domain.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import org.bson.types.ObjectId

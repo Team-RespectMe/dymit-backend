@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.common.event.GroupImportantEvent
 import net.noti_me.dymit.dymit_backend_api.board.application.port.out.study_group.dto.BoardStudyGroupDto
 import net.noti_me.dymit.dymit_backend_api.board.domain.Board
 import net.noti_me.dymit.dymit_backend_api.board.domain.Post
-import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
+import net.noti_me.dymit.dymit_backend_api.push_notification.domain.GroupPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
