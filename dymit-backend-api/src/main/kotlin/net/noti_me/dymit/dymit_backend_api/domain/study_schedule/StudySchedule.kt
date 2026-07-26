@@ -2,9 +2,9 @@ package net.noti_me.dymit.dymit_backend_api.domain.study_schedule
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.BaseAggregateRoot
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberRoleDto as GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleLocationChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleTimeChangedEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyRoleAssignedEvent

@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain.study_schedule
 
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import org.bson.types.ObjectId
 
 /**

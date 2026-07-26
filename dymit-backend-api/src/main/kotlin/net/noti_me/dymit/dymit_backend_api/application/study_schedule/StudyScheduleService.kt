@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule
 
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDetailDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDto

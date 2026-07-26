@@ -10,14 +10,14 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCreatedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupRecentPostDto as RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -25,10 +25,10 @@ import org.springframework.stereotype.Service
 @Service
 class PostServiceImpl(
     private val postRepository: PostRepository,
-    private val loadGroupPort: LoadStudyGroupPort,
-    private val saveGroupPort: SaveStudyGroupPort,
+    private val loadGroupPort: StudyGroupQueryPort,
+    private val saveGroupPort: StudyGroupCommandPort,
     private val boardRepository: BoardRepository,
-    private val groupMemberRepository: StudyGroupMemberRepository,
+    private val groupMemberRepository: StudyGroupMemberPort,
     private val eventPublisher: ApplicationEventPublisher
 ): PostService {
 
@@ -60,7 +60,13 @@ class PostServiceImpl(
         )
 
         val savedPost = this.postRepository.save(newPost)
-        group.updateRecentPost(RecentPostVo.from(savedPost))
+        group.updateRecentPost(
+            RecentPostVo(
+                postId = savedPost.identifier,
+                title = savedPost.title,
+                createdAt = savedPost.createdAt ?: java.time.LocalDateTime.now()
+            )
+        )
         saveGroupPort.update(group)
         val event = PostCreatedEvent(
             group = group,
@@ -97,7 +103,13 @@ class PostServiceImpl(
         val updatedPost = this.postRepository.save(post)
 
         if (group.recentPost?.postId == updatedPost.identifier) {
-            group.updateRecentPost(RecentPostVo.from(updatedPost))
+            group.updateRecentPost(
+                RecentPostVo(
+                    postId = updatedPost.identifier,
+                    title = updatedPost.title,
+                    createdAt = updatedPost.createdAt ?: java.time.LocalDateTime.now()
+                )
+            )
             saveGroupPort.update(group)
         }
 
@@ -128,7 +140,15 @@ class PostServiceImpl(
             boardId = ObjectId(boardId)
         )
 
-        group.updateRecentPost(RecentPostVo.from(recentPost))
+        group.updateRecentPost(
+            recentPost?.let {
+                RecentPostVo(
+                    postId = it.identifier,
+                    title = it.title,
+                    createdAt = it.createdAt ?: java.time.LocalDateTime.now()
+                )
+            }
+        )
         saveGroupPort.update(group)
     }
 

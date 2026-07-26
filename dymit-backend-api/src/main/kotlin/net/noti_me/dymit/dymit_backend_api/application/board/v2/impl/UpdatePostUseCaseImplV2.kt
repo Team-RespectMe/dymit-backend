@@ -5,12 +5,12 @@ import net.noti_me.dymit.dymit_backend_api.application.board.v2.dto.PostDtoV2
 import net.noti_me.dymit.dymit_backend_api.application.board.v2.usecases.UpdatePostUseCaseV2
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupRecentPostDto as RecentPostVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.BoardRepositoryV2
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.PostRepositoryV2
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
@@ -22,9 +22,9 @@ import org.springframework.stereotype.Service
 class UpdatePostUseCaseImplV2(
     private val postRepository: PostRepositoryV2,
     private val boardRepository: BoardRepositoryV2,
-    private val loadGroupPort: LoadStudyGroupPort,
-    private val saveGroupPort: SaveStudyGroupPort,
-    private val groupMemberRepository: StudyGroupMemberRepository,
+    private val loadGroupPort: StudyGroupQueryPort,
+    private val saveGroupPort: StudyGroupCommandPort,
+    private val groupMemberRepository: StudyGroupMemberPort,
     private val scheduleParticipantRepository: ScheduleParticipantRepository
 ) : UpdatePostUseCaseV2 {
 
@@ -65,7 +65,13 @@ class UpdatePostUseCaseImplV2(
         val updatedPost = postRepository.save(post)
 
         if (group.recentPost?.postId == updatedPost.identifier) {
-            group.updateRecentPost(RecentPostVo.from(updatedPost))
+            group.updateRecentPost(
+                RecentPostVo(
+                    postId = updatedPost.identifier,
+                    title = updatedPost.title,
+                    createdAt = updatedPost.createdAt ?: java.time.LocalDateTime.now()
+                )
+            )
             saveGroupPort.update(group)
         }
         return PostDtoV2.from(updatedPost)

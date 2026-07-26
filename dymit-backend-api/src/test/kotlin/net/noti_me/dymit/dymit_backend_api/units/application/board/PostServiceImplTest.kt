@@ -20,15 +20,15 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberRoleDto as GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupRecentPostDto as RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
@@ -42,10 +42,10 @@ class PostServiceImplTest : BehaviorSpec({
 
     // Mock 객체 선언
     val postRepository = mockk<PostRepository>()
-    val loadGroupPort = mockk<LoadStudyGroupPort>()
-    val saveGroupPort = mockk<SaveStudyGroupPort>()
+    val loadGroupPort = mockk<StudyGroupQueryPort>()
+    val saveGroupPort = mockk<StudyGroupCommandPort>()
     val boardRepository = mockk<BoardRepository>()
-    val groupMemberRepository = mockk<StudyGroupMemberRepository>()
+    val groupMemberRepository = mockk<StudyGroupMemberPort>()
     val eventPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
     val postService = PostServiceImpl(
         postRepository,

@@ -22,7 +22,7 @@ class StudyScheduleRoleResponse(
             return StudyScheduleRoleResponse(
                 memberId = dto.memberId,
                 nickname = dto.nickname,
-                image = ProfileImageResponse.from(dto.image),
+                image = ProfileImageResponse.of(dto.image.type, dto.image.url),
                 roles = dto.roles,
                 color = dto.color
             )

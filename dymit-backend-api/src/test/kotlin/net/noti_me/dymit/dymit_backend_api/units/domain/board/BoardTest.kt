@@ -13,8 +13,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardAction
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardPermission
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberRoleDto as GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
 

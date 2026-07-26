@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.SaveMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import org.springframework.stereotype.Service
 import org.springframework.context.ApplicationEventPublisher
 
@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationEventPublisher
 class DeleteMemberUseCaseImpl(
     private val loadMemberPort: LoadMemberPort,
     private val saveMemberPort: SaveMemberPort,
-    private val loadGroupPort: LoadStudyGroupPort,
+    private val loadGroupPort: StudyGroupQueryPort,
 ): DeleteMemberUseCase {
 
     override fun deleteMember(loginMember: MemberInfo, memberId: String) {

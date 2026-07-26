@@ -9,14 +9,14 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 @Service
 class BoardServiceImpl(
     private val boardRepository: BoardRepository,
-    private val studyGroupMemberRepository: StudyGroupMemberRepository
+    private val studyGroupMemberRepository: StudyGroupMemberPort
 ): BoardService{
 
     override fun createBoard(

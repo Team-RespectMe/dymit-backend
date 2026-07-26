@@ -19,15 +19,15 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostCategory
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberRoleDto as GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupRecentPostDto as RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.BoardRepositoryV2
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.PostRepositoryV2
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.supports.createProfileImageVo
 import org.bson.types.ObjectId
@@ -37,9 +37,9 @@ internal class UpdatePostUseCaseImplV2Test : BehaviorSpec({
 
     val postRepository = mockk<PostRepositoryV2>()
     val boardRepository = mockk<BoardRepositoryV2>()
-    val loadStudyGroupPort = mockk<LoadStudyGroupPort>()
-    val saveStudyGroupPort = mockk<SaveStudyGroupPort>(relaxed = true)
-    val studyGroupMemberRepository = mockk<StudyGroupMemberRepository>()
+    val loadStudyGroupPort = mockk<StudyGroupQueryPort>()
+    val saveStudyGroupPort = mockk<StudyGroupCommandPort>(relaxed = true)
+    val studyGroupMemberRepository = mockk<StudyGroupMemberPort>()
     val scheduleParticipantRepository = mockk<ScheduleParticipantRepository>()
 
     val useCase = UpdatePostUseCaseImplV2(

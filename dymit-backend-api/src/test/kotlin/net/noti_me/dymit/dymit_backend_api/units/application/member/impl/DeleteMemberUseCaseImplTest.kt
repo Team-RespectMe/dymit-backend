@@ -8,7 +8,7 @@ import net.noti_me.dymit.dymit_backend_api.member.application.impl.DeleteMemberU
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.SaveMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 import org.bson.types.ObjectId
@@ -19,7 +19,7 @@ internal class DeleteMemberUseCaseImplTest(): BehaviorSpec() {
 
     private val saveMemberPort = mockk<SaveMemberPort>()
 
-    private val loadGroupPort = mockk<LoadStudyGroupPort>()
+    private val loadGroupPort = mockk<StudyGroupQueryPort>()
 
     private val deleteMemberUseCase = DeleteMemberUseCaseImpl(
         loadMemberPort = loadMemberPort,

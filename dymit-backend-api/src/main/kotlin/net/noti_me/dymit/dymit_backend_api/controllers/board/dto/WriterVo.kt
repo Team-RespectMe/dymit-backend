@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.controllers.board.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 
 @Schema(description = "작성자 정보")
 class WriterVo(

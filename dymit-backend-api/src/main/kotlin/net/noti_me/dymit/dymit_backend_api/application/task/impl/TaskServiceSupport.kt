@@ -18,8 +18,8 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFile
 import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
@@ -30,8 +30,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
@@ -47,8 +47,8 @@ import java.time.LocalDateTime
  */
 @Component
 class TaskServiceSupport(
-    private val loadStudyGroupPort: LoadStudyGroupPort,
-    private val groupMemberRepository: StudyGroupMemberRepository,
+    private val loadStudyGroupPort: StudyGroupQueryPort,
+    private val groupMemberRepository: StudyGroupMemberPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val scheduleParticipantRepository: ScheduleParticipantRepository,
     private val taskRepository: TaskRepository,

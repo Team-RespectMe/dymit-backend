@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.application.study_schedule.impl
 
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.SchedulePreview
-import net.noti_me.dymit.dymit_backend_api.application.study_group.dto.query.StudyGroupQueryModelDto
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.SchedulePreview
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.StudyScheduleService
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.application.study_schedule.dto.StudyScheduleDetailDto
@@ -14,9 +14,9 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.controllers.study_schedule.dto.RoleAssignment
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberRoleDto as GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleCancelParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleParticipateEvent
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleCanceledEvent
@@ -26,9 +26,9 @@ import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.SchedulePartici
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleRole
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.StudyScheduleModifiedEvent
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.types.ObjectId
@@ -38,9 +38,9 @@ import java.time.LocalDateTime
 
 @Service
 class StudyScheduleServiceImpl(
-    private val groupMemberRepository: StudyGroupMemberRepository,
-    private val loadStudyGroupPort: LoadStudyGroupPort,
-    private val saveStudyGroupPort: SaveStudyGroupPort,
+    private val groupMemberRepository: StudyGroupMemberPort,
+    private val loadStudyGroupPort: StudyGroupQueryPort,
+    private val saveStudyGroupPort: StudyGroupCommandPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val participantRepository: ScheduleParticipantRepository,
     private val eventPublisher: ApplicationEventPublisher
@@ -226,7 +226,11 @@ class StudyScheduleServiceImpl(
         groups.forEach { group ->
             val schedule = schedules[ObjectId(group.id)]
             if (schedule != null) {
-                group.recentSchedule = SchedulePreview.from(schedule)
+                group.recentSchedule = SchedulePreview(
+                    title = schedule.title,
+                    session = schedule.session,
+                    startAt = schedule.scheduleAt
+                )
             }
         }
     }

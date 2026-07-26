@@ -2,8 +2,8 @@ package net.noti_me.dymit.dymit_backend_api.application.study_schedule
 
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberNicknameChangedEvent
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageChangedEvent
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository

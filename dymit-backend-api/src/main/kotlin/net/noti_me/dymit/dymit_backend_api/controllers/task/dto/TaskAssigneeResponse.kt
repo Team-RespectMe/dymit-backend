@@ -61,7 +61,7 @@ class TaskAssigneeMemberResponse(
             return TaskAssigneeMemberResponse(
                 id = dto.id,
                 nickname = dto.nickname,
-                profileImage = ProfileImageResponse.from(dto.profileImage)
+                profileImage = ProfileImageResponse.of(dto.profileImage.type, dto.profileImage.url)
             )
         }
     }

@@ -25,9 +25,9 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssignee
@@ -35,8 +35,8 @@ import net.noti_me.dymit.dymit_backend_api.domain.task.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskSubmission
 import net.noti_me.dymit.dymit_backend_api.domain.task.TaskType
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.task.TaskAssigneeRepository
@@ -49,8 +49,8 @@ import java.time.LocalDateTime
 
 internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
 
-    private val loadStudyGroupPort = mockk<LoadStudyGroupPort>()
-    private val groupMemberRepository = mockk<StudyGroupMemberRepository>()
+    private val loadStudyGroupPort = mockk<StudyGroupQueryPort>()
+    private val groupMemberRepository = mockk<StudyGroupMemberPort>()
     private val studyScheduleRepository = mockk<StudyScheduleRepository>()
     private val scheduleParticipantRepository = mockk<ScheduleParticipantRepository>()
     private val taskRepository = mockk<TaskRepository>()

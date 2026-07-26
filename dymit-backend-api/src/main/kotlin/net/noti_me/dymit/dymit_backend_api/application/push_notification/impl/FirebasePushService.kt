@@ -10,7 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.member.domain.DeviceToken
 import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
 import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 class FirebasePushService(
     private val app: FirebaseApp,
     private val loadMemberPort: LoadMemberPort,
-    private val groupMemberRepository: StudyGroupMemberRepository
+    private val groupMemberRepository: StudyGroupMemberPort
 ) : PushService {
 
     private val logger = LoggerFactory.getLogger(javaClass)

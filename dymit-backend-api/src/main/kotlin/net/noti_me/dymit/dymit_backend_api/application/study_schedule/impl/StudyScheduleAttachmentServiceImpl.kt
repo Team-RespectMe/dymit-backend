@@ -15,7 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.file.UserFileStatus
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleAttachment
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.file.UserFileRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleAttachmentLinkQueryRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleAttachmentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class StudyScheduleAttachmentServiceImpl(
     private val studyScheduleRepository: StudyScheduleRepository,
-    private val groupMemberRepository: StudyGroupMemberRepository,
+    private val groupMemberRepository: StudyGroupMemberPort,
     private val scheduleAttachmentRepository: ScheduleAttachmentRepository,
     private val userFileRepository: UserFileRepository,
     private val fileServiceFacade: FileServiceFacade,

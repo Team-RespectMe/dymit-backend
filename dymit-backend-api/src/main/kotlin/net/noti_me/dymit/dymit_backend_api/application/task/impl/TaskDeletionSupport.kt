@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.application.task.impl
 
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
 import net.noti_me.dymit.dymit_backend_api.domain.task.Task
 import net.noti_me.dymit.dymit_backend_api.domain.task.event.TaskDeletedEvent
 import org.bson.types.ObjectId

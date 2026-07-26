@@ -8,12 +8,12 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleComment
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.event.ScheduleCommentCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleCommentRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import org.bson.types.ObjectId
@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class ScheduleCommentServiceImpl(
-    private val loadStudyGroupPort: LoadStudyGroupPort,
+    private val loadStudyGroupPort: StudyGroupQueryPort,
     private val scheduleCommentRepository: ScheduleCommentRepository,
-    private val studyGroupMemberRepository: StudyGroupMemberRepository,
+    private val studyGroupMemberRepository: StudyGroupMemberPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val eventPublisher: ApplicationEventPublisher,
 ) : ScheduleCommentService {

@@ -10,7 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeed
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.UserFeedQueryHistory
 import net.noti_me.dymit.dymit_backend_api.member.application.port.out.persistence.LoadMemberPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedQueryHistoryRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.user_feed.UserFeedRepository
 import org.bson.types.ObjectId
@@ -25,7 +25,7 @@ class UserFeedServiceImpl(
     private val loadMemberPort: LoadMemberPort,
     private val userFeedRepository: UserFeedRepository,
     private val groupFeedService: GroupFeedService,
-    private val studyGroupMemberRepository: StudyGroupMemberRepository,
+    private val studyGroupMemberRepository: StudyGroupMemberPort,
     private val userFeedQueryHistoryRepository: UserFeedQueryHistoryRepository
 ) : UserFeedService {
 

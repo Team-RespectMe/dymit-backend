@@ -13,18 +13,18 @@ import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCommentCreated
 import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCreatedEvent
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.BoardRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.CommentRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.PostRepository
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
 class CommentServiceImpl(
-    private val loadGroupPort: LoadStudyGroupPort,
-    private val groupMemberRepository: StudyGroupMemberRepository,
+    private val loadGroupPort: StudyGroupQueryPort,
+    private val groupMemberRepository: StudyGroupMemberPort,
     private val boardRepository: BoardRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,

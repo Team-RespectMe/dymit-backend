@@ -8,12 +8,12 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
 import net.noti_me.dymit.dymit_backend_api.domain.board.event.PostCreatedEvent
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.RecentPostVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupRecentPostDto as RecentPostVo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.BoardRepositoryV2
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.PostRepositoryV2
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.SaveStudyGroupPort
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupCommandPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
@@ -26,9 +26,9 @@ import org.springframework.stereotype.Service
 class CreatePostUseCaseImplV2(
     private val postRepository: PostRepositoryV2,
     private val boardRepository: BoardRepositoryV2,
-    private val loadGroupPort: LoadStudyGroupPort,
-    private val saveGroupPort: SaveStudyGroupPort,
-    private val groupMemberRepository: StudyGroupMemberRepository,
+    private val loadGroupPort: StudyGroupQueryPort,
+    private val saveGroupPort: StudyGroupCommandPort,
+    private val groupMemberRepository: StudyGroupMemberPort,
     private val scheduleParticipantRepository: ScheduleParticipantRepository,
     private val eventPublisher: ApplicationEventPublisher
 ) : CreatePostUseCaseV2 {
@@ -67,7 +67,13 @@ class CreatePostUseCaseImplV2(
         )
         val savedPost = postRepository.save(newPost)
 
-        group.updateRecentPost(RecentPostVo.from(savedPost))
+        group.updateRecentPost(
+            RecentPostVo(
+                postId = savedPost.identifier,
+                title = savedPost.title,
+                createdAt = savedPost.createdAt ?: java.time.LocalDateTime.now()
+            )
+        )
         saveGroupPort.update(group)
 
         val event = PostCreatedEvent(

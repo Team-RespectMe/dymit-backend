@@ -1,0 +1,244 @@
+package net.noti_me.dymit.dymit_backend_api.study_group.adapter.`in`.web
+
+import jakarta.annotation.security.RolesAllowed
+import jakarta.validation.Valid
+import net.noti_me.dymit.dymit_backend_api.study_group.application.StudyGroupCommandService
+import net.noti_me.dymit.dymit_backend_api.study_group.application.StudyGroupQueryService
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command.EnlistBlacklistCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.SchedulePreview
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.study_schedule.StudyGroupSchedulePort
+import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
+import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
+import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
+import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web.StudyGroupApi
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web.dto.*
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.*
+import javax.annotation.security.PermitAll
+
+@RestController
+@RequestMapping("/api/v1/study-groups")
+class StudyGroupController(
+    private val studyGroupCommandService: StudyGroupCommandService,
+    private val studyGroupQueryService: StudyGroupQueryService,
+    private val studyGroupSchedulePort: StudyGroupSchedulePort
+): StudyGroupApi {
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun createStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @RequestBody @Valid @Sanitize request: StudyGroupCreateRequest
+    ): StudyGroupResponse {
+        val result = studyGroupCommandService.createStudyGroup(
+            member = memberInfo,
+            command = request.toCommand()
+        )
+
+        return StudyGroupResponse.from(result)
+    }
+
+    @PostMapping("/{groupId}/members")
+    @ResponseStatus(HttpStatus.CREATED)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun joinStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid @Sanitize request: StudyGroupJoinRequest
+    ): StudyGroupMemberResponse {
+        val result = studyGroupCommandService.joinStudyGroup(memberInfo, request.toCommand(groupId))
+        return StudyGroupMemberResponse.from(result)
+    }
+
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun searchStudyGroupByInviteCode(
+        @LoginMember memberInfo: MemberInfo,
+        @RequestParam("inviteCode", required=true) inviteCode: String
+    ): StudyGroupResponse {
+        val searchResult = studyGroupQueryService.getStudyGroupByInviteCode(
+            memberInfo,
+            inviteCode
+        )
+        return StudyGroupResponse.from(searchResult)
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getMyStudyGroups(memberInfo: MemberInfo): ListResponse<StudyGroupListItemDto> {
+        val studyGroups = studyGroupQueryService.getMyStudyGroups(memberInfo)
+        val schedules = studyGroupSchedulePort.loadUpcomingByGroupIds(studyGroups.map { it.id })
+        studyGroups.forEach { group ->
+            schedules[group.id]?.let { group.recentSchedule = SchedulePreview.from(it) }
+        }
+        return ListResponse.from(studyGroups.map { StudyGroupListItemDto.from(it) })
+    }
+
+    @GetMapping("/{groupId}/invite-code")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getStudyGroupInviteCode(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): InviteCodeResponse {
+        val inviteCode = studyGroupQueryService.getInviteCode(memberInfo, groupId)
+        return InviteCodeResponse(
+            code =  inviteCode.code,
+            createdAt = inviteCode.createdAt,
+            expireAt = inviteCode.expireAt
+        )
+    }
+
+    @GetMapping("/{groupId}")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): StudyGroupQueryDetailResponse {
+        val group = studyGroupQueryService.getStudyGroup(memberInfo, groupId)
+        val groupMembers = studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
+        val sorted = groupMembers.sortedBy { it.role  }
+        return StudyGroupQueryDetailResponse.of(group, sorted)
+    }
+
+    @PutMapping("/{groupId}/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun updateStudyGroupProfileImage(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @ModelAttribute @Valid @Sanitize request: UpdateStudyGroupProfileImageRequest
+    ): StudyGroupResponse {
+        val updatedGroup = studyGroupCommandService.updateStudyGroupProfileImage(
+            member = memberInfo,
+            command = request.toCommand(groupId)
+        )
+
+        return StudyGroupResponse.from(updatedGroup)
+    }
+
+    @DeleteMapping("/{groupId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun deleteStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ) {
+        studyGroupCommandService.deleteStudyGroup(memberInfo, groupId)
+    }
+
+    @DeleteMapping("/{groupId}/members/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun leaveStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ) {
+        studyGroupCommandService.leaveStudyGroup(memberInfo, groupId)
+    }
+
+    @DeleteMapping("/{groupId}/members/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun removeStudyGroupMember(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable memberId: String
+    ) {
+        studyGroupCommandService.expelStudyGroupMember(memberInfo, groupId, memberId)
+    }
+
+    @DeleteMapping("/{groupId}/blacklists")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun addStudyGroupMemberToBlacklist(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid @Sanitize request: BlackListEnlistRequest
+    ) {
+        val command = EnlistBlacklistCommand(
+            groupId = groupId,
+            targetMember = request.targetId,
+            reason = request.reason
+        )
+        studyGroupCommandService.enlistBlacklist(memberInfo, command)
+    }
+
+    @GetMapping("/{groupId}/blacklists")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getStudyGroupBlacklists(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): ListResponse<BlackListResponse> {
+        val blacklists = studyGroupQueryService.getBlacklists(memberInfo = memberInfo,
+            groupId = groupId)
+            .asSequence()
+            .map { BlackListResponse.from(it) }
+            .toList()
+
+        return ListResponse.from(blacklists)
+    }
+
+    @DeleteMapping("/{groupId}/blacklists/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun removeStudyGroupMemberFromBlacklist(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable memberId: String
+    ) {
+        studyGroupCommandService.delistBlacklist(memberInfo, groupId, memberId)
+    }
+
+    @PutMapping("/{groupId}")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun updateStudyGroup(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid request: StudyGroupModifyRequest
+    ): StudyGroupResponse {
+        return StudyGroupResponse.from(
+            studyGroupCommandService.updateStudyGroupInfo(
+                memberInfo,
+                request.toCommand(groupId)
+            )
+        )
+    }
+
+    @PatchMapping("/{groupId}/owner")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun changeStudyGroupOwner(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestBody @Valid request: ChangeStudyGroupOwnerRequest
+    ) {
+        studyGroupCommandService.changeStudyGroupOwner(
+            memberInfo,
+            request.toCommand(groupId)
+        )
+    }
+
+    @GetMapping("/{groupId}/group-members")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getStudyGroupMembers(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+
+    ): ListResponse<StudyGroupMemberResponse> {
+        return ListResponse.from(
+               studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
+                 .map { StudyGroupMemberResponse.from(it) }
+        )
+    }
+}

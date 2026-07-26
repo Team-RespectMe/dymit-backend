@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.BoardCategoryWritePolicy
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostCategory
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import org.bson.types.ObjectId
 

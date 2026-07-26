@@ -4,8 +4,8 @@ import net.noti_me.dymit.dymit_backend_api.common.event.GroupImportantEvent
 import net.noti_me.dymit.dymit_backend_api.domain.board.Board
 import net.noti_me.dymit.dymit_backend_api.domain.board.Post
 import net.noti_me.dymit.dymit_backend_api.domain.push.GroupPushMessage
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroup
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.StudyGroupMember
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupDto as StudyGroup
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberDto as StudyGroupMember
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.AssociatedResource
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.FeedMessage
 import net.noti_me.dymit.dymit_backend_api.domain.user_feed.GroupFeed

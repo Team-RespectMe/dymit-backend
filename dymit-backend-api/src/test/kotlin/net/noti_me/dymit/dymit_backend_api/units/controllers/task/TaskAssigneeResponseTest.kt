@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.application.task.dto.TaskAssigneeMemberDto
 import net.noti_me.dymit.dymit_backend_api.controllers.task.dto.TaskAssigneeResponse
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 
 /**
  * 과제 제출 대상 응답 HATEOAS 단위 테스트입니다.

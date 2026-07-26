@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.configs.MongoConfig
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.domain.board.PostComment
 import net.noti_me.dymit.dymit_backend_api.domain.board.Writer
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 import org.bson.types.ObjectId
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import

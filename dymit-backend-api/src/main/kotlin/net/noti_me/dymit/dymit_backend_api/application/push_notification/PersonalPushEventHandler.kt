@@ -7,6 +7,8 @@ import net.noti_me.dymit.dymit_backend_api.common.event.GroupPushable
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalImportantEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.PersonalPushEvent
 import net.noti_me.dymit.dymit_backend_api.common.event.Pushable
+import net.noti_me.dymit.dymit_backend_api.domain.push.PersonalPushMessage
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.events.StudyGroupOwnerChangedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
@@ -31,5 +33,19 @@ class PersonalPushEventHandler(
         pushMessages.forEach { pushMessage ->
             pushService.sendPersonalPush(pushMessage)
         }
+    }
+
+    @EventListener
+    fun handleStudyGroupOwnerChangedEvent(event: StudyGroupOwnerChangedEvent) {
+        pushService.sendPersonalPush(
+            PersonalPushMessage(
+                memberId = event.ownerId,
+                eventName = StudyGroupOwnerChangedEvent.EVENT_NAME,
+                title = "Dymit",
+                body = "${event.groupName} 새로운 소유자가 되셨습니다!",
+                data = mapOf("groupId" to event.groupId),
+                image = null
+            )
+        )
     }
 }

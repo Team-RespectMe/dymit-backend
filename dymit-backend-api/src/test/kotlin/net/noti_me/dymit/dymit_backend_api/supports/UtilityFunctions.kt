@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.supports
 
 import net.noti_me.dymit.dymit_backend_api.domain.ProfileImageType
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.ProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupProfileImageDto as ProfileImageVo
 
 fun createProfileImageVo(
     type: ProfileImageType = ProfileImageType.PRESET,

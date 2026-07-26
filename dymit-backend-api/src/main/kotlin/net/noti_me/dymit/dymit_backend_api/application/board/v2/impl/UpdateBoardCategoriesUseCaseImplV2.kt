@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.application.board.v2.usecases.UpdateB
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.board.v2.BoardRepositoryV2
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group_member.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupMemberPort
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 @Service
 class UpdateBoardCategoriesUseCaseImplV2(
     private val boardRepository: BoardRepositoryV2,
-    private val groupMemberRepository: StudyGroupMemberRepository
+    private val groupMemberRepository: StudyGroupMemberPort
 ) : UpdateBoardCategoriesUseCaseV2 {
 
     override fun updateCategories(

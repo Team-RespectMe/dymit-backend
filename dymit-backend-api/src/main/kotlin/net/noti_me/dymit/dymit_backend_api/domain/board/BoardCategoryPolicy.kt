@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.domain.board
 
-import net.noti_me.dymit.dymit_backend_api.domain.study_group.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.dto.StudyGroupMemberRoleDto as GroupMemberRole
 
 /**
  * 게시판 카테고리별 작성 정책입니다.

@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.application.reminder
 import org.quartz.DisallowConcurrentExecution
 import org.springframework.stereotype.Component
 import net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule
-import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_group.LoadStudyGroupPort
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.server_to_server.StudyGroupQueryPort
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.ScheduleParticipantRepository
 import net.noti_me.dymit.dymit_backend_api.ports.persistence.study_schedule.StudyScheduleRepository
 import net.noti_me.dymit.dymit_backend_api.application.reminder.events.HourlyScheduleReminderEvent
@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 @Component
 @DisallowConcurrentExecution
 class HourlyScheduleReminderJob(
-    private val loadGroupPort: LoadStudyGroupPort,
+    private val loadGroupPort: StudyGroupQueryPort,
     private val studyScheduleRepository: StudyScheduleRepository,
     private val eventPublisher: ApplicationEventPublisher,
     private val scheduleParticipantRepository: ScheduleParticipantRepository,
