@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_schedule.application
 
+import net.noti_me.dymit.dymit_backend_api.common.daily_statistics.DailyStatisticsWindowCalculator
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.StudyScheduleService
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.StudyScheduleCreateCommand
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.StudyScheduleDetailDto
@@ -248,6 +249,7 @@ class StudyScheduleServiceImpl(
         val scheduleMember = ScheduleParticipant(
             memberId = ObjectId(memberInfo.memberId),
             scheduleId = ObjectId(scheduleId),
+            createdAt = LocalDateTime.now(DailyStatisticsWindowCalculator.KOREA_ZONE)
         )
 
         val participant = participantRepository.save(scheduleMember)

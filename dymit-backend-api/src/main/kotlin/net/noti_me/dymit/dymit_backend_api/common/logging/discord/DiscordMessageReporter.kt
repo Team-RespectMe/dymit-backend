@@ -3,16 +3,18 @@ package net.noti_me.dymit.dymit_backend_api.common.logging.discord
 import com.fasterxml.jackson.databind.ObjectMapper
 import net.noti_me.dymit.dymit_backend_api.common.logging.LogReporter
 import org.slf4j.LoggerFactory
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
+/**
+ * Formats and reports API error details to Discord.
+ */
 class DiscordMessageReporter(
     private val objectMapper: ObjectMapper,
-    private val webClient : WebClient,
+    private val transport: DiscordWebhookTransport,
     private val discordWebhookUrl: String
 ) : LogReporter {
 
@@ -20,6 +22,9 @@ class DiscordMessageReporter(
 
     private val formatter = DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC)
 
+    /**
+     * Formats the HTTP exchange and asynchronously sends the existing error payload.
+     */
     override fun send(request: ContentCachingRequestWrapper, response: ContentCachingResponseWrapper) {
         val time = Instant.now()
         val embeds = listOf(
@@ -53,12 +58,7 @@ class DiscordMessageReporter(
 
         val dto = DiscordMessageDto("Error Log", embeds)
         logger.debug(objectMapper.writeValueAsString(dto))
-        webClient
-            .post()
-            .uri(discordWebhookUrl)
-            .bodyValue(dto)
-            .retrieve()
-            .bodyToMono(Void::class.java)
+        transport.send(discordWebhookUrl, dto)
             .doOnError { error -> logger.error("Failed to send Discord message: ${error.message}") }
             .subscribe()
     }

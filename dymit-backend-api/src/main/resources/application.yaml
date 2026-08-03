@@ -66,6 +66,10 @@ log-reporter:
     quartz:
       webhook:
         url: ${DYMIT_DISCORD_QUARTZ_WEBHOOK_URL:}
+discord:
+  daily_statistics:
+    webhook:
+      url: ${DYMIT_DISCORD_DAILY_STATISTICS_WEBHOOK_URL:}
 logging:
   level:
     root: ${DYMIT_SERVER_LOG_LEVEL:INFO}
@@ -73,4 +77,3 @@ logging:
     org.apache: ${DYMIT_APACHE_LOG_LEVEL:INFO}
     org.springframework.web: ${DYMIT_SPRING_WEB_LOG_LEVEL:INFO}
     org.springframework.data.mongodb: ${DYMIT_SPRING_DATA_MONGODB_LOG_LEVEL:INFO}
-
