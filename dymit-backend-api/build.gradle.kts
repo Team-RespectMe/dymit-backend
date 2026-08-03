@@ -27,11 +27,13 @@ repositories {
 dependencies {
 	implementation("io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64") // Apple Silicon(M1/M2)
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-cache")
+	implementation("io.micrometer:micrometer-registry-prometheus")
 
     // for batch operations
     implementation("org.springframework.boot:spring-boot-starter-quartz:3.5.7")

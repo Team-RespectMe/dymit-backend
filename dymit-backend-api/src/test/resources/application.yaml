@@ -18,6 +18,20 @@ spring:
 server:
   port: 0
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
 de.flapdoodle.mongodb.embedded.version: 5.0.14
 
 test:
