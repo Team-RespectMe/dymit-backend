@@ -11,20 +11,23 @@ import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import java.util.*
 
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
-class MDCLoggingFilter : Filter {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
-
-    override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain) {
-        logger.debug("MDC will be set")
-        val traceId = UUID.randomUUID().toString()
-        MDC.put("traceId", traceId)
-        try {
-            chain.doFilter(request, response)
-        } finally {
-            MDC.clear()
-        }
-    }
-}
+/**
+ * Micrometer 기반 MDC 도입으로 이 필터는 사용하지 않음
+ */
+//@Component
+//@Order(Ordered.HIGHEST_PRECEDENCE)
+//class MDCLoggingFilter : Filter {
+//
+//    private val logger = LoggerFactory.getLogger(javaClass)
+//
+//    override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain) {
+//        logger.debug("MDC will be set")
+//        val traceId = UUID.randomUUID().toString()
+//        MDC.put("traceId", traceId)
+//        try {
+//            chain.doFilter(request, response)
+//        } finally {
+//            MDC.clear()
+//        }
+//    }
+//}

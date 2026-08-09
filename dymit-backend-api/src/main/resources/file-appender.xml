@@ -1,0 +1,37 @@
+<included>
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <file>${LOG_FILE_PATH}</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE_FILE_PATTERN}</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!--
+              Do not emit every Logback context property (for example, ROOT_LOG_LEVEL)
+              as a top-level log field. Required deployment metadata is declared below.
+            -->
+            <includeContext>false</includeContext>
+            <includeMdc>true</includeMdc>
+            <mdcKeyFieldName>traceId=trace_id</mdcKeyFieldName>
+            <mdcKeyFieldName>spanId=span_id</mdcKeyFieldName>
+            <customFields><![CDATA[
+                {
+                    "platform": "${PLATFORM}",
+                    "service": "${SERVICE}",
+                    "kubernetes": {
+                        "node_name": "${K8S_NODE_NAME}",
+                        "namespace": "${K8S_NAMESPACE}",
+                        "pod_name": "${K8S_POD_NAME}",
+                        "pod_uid": "${K8S_POD_UID}"
+                    }
+                }
+            ]]></customFields>
+        </encoder>
+    </appender>
+</included>

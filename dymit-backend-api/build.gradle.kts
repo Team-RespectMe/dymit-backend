@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.13.25"
+version = "0.13.27"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 
@@ -34,6 +34,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-cache")
 	implementation("io.micrometer:micrometer-registry-prometheus")
+	implementation("io.micrometer:micrometer-tracing-bridge-brave")
+	implementation("io.zipkin.reporter2:zipkin-reporter-brave")
 
     // for batch operations
     implementation("org.springframework.boot:spring-boot-starter-quartz:3.5.7")
@@ -49,9 +51,13 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.792")
     implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
+    // logging
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
+
 
 	testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
+
 
     // testImplementation("io.kotest:kotest-extensions-htmlreporter:5.9.1")
     // testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1")
