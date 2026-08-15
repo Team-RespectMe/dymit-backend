@@ -1,3 +1,4 @@
 plugins {
     base
+    id("com.bmuschko.docker-remote-api") version "9.4.0" apply false
 }
