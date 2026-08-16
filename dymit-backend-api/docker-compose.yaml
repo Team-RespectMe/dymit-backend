@@ -1,0 +1,41 @@
+services:
+  mongodb:
+    build: ./docker/mongodb
+    image: dymit-mongodb:local
+    container_name: dymit-mongodb
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/etc/mongo-keyfile"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test_admin
+      MONGO_INITDB_ROOT_PASSWORD: test1234
+      MONGO_INITDB_DATABASE: dymit
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./docker/mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username test_admin --password test1234 --authenticationDatabase admin --eval 'db.adminCommand(\"ping\")' >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  mongodb-init:
+    image: mongo:7.0
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    command:
+      [
+        "mongosh",
+        "--host",
+        "mongodb:27017",
+        "--username",
+        "test_admin",
+        "--password",
+        "test1234",
+        "--authenticationDatabase",
+        "admin",
+        "/scripts/initialize.js"
+      ]
+    volumes:
+      - ./docker/mongodb/initialize.js:/scripts/initialize.js:ro

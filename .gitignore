@@ -58,3 +58,7 @@ build/
 **/.agent-dev/logs/
 .agent-dev/tasks/
 **/.agent-dev/tasks/
+
+## DOCKER
+docker/
+**/docker/

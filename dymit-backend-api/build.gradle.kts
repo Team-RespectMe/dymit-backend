@@ -13,6 +13,8 @@ group = "net.noti-me.dymit-backend"
 version = "0.13.27"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
+val dockerExecutable = providers.environmentVariable("DYMIT_DOCKER_EXECUTABLE")
+    .orElse("/usr/local/bin/docker")
 
 java {
 	toolchain {
@@ -113,9 +115,35 @@ tasks.register<DockerPushImage>("pushDockerImage") {
 	group = "docker"
 }
 
+tasks.register<Exec>("startMongoDb") {
+    group = "application"
+    description = "로컬 MongoDB를 기동합니다"
+    workingDir = project.projectDir
+    commandLine(dockerExecutable.get(), "compose", "up", "--build", "--detach", "mongodb")
+}
+
+tasks.register<Exec>("initializeMongoDb") {
+    group = "application"
+    description = "로컬 MongoDB의 계정과 replica set을 초기화합니다"
+    dependsOn("startMongoDb")
+    workingDir = project.projectDir
+    commandLine(dockerExecutable.get(), "compose", "run", "--rm", "mongodb-init")
+}
+
+tasks.register("startLocalInfrastructure") {
+    group = "application"
+    description = "애플리케이션 로컬 실행에 필요한 인프라를 기동하고 초기화합니다"
+    dependsOn("initializeMongoDb")
+}
+
+tasks.named("bootRun") {
+    dependsOn("startLocalInfrastructure")
+}
+
 tasks.register<JavaExec>("bootDebug") {
     group = "application"
     description = "Run Spring Boot in debug mode for Neovim DAP"
+    dependsOn("startLocalInfrastructure")
 
     // Spring Boot main 클래스 자동 감지
     mainClass.set("net.noti_me.dymit.dymit_backend_api.ApplicationKt") // 실제 main 클래스 경로로 수정
