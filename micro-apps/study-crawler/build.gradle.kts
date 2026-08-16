@@ -3,7 +3,6 @@ import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 plugins {
     base
-    id("com.bmuschko.docker-remote-api") version "9.4.0"
 }
 
 group = "net.noti-me.dymit-backend"
