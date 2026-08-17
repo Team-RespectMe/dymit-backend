@@ -13,7 +13,8 @@ import java.time.LocalDateTime
  *
  * @property id MongoDB ObjectId
  * @property writer 모집글 작성자
- * @property group 모집 대상 스터디 그룹
+ * @property groupId 모집 대상 스터디 그룹 ObjectId
+ * @property type 모집글 출처 유형
  * @property title 모집글 제목
  * @property description 스터디 소개
  * @property purpose 스터디 목적
@@ -23,29 +24,33 @@ import java.time.LocalDateTime
  * @property targetMember 모집 대상
  * @property studyFormat 운영 방식
  * @property contact 연락처 또는 연락 URL
+ * @property tags 모집글 태그 목록
  * @property createdAt 생성 시각
  * @property updatedAt 수정 시각
  * @property isDeleted 삭제 여부
  */
 @Document(collection = "study_recruitments")
-@TypeAlias(DYMIT_STUDY_RECURITMENT_TYPE_ALIAS)
-class DymitStudyRecuritment(
+@TypeAlias(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS)
+class DymitStudyRecruitment(
     id: ObjectId? = null,
-    val writer: DymitStudyRecuritmentWriter,
-    val group: DymitStudyRecuritmentGroup,
+    val writer: DymitStudyRecruitmentWriter,
+    @Field("group_id")
+    val groupId: ObjectId,
+    val type: StudyRecruitmentType = StudyRecruitmentType.DYMIT,
     title: String,
     description: String,
     purpose: String,
-    recruitmentStatus: DymitStudyRecuritmentStatus = DymitStudyRecuritmentStatus.RECRUITING,
+    recruitmentStatus: DymitStudyRecruitmentStatus = DymitStudyRecruitmentStatus.RECRUITING,
     recruitmentStart: Instant? = null,
     recruitmentEnd: Instant? = null,
     targetMember: String,
     studyFormat: String,
     contact: String,
+    tags: List<String> = emptyList(),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false
-) : BaseAggregateRoot<DymitStudyRecuritment>(
+) : BaseAggregateRoot<DymitStudyRecruitment>(
     id = id,
     createdAt = createdAt,
     updatedAt = updatedAt,
@@ -62,7 +67,7 @@ class DymitStudyRecuritment(
         private set
 
     @Field("recruitment_status")
-    var recruitmentStatus: DymitStudyRecuritmentStatus = recruitmentStatus
+    var recruitmentStatus: DymitStudyRecruitmentStatus = recruitmentStatus
         private set
 
     @Field("recruitment_start")
@@ -84,15 +89,8 @@ class DymitStudyRecuritment(
     var contact: String = validateLength(contact, CONTACT_MAX_LENGTH, "연락처")
         private set
 
-    /**
-     * 모집글 제목을 변경합니다.
-     *
-     * @param newTitle 변경할 제목
-     */
-    fun changeTitle(newTitle: String) {
-        title = validateLength(newTitle, TITLE_MAX_LENGTH, "제목")
-        touchUpdatedAt()
-    }
+    var tags: List<String> = tags.toList()
+        private set
 
     /**
      * 스터디 소개를 변경합니다.
@@ -164,6 +162,34 @@ class DymitStudyRecuritment(
         touchUpdatedAt()
     }
 
+    /**
+     * 모집 상태를 변경합니다.
+     *
+     * @param newStatus 변경할 모집 상태
+     */
+    fun changeRecruitmentStatus(newStatus: DymitStudyRecruitmentStatus) {
+        recruitmentStatus = newStatus
+        touchUpdatedAt()
+    }
+
+    /**
+     * 모집글 태그 목록을 변경합니다.
+     *
+     * @param newTags 변경할 태그 목록
+     */
+    fun changeTags(newTags: List<String>) {
+        tags = newTags.toList()
+        touchUpdatedAt()
+    }
+
+    /**
+     * 모집글을 삭제 상태로 변경합니다.
+     */
+    override fun markAsDeleted() {
+        super.markAsDeleted()
+        touchUpdatedAt()
+    }
+
     private fun touchUpdatedAt() {
         updatedAt = LocalDateTime.now()
     }
@@ -186,34 +212,4 @@ class DymitStudyRecuritment(
     }
 }
 
-/**
- * Dymit 내부 스터디 모집글 작성자 값 객체입니다.
- *
- * @property id 작성자 ObjectId
- * @property nickname 작성자 표시 닉네임
- */
-data class DymitStudyRecuritmentWriter(
-    val id: ObjectId,
-    val nickname: String
-)
-
-/**
- * Dymit 내부 스터디 모집글 그룹 값 객체입니다.
- *
- * @property id 그룹 ObjectId
- * @property name 그룹 표시 이름
- */
-data class DymitStudyRecuritmentGroup(
-    val id: ObjectId,
-    val name: String
-)
-
-/**
- * Dymit 내부 스터디 모집 상태입니다.
- */
-enum class DymitStudyRecuritmentStatus {
-    RECRUITING,
-    DONE
-}
-
-internal const val DYMIT_STUDY_RECURITMENT_TYPE_ALIAS = "dymit_study_recuritment"
+internal const val DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS = "dymit_study_recruitment"

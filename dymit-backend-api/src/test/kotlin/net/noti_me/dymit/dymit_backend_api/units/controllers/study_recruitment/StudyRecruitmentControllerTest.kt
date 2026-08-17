@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.units.study_recruitment.adapter.`in`.web
 
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -11,6 +12,8 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.web.St
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.QueryStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.QueryStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.StudyRecruitmentApi
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.types.ObjectId
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
@@ -52,6 +55,24 @@ internal class StudyRecruitmentControllerTest : BehaviorSpec() {
                 }
             }
         }
+
+        Given("the relocated v1 web contract") {
+            Then("the API interface and response DTO live under the application port web package") {
+                StudyRecruitmentApi::class.java.`package`.name shouldBe
+                    "net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.in.web"
+                responseDtoFieldNames() shouldContainAll listOf(
+                    "id",
+                    "externalId",
+                    "type",
+                    "title",
+                    "content",
+                    "url",
+                    "writer",
+                    "createdAt",
+                    "updatedAt"
+                )
+            }
+        }
     }
 
     private fun request() = MockHttpServletRequest("GET", "/api/v1/study-recruitments").apply {
@@ -63,7 +84,7 @@ internal class StudyRecruitmentControllerTest : BehaviorSpec() {
     private fun createDto(id: String) = StudyRecruitmentDto(
         id = id,
         externalId = "external-$id",
-        type = "INFLEARN",
+        type = StudyRecruitmentType.INFLEARN,
         title = "title-$id",
         content = "content-$id",
         url = "https://example.com/$id",
@@ -71,4 +92,10 @@ internal class StudyRecruitmentControllerTest : BehaviorSpec() {
         createdAt = null,
         updatedAt = null
     )
+
+    private fun responseDtoFieldNames(): List<String> {
+        return Class.forName(
+            "net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.in.web.dto.StudyRecruitmentResponse"
+        ).declaredFields.map { it.name }
+    }
 }

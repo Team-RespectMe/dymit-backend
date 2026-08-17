@@ -5,6 +5,9 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.QueryStudyRecruitmentUseCase
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.StudyRecruitmentApi
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.QueryStudyRecruitmentRequest
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam

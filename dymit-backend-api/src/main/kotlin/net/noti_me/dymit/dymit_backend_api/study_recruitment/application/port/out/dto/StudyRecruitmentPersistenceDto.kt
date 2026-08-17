@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.dto
 
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import java.time.LocalDateTime
 
 /**
@@ -18,7 +19,7 @@ import java.time.LocalDateTime
 data class StudyRecruitmentPersistenceDto(
     val id: String,
     val externalId: String,
-    val type: String,
+    val type: StudyRecruitmentType,
     val title: String,
     val content: String,
     val url: String,

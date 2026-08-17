@@ -1,4 +1,4 @@
-package net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.web
+package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentResponse
 import org.springframework.web.bind.annotation.RequestMapping
 
 /**

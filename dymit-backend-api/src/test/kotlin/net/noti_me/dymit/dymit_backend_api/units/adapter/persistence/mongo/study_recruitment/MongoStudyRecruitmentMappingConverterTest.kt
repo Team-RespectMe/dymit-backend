@@ -1,11 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.units.study_recruitment.adapter.out.persistence.mongo
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecuritment
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecuritmentGroup
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecuritmentWriter
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentResponse
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentWriter
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter
@@ -16,20 +20,15 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
 
     private val converter = createConverter()
+    private val objectMapper = jacksonObjectMapper()
 
     init {
-        Given("a Dymit study recruitment entity") {
-            val recruitment = DymitStudyRecuritment(
+        Given("Dymit 모집글을 Mongo 문서로 쓸 때") {
+            val recruitment = DymitStudyRecruitment(
                 id = ObjectId.get(),
-                writer = DymitStudyRecuritmentWriter(
-                    id = ObjectId.get(),
-                    nickname = "작성자"
-                ),
-                group = DymitStudyRecuritmentGroup(
-                    id = ObjectId.get(),
-                    name = "테스트 그룹"
-                ),
-                title = "제목",
+                writer = DymitStudyRecruitmentWriter(ObjectId.get(), "작성자"),
+                groupId = ObjectId.get(),
+                title = "테스트 그룹",
                 description = "소개",
                 purpose = "목적",
                 targetMember = "백엔드",
@@ -37,48 +36,81 @@ internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
                 contact = "https://example.com/contact"
             )
 
-            When("Spring Data Mongo writes it to a BSON document") {
+            When("Spring Data MappingMongoConverter를 사용하면") {
                 val document = Document()
                 converter.write(recruitment, document)
 
-                Then("the configured type alias is stored in _class") {
-                    document.getString("_class") shouldBe DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
+                Then("_class에 Dymit alias가 기록된다") {
+                    document.getString("_class") shouldBe DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
                 }
             }
         }
 
-        Given("the study recruitment exclusion query") {
-            val queryDocument = Document(
-                mapOf(
-                    "isDeleted" to false,
-                    "_class" to Document("\$ne", DYMIT_STUDY_RECURITMENT_TYPE_ALIAS)
-                )
-            )
-
+        Given("legacy INFLEARN Mongo 문서") {
             val legacyDocument = Document(
                 mapOf(
                     "_id" to ObjectId.get(),
                     "externalId" to "legacy-1",
+                    "type" to "INFLEARN",
+                    "title" to "외부 모집글",
+                    "content" to "본문",
+                    "url" to "https://example.com/legacy",
+                    "writer" to "외부 작성자",
                     "isDeleted" to false
                 )
             )
-            val aliasDocument = Document(
-                mapOf(
-                    "_id" to ObjectId.get(),
-                    "externalId" to "dymit-1",
-                    "isDeleted" to false,
-                    "_class" to DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
+
+            When("StudyRecruitment로 읽으면") {
+                val recruitment = converter.read(StudyRecruitment::class.java, legacyDocument)
+
+                Then("INFLEARN enum으로 호환 역직렬화된다") {
+                    recruitment.type shouldBe StudyRecruitmentType.INFLEARN
+                    recruitment.externalId shouldBe "legacy-1"
+                }
+            }
+        }
+
+        Given("v1 외부 모집글 응답") {
+            val response = StudyRecruitmentResponse.from(
+                StudyRecruitmentDto(
+                    id = "id-1",
+                    externalId = "external-1",
+                    type = StudyRecruitmentType.INFLEARN,
+                    title = "외부 모집글",
+                    content = "본문",
+                    url = "https://example.com/1",
+                    writer = "작성자",
+                    createdAt = null,
+                    updatedAt = null
                 )
             )
 
-            When("the query is evaluated with Mongo's \$ne semantics") {
-                Then("a legacy document without _class remains eligible") {
-                    matchesQuery(queryDocument, legacyDocument) shouldBe true
-                }
+            When("JSON으로 직렬화하면") {
+                val json = objectMapper.writeValueAsString(response)
 
-                Then("an alias document is excluded") {
-                    matchesQuery(queryDocument, aliasDocument) shouldBe false
+                Then("기존 v1 type 값은 INFLEARN 문자열로 유지된다") {
+                    json.contains("\"type\":\"INFLEARN\"") shouldBe true
                 }
+            }
+        }
+
+        Given("외부 모집글 제외 쿼리 문서") {
+            val queryDocument = Document(
+                mapOf(
+                    "isDeleted" to false,
+                    "_class" to Document("\$ne", DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS)
+                )
+            )
+
+            Then("_class가 없는 legacy 문서는 매칭된다") {
+                matchesQuery(queryDocument, Document("isDeleted", false)) shouldBe true
+            }
+
+            Then("alias 문서는 제외된다") {
+                matchesQuery(
+                    queryDocument,
+                    Document(mapOf("isDeleted" to false, "_class" to DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
+                ) shouldBe false
             }
         }
     }
@@ -99,12 +131,11 @@ internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
         queryDocument: Document,
         candidate: Document
     ): Boolean {
-        val isDeletedMatches = candidate["isDeleted"] == queryDocument["isDeleted"]
         val classCondition = queryDocument["_class"] as Document
         val excludedAlias = classCondition["\$ne"]
         val candidateClass = candidate["_class"]
-        val classMatches = candidateClass == null || candidateClass != excludedAlias
 
-        return isDeletedMatches && classMatches
+        return candidate["isDeleted"] == queryDocument["isDeleted"] &&
+            (candidateClass == null || candidateClass != excludedAlias)
     }
 }

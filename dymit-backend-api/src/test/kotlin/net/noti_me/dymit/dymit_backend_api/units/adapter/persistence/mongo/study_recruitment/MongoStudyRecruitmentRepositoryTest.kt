@@ -8,8 +8,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.out.persistence.mongo.MongoStudyRecruitmentAdapter
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -35,7 +36,7 @@ internal class MongoStudyRecruitmentRepositoryTest : BehaviorSpec() {
                     verify(exactly = 1) { mongoTemplate.find(any<Query>(), StudyRecruitment::class.java) }
                     query.captured.limit shouldBe 21
                     query.captured.queryObject["isDeleted"] shouldBe false
-                    (query.captured.queryObject["_class"] as Document)["\$ne"] shouldBe DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
+                    (query.captured.queryObject["_class"] as Document)["\$ne"] shouldBe DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
                     (query.captured.queryObject["_id"] as Document)["\$lt"] shouldBe cursor
                     query.captured.sortObject["_id"] shouldBe -1
                     result.map { it.id } shouldContainExactly listOf(recruitment.identifier)
@@ -53,7 +54,7 @@ internal class MongoStudyRecruitmentRepositoryTest : BehaviorSpec() {
 
                 Then("it omits the cursor criterion while retaining the deletion filter") {
                     query.captured.queryObject["isDeleted"] shouldBe false
-                    (query.captured.queryObject["_class"] as Document)["\$ne"] shouldBe DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
+                    (query.captured.queryObject["_class"] as Document)["\$ne"] shouldBe DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
                     query.captured.queryObject.containsKey("_id") shouldBe false
                 }
             }
@@ -63,7 +64,7 @@ internal class MongoStudyRecruitmentRepositoryTest : BehaviorSpec() {
     private fun createStudyRecruitment(id: String): StudyRecruitment = StudyRecruitment(
         id = ObjectId.get(),
         externalId = "external-$id",
-        type = "INFLEARN",
+        type = StudyRecruitmentType.INFLEARN,
         title = "title",
         content = "content",
         url = "https://example.com/$id",

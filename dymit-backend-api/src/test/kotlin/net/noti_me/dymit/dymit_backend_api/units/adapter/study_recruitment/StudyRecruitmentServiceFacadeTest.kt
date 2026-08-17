@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.QuerySt
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.QueryStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.LoadStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.dto.StudyRecruitmentPersistenceDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.types.ObjectId
 
 /** Query study recruitment service unit tests. */
@@ -64,7 +65,7 @@ internal class StudyRecruitmentServiceFacadeTest : BehaviorSpec() {
     private fun createPersistenceDto(id: String) = StudyRecruitmentPersistenceDto(
         id = id,
         externalId = "external-$id",
-        type = "INFLEARN",
+        type = StudyRecruitmentType.INFLEARN,
         title = "title",
         content = "content",
         url = "https://example.com/$id",

@@ -2,8 +2,8 @@ package net.noti_me.dymit.dymit_backend_api.units.study_recruitment.application
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.web.QueryStudyRecruitmentRequest
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.QueryStudyRecruitmentCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.QueryStudyRecruitmentRequest
 
 /** Query study recruitment web-request conversion unit tests. */
 internal class QueryStudyRecruitmentUseCaseImplTest : BehaviorSpec() {

@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 class StudyRecruitment(
     id: ObjectId? = null,
     externalId: String?,
-    type: String,
+    type: StudyRecruitmentType,
     title: String,
     content: String,
     url: String,
@@ -41,7 +41,7 @@ class StudyRecruitment(
     var externalId: String? = externalId
         private set
 
-    var type: String = type
+    var type: StudyRecruitmentType = type
         private set
 
     var title: String = title

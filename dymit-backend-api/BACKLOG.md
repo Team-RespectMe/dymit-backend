@@ -1,12 +1,12 @@
 # BACKLOG
 ---
-## TASK-90 Dymit 스터디그룹 도메인 엔티티 추가
+## TASK-90 Dymit 스터디그룹 CRUD 서비스
 **STATUS** Done
 **BACKGROUND**
 
 현재 스터디 그룹 모집 API는 외부 스터디 그룹에 대한 모집만 조회가 가능합니다.
-
-이제 Dymit 에서 존재하는 스터디 그룹들이 자신의 그룹에 대한 채용공고를 올릴 수 있도록 기능을 추가하려합니다.
+Dymit StudyGroup 의 채용 공고에 대한 CRUD Feature를 추가하려고 합니다.
+이 작업의 결과물은 /api/v2/study-recruitments 패턴의 엔드포인트만을 사용합니다.
 
 ### Base Rules
 - 구조를 [PROJECT_STRUCTURE.md](.agent-dev/PROJECT_STRUCTURE.md)를 참고하여 
@@ -15,35 +15,58 @@
 
 
 ### REQUIREMENTS
-- StudyRecuritment 도메인 엔티티는 외부 스터디 채용에 대한 엔티티로 둘 것입니다. 
-- DymitStudyRecuritment 라는 새로운 도메인 엔티티를 추가하세요.
-- "study_recuritments" 라는 컬렉션에 저장합니다. 즉 StudyRecruitment 와 동일한 컬렉션에 저장할 예정인데 문제가 생기지 않을지 파악하세요.
-- 새로운 도메인 엔티티의 필드는 아래와 같습니다.
-```json
+- 모든 대상은 DymitStudyRecruitment 를 만들 수 있는 도큐먼트만 대상으로 합니다. 
+- DymitStudyRecruitment Entity의 group 필드는 그냥 없애고 단일 groupId로  
+대체하는게 좋겠습니다. 대신 tags 필드를 추가하십시오(List<String>), type 필드도
+추가하세요.
+- type필드의 경우 StudyRecruitmentType 이란걸 정의하고, DYMIT,INFLEARN을
+정의하세요. 
+- 한 파일에 한 인터페이스 한 클래스 이런식으로 작성하세요 한 파일안에
+때려박지말고 
+- Dymit Study Recruitment 의 Create 엔드포인트를 생성하십시오.
+    - Controller의 입력으로 CreateStudyRecruitmentRequest 를 정의하세요. 
+```json 
+//CreateStudyRecruitmentRequest
 {
-    "_id": ObjectId(...),
-    "writer" {
-        "id": ObjectId(...),
-        "nickname": String,
-    },
-    "group": {
-        "id": ObjectId(...),
-        "name": "...",
-    },
-    "title": "공고 내용", / 50자 제한
-    "description": "스터디 소개", / 200자 제한
-    "purpose": "스터디 목적", // 50자 제한
-    "recruitment_status": "RECRUITING", // ENUM 정의 RECRUITING/DONE, 
-    "recruitment_start": Instant?, // 미지정 가능함
-    "recruitment_end": Instant?, // 미지정 가능함
-    "target_member": "모집 대상", // 100자 제한
-    "study_format": "운영 방식", // 100자 제한
-    "contact": String, // 연락처 및 연락 URL // 255자 제한
-    "createdAt": LocalDateTime? 
-    "updatedAt": LocalDateTime?
-    "isDeleted": Boolean
+    "groupId": "스터디 모집 대상 study group id",
+    "description": "스터디 모집 설명",
+    "purpose": "스터디 목적",
+    "targetMember": "모집 대상 정보",
+    "studyFormat" : "스터디 진행 방식에 대한 설명",
+    "contact": "url or phone or email",
+    "recruitment_start": Instant?,
+    "recruitment_end": Instant?,
+    "tags": List<String> = emptyList(),
+}
+
+```
+- Dymit Study Recruitment 의 Put 엔드포인트를 생성하십시오. 
+    - UpdateStudyRecruitmentRequest 를 정의하고 사용합니다.
+- groupId를 통해 실제 스터디그룹을 조회하고(DymitStudyRecuritmentLoadStudyGroupPort 정의하여 사용)
+그 이름을 가져와서 title로 사용합니다.
+
+```json
+// UpdateStudyRecruitmentRequest
+{
+    "description": "스터디 모집 설명",
+    "purpose": "스터디 목적",
+    "targetMember": "모집 대상 정보",
+    "studyFormat" : "스터디 진행 방식에 대한 설명",
+    "contact": "url or phone or email",
+    "recruitment_start": Instant?,
+    "recruitment_end": Instant?,
+    "status": "RECRUITING OR DONE",
+    "tags": List<String> = emptyList<>()
 }
 ```
-- title, description, purpose, recruitment_start, recruitment_end, target_member, study_format, contact는 수정 가능합니다. 각각에 대해 별도로 변경 함수를 작성하세요. 
-- group은 생성 시 확정되는 정보로 수정 불가능합니다.
-- writer도 생성 시 확정되는 정보로 수정 불가능합니다.
+- Dymit Study Recruitment 의 Delete 엔드포인트를 생성하십시오.
+- Dymit Study Recruitment 의 목록조회 GET Endpoint 를 생성하십시오.
+    - RequestParam으로 cursor 를 가지고 있어야하며(required=false) null이 허용됩니다.
+    - cursor가 null이면 그냥 최신순 조회합니다.
+    - cursor가 존재하면 cursor 이전에 생성된 데이터로 최신순 조회합니다.
+    - ListResponse형태로 반환하며, ListResponse.of 로 생성하여 반환합니다. 사용예는 다른 코드들을 참조하세요.
+- Dymit Study Recruitment 의 단건 목록 조회 Get Endpoint 를 생성하십시오.
+- Dymit Study Recruitment의 CUD는 그룹 소유자 한정으로 가능합니다. 
+
+### REFERENCE
+- ./src/main/kotlin/net/noti_me/dymit/dymit_backend_api/study_recruitment/domain/DymitStudyRecuritment.kt

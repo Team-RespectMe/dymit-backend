@@ -2,8 +2,9 @@ package net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.out.persis
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.LoadStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.dto.StudyRecruitmentPersistenceDto
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -34,7 +35,8 @@ class MongoStudyRecruitmentAdapter(
     ): List<StudyRecruitmentPersistenceDto> {
         val query = Query()
             .addCriteria(Criteria.where("isDeleted").`is`(false))
-            .addCriteria(Criteria.where("_class").ne(DYMIT_STUDY_RECURITMENT_TYPE_ALIAS))
+            .addCriteria(Criteria.where("type").`is`(StudyRecruitmentType.INFLEARN))
+            .addCriteria(Criteria.where("_class").ne(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
             .limit(size)
             .with(Sort.by(Sort.Direction.DESC, "_id"))
 
