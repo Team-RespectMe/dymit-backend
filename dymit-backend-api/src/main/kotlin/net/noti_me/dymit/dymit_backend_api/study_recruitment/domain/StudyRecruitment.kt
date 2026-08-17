@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 @Document(collection = "study_recruitments")
 class StudyRecruitment(
     id: ObjectId? = null,
-    externalId: String,
+    externalId: String?,
     type: String,
     title: String,
     content: String,
@@ -38,7 +38,7 @@ class StudyRecruitment(
     isDeleted = isDeleted
 ) {
 
-    var externalId: String = externalId
+    var externalId: String? = externalId
         private set
 
     var type: String = type

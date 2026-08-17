@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.out.persis
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.LoadStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.dto.StudyRecruitmentPersistenceDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECURITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitment
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
@@ -33,6 +34,7 @@ class MongoStudyRecruitmentAdapter(
     ): List<StudyRecruitmentPersistenceDto> {
         val query = Query()
             .addCriteria(Criteria.where("isDeleted").`is`(false))
+            .addCriteria(Criteria.where("_class").ne(DYMIT_STUDY_RECURITMENT_TYPE_ALIAS))
             .limit(size)
             .with(Sort.by(Sort.Direction.DESC, "_id"))
 
@@ -47,7 +49,9 @@ class MongoStudyRecruitmentAdapter(
     private fun StudyRecruitment.toPersistenceDto(): StudyRecruitmentPersistenceDto {
         return StudyRecruitmentPersistenceDto(
             id = identifier,
-            externalId = externalId,
+            externalId = requireNotNull(externalId) {
+                "외부 스터디 모집글에는 externalId가 필요합니다."
+            },
             type = type,
             title = title,
             content = content,
