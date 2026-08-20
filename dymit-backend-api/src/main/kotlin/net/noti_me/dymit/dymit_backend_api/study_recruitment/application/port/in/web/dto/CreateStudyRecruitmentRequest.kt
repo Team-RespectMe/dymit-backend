@@ -30,9 +30,7 @@ data class CreateStudyRecruitmentRequest(
     val studyFormat: String,
     @field:Size(max = 255)
     val contact: String,
-    @JsonProperty("recruitment_start")
     val recruitmentStart: Instant? = null,
-    @JsonProperty("recruitment_end")
     val recruitmentEnd: Instant? = null,
     val tags: List<String> = emptyList()
 ) {

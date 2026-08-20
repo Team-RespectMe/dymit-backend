@@ -36,11 +36,8 @@ data class DymitStudyRecruitmentResponse(
     val title: String,
     val description: String,
     val purpose: String,
-    @JsonProperty("recruitment_status")
     val recruitmentStatus: DymitStudyRecruitmentStatus,
-    @JsonProperty("recruitment_start")
     val recruitmentStart: Instant?,
-    @JsonProperty("recruitment_end")
     val recruitmentEnd: Instant?,
     val targetMember: String,
     val studyFormat: String,
