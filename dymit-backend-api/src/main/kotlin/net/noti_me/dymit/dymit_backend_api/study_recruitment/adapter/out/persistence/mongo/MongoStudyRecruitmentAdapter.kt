@@ -33,19 +33,32 @@ class MongoStudyRecruitmentAdapter(
         cursorId: ObjectId?,
         size: Int
     ): List<StudyRecruitmentPersistenceDto> {
-        val query = Query()
-            .addCriteria(Criteria.where("isDeleted").`is`(false))
-            .addCriteria(Criteria.where("type").`is`(StudyRecruitmentType.INFLEARN))
-            .addCriteria(Criteria.where("_class").ne(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
-            .limit(size)
-            .with(Sort.by(Sort.Direction.DESC, "_id"))
-
-        if ( cursorId != null ) {
-            query.addCriteria(Criteria.where("_id").lt(cursorId))
+        val cursorCreatedAt = cursorId?.let { id ->
+            mongoTemplate.findById(id, StudyRecruitment::class.java)
+                ?.createdAt
         }
 
-        return mongoTemplate.find(query, StudyRecruitment::class.java)
-            .map { it.toPersistenceDto() }
+        val query = Query()
+            .addCriteria(Criteria.where("isDeleted").`is`(false))
+            .addCriteria(Criteria.where("type").ne(StudyRecruitmentType.DYMIT))
+            .limit(size)
+            .with(
+                Sort.by(
+                    Sort.Order.desc("createdAt"),
+                    Sort.Order.desc("_id")
+                )
+            )
+
+        if (cursorCreatedAt != null) {
+            query.addCriteria(
+                Criteria.where("createdAt").lt(cursorCreatedAt)
+            )
+        }
+
+        return mongoTemplate.find(
+            query,
+            StudyRecruitment::class.java
+        ).map { it.toPersistenceDto() }
     }
 
     private fun StudyRecruitment.toPersistenceDto(): StudyRecruitmentPersistenceDto {
