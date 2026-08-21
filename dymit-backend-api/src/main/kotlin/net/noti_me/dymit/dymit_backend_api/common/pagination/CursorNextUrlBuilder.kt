@@ -1,6 +1,5 @@
 package net.noti_me.dymit.dymit_backend_api.common.pagination
 
-import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.net.URLEncoder
@@ -21,16 +20,18 @@ class CursorNextUrlBuilder {
         /**
          * 현재 요청의 기본 URL을 가져옵니다 (QueryString 제외)
          * 프록시 환경을 고려하여 X-Forwarded-* 헤더를 우선 사용합니다
+         *
+         * @return 정규화된 현재 요청 기본 URL
          */
         fun getCurrentBaseUrl(): String {
             val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
-
-            // 스키마 결정 로직
-            val scheme = getScheme(request)
-
-            val serverName = request.getHeader("X-Forwarded-Host")
-                ?: request.getHeader("Host")?.substringBefore(':')
-                ?: request.serverName
+            val forwardedHost = request.getHeader("X-Forwarded-Host")
+            val hostname = normalizeHostname(
+                forwardedHost
+                    ?: request.getHeader("Host")
+                    ?: request.serverName
+            )
+            val scheme = getScheme(hostname)
 
             // X-Forwarded-Port가 있으면 사용, 없으면 프록시 환경에서는 포트 생략
             val forwardedPort = request.getHeader("X-Forwarded-Port")
@@ -38,20 +39,28 @@ class CursorNextUrlBuilder {
             val servletPath = request.servletPath
 
             val url = StringBuilder()
-            url.append(scheme).append("://").append(serverName)
+            url.append(scheme).append("://").append(formatHostname(hostname))
 
-            // 포트 처리: X-Forwarded-Port가 있거나, 프록시가 아닌 환경에서만 포트 추가
-            if (forwardedPort != null) {
-                val port = forwardedPort.toIntOrNull()
-                if (port != null &&
-                    !((scheme == "http" && port == 80) || (scheme == "https" && port == 443))) {
-                    url.append(":").append(port)
-                }
-            } else if (request.getHeader("X-Forwarded-Host") == null) {
-                // 프록시 환경이 아닌 경우에만 직접 포트 확인
-                val serverPort = request.serverPort
-                if (!((scheme == "http" && serverPort == 80) || (scheme == "https" && serverPort == 443))) {
-                    url.append(":").append(serverPort)
+            // 로컬 호스트만 포트를 노출하며 전달 포트를 우선 사용합니다.
+            if (isLocalHostname(hostname)) {
+                if (forwardedPort != null) {
+                    appendNonDefaultPort(
+                        url = url,
+                        scheme = scheme,
+                        port = forwardedPort.substringBefore(',').trim().toIntOrNull()
+                    )
+                } else if (forwardedHost != null) {
+                    appendNonDefaultPort(
+                        url = url,
+                        scheme = scheme,
+                        port = extractEmbeddedPort(forwardedHost)
+                    )
+                } else {
+                    appendNonDefaultPort(
+                        url = url,
+                        scheme = scheme,
+                        port = request.serverPort
+                    )
                 }
             }
 
@@ -63,17 +72,56 @@ class CursorNextUrlBuilder {
          * 요청에서 올바른 스키마를 결정합니다.
          * localhost 환경이면 http, 그 외엔 https 사용
          */
-        private fun getScheme(request: HttpServletRequest): String {
-            val serverName = request.getHeader("X-Forwarded-Host")
-                ?: request.getHeader("Host")?.substringBefore(':')
-                ?: request.serverName
-
-            // localhost 또는 127.0.0.1인 경우에만 http 사용, 그 외엔 모두 https
-            return if (serverName.contains("localhost") || serverName.contains("127.0.0.1")) {
+        private fun getScheme(hostname: String): String {
+            return if (isLocalHostname(hostname)) {
                 "http"
             } else {
                 "https"
             }
+        }
+
+        private fun normalizeHostname(host: String): String {
+            val firstHost = host.substringBefore(',').trim()
+            val hostname = when {
+                firstHost.startsWith("[") -> firstHost.substringAfter('[').substringBefore(']')
+                firstHost.count { it == ':' } == 1 -> firstHost.substringBefore(':')
+                else -> firstHost
+            }
+
+            return hostname.trim().trimEnd('.').lowercase()
+        }
+
+        private fun extractEmbeddedPort(host: String): Int? {
+            val firstHost = host.substringBefore(',').trim()
+            return if (firstHost.startsWith("[")) {
+                firstHost.substringAfter("]:", "").toIntOrNull()
+            } else if (firstHost.count { it == ':' } == 1) {
+                firstHost.substringAfter(':').toIntOrNull()
+            } else {
+                null
+            }
+        }
+
+        private fun formatHostname(hostname: String): String {
+            return if (hostname.contains(':')) "[$hostname]" else hostname
+        }
+
+        private fun isLocalHostname(hostname: String): Boolean {
+            return hostname == "localhost" || hostname == "127.0.0.1"
+        }
+
+        private fun appendNonDefaultPort(
+            url: StringBuilder,
+            scheme: String,
+            port: Int?
+        ) {
+            if (port == null) {
+                return
+            }
+            if ((scheme == "http" && port == 80) || (scheme == "https" && port == 443)) {
+                return
+            }
+            url.append(":").append(port)
         }
 
         /**

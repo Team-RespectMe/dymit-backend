@@ -6,10 +6,11 @@ plugins {
 	kotlin("plugin.spring") version "1.9.25"
 	id("org.springframework.boot") version "3.5.3"
 	id("io.spring.dependency-management") version "1.1.7"
+    id("com.bmuschko.docker-remote-api")
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.14.0"
+version = "0.14.2"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 val dockerExecutable = providers.environmentVariable("DYMIT_DOCKER_EXECUTABLE")
