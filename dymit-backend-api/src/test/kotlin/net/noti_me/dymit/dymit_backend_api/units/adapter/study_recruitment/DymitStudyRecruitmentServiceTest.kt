@@ -31,6 +31,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.ou
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentPersistenceDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.study_group.DymitStudyRecruitmentLoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.study_group.dto.DymitStudyRecruitmentStudyGroupDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentWriter
@@ -76,17 +77,21 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
         Given("Dymit 생성 서비스") {
             val command = CreateDymitStudyRecruitmentCommand(
                 groupId = groupDto.id.toHexString(),
+                title = "커맨드 제목",
                 description = "소개",
                 purpose = "목적",
                 targetMember = "백엔드",
                 studyFormat = "온라인",
-                contact = "https://example.com/contact",
+                contact = Contact(
+                    url = "https://example.com/contact",
+                    title = "오픈채팅"
+                ),
                 recruitmentStart = Instant.parse("2026-08-17T00:00:00Z"),
                 recruitmentEnd = Instant.parse("2026-08-24T00:00:00Z"),
                 tags = emptyList()
             )
 
-            Then("생성 시 group title, writer, DYMIT type, 기본 tags를 저장한다") {
+            Then("생성 시 command title과 writer, DYMIT type, 기본 tags를 저장하고 그룹 소유자만 허용한다") {
                 val captured = slot<DymitStudyRecruitment>()
                 every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
                 every { saveRecruitmentPort.save(capture(captured)) } answers { persistenceDtoFrom(captured.captured) }
@@ -95,13 +100,15 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 val result = createService.execute(memberInfo, command)
 
                 captured.captured.type shouldBe StudyRecruitmentType.DYMIT
-                captured.captured.title shouldBe "테스트 그룹"
+                captured.captured.title shouldBe "커맨드 제목"
                 captured.captured.writer shouldBe DymitStudyRecruitmentWriter(ownerId, "owner")
+                captured.captured.groupId shouldBe groupDto.id
                 captured.captured.tags shouldBe emptyList()
                 result.groupId shouldBe groupDto.id.toHexString()
                 result.type shouldBe StudyRecruitmentType.DYMIT
                 result.writerNickname shouldBe "owner"
                 result.writerProfileImageUrl shouldBe "https://example.com/profile-thumb.png"
+                result.contact shouldBe command.contact
             }
 
             Then("그룹 소유자가 아니면 생성할 수 없다") {
@@ -172,6 +179,8 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 result.size shouldBe 2
                 result.all { it is DymitStudyRecruitmentSummaryDto } shouldBe true
                 result.first().title shouldBe "테스트 그룹"
+                result.first().purpose shouldBe "목적"
+                result.first().writerId shouldBe ownerId.toHexString()
                 result.first().tags shouldBe emptyList()
                 result.first().type shouldBe StudyRecruitmentType.DYMIT
                 result.first().status shouldBe DymitStudyRecruitmentStatus.RECRUITING
@@ -201,11 +210,15 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
             val persistenceDto = createPersistenceDto(recruitmentId = recruitmentId)
             val command = UpdateDymitStudyRecruitmentCommand(
                 recruitmentId = recruitmentId.toHexString(),
+                title = "수정 제목",
                 description = "수정 소개",
                 purpose = "수정 목적",
                 targetMember = "앱 개발자",
                 studyFormat = "오프라인",
-                contact = "mailto:test@example.com",
+                contact = Contact(
+                    url = "mailto:test@example.com",
+                    title = "이메일"
+                ),
                 recruitmentStart = null,
                 recruitmentEnd = Instant.parse("2026-08-25T00:00:00Z"),
                 status = DymitStudyRecruitmentStatus.DONE,
@@ -222,10 +235,11 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 val result = updateService.execute(memberInfo, command)
 
                 verify(exactly = 1) { loadRecruitmentPort.loadById(recruitmentId) }
+                captured.captured.title shouldBe "수정 제목"
                 captured.captured.description shouldBe "수정 소개"
                 captured.captured.recruitmentStatus shouldBe DymitStudyRecruitmentStatus.DONE
                 captured.captured.tags shouldBe listOf("updated")
-                result.contact shouldBe "mailto:test@example.com"
+                result.contact shouldBe command.contact
                 result.writerProfileImageUrl shouldBe "https://example.com/profile-thumb.png"
             }
 
@@ -290,7 +304,10 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
             recruitmentEnd = Instant.parse("2026-08-24T00:00:00Z"),
             targetMember = "백엔드",
             studyFormat = "온라인",
-            contact = "https://example.com/contact",
+            contact = Contact(
+                url = "https://example.com/contact",
+                title = "오픈채팅"
+            ),
             tags = emptyList(),
             createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
             updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0),

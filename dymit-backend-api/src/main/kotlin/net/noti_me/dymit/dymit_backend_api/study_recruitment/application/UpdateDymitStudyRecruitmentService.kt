@@ -52,6 +52,7 @@ class UpdateDymitStudyRecruitmentService(
         }
 
         val recruitment = persistenceDto.toDomain()
+        recruitment.changeTitle(command.title)
         recruitment.changeDescription(command.description)
         recruitment.changePurpose(command.purpose)
         recruitment.changeTargetMember(command.targetMember)

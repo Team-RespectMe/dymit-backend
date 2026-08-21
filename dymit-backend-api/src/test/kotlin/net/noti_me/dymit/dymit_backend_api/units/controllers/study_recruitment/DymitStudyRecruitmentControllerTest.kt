@@ -32,6 +32,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentSummaryResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentWriterResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.UpdateStudyRecruitmentRequest
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.types.ObjectId
@@ -68,15 +69,16 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         }
 
         Given("생성 요청 DTO 검증") {
-            Then("description 최대 길이를 넘기면 실패한다") {
-                val request = createRequest(description = "a".repeat(201))
-                validator.validate(request).map { it.message } shouldContain "size must be between 0 and 200"
-            }
+                Then("description 최대 길이를 넘기면 실패한다") {
+                    val request = createRequest(description = "a".repeat(201))
+                    validator.validate(request).map { it.message } shouldContain "size must be between 0 and 200"
+                }
 
-            Then("toCommand는 정확한 입력 타입으로 변환한다") {
+            Then("toCommand는 title과 Contact를 포함한 정확한 입력 타입으로 변환한다") {
                 val request = createRequest(tags = listOf("kotlin"))
                 request.toCommand() shouldBe CreateDymitStudyRecruitmentCommand(
                     groupId = request.groupId,
+                    title = request.title,
                     description = request.description,
                     purpose = request.purpose,
                     targetMember = request.targetMember,
@@ -95,10 +97,11 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                 validator.validate(request).map { it.message } shouldContain "size must be between 0 and 50"
             }
 
-            Then("toCommand는 recruitmentId를 포함한 정확한 입력 타입으로 변환한다") {
+            Then("toCommand는 recruitmentId와 Contact를 포함한 정확한 입력 타입으로 변환한다") {
                 val request = updateRequest(tags = listOf("backend"))
                 request.toCommand("recruitment-id") shouldBe UpdateDymitStudyRecruitmentCommand(
                     recruitmentId = "recruitment-id",
+                    title = request.title,
                     description = request.description,
                     purpose = request.purpose,
                     targetMember = request.targetMember,
@@ -126,12 +129,15 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                 Then("생성 유즈케이스에 명령을 전달하고 응답으로 변환한다") {
                     verify(exactly = 1) { createUseCase.execute(memberInfo, any()) }
                     command.captured.groupId shouldBe request.groupId
+                    command.captured.title shouldBe request.title
+                    command.captured.contact shouldBe request.contact
                     command.captured.tags shouldBe listOf("kotlin")
                     response.id shouldBe "new-id"
                     response.type shouldBe StudyRecruitmentType.DYMIT
                     response.writer.id shouldBe memberInfo.memberId
                     response.writer.name shouldBe memberInfo.nickname
                     response.writer.profileImageUrl shouldBe "https://example.com/profile-thumb.png"
+                    response.contact shouldBe request.contact
                 }
             }
         }
@@ -151,6 +157,8 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                     response.count shouldBe 2L
                     response.items.map(DymitStudyRecruitmentSummaryResponse::id) shouldBe listOf("1", "2")
                     response.items.map { it.title } shouldBe listOf("테스트 그룹", "테스트 그룹")
+                    response.items.map { it.purpose } shouldBe listOf("목적", "목적")
+                    response.items.map { it.writerId } shouldBe listOf(memberInfo.memberId, memberInfo.memberId)
                     response.items.map { it.tags } shouldBe listOf(listOf("kotlin"), listOf("kotlin"))
                     response.items.map { it.type } shouldBe listOf(StudyRecruitmentType.DYMIT, StudyRecruitmentType.DYMIT)
                     response.items.map { it.status } shouldBe listOf(
@@ -175,6 +183,10 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                     response.writer.id shouldBe memberInfo.memberId
                     response.writer.name shouldBe memberInfo.nickname
                     response.writer.profileImageUrl shouldBe "https://example.com/profile-thumb.png"
+                    response.contact shouldBe Contact(
+                        url = "https://example.com/contact",
+                        title = "오픈채팅"
+                    )
                 }
             }
         }
@@ -190,8 +202,11 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                 Then("수정 유즈케이스에 recruitmentId를 포함한 명령을 전달한다") {
                     verify(exactly = 1) { updateUseCase.execute(memberInfo, any()) }
                     command.captured.recruitmentId shouldBe "updated-id"
+                    command.captured.title shouldBe request.title
+                    command.captured.contact shouldBe request.contact
                     command.captured.status shouldBe DymitStudyRecruitmentStatus.DONE
                     response.id shouldBe "updated-id"
+                    response.contact shouldBe request.contact
                 }
             }
         }
@@ -232,12 +247,11 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                 DymitStudyRecruitmentResponse::class.java.declaredFields.map { it.name } shouldNotContain "writerNickname"
                 DymitStudyRecruitmentWriterResponse::class.java.declaredFields.map { it.name } shouldContainAll
                     listOf("id", "name", "profileImageUrl")
-                CreateStudyRecruitmentRequest::class.java.declaredFields.map { it.name } shouldNotContain "title"
             }
 
             Then("v2 목록 응답 DTO는 summary 필드만 가진다") {
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldContainAll
-                    listOf("id", "createdAt", "title", "tags", "type", "status")
+                    listOf("id", "createdAt", "title", "purpose", "writerId", "tags", "type", "status")
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "writer"
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "groupId"
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "description"
@@ -253,30 +267,40 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
     }
 
     private fun createRequest(
+        title: String = "테스트 그룹",
         description: String = "소개",
         purpose: String = "목적",
         tags: List<String> = emptyList()
     ) = CreateStudyRecruitmentRequest(
         groupId = ObjectId.get().toHexString(),
+        title = title,
         description = description,
         purpose = purpose,
         targetMember = "백엔드",
         studyFormat = "온라인",
-        contact = "https://example.com/contact",
+        contact = Contact(
+            url = "https://example.com/contact",
+            title = "오픈채팅"
+        ),
         recruitmentStart = Instant.parse("2026-08-17T00:00:00Z"),
         recruitmentEnd = Instant.parse("2026-08-24T00:00:00Z"),
         tags = tags
     )
 
     private fun updateRequest(
+        title: String = "수정 제목",
         purpose: String = "목적",
         tags: List<String> = emptyList()
     ) = UpdateStudyRecruitmentRequest(
+        title = title,
         description = "소개",
         purpose = purpose,
         targetMember = "백엔드",
         studyFormat = "온라인",
-        contact = "https://example.com/contact",
+        contact = Contact(
+            url = "https://example.com/contact",
+            title = "오픈채팅"
+        ),
         recruitmentStart = Instant.parse("2026-08-17T00:00:00Z"),
         recruitmentEnd = Instant.parse("2026-08-24T00:00:00Z"),
         status = DymitStudyRecruitmentStatus.DONE,
@@ -298,7 +322,10 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         recruitmentEnd = Instant.parse("2026-08-24T00:00:00Z"),
         targetMember = "백엔드",
         studyFormat = "온라인",
-        contact = "https://example.com/contact",
+        contact = Contact(
+            url = "https://example.com/contact",
+            title = "오픈채팅"
+        ),
         tags = listOf("kotlin"),
         createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
         updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0)
@@ -308,6 +335,8 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         id = id,
         createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
         title = "테스트 그룹",
+        purpose = "목적",
+        writerId = memberInfo.memberId,
         tags = listOf("kotlin"),
         type = StudyRecruitmentType.DYMIT,
         status = DymitStudyRecruitmentStatus.RECRUITING

@@ -6,6 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.ou
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
+import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -36,8 +37,11 @@ class MongoDymitStudyRecruitmentAdapter(
             .addCriteria(Criteria.where("type").`is`(StudyRecruitmentType.DYMIT))
             .addCriteria(Criteria.where("isDeleted").`is`(false))
 
-        return mongoTemplate.findOne(query, DymitStudyRecruitment::class.java)
-            ?.let(DymitStudyRecruitmentPersistenceDto::from)
+        return mongoTemplate.findOne(
+            query,
+            Document::class.java,
+            COLLECTION_NAME
+        )?.toPersistenceDto()
     }
 
     /**
@@ -62,8 +66,8 @@ class MongoDymitStudyRecruitmentAdapter(
             query.addCriteria(Criteria.where("_id").lt(cursorId))
         }
 
-        return mongoTemplate.find(query, DymitStudyRecruitment::class.java)
-            .map(DymitStudyRecruitmentPersistenceDto::from)
+        return mongoTemplate.find(query, Document::class.java, COLLECTION_NAME)
+            .map { it.toPersistenceDto() }
     }
 
     /**
@@ -77,5 +81,28 @@ class MongoDymitStudyRecruitmentAdapter(
             "Dymit 모집글은 DYMIT 유형으로만 저장할 수 있습니다."
         }
         return DymitStudyRecruitmentPersistenceDto.from(mongoTemplate.save(recruitment))
+    }
+
+    private fun Document.toPersistenceDto(): DymitStudyRecruitmentPersistenceDto {
+        normalizeLegacyContact()
+        val recruitment = mongoTemplate.converter.read(
+            DymitStudyRecruitment::class.java,
+            this
+        )
+        return DymitStudyRecruitmentPersistenceDto.from(recruitment)
+    }
+
+    private fun Document.normalizeLegacyContact() {
+        val legacyContact = get("contact") as? String ?: return
+        this["contact"] = Document(
+            mapOf(
+                "url" to legacyContact,
+                "title" to ""
+            )
+        )
+    }
+
+    private companion object {
+        const val COLLECTION_NAME = "study_recruitments"
     }
 }

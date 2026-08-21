@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto
 
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentWriter
@@ -24,7 +25,7 @@ import java.time.LocalDateTime
  * @property recruitmentEnd 모집 종료 시각
  * @property targetMember 모집 대상
  * @property studyFormat 운영 방식
- * @property contact 연락처 또는 연락 URL
+ * @property contact 연락처 정보
  * @property tags 태그 목록
  * @property createdAt 생성 시각
  * @property updatedAt 수정 시각
@@ -44,7 +45,7 @@ data class DymitStudyRecruitmentPersistenceDto(
     val recruitmentEnd: Instant?,
     val targetMember: String,
     val studyFormat: String,
-    val contact: String,
+    val contact: Contact,
     val tags: List<String>,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?,

@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentResponse
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentWriter
@@ -16,6 +17,8 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.core.convert.NoOpDbRefResolver
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 
 internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
 
@@ -33,7 +36,10 @@ internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
                 purpose = "목적",
                 targetMember = "백엔드",
                 studyFormat = "온라인",
-                contact = "https://example.com/contact"
+                contact = Contact(
+                    url = "https://example.com/contact",
+                    title = "오픈채팅"
+                )
             )
 
             When("Spring Data MappingMongoConverter를 사용하면") {
@@ -95,12 +101,10 @@ internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
         }
 
         Given("외부 모집글 제외 쿼리 문서") {
-            val queryDocument = Document(
-                mapOf(
-                    "isDeleted" to false,
-                    "_class" to Document("\$ne", DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS)
-                )
-            )
+            val queryDocument = Query()
+                .addCriteria(Criteria.where("isDeleted").`is`(false))
+                .addCriteria(Criteria.where("_class").ne(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
+                .queryObject
 
             Then("_class가 없는 legacy 문서는 매칭된다") {
                 matchesQuery(queryDocument, Document("isDeleted", false)) shouldBe true
@@ -111,6 +115,46 @@ internal class MongoStudyRecruitmentMappingConverterTest : BehaviorSpec() {
                     queryDocument,
                     Document(mapOf("isDeleted" to false, "_class" to DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
                 ) shouldBe false
+            }
+        }
+
+        Given("legacy Dymit Mongo 문서") {
+            val savedDocument = Document()
+            converter.write(
+                DymitStudyRecruitment(
+                    id = ObjectId.get(),
+                    writer = DymitStudyRecruitmentWriter(ObjectId.get(), "작성자"),
+                    groupId = ObjectId.get(),
+                    type = StudyRecruitmentType.DYMIT,
+                    title = "기존 모집글",
+                    description = "소개",
+                    purpose = "목적",
+                    targetMember = "백엔드",
+                    studyFormat = "온라인",
+                    contact = Contact(
+                        url = "https://example.com/contact",
+                        title = "오픈채팅"
+                    ),
+                    tags = listOf("kotlin"),
+                    isDeleted = false
+                ),
+                savedDocument
+            )
+            val legacyDocument = Document().apply {
+                putAll(savedDocument)
+                remove("_class")
+            }
+
+            When("DymitStudyRecruitment로 읽으면") {
+                val recruitment = converter.read(DymitStudyRecruitment::class.java, legacyDocument)
+
+                Then("_class가 없어도 type 기반 legacy 문서를 읽을 수 있다") {
+                    recruitment.type shouldBe StudyRecruitmentType.DYMIT
+                    recruitment.contact shouldBe Contact(
+                        url = "https://example.com/contact",
+                        title = "오픈채팅"
+                    )
+                }
             }
         }
     }

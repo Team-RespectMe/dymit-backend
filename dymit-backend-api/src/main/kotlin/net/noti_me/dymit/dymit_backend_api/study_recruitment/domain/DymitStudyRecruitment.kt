@@ -23,7 +23,7 @@ import java.time.LocalDateTime
  * @property recruitmentEnd 모집 종료 시각
  * @property targetMember 모집 대상
  * @property studyFormat 운영 방식
- * @property contact 연락처 또는 연락 URL
+ * @property contact 연락처 정보
  * @property tags 모집글 태그 목록
  * @property createdAt 생성 시각
  * @property updatedAt 수정 시각
@@ -45,7 +45,7 @@ class DymitStudyRecruitment(
     recruitmentEnd: Instant? = null,
     targetMember: String,
     studyFormat: String,
-    contact: String,
+    contact: Contact,
     tags: List<String> = emptyList(),
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
@@ -86,7 +86,7 @@ class DymitStudyRecruitment(
     var studyFormat: String = validateLength(studyFormat, STUDY_FORMAT_MAX_LENGTH, "운영 방식")
         private set
 
-    var contact: String = validateLength(contact, CONTACT_MAX_LENGTH, "연락처")
+    var contact: Contact = contact
         private set
 
     var tags: List<String> = tags.toList()
@@ -109,6 +109,16 @@ class DymitStudyRecruitment(
      */
     fun changePurpose(newPurpose: String) {
         purpose = validateLength(newPurpose, PURPOSE_MAX_LENGTH, "목적")
+        touchUpdatedAt()
+    }
+
+    /**
+     * 모집글 제목을 변경합니다.
+     *
+     * @param newTitle 변경할 제목
+     */
+    fun changeTitle(newTitle: String) {
+        title = validateLength(newTitle, TITLE_MAX_LENGTH, "제목")
         touchUpdatedAt()
     }
 
@@ -155,10 +165,10 @@ class DymitStudyRecruitment(
     /**
      * 연락처를 변경합니다.
      *
-     * @param newContact 변경할 연락처 또는 연락 URL
+     * @param newContact 변경할 연락처 정보
      */
-    fun changeContact(newContact: String) {
-        contact = validateLength(newContact, CONTACT_MAX_LENGTH, "연락처")
+    fun changeContact(newContact: Contact) {
+        contact = newContact
         touchUpdatedAt()
     }
 
@@ -201,8 +211,6 @@ class DymitStudyRecruitment(
         const val PURPOSE_MAX_LENGTH = 50
         const val TARGET_MEMBER_MAX_LENGTH = 100
         const val STUDY_FORMAT_MAX_LENGTH = 100
-        const val CONTACT_MAX_LENGTH = 255
-
         fun validateLength(value: String, maxLength: Int, fieldName: String): String {
             require(value.length <= maxLength) {
                 "${fieldName}은(는) ${maxLength}자 이내로 작성해야 합니다."

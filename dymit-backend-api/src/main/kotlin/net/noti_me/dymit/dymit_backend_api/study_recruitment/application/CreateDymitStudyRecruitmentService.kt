@@ -54,7 +54,7 @@ class CreateDymitStudyRecruitmentService(
             ),
             groupId = group.id,
             type = StudyRecruitmentType.DYMIT,
-            title = group.name,
+            title = command.title,
             description = command.description,
             purpose = command.purpose,
             recruitmentStart = command.recruitmentStart,

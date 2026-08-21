@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentWriter
@@ -42,9 +43,33 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
                     recruitment.recruitmentEnd shouldBe end
                     recruitment.targetMember shouldBe "백엔드 개발자"
                     recruitment.studyFormat shouldBe "온라인"
-                    recruitment.contact shouldBe "https://example.com/contact"
+                    recruitment.contact shouldBe Contact(
+                        url = "https://example.com/contact",
+                        title = "오픈채팅"
+                    )
                     recruitment.tags shouldBe listOf("kotlin", "backend")
                 }
+            }
+        }
+
+        Given("Contact 값 객체") {
+            Then("url과 title을 보존한다") {
+                Contact(
+                    url = "https://example.com/contact",
+                    title = "문의 링크"
+                ) shouldBe Contact(
+                    url = "https://example.com/contact",
+                    title = "문의 링크"
+                )
+            }
+
+            Then("url 길이가 255자를 초과하면 거부된다") {
+                shouldThrow<IllegalArgumentException> {
+                    Contact(
+                        url = "a".repeat(256),
+                        title = "문의"
+                    )
+                }.message shouldBe "연락 URL은 255자 이내로 작성해야 합니다."
             }
         }
 
@@ -56,7 +81,10 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
                     purpose = "c".repeat(50),
                     targetMember = "d".repeat(100),
                     studyFormat = "e".repeat(100),
-                    contact = "f".repeat(255)
+                    contact = Contact(
+                        url = "f".repeat(255),
+                        title = "문의"
+                    )
                 )
 
                 recruitment.title shouldBe "a".repeat(50)
@@ -79,8 +107,8 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
                     createRecruitment(studyFormat = "a".repeat(101))
                 }.message shouldBe "운영 방식은(는) 100자 이내로 작성해야 합니다."
                 shouldThrow<IllegalArgumentException> {
-                    createRecruitment(contact = "a".repeat(256))
-                }.message shouldBe "연락처은(는) 255자 이내로 작성해야 합니다."
+                    createRecruitment(contact = Contact(url = "a".repeat(256), title = "문의"))
+                }.message shouldBe "연락 URL은 255자 이내로 작성해야 합니다."
             }
         }
 
@@ -110,8 +138,12 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
                 recruitment.changeStudyFormat("오프라인")
                 recruitment.studyFormat shouldBe "오프라인"
 
-                recruitment.changeContact("mailto:test@example.com")
-                recruitment.contact shouldBe "mailto:test@example.com"
+                val updatedContact = Contact(
+                    url = "mailto:test@example.com",
+                    title = "이메일"
+                )
+                recruitment.changeContact(updatedContact)
+                recruitment.contact shouldBe updatedContact
 
                 recruitment.changeRecruitmentStatus(DymitStudyRecruitmentStatus.DONE)
                 recruitment.recruitmentStatus shouldBe DymitStudyRecruitmentStatus.DONE
@@ -161,7 +193,10 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
         recruitmentEnd: Instant? = null,
         targetMember: String = "백엔드 개발자",
         studyFormat: String = "온라인",
-        contact: String = "https://example.com/contact",
+        contact: Contact = Contact(
+            url = "https://example.com/contact",
+            title = "오픈채팅"
+        ),
         tags: List<String> = emptyList()
     ): DymitStudyRecruitment {
         return DymitStudyRecruitment(

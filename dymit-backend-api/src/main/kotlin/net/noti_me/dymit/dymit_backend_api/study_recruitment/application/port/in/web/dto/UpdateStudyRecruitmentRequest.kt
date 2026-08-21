@@ -1,25 +1,28 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.validation.constraints.Size
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.UpdateDymitStudyRecruitmentCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import java.time.Instant
 
 /**
  * Dymit 스터디 모집글 수정 요청입니다.
  *
+ * @property title 모집글 제목
  * @property description 스터디 소개
  * @property purpose 스터디 목적
  * @property targetMember 모집 대상
  * @property studyFormat 운영 방식
- * @property contact 연락처 또는 연락 URL
+ * @property contact 연락처 정보
  * @property recruitmentStart 모집 시작 시각
  * @property recruitmentEnd 모집 종료 시각
  * @property status 모집 상태
  * @property tags 태그 목록
  */
 data class UpdateStudyRecruitmentRequest(
+    @field:Size(max = 50)
+    val title: String,
     @field:Size(max = 200)
     val description: String,
     @field:Size(max = 50)
@@ -28,8 +31,7 @@ data class UpdateStudyRecruitmentRequest(
     val targetMember: String,
     @field:Size(max = 100)
     val studyFormat: String,
-    @field:Size(max = 255)
-    val contact: String,
+    val contact: Contact,
     val recruitmentStart: Instant? = null,
     val recruitmentEnd: Instant? = null,
     val status: DymitStudyRecruitmentStatus,
@@ -45,6 +47,7 @@ data class UpdateStudyRecruitmentRequest(
     fun toCommand(recruitmentId: String): UpdateDymitStudyRecruitmentCommand {
         return UpdateDymitStudyRecruitmentCommand(
             recruitmentId = recruitmentId,
+            title = title,
             description = description,
             purpose = purpose,
             targetMember = targetMember,
