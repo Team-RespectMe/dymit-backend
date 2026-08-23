@@ -23,6 +23,6 @@ class GetTaskDetailUseCaseImpl(
 
         val task = support.loadTask(taskId)
         support.checkTaskInGroup(task, groupIdObjectId)
-        return support.toTaskDto(task, groupIdObjectId)
+        return support.toTaskDto(task, groupIdObjectId, allowMissingAssignee = true)
     }
 }

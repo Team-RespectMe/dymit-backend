@@ -13,6 +13,7 @@ import io.mockk.unmockkObject
 import net.noti_me.dymit.dymit_backend_api.task.application.TaskExpireAtNormalizer
 import net.noti_me.dymit.dymit_backend_api.task.application.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
+import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskProfileImageType as ProfileImageType
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
@@ -289,16 +290,17 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         }
 
         Given("과제 DTO 변환") {
-            When("제출 상태가 섞인 assignee 목록이 있으면") {
-                Then("제출/미제출 수를 계산해 DTO에 반영한다") {
+            When("제출 상태가 섞인 assignee 목록이 있고 누락된 그룹 멤버를 허용하면") {
+                Then("fallback 값과 정상 멤버 값을 함께 반영한다") {
                     val groupId = ObjectId.get()
                     val memberId1 = ObjectId.get()
                     val memberId2 = ObjectId.get()
+                    val missingMemberId = ObjectId.get()
                     val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
                     val assignees = listOf(
                         TaskAssignee(taskId = task.id!!, memberId = memberId1, status = TaskAssigneeStatus.SUBMITTED),
                         TaskAssignee(taskId = task.id!!, memberId = memberId2, status = TaskAssigneeStatus.NOT_SUBMITTED),
-                        TaskAssignee(taskId = task.id!!, memberId = ObjectId.get(), status = TaskAssigneeStatus.NOT_SUBMITTED)
+                        TaskAssignee(taskId = task.id!!, memberId = missingMemberId, status = TaskAssigneeStatus.NOT_SUBMITTED)
                     )
                     val members = listOf(
                         StudyGroupMember(
@@ -312,12 +314,6 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                             memberId = memberId2,
                             nickname = "member-2",
                             profileImage = ProfileImageVo(StudyGroupProfileImageType.EXTERNAL, "https://example.com/2.png")
-                        ),
-                        StudyGroupMember(
-                            groupId = groupId,
-                            memberId = assignees[2].memberId,
-                            nickname = "member-3",
-                            profileImage = ProfileImageVo(StudyGroupProfileImageType.PRESET, "https://example.com/3.png")
                         )
                     )
 
@@ -330,12 +326,54 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                         )
                     } returns members
 
-                    val result = support.toTaskDto(task, groupId)
+                    val result = support.toTaskDto(task, groupId, allowMissingAssignee = true)
 
                     result.submittedAssigneeCount shouldBe 1
                     result.notSubmittedAssigneeCount shouldBe 2
                     result.assignees.size shouldBe 3
                     result.submissionType shouldBe TaskSubmissionType.OUTPUT
+                    result.assignees[0].memberId shouldBe memberId1.toHexString()
+                    result.assignees[0].nickname shouldBe "member-1"
+                    result.assignees[0].profileImageUrl shouldBe "https://example.com/1.png"
+                    result.assignees[0].profileImageType shouldBe ProfileImageType.PRESET
+                    result.assignees[0].status shouldBe TaskAssigneeStatus.SUBMITTED
+                    result.assignees[1].memberId shouldBe memberId2.toHexString()
+                    result.assignees[1].nickname shouldBe "member-2"
+                    result.assignees[1].profileImageUrl shouldBe "https://example.com/2.png"
+                    result.assignees[1].profileImageType shouldBe ProfileImageType.EXTERNAL
+                    result.assignees[1].status shouldBe TaskAssigneeStatus.NOT_SUBMITTED
+                    result.assignees[2].memberId shouldBe missingMemberId.toHexString()
+                    result.assignees[2].nickname shouldBe "탈퇴한 회원"
+                    result.assignees[2].profileImageUrl shouldBe
+                        "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/kick_64x64.png"
+                    result.assignees[2].profileImageType shouldBe ProfileImageType.PRESET
+                    result.assignees[2].status shouldBe TaskAssigneeStatus.NOT_SUBMITTED
+                }
+            }
+
+            When("제출 대상자 중 그룹 멤버가 누락되고 기본 경로를 사용하면") {
+                Then("NotFoundException을 유지한다") {
+                    val groupId = ObjectId.get()
+                    val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
+                    val missingMemberId = ObjectId.get()
+                    val assignees = listOf(
+                        TaskAssignee(taskId = task.id!!, memberId = missingMemberId, status = TaskAssigneeStatus.NOT_SUBMITTED)
+                    )
+
+                    every { taskFilePort.loadByIds(emptyList()) } returns emptyList()
+                    every { taskAssigneeRepository.findByTaskId(task.id!!) } returns assignees
+                    every {
+                        groupMemberRepository.findByGroupIdAndMemberIdsIn(
+                            groupId,
+                            assignees.map { it.memberId }
+                        )
+                    } returns emptyList()
+
+                    val exception = shouldThrow<NotFoundException> {
+                        support.toTaskDto(task, groupId)
+                    }
+
+                    exception.message shouldBe "그룹 멤버 정보를 찾을 수 없습니다."
                 }
             }
         }

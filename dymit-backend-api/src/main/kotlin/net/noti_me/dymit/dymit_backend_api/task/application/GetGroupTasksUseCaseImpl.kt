@@ -22,6 +22,6 @@ class GetGroupTasksUseCaseImpl(
         support.requireGroupMember(groupIdObjectId, memberId)
         return support.loadTasksByGroup(groupIdObjectId)
             .sortedByDescending { it.expireAt }
-            .map { support.toTaskDto(it, groupIdObjectId) }
+            .map { support.toTaskDto(it, groupIdObjectId, allowMissingAssignee = true) }
     }
 }

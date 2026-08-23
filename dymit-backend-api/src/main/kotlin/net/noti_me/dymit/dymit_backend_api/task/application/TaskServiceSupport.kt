@@ -360,13 +360,15 @@ class TaskServiceSupport(
         val orphaned = targets.filter { !referenced.contains(it) }
         updateFileStatuses(orphaned, TaskFileStatusDto.UNREFERENCED)
     }
-
-    fun toTaskDto(task: Task, groupId: ObjectId): TaskDto {
+    fun toTaskDto(
+        task: Task,
+        groupId: ObjectId,
+        allowMissingAssignee: Boolean = false
+    ): TaskDto {
         val files = taskFilePort.loadByIds(task.attachments.map { it.fileId }).associateBy { it.id }
         val assignees = taskAssigneeRepository.findByTaskId(task.id!!)
         val members = groupMemberRepository.findByGroupIdAndMemberIdsIn(groupId, assignees.map { it.memberId })
             .associateBy { it.memberId }
-
         return TaskDto(
             taskId = task.identifier,
             relatedScheduleId = task.relatedScheduleId.toHexString(),
@@ -388,12 +390,13 @@ class TaskServiceSupport(
             submittedAssigneeCount = assignees.count { it.status == TaskAssigneeStatus.SUBMITTED },
             notSubmittedAssigneeCount = assignees.count { it.status == TaskAssigneeStatus.NOT_SUBMITTED },
             assignees = assignees.map { assignee ->
-                val member = members[assignee.memberId] ?: throw NotFoundException(message = "그룹 멤버 정보를 찾을 수 없습니다.")
+                val member = members[assignee.memberId]
+                    ?: if (allowMissingAssignee) null else throw NotFoundException(message = "그룹 멤버 정보를 찾을 수 없습니다.")
                 TaskAssigneeSummaryDto(
-                    memberId = member.memberId.toHexString(),
-                    nickname = member.nickname,
-                    profileImageUrl = member.profileImage.url,
-                    profileImageType = TaskProfileImageType.valueOf(member.profileImage.type.name),
+                    memberId = assignee.memberId.toHexString(),
+                    nickname = member?.nickname ?: "탈퇴한 회원",
+                    profileImageUrl = member?.profileImage?.url ?: "https://d380gc0prbxdbr.cloudfront.net/static/presets/members/kick_64x64.png",
+                    profileImageType = member?.profileImage?.type?.name?.let(TaskProfileImageType::valueOf) ?: TaskProfileImageType.PRESET,
                     status = assignee.status
                 )
             }

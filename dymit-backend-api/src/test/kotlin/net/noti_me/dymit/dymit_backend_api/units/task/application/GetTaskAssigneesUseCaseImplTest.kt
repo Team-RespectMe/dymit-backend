@@ -1,12 +1,15 @@
 package net.noti_me.dymit.dymit_backend_api.units.task.application
 
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskAssigneeDto
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.GetTaskAssigneesQuery
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskAssigneeMemberDto
 import net.noti_me.dymit.dymit_backend_api.task.application.TaskServiceSupport
 import net.noti_me.dymit.dymit_backend_api.task.application.GetTaskAssigneesUseCaseImpl
@@ -82,7 +85,7 @@ internal class GetTaskAssigneesUseCaseImplTest : BehaviorSpec() {
                     every { support.requireGroupMember(groupId, memberId) } returns mockk<StudyGroupMember>()
                     every { support.toTaskAssigneeDtos(taskId, groupId) } returns assignees
 
-                    val result = useCase.getTaskAssignees(memberInfo, taskId.toHexString())
+                    val result = useCase.execute(GetTaskAssigneesQuery(memberInfo, taskId.toHexString()))
 
                     verify(exactly = 1) { support.loadTask(taskId.toHexString()) }
                     verify(exactly = 1) { support.loadSchedule(task.relatedScheduleId.toHexString()) }
@@ -91,6 +94,47 @@ internal class GetTaskAssigneesUseCaseImplTest : BehaviorSpec() {
                     result.size shouldBe 2
                     result[0].member.nickname shouldBe "member-1"
                     result[1].member.profileImage.url shouldBe "https://example.com/profile2.png"
+                }
+
+                Then("요청자가 그룹 비회원이면 403을 유지한다") {
+                    val requesterId = ObjectId.get()
+                    val taskId = ObjectId.get()
+                    val groupId = ObjectId.get()
+                    val task = Task(
+                        id = taskId,
+                        relatedScheduleId = ObjectId.get(),
+                        type = net.noti_me.dymit.dymit_backend_api.task.domain.TaskType.PRE,
+                        title = "과제",
+                        description = "설명",
+                        attachments = emptyList(),
+                        expireAt = LocalDateTime.now().plusDays(2)
+                    )
+                    val schedule = StudySchedule(
+                        id = task.relatedScheduleId,
+                        groupId = groupId,
+                        scheduleAt = LocalDateTime.now().plusDays(1)
+                    )
+                    val memberInfo = MemberInfo(
+                        memberId = requesterId.toHexString(),
+                        nickname = "outsider",
+                        roles = listOf(MemberRole.ROLE_MEMBER.name)
+                    )
+
+                    every { support.loadTask(taskId.toHexString()) } returns task
+                    every { support.loadSchedule(task.relatedScheduleId.toHexString()) } returns schedule
+                    every { support.requireGroupMember(groupId, requesterId) } throws ForbiddenException(
+                        message = "그룹 멤버만 접근할 수 있습니다."
+                    )
+
+                    val exception = shouldThrow<ForbiddenException> {
+                        useCase.execute(GetTaskAssigneesQuery(memberInfo, taskId.toHexString()))
+                    }
+
+                    exception.message shouldBe "그룹 멤버만 접근할 수 있습니다."
+                    verify(exactly = 1) { support.loadTask(taskId.toHexString()) }
+                    verify(exactly = 1) { support.loadSchedule(task.relatedScheduleId.toHexString()) }
+                    verify(exactly = 1) { support.requireGroupMember(groupId, requesterId) }
+                    verify(exactly = 0) { support.toTaskAssigneeDtos(any(), any()) }
                 }
             }
         }
