@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.CreateStudyRecruitmentRequest
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentSummaryResponse
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentRequestType
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.UpdateStudyRecruitmentRequest
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -40,13 +41,19 @@ interface DymitStudyRecruitmentApi {
      *
      * @param cursor 다음 페이지 조회를 위한 커서
      * @param size 조회 개수
+     * @param type 조회할 모집글 유형
+     * @param mine 본인이 작성한 Dymit 모집글만 조회할지 여부
+     * @param memberInfo 로그인 회원 정보
      * @return 커서 기반 목록 응답
      */
     @ApiResponse(responseCode = "200", description = "모집글 목록을 조회했습니다.")
     @Operation(method = "GET", summary = "Dymit 스터디 모집글 목록 조회")
     fun getStudyRecruitmentList(
         cursor: String? = null,
-        size: Int = 20
+        size: Int = 20,
+        type: StudyRecruitmentRequestType = StudyRecruitmentRequestType.DYMIT,
+        mine: Boolean = false,
+        memberInfo: MemberInfo? = null
     ): ListResponse<DymitStudyRecruitmentSummaryResponse>
 
     /**

@@ -26,7 +26,7 @@ class LoginMemberResolver : HandlerMethodArgumentResolver{
     ): Any? {
         val required = parameter.getParameterAnnotation(LoginMember::class.java)!!
             .required
-        val principal: MemberInfo? = SecurityContextHolder.getContext().authentication.principal as MemberInfo
+        val principal = SecurityContextHolder.getContext().authentication?.principal as? MemberInfo
         return if (required) {
             principal ?: throw UnauthorizedException("인증 정보가 필요합니다.")
         } else {

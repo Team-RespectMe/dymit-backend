@@ -49,11 +49,13 @@ class MongoDymitStudyRecruitmentAdapter(
      *
      * @param cursorId 다음 페이지 커서 ObjectId
      * @param size 조회 개수
+     * @param writerId 작성자 필터 ObjectId
      * @return Dymit 모집글 영속성 DTO 목록
      */
     override fun loadByCursorOrderByIdDesc(
         cursorId: ObjectId?,
-        size: Int
+        size: Int,
+        writerId: ObjectId?
     ): List<DymitStudyRecruitmentPersistenceDto> {
         val query = Query()
             .addCriteria(Criteria.where("_class").`is`(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
@@ -64,6 +66,9 @@ class MongoDymitStudyRecruitmentAdapter(
 
         if ( cursorId != null ) {
             query.addCriteria(Criteria.where("_id").lt(cursorId))
+        }
+        if ( writerId != null ) {
+            query.addCriteria(Criteria.where("writer._id").`is`(writerId))
         }
 
         return mongoTemplate.find(query, Document::class.java, COLLECTION_NAME)

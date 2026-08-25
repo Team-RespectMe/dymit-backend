@@ -31,16 +31,25 @@ class GetDymitStudyRecruitmentListService(
             throw BadRequestException(message = "조회 크기는 1 이상 100 이하여야 합니다.")
         }
         val cursorId = query.cursor?.let(::parseCursor)
+        val writerId = query.memberId.takeIf { query.mine }?.let(::parseMemberId)
 
         return loadRecruitmentPort.loadByCursorOrderByIdDesc(
             cursorId = cursorId,
-            size = query.size + 1
+            size = query.size + 1,
+            writerId = writerId
         ).map(DymitStudyRecruitmentSummaryDto::from)
     }
 
     private fun parseCursor(value: String): ObjectId {
         if ( !ObjectId.isValid(value) ) {
             throw BadRequestException(message = "올바르지 않은 커서입니다.")
+        }
+        return ObjectId(value)
+    }
+
+    private fun parseMemberId(value: String): ObjectId {
+        if ( !ObjectId.isValid(value) ) {
+            throw BadRequestException(message = "올바르지 않은 회원 식별자입니다.")
         }
         return ObjectId(value)
     }

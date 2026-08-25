@@ -16,6 +16,8 @@ import java.time.LocalDateTime
  * @property tags 태그 목록
  * @property type 모집글 출처 유형
  * @property status 모집 상태
+ * @property content 모집글 요약 내용
+ * @property url 외부 원본 모집글 URL
  */
 data class DymitStudyRecruitmentSummaryResponse(
     val id: String,
@@ -25,7 +27,9 @@ data class DymitStudyRecruitmentSummaryResponse(
     val writerId: String,
     val tags: List<String>,
     val type: StudyRecruitmentType,
-    val status: DymitStudyRecruitmentStatus
+    val status: DymitStudyRecruitmentStatus,
+    val content: String = "",
+    val url: String? = null
 ) {
 
     companion object {
@@ -47,7 +51,9 @@ data class DymitStudyRecruitmentSummaryResponse(
                 writerId = recruitment.writerId,
                 tags = recruitment.tags,
                 type = recruitment.type,
-                status = recruitment.status
+                status = recruitment.status,
+                content = recruitment.content,
+                url = recruitment.url
             )
         }
     }

@@ -165,7 +165,7 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
 
         Given("Dymit 목록 조회 서비스") {
             val cursor = ObjectId.get()
-            every { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3) } returns listOf(
+            every { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3, null) } returns listOf(
                 createPersistenceDto(recruitmentId = ObjectId.get()),
                 createPersistenceDto(recruitmentId = ObjectId.get())
             )
@@ -173,7 +173,7 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
             Then("최신순 커서 조회에 size+1을 사용하고 summary만 반환한다") {
                 val result = getListService.execute(GetDymitStudyRecruitmentListQuery(cursor.toHexString(), 2))
 
-                verify(exactly = 1) { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3) }
+                verify(exactly = 1) { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3, null) }
                 verify(exactly = 0) { loadMemberPort.loadByIds(any()) }
                 verify(exactly = 0) { loadMemberPort.loadById(any()) }
                 result.size shouldBe 2
@@ -184,6 +184,8 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 result.first().tags shouldBe emptyList()
                 result.first().type shouldBe StudyRecruitmentType.DYMIT
                 result.first().status shouldBe DymitStudyRecruitmentStatus.RECRUITING
+                result.first().content shouldBe "소개"
+                result.first().url shouldBe null
             }
 
             Then("size가 범위를 벗어나면 BadRequestException을 던진다") {
@@ -193,7 +195,7 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
             }
 
             Then("목록 조회는 작성자 조회 포트를 호출하지 않는다") {
-                every { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3) } returns listOf(
+                every { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3, null) } returns listOf(
                     createPersistenceDto(recruitmentId = ObjectId.get()),
                     createPersistenceDto(recruitmentId = ObjectId.get())
                 )
@@ -202,6 +204,35 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
 
                 verify(exactly = 0) { loadMemberPort.loadByIds(any()) }
                 verify(exactly = 0) { loadMemberPort.loadById(any()) }
+            }
+
+            Then("mine=true 이면 요청 회원 ID를 작성자 필터로 전달한다") {
+                every { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3, ownerId) } returns listOf(
+                    createPersistenceDto(recruitmentId = ObjectId.get())
+                )
+
+                getListService.execute(
+                    GetDymitStudyRecruitmentListQuery(
+                        cursor = cursor.toHexString(),
+                        size = 2,
+                        mine = true,
+                        memberId = ownerId.toHexString()
+                    )
+                )
+
+                verify(exactly = 1) { loadRecruitmentPort.loadByCursorOrderByIdDesc(cursor, 3, ownerId) }
+            }
+
+            Then("mine=true 이고 회원 식별자가 올바르지 않으면 BadRequestException을 던진다") {
+                shouldThrow<BadRequestException> {
+                    getListService.execute(
+                        GetDymitStudyRecruitmentListQuery(
+                            size = 2,
+                            mine = true,
+                            memberId = "invalid-member-id"
+                        )
+                    )
+                }.message shouldBe "올바르지 않은 회원 식별자입니다."
             }
         }
 

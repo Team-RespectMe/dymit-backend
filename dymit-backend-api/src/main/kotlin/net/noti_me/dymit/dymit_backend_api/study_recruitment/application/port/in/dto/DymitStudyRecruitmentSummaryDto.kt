@@ -16,6 +16,8 @@ import java.time.LocalDateTime
  * @property tags 태그 목록
  * @property type 모집글 출처 유형
  * @property status 모집 상태
+ * @property content 모집글 요약 내용
+ * @property url 외부 원본 모집글 URL
  */
 data class DymitStudyRecruitmentSummaryDto(
     val id: String,
@@ -25,7 +27,9 @@ data class DymitStudyRecruitmentSummaryDto(
     val writerId: String,
     val tags: List<String>,
     val type: StudyRecruitmentType,
-    val status: DymitStudyRecruitmentStatus
+    val status: DymitStudyRecruitmentStatus,
+    val content: String = "",
+    val url: String? = null
 ) {
 
     companion object {
@@ -47,8 +51,35 @@ data class DymitStudyRecruitmentSummaryDto(
                 writerId = recruitment.writerId.toHexString(),
                 tags = recruitment.tags,
                 type = recruitment.type,
-                status = recruitment.recruitmentStatus
+                status = recruitment.recruitmentStatus,
+                content = recruitment.description.take(CONTENT_MAX_LENGTH),
+                url = null
             )
         }
+
+        /**
+         * 외부 모집글 DTO를 v2 목록 요약 DTO로 변환합니다.
+         *
+         * @param recruitment v1 외부 모집글 DTO
+         * @return v2 모집글 목록 요약 DTO
+         */
+        fun from(
+            recruitment: StudyRecruitmentDto
+        ): DymitStudyRecruitmentSummaryDto {
+            return DymitStudyRecruitmentSummaryDto(
+                id = recruitment.id,
+                createdAt = recruitment.createdAt,
+                title = recruitment.title,
+                purpose = "",
+                writerId = "",
+                tags = emptyList(),
+                type = recruitment.type,
+                status = DymitStudyRecruitmentStatus.RECRUITING,
+                content = recruitment.content,
+                url = recruitment.url
+            )
+        }
+
+        private const val CONTENT_MAX_LENGTH = 100
     }
 }

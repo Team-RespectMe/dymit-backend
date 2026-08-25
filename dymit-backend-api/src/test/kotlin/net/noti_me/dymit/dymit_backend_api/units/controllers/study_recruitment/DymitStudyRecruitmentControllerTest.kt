@@ -1,16 +1,19 @@
 package net.noti_me.dymit.dymit_backend_api.units.study_recruitment.adapter.`in`.web
 
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import jakarta.validation.Validation
 import jakarta.validation.Validator
+import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.web.DymitStudyRecruitmentController
@@ -18,6 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.DeleteDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.GetDymitStudyRecruitmentListUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.GetDymitStudyRecruitmentUseCase
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.QueryStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.UpdateDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.CreateDymitStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DeleteDymitStudyRecruitmentCommand
@@ -25,11 +29,14 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentListQuery
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentQuery
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.QueryStudyRecruitmentCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.UpdateDymitStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.DymitStudyRecruitmentApi
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.CreateStudyRecruitmentRequest
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentSummaryResponse
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentRequestType
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentWriterResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.UpdateStudyRecruitmentRequest
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
@@ -46,12 +53,14 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
 
     private val createUseCase = mockk<CreateDymitStudyRecruitmentUseCase>()
     private val getListUseCase = mockk<GetDymitStudyRecruitmentListUseCase>()
+    private val queryExternalUseCase = mockk<QueryStudyRecruitmentUseCase>()
     private val getUseCase = mockk<GetDymitStudyRecruitmentUseCase>()
     private val updateUseCase = mockk<UpdateDymitStudyRecruitmentUseCase>()
     private val deleteUseCase = mockk<DeleteDymitStudyRecruitmentUseCase>(relaxed = true)
     private val controller = DymitStudyRecruitmentController(
         createUseCase = createUseCase,
         getListUseCase = getListUseCase,
+        queryExternalUseCase = queryExternalUseCase,
         getUseCase = getUseCase,
         updateUseCase = updateUseCase,
         deleteUseCase = deleteUseCase
@@ -147,13 +156,27 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
             val first = createSummaryDto(id = "1")
             val second = createSummaryDto(id = "2")
             val third = createSummaryDto(id = "3")
-            every { getListUseCase.execute(GetDymitStudyRecruitmentListQuery(cursor = null, size = 2)) } returns listOf(first, second, third)
+            every {
+                getListUseCase.execute(
+                    GetDymitStudyRecruitmentListQuery(cursor = null, size = 2, mine = false, memberId = "")
+                )
+            } returns listOf(first, second, third)
 
             When("getStudyRecruitmentList를 호출하면") {
-                val response = controller.getStudyRecruitmentList(null, 2)
+                val response = controller.getStudyRecruitmentList(
+                    cursor = null,
+                    size = 2,
+                    type = StudyRecruitmentRequestType.DYMIT,
+                    mine = false,
+                    memberInfo = null
+                )
 
                 Then("summary 응답만 반환하고 next 링크와 size를 구성한다") {
-                    verify(exactly = 1) { getListUseCase.execute(GetDymitStudyRecruitmentListQuery(cursor = null, size = 2)) }
+                    verify(exactly = 1) {
+                        getListUseCase.execute(
+                            GetDymitStudyRecruitmentListQuery(cursor = null, size = 2, mine = false, memberId = "")
+                        )
+                    }
                     response.count shouldBe 2L
                     response.items.map(DymitStudyRecruitmentSummaryResponse::id) shouldBe listOf("1", "2")
                     response.items.map { it.title } shouldBe listOf("테스트 그룹", "테스트 그룹")
@@ -165,9 +188,111 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                         DymitStudyRecruitmentStatus.RECRUITING,
                         DymitStudyRecruitmentStatus.RECRUITING
                     )
+                    response.items.map { it.content } shouldBe listOf("소개", "소개")
+                    response.items.map { it.url } shouldBe listOf(null, null)
                     response._links["next"]?.href?.contains("cursor=2") shouldBe true
                     response._links["next"]?.href?.contains("size=2") shouldBe true
+                    response._links["next"]?.href?.contains("type=DYMIT") shouldBe true
+                    response._links["next"]?.href?.contains("mine=false") shouldBe true
                 }
+            }
+
+            Then("type 생략 기본값은 DYMIT 이다") {
+                RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request("/api/v2/study-recruitments")))
+                clearMocks(getListUseCase, answers = false, recordedCalls = true)
+                every {
+                    getListUseCase.execute(
+                        GetDymitStudyRecruitmentListQuery(cursor = null, size = 2, mine = false, memberId = "")
+                    )
+                } returns listOf(first, second, third)
+                controller.getStudyRecruitmentList(
+                    cursor = null,
+                    size = 2,
+                    type = StudyRecruitmentRequestType.DYMIT,
+                    mine = false,
+                    memberInfo = null
+                )
+
+                verify(exactly = 1) {
+                    getListUseCase.execute(
+                        GetDymitStudyRecruitmentListQuery(cursor = null, size = 2, mine = false, memberId = "")
+                    )
+                }
+            }
+
+            Then("DYMIT 과 mine=true 면 요청 회원 ID를 작성자 조건으로 전달한다") {
+                RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request("/api/v2/study-recruitments")))
+                every {
+                    getListUseCase.execute(
+                        GetDymitStudyRecruitmentListQuery(
+                            cursor = "cursor-id",
+                            size = 3,
+                            mine = true,
+                            memberId = memberInfo.memberId
+                        )
+                    )
+                } returns listOf(first)
+
+                controller.getStudyRecruitmentList(
+                    cursor = "cursor-id",
+                    size = 3,
+                    type = StudyRecruitmentRequestType.DYMIT,
+                    mine = true,
+                    memberInfo = memberInfo
+                )
+
+                verify(exactly = 1) {
+                    getListUseCase.execute(
+                        GetDymitStudyRecruitmentListQuery(
+                            cursor = "cursor-id",
+                            size = 3,
+                            mine = true,
+                            memberId = memberInfo.memberId
+                        )
+                    )
+                }
+            }
+
+            Then("EXTERNAL 은 v1 목록 유즈케이스를 사용하고 mine=true 를 무시한다") {
+                RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request("/api/v2/study-recruitments")))
+                clearMocks(getListUseCase, queryExternalUseCase, answers = false, recordedCalls = true)
+                every {
+                    queryExternalUseCase.execute(QueryStudyRecruitmentCommand(cursor = "external-cursor", size = 4))
+                } returns listOf(createExternalDto("external-1"))
+
+                val response = controller.getStudyRecruitmentList(
+                    cursor = "external-cursor",
+                    size = 4,
+                    type = StudyRecruitmentRequestType.EXTERNAL,
+                    mine = true,
+                    memberInfo = memberInfo
+                )
+
+                verify(exactly = 1) {
+                    queryExternalUseCase.execute(QueryStudyRecruitmentCommand(cursor = "external-cursor", size = 4))
+                }
+                verify(exactly = 0) { getListUseCase.execute(any<GetDymitStudyRecruitmentListQuery>()) }
+                response.items.single().type shouldBe StudyRecruitmentType.INFLEARN
+                response.items.single().content shouldBe "외부 본문"
+                response.items.single().url shouldBe "https://example.com/external-1"
+                response.items.single().purpose shouldBe ""
+                response.items.single().writerId shouldBe ""
+                response.items.single().tags shouldBe emptyList()
+                response.items.single().status shouldBe DymitStudyRecruitmentStatus.RECRUITING
+            }
+
+            Then("mine=true 미인증 요청은 기존 인증 오류를 유지한다") {
+                val exception = shouldThrow<UnauthorizedException> {
+                    controller.getStudyRecruitmentList(
+                        cursor = null,
+                        size = 2,
+                        type = StudyRecruitmentRequestType.DYMIT,
+                        mine = true,
+                        memberInfo = null
+                    )
+                }
+
+                exception.message shouldBe "인증 정보가 필요합니다."
             }
         }
 
@@ -251,7 +376,7 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
 
             Then("v2 목록 응답 DTO는 summary 필드만 가진다") {
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldContainAll
-                    listOf("id", "createdAt", "title", "purpose", "writerId", "tags", "type", "status")
+                    listOf("id", "createdAt", "title", "purpose", "writerId", "tags", "type", "status", "content", "url")
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "writer"
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "groupId"
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "description"
@@ -339,6 +464,20 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         writerId = memberInfo.memberId,
         tags = listOf("kotlin"),
         type = StudyRecruitmentType.DYMIT,
-        status = DymitStudyRecruitmentStatus.RECRUITING
+        status = DymitStudyRecruitmentStatus.RECRUITING,
+        content = "소개",
+        url = null
+    )
+
+    private fun createExternalDto(id: String) = StudyRecruitmentDto(
+        id = id,
+        externalId = "external-$id",
+        type = StudyRecruitmentType.INFLEARN,
+        title = "외부 모집글",
+        content = "외부 본문",
+        url = "https://example.com/$id",
+        writer = "외부 작성자",
+        createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
+        updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0)
     )
 }

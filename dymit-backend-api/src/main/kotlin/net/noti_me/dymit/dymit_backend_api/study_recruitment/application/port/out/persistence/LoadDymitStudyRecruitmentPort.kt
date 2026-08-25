@@ -21,10 +21,12 @@ interface LoadDymitStudyRecruitmentPort {
      *
      * @param cursorId 다음 페이지 커서 ObjectId
      * @param size 조회 개수
+     * @param writerId 작성자 필터 ObjectId
      * @return Dymit 스터디 모집글 영속성 DTO 목록
      */
     fun loadByCursorOrderByIdDesc(
         cursorId: ObjectId?,
-        size: Int
+        size: Int,
+        writerId: ObjectId? = null
     ): List<DymitStudyRecruitmentPersistenceDto>
 }
