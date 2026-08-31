@@ -39,7 +39,7 @@ class QueryStudyRecruitmentService(
             type = type,
             title = title,
             content = content,
-            url = url,
+            url = "${url}/${title}",
             writer = writer,
             createdAt = createdAt,
             updatedAt = updatedAt

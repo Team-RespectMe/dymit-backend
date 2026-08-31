@@ -14,9 +14,16 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.StudyGroupQue
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.InviteCodeVo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command.StudyGroupCreateCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command.StudyGroupDto
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.MemberPreview
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.PostPreview
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupMemberQueryDto
+import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web.dto.StudyGroupCreateRequest
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.LoadStudyGroupPostPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.study_schedule.StudyGroupSchedulePort
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupProfileImageVo
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.ProfileImageVo
 import org.bson.types.ObjectId
 import java.time.LocalDateTime
 
@@ -25,7 +32,13 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
     private val commandService = mockk<StudyGroupCommandService>()
     private val queryService = mockk<StudyGroupQueryService>()
     private val schedulePort = mockk<StudyGroupSchedulePort>()
-    private val controller = StudyGroupController(commandService, queryService, schedulePort)
+    private val loadStudyGroupPostPort = mockk<LoadStudyGroupPostPort>()
+    private val controller = StudyGroupController(
+        commandService,
+        queryService,
+        schedulePort,
+        loadStudyGroupPostPort
+    )
 
     init {
         afterEach { clearAllMocks() }
@@ -63,5 +76,132 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
                 }
             }
         }
+
+        given("a study-group detail query") {
+            val member = MemberInfo.of(ObjectId.get().toHexString(), "tester", listOf("ROLE_MEMBER"))
+            val groupId = ObjectId.get().toHexString()
+            val createdAt = LocalDateTime.of(2026, 8, 31, 10, 0)
+            val owner = MemberPreview(
+                memberId = ObjectId.get().toHexString(),
+                nickname = "owner",
+                role = GroupMemberRole.OWNER,
+                profileImage = ProfileImageVo()
+            )
+
+            `when`("the notice board has a latest post") {
+                then("it loads the recent notice, keeps group/member queries, and returns sorted members") {
+                    val noticeBoardId = ObjectId.get().toHexString()
+                    val recentPost = PostPreview(
+                        postId = ObjectId.get().toHexString(),
+                        title = "latest notice",
+                        createdAt = createdAt.plusDays(1)
+                    )
+                    val group = createStudyGroupQueryModel(
+                        id = groupId,
+                        owner = owner,
+                        noticeBoardId = noticeBoardId,
+                        createdAt = createdAt
+                    )
+                    val members = listOf(
+                        createMemberQueryDto(groupId, "member", GroupMemberRole.MEMBER, createdAt.plusMinutes(2)),
+                        createMemberQueryDto(groupId, "owner", GroupMemberRole.OWNER, createdAt),
+                        createMemberQueryDto(groupId, "admin", GroupMemberRole.ADMIN, createdAt.plusMinutes(1))
+                    )
+                    every { queryService.getStudyGroup(member, groupId) } returns group
+                    every { loadStudyGroupPostPort.loadLatestPost(noticeBoardId) } returns recentPost
+                    every { queryService.getStudyGroupMembers(member, groupId) } returns members
+
+                    val response = controller.getStudyGroup(member, groupId)
+
+                    verify(exactly = 1) { queryService.getStudyGroup(member, groupId) }
+                    verify(exactly = 1) { loadStudyGroupPostPort.loadLatestPost(noticeBoardId) }
+                    verify(exactly = 1) { queryService.getStudyGroupMembers(member, groupId) }
+                    response.id shouldBe groupId
+                    response.noticeBoardId shouldBe noticeBoardId
+                    response.recentPost?.postId shouldBe recentPost.postId
+                    response.recentPost?.title shouldBe recentPost.title
+                    response.recentPost?.createdAt shouldBe recentPost.createdAt
+                    response.members.map { it.role } shouldBe listOf(
+                        GroupMemberRole.OWNER,
+                        GroupMemberRole.ADMIN,
+                        GroupMemberRole.MEMBER
+                    )
+                }
+            }
+
+            `when`("the notice board id is blank") {
+                then("it skips recent-post loading and returns null recentPost") {
+                    val group = createStudyGroupQueryModel(
+                        id = groupId,
+                        owner = owner,
+                        noticeBoardId = "",
+                        createdAt = createdAt
+                    )
+                    every { queryService.getStudyGroup(member, groupId) } returns group
+                    every { queryService.getStudyGroupMembers(member, groupId) } returns emptyList()
+
+                    val response = controller.getStudyGroup(member, groupId)
+
+                    verify(exactly = 1) { queryService.getStudyGroup(member, groupId) }
+                    verify(exactly = 0) { loadStudyGroupPostPort.loadLatestPost(any()) }
+                    verify(exactly = 1) { queryService.getStudyGroupMembers(member, groupId) }
+                    response.recentPost shouldBe null
+                }
+            }
+
+            `when`("the notice board has no latest post") {
+                then("it returns null recentPost after querying the board") {
+                    val noticeBoardId = ObjectId.get().toHexString()
+                    val group = createStudyGroupQueryModel(
+                        id = groupId,
+                        owner = owner,
+                        noticeBoardId = noticeBoardId,
+                        createdAt = createdAt
+                    )
+                    every { queryService.getStudyGroup(member, groupId) } returns group
+                    every { loadStudyGroupPostPort.loadLatestPost(noticeBoardId) } returns null
+                    every { queryService.getStudyGroupMembers(member, groupId) } returns emptyList()
+
+                    val response = controller.getStudyGroup(member, groupId)
+
+                    verify(exactly = 1) { loadStudyGroupPostPort.loadLatestPost(noticeBoardId) }
+                    response.recentPost shouldBe null
+                }
+            }
+        }
+    }
+
+    private fun createStudyGroupQueryModel(
+        id: String,
+        owner: MemberPreview,
+        noticeBoardId: String,
+        createdAt: LocalDateTime
+    ): StudyGroupQueryModelDto {
+        return StudyGroupQueryModelDto(
+            id = id,
+            name = "Algorithm",
+            profileImage = GroupProfileImageVo(),
+            owner = owner,
+            description = "Weekly practice",
+            noticeBoardId = noticeBoardId,
+            inviteCode = InviteCodeVo("invite", createdAt, createdAt.plusDays(1)),
+            createdAt = createdAt
+        )
+    }
+
+    private fun createMemberQueryDto(
+        groupId: String,
+        nickname: String,
+        role: GroupMemberRole,
+        createdAt: LocalDateTime
+    ): StudyGroupMemberQueryDto {
+        return StudyGroupMemberQueryDto(
+            groupId = groupId,
+            memberId = ObjectId.get().toHexString(),
+            nickname = nickname,
+            role = role,
+            profileImage = ProfileImageVo(),
+            createdAt = createdAt
+        )
     }
 }
