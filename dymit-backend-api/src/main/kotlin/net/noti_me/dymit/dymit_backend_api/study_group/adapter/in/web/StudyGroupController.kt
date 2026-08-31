@@ -6,6 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.StudyGroupCom
 import net.noti_me.dymit.dymit_backend_api.study_group.application.StudyGroupQueryService
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command.EnlistBlacklistCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.SchedulePreview
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.LoadStudyGroupPostPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.study_schedule.StudyGroupSchedulePort
 import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
@@ -24,7 +25,8 @@ import javax.annotation.security.PermitAll
 class StudyGroupController(
     private val studyGroupCommandService: StudyGroupCommandService,
     private val studyGroupQueryService: StudyGroupQueryService,
-    private val studyGroupSchedulePort: StudyGroupSchedulePort
+    private val studyGroupSchedulePort: StudyGroupSchedulePort,
+    private val loadStudyGroupPostPort: LoadStudyGroupPostPort = LoadStudyGroupPostPort { null }
 ): StudyGroupApi {
 
     @PostMapping
@@ -103,6 +105,9 @@ class StudyGroupController(
         @PathVariable groupId: String
     ): StudyGroupQueryDetailResponse {
         val group = studyGroupQueryService.getStudyGroup(memberInfo, groupId)
+        group.recentPost = group.noticeBoardId
+            .takeIf { it.isNotBlank() }
+            ?.let(loadStudyGroupPostPort::loadLatestPost)
         val groupMembers = studyGroupQueryService.getStudyGroupMembers(memberInfo, groupId)
         val sorted = groupMembers.sortedBy { it.role  }
         return StudyGroupQueryDetailResponse.of(group, sorted)
