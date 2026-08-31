@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.domain
 
 import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
+import net.noti_me.dymit.dymit_backend_api.common.errors.TooManyRequestException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
@@ -25,6 +26,8 @@ import java.time.LocalDateTime
  * @property studyFormat 운영 방식
  * @property contact 연락처 정보
  * @property tags 모집글 태그 목록
+ * @property bumpAt 마지막 끌어올리기 시각
+ * @property bumpCount 끌어올리기 횟수
  * @property createdAt 생성 시각
  * @property updatedAt 수정 시각
  * @property isDeleted 삭제 여부
@@ -47,6 +50,8 @@ class DymitStudyRecruitment(
     studyFormat: String,
     contact: Contact,
     tags: List<String> = emptyList(),
+    bumpAt: Instant = Instant.now(),
+    bumpCount: Int = 0,
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null,
     isDeleted: Boolean = false
@@ -91,6 +96,32 @@ class DymitStudyRecruitment(
 
     var tags: List<String> = tags.toList()
         private set
+
+    @Field("bumpAt")
+    var bumpAt: Instant = bumpAt
+        private set
+
+    @Field("bumpCount")
+    var bumpCount: Int = bumpCount
+        private set
+
+    /**
+     * 모집글을 목록 최상단으로 끌어올립니다.
+     *
+     * @throws TooManyRequestException 최대 끌어올리기 횟수를 초과한 경우
+     */
+    fun bump() {
+        if ( bumpCount >= MAX_BUMP_COUNT ) {
+            throw TooManyRequestException(
+                code = "EXCEED_BUMP_COUNT",
+                message = "끌어올리기 최대 횟수를 초과하였습니다."
+            )
+        }
+
+        bumpCount += 1
+        bumpAt = Instant.now()
+        touchUpdatedAt()
+    }
 
     /**
      * 스터디 소개를 변경합니다.
@@ -211,6 +242,7 @@ class DymitStudyRecruitment(
         const val PURPOSE_MAX_LENGTH = 50
         const val TARGET_MEMBER_MAX_LENGTH = 100
         const val STUDY_FORMAT_MAX_LENGTH = 100
+        const val MAX_BUMP_COUNT = 5
         fun validateLength(value: String, maxLength: Int, fieldName: String): String {
             require(value.length <= maxLength) {
                 "${fieldName}은(는) ${maxLength}자 이내로 작성해야 합니다."

@@ -25,6 +25,8 @@ import java.time.LocalDateTime
  * @property studyFormat 운영 방식
  * @property contact 연락처 정보
  * @property tags 태그 목록
+ * @property bumpAt 마지막 끌어올리기 시각
+ * @property bumpCount 끌어올리기 횟수
  * @property createdAt 생성 시각
  * @property updatedAt 수정 시각
  */
@@ -44,7 +46,9 @@ data class DymitStudyRecruitmentResponse(
     val contact: Contact,
     val tags: List<String>,
     val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?
+    val updatedAt: LocalDateTime?,
+    val bumpAt: Instant,
+    val bumpCount: Int
 ) : BaseResponse() {
 
     companion object {
@@ -72,7 +76,9 @@ data class DymitStudyRecruitmentResponse(
                 contact = recruitment.contact,
                 tags = recruitment.tags,
                 createdAt = recruitment.createdAt,
-                updatedAt = recruitment.updatedAt
+                updatedAt = recruitment.updatedAt,
+                bumpAt = recruitment.bumpAt,
+                bumpCount = recruitment.bumpCount
             )
         }
     }

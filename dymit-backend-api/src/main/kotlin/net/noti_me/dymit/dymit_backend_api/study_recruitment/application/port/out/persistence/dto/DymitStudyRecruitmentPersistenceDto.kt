@@ -27,6 +27,9 @@ import java.time.LocalDateTime
  * @property studyFormat 운영 방식
  * @property contact 연락처 정보
  * @property tags 태그 목록
+ * @property bumpAt 마지막 끌어올리기 시각
+ * @property bumpCount 끌어올리기 횟수
+ * @property hasStoredBumpAt Mongo 문서에 끌어올리기 시각이 저장되어 있는지 여부
  * @property createdAt 생성 시각
  * @property updatedAt 수정 시각
  * @property isDeleted 삭제 여부
@@ -49,7 +52,10 @@ data class DymitStudyRecruitmentPersistenceDto(
     val tags: List<String>,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?,
-    val isDeleted: Boolean
+    val isDeleted: Boolean,
+    val bumpAt: Instant = Instant.EPOCH,
+    val bumpCount: Int = 0,
+    val hasStoredBumpAt: Boolean = true
 ) {
 
     /**
@@ -76,6 +82,8 @@ data class DymitStudyRecruitmentPersistenceDto(
             studyFormat = studyFormat,
             contact = contact,
             tags = tags,
+            bumpAt = bumpAt,
+            bumpCount = bumpCount,
             createdAt = createdAt,
             updatedAt = updatedAt,
             isDeleted = isDeleted
@@ -111,7 +119,9 @@ data class DymitStudyRecruitmentPersistenceDto(
                 tags = recruitment.tags,
                 createdAt = recruitment.createdAt,
                 updatedAt = recruitment.updatedAt,
-                isDeleted = recruitment.isDeleted
+                isDeleted = recruitment.isDeleted,
+                bumpAt = recruitment.bumpAt,
+                bumpCount = recruitment.bumpCount
             )
         }
     }

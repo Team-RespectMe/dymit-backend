@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentPersistenceDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentCursor
 import org.bson.types.ObjectId
 
 /**
@@ -17,7 +18,7 @@ interface LoadDymitStudyRecruitmentPort {
     fun loadById(recruitmentId: ObjectId): DymitStudyRecruitmentPersistenceDto?
 
     /**
-     * 커서보다 작은 Dymit 스터디 모집글을 최신순으로 조회합니다.
+     * 커서 뒤의 Dymit 스터디 모집글을 끌어올리기 시각과 식별자 내림차순으로 조회합니다.
      *
      * @param cursorId 다음 페이지 커서 ObjectId
      * @param size 조회 개수
@@ -26,6 +27,20 @@ interface LoadDymitStudyRecruitmentPort {
      */
     fun loadByCursorOrderByIdDesc(
         cursorId: ObjectId?,
+        size: Int,
+        writerId: ObjectId? = null
+    ): List<DymitStudyRecruitmentPersistenceDto>
+
+    /**
+     * 복합 커서 뒤의 Dymit 모집글을 끌어올리기 시각과 식별자 내림차순으로 조회합니다.
+     *
+     * @param cursor 다음 페이지 복합 커서
+     * @param size 조회 개수
+     * @param writerId 작성자 필터 ObjectId
+     * @return Dymit 스터디 모집글 영속성 DTO 목록
+     */
+    fun loadByCursorOrderByBumpAtDesc(
+        cursor: DymitStudyRecruitmentCursor?,
         size: Int,
         writerId: ObjectId? = null
     ): List<DymitStudyRecruitmentPersistenceDto>

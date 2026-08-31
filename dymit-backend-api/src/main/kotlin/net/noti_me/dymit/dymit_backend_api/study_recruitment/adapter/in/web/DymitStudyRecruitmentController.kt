@@ -8,12 +8,14 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.Sanitize
 import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.BumpStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.CreateDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.DeleteDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.GetDymitStudyRecruitmentListUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.GetDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.QueryStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.UpdateDymitStudyRecruitmentUseCase
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.BumpStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DeleteDymitStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentListQuery
@@ -44,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController
  * @property queryExternalUseCase 외부 모집글 목록 조회 유즈케이스
  * @property getUseCase 모집글 단건 조회 유즈케이스
  * @property updateUseCase 모집글 수정 유즈케이스
+ * @property bumpUseCase 모집글 끌어올리기 유즈케이스
  * @property deleteUseCase 모집글 삭제 유즈케이스
  */
 @RestController
@@ -53,7 +56,8 @@ class DymitStudyRecruitmentController(
     private val queryExternalUseCase: QueryStudyRecruitmentUseCase,
     private val getUseCase: GetDymitStudyRecruitmentUseCase,
     private val updateUseCase: UpdateDymitStudyRecruitmentUseCase,
-    private val deleteUseCase: DeleteDymitStudyRecruitmentUseCase
+    private val deleteUseCase: DeleteDymitStudyRecruitmentUseCase,
+    private val bumpUseCase: BumpStudyRecruitmentUseCase? = null
 ) : DymitStudyRecruitmentApi {
 
     /**
@@ -101,7 +105,9 @@ class DymitStudyRecruitmentController(
             size = size,
             items = responses,
             extractors = buildMap {
-                put("cursor") { it.id }
+                put("cursor") {
+                    if ( type == StudyRecruitmentRequestType.DYMIT ) it.cursor else it.id
+                }
                 put("size") { size }
                 put("type") { type }
                 put("mine") { mine }
@@ -152,6 +158,26 @@ class DymitStudyRecruitmentController(
     ): DymitStudyRecruitmentResponse {
         return DymitStudyRecruitmentResponse.from(
             updateUseCase.execute(memberInfo, request.toCommand(recruitmentId))
+        )
+    }
+
+    /**
+     * 그룹 소유자의 Dymit 모집글 끌어올리기 요청을 처리합니다.
+     */
+    @PostMapping("/{recruitmentId}/bumps")
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun bumpStudyRecruitment(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable recruitmentId: String
+    ): DymitStudyRecruitmentResponse {
+        val useCase = requireNotNull(bumpUseCase) {
+            "모집글 끌어올리기 유즈케이스가 구성되지 않았습니다."
+        }
+        return DymitStudyRecruitmentResponse.from(
+            useCase.execute(
+                memberInfo = memberInfo,
+                command = BumpStudyRecruitmentCommand(recruitmentId)
+            )
         )
     }
 

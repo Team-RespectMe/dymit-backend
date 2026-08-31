@@ -1,7 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.out.persistence.mongo
 
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.CheckDymitStudyRecruitmentExistencePort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.LoadDymitStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.SaveDymitStudyRecruitmentPort
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentCursor
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentPersistenceDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
@@ -13,6 +15,8 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Repository
+import java.time.Instant
+import java.util.Date
 
 /**
  * Dymit 스터디 모집글 MongoDB 영속성 어댑터입니다.
@@ -22,7 +26,25 @@ import org.springframework.stereotype.Repository
 @Repository
 class MongoDymitStudyRecruitmentAdapter(
     private val mongoTemplate: MongoTemplate
-) : LoadDymitStudyRecruitmentPort, SaveDymitStudyRecruitmentPort {
+) : LoadDymitStudyRecruitmentPort,
+    SaveDymitStudyRecruitmentPort,
+    CheckDymitStudyRecruitmentExistencePort {
+
+    /**
+     * 그룹의 미삭제 Dymit 모집글 존재 여부를 조회합니다.
+     *
+     * @param groupId 그룹 ObjectId
+     * @return 미삭제 Dymit 모집글이 존재하면 true
+     */
+    override fun existsActiveByGroupId(groupId: ObjectId): Boolean {
+        val query = Query()
+            .addCriteria(Criteria.where("group_id").`is`(groupId))
+            .addCriteria(Criteria.where("_class").`is`(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
+            .addCriteria(Criteria.where("type").`is`(StudyRecruitmentType.DYMIT))
+            .addCriteria(Criteria.where("isDeleted").`is`(false))
+
+        return mongoTemplate.exists(query, COLLECTION_NAME)
+    }
 
     /**
      * Dymit 타입 alias와 출처 유형이 일치하는 미삭제 모집글만 단건 조회합니다.
@@ -45,7 +67,7 @@ class MongoDymitStudyRecruitmentAdapter(
     }
 
     /**
-     * Dymit 타입 alias와 출처 유형이 일치하는 미삭제 모집글 목록을 최신순으로 조회합니다.
+     * Dymit 타입 alias와 출처 유형이 일치하는 미삭제 모집글 목록을 끌어올리기 최신순으로 조회합니다.
      *
      * @param cursorId 다음 페이지 커서 ObjectId
      * @param size 조회 개수
@@ -57,15 +79,37 @@ class MongoDymitStudyRecruitmentAdapter(
         size: Int,
         writerId: ObjectId?
     ): List<DymitStudyRecruitmentPersistenceDto> {
+        val cursor = cursorId?.let(::loadLegacyCursor)
+        return loadByCursorOrderByBumpAtDesc(cursor, size, writerId)
+    }
+
+    /**
+     * 복합 커서 뒤의 Dymit 모집글을 끌어올리기 시각과 식별자 내림차순으로 조회합니다.
+     *
+     * @param cursor 다음 페이지 복합 커서
+     * @param size 조회 개수
+     * @param writerId 작성자 필터 ObjectId
+     * @return Dymit 모집글 영속성 DTO 목록
+     */
+    override fun loadByCursorOrderByBumpAtDesc(
+        cursor: DymitStudyRecruitmentCursor?,
+        size: Int,
+        writerId: ObjectId?
+    ): List<DymitStudyRecruitmentPersistenceDto> {
         val query = Query()
             .addCriteria(Criteria.where("_class").`is`(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
             .addCriteria(Criteria.where("type").`is`(StudyRecruitmentType.DYMIT))
             .addCriteria(Criteria.where("isDeleted").`is`(false))
             .limit(size)
-            .with(Sort.by(Sort.Direction.DESC, "_id"))
+            .with(
+                Sort.by(
+                    Sort.Order.desc("bumpAt"),
+                    Sort.Order.desc("_id")
+                )
+            )
 
-        if ( cursorId != null ) {
-            query.addCriteria(Criteria.where("_id").lt(cursorId))
+        if ( cursor != null ) {
+            query.addCriteria(createCursorCriteria(cursor))
         }
         if ( writerId != null ) {
             query.addCriteria(Criteria.where("writer._id").`is`(writerId))
@@ -89,12 +133,16 @@ class MongoDymitStudyRecruitmentAdapter(
     }
 
     private fun Document.toPersistenceDto(): DymitStudyRecruitmentPersistenceDto {
+        val hasStoredBumpAt = containsKey("bumpAt")
         normalizeLegacyContact()
+        normalizeLegacyBumpFields()
         val recruitment = mongoTemplate.converter.read(
             DymitStudyRecruitment::class.java,
             this
         )
-        return DymitStudyRecruitmentPersistenceDto.from(recruitment)
+        return DymitStudyRecruitmentPersistenceDto.from(recruitment).copy(
+            hasStoredBumpAt = hasStoredBumpAt
+        )
     }
 
     private fun Document.normalizeLegacyContact() {
@@ -104,6 +152,53 @@ class MongoDymitStudyRecruitmentAdapter(
                 "url" to legacyContact,
                 "title" to ""
             )
+        )
+    }
+
+    private fun Document.normalizeLegacyBumpFields() {
+        if ( !containsKey("bumpAt") ) {
+            this["bumpAt"] = getObjectId("_id")?.date?.toInstant() ?: Instant.EPOCH
+        }
+        if ( !containsKey("bumpCount") ) {
+            this["bumpCount"] = 0
+        }
+    }
+
+    private fun loadLegacyCursor(cursorId: ObjectId): DymitStudyRecruitmentCursor {
+        val cursorDocument = mongoTemplate.findOne(
+            Query.query(Criteria.where("_id").`is`(cursorId)),
+            Document::class.java,
+            COLLECTION_NAME
+        )
+        val storedBumpAt = cursorDocument?.get("bumpAt")
+        val bumpAt = when ( storedBumpAt ) {
+            is Date -> storedBumpAt.toInstant()
+            is Instant -> storedBumpAt
+            else -> cursorId.date.toInstant()
+        }
+
+        return DymitStudyRecruitmentCursor(
+            bumpAt = bumpAt,
+            recruitmentId = cursorId,
+            hasStoredBumpAt = storedBumpAt != null
+        )
+    }
+
+    private fun createCursorCriteria(cursor: DymitStudyRecruitmentCursor): Criteria {
+        if ( !cursor.hasStoredBumpAt ) {
+            return Criteria().andOperator(
+                Criteria.where("bumpAt").exists(false),
+                Criteria.where("_id").lt(cursor.recruitmentId)
+            )
+        }
+
+        return Criteria().orOperator(
+            Criteria.where("bumpAt").lt(cursor.bumpAt),
+            Criteria().andOperator(
+                Criteria.where("bumpAt").`is`(cursor.bumpAt),
+                Criteria.where("_id").lt(cursor.recruitmentId)
+            ),
+            Criteria.where("bumpAt").exists(false)
         )
     }
 

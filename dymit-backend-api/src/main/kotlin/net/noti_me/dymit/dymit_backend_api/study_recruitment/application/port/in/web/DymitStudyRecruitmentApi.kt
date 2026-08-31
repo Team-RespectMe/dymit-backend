@@ -84,6 +84,21 @@ interface DymitStudyRecruitmentApi {
     ): DymitStudyRecruitmentResponse
 
     /**
+     * Dymit 스터디 모집글을 끌어올립니다.
+     *
+     * @param memberInfo 로그인 회원 정보
+     * @param recruitmentId 모집글 식별자
+     * @return 끌어올린 모집글 응답
+     */
+    @ApiResponse(responseCode = "200", description = "모집글을 끌어올렸습니다.")
+    @Operation(method = "POST", summary = "Dymit 스터디 모집글 끌어올리기")
+    @SecurityRequirement(name = "bearer-jwt")
+    fun bumpStudyRecruitment(
+        memberInfo: MemberInfo,
+        recruitmentId: String
+    ): DymitStudyRecruitmentResponse
+
+    /**
      * Dymit 스터디 모집글을 삭제합니다.
      *
      * @param memberInfo 로그인 회원 정보

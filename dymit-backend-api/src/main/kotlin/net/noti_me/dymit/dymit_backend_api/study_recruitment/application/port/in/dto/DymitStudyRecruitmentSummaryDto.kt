@@ -1,6 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentPersistenceDto
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentCursor
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import java.time.LocalDateTime
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
  * @property status 모집 상태
  * @property content 모집글 요약 내용
  * @property url 외부 원본 모집글 URL
+ * @property cursor 다음 페이지 조회용 커서
  */
 data class DymitStudyRecruitmentSummaryDto(
     val id: String,
@@ -29,7 +31,8 @@ data class DymitStudyRecruitmentSummaryDto(
     val type: StudyRecruitmentType,
     val status: DymitStudyRecruitmentStatus,
     val content: String = "",
-    val url: String? = null
+    val url: String? = null,
+    val cursor: String = id
 ) {
 
     companion object {
@@ -53,7 +56,12 @@ data class DymitStudyRecruitmentSummaryDto(
                 type = recruitment.type,
                 status = recruitment.recruitmentStatus,
                 content = recruitment.description.take(CONTENT_MAX_LENGTH),
-                url = null
+                url = null,
+                cursor = DymitStudyRecruitmentCursor(
+                    bumpAt = recruitment.bumpAt,
+                    recruitmentId = recruitment.id,
+                    hasStoredBumpAt = recruitment.hasStoredBumpAt
+                ).encode()
             )
         }
 
@@ -76,7 +84,8 @@ data class DymitStudyRecruitmentSummaryDto(
                 type = recruitment.type,
                 status = DymitStudyRecruitmentStatus.RECRUITING,
                 content = recruitment.content,
-                url = recruitment.url
+                url = recruitment.url,
+                cursor = recruitment.id
             )
         }
 

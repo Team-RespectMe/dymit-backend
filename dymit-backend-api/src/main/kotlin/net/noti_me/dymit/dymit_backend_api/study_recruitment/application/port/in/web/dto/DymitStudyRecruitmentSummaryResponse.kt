@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
  * @property status 모집 상태
  * @property content 모집글 요약 내용
  * @property url 외부 원본 모집글 URL
+ * @property cursor 다음 페이지 조회용 커서
  */
 data class DymitStudyRecruitmentSummaryResponse(
     val id: String,
@@ -29,7 +31,9 @@ data class DymitStudyRecruitmentSummaryResponse(
     val type: StudyRecruitmentType,
     val status: DymitStudyRecruitmentStatus,
     val content: String = "",
-    val url: String? = null
+    val url: String? = null,
+    @get:JsonIgnore
+    val cursor: String = id
 ) {
 
     companion object {
@@ -53,7 +57,8 @@ data class DymitStudyRecruitmentSummaryResponse(
                 type = recruitment.type,
                 status = recruitment.status,
                 content = recruitment.content,
-                url = recruitment.url
+                url = recruitment.url,
+                cursor = recruitment.cursor
             )
         }
     }

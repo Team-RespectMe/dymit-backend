@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentListQuery
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.LoadDymitStudyRecruitmentPort
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentCursor
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
@@ -19,7 +20,7 @@ class GetDymitStudyRecruitmentListService(
 ) : GetDymitStudyRecruitmentListUseCase {
 
     /**
-     * Dymit 모집글 목록을 최신순으로 조회하며 다음 페이지 판단용 한 건을 더 불러옵니다.
+     * Dymit 모집글 목록을 끌어올리기 최신순으로 조회하며 다음 페이지 판단용 한 건을 더 불러옵니다.
      *
      * @param query 목록 조회 쿼리
      * @return 모집글 요약 DTO 목록
@@ -30,21 +31,31 @@ class GetDymitStudyRecruitmentListService(
         if ( query.size !in 1..100 ) {
             throw BadRequestException(message = "조회 크기는 1 이상 100 이하여야 합니다.")
         }
-        val cursorId = query.cursor?.let(::parseCursor)
         val writerId = query.memberId.takeIf { query.mine }?.let(::parseMemberId)
+        val cursorValue = query.cursor
+        val recruitments = if ( cursorValue != null && ObjectId.isValid(cursorValue) ) {
+            loadRecruitmentPort.loadByCursorOrderByIdDesc(
+                cursorId = ObjectId(cursorValue),
+                size = query.size + 1,
+                writerId = writerId
+            )
+        } else {
+            loadRecruitmentPort.loadByCursorOrderByBumpAtDesc(
+                cursor = cursorValue?.let(::parseCursor),
+                size = query.size + 1,
+                writerId = writerId
+            )
+        }
 
-        return loadRecruitmentPort.loadByCursorOrderByIdDesc(
-            cursorId = cursorId,
-            size = query.size + 1,
-            writerId = writerId
-        ).map(DymitStudyRecruitmentSummaryDto::from)
+        return recruitments.map(DymitStudyRecruitmentSummaryDto::from)
     }
 
-    private fun parseCursor(value: String): ObjectId {
-        if ( !ObjectId.isValid(value) ) {
+    private fun parseCursor(value: String): DymitStudyRecruitmentCursor {
+        return try {
+            DymitStudyRecruitmentCursor.decode(value)
+        } catch ( exception: IllegalArgumentException ) {
             throw BadRequestException(message = "올바르지 않은 커서입니다.")
         }
-        return ObjectId(value)
     }
 
     private fun parseMemberId(value: String): ObjectId {

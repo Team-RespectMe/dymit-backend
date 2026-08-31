@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import net.noti_me.dymit.dymit_backend_api.common.errors.TooManyRequestException
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
@@ -48,7 +49,38 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
                         title = "오픈채팅"
                     )
                     recruitment.tags shouldBe listOf("kotlin", "backend")
+                    recruitment.bumpCount shouldBe 0
+                    recruitment.bumpAt shouldNotBe null
                 }
+            }
+        }
+
+        Given("끌어올리기") {
+            Then("1회 호출 시 횟수가 증가하고 시간이 갱신된다") {
+                val recruitment = createRecruitment()
+                val beforeBumpAt = recruitment.bumpAt
+                val beforeUpdatedAt = recruitment.updatedAt
+
+                recruitment.bump()
+
+                recruitment.bumpCount shouldBe 1
+                recruitment.bumpAt shouldNotBe beforeBumpAt
+                recruitment.updatedAt shouldNotBe beforeUpdatedAt
+            }
+
+            Then("5회까지는 성공하고 6회째는 제한 예외를 던진다") {
+                val recruitment = createRecruitment()
+
+                repeat(5) {
+                    recruitment.bump()
+                }
+
+                recruitment.bumpCount shouldBe 5
+                val exception = shouldThrow<TooManyRequestException> {
+                    recruitment.bump()
+                }
+                exception.code shouldBe "EXCEED_BUMP_COUNT"
+                exception.message shouldBe "끌어올리기 최대 횟수를 초과하였습니다."
             }
         }
 

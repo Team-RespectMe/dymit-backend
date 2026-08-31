@@ -153,9 +153,9 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
 
         Given("v2 목록 조회 컨트롤러") {
             RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request("/api/v2/study-recruitments")))
-            val first = createSummaryDto(id = "1")
-            val second = createSummaryDto(id = "2")
-            val third = createSummaryDto(id = "3")
+            val first = createSummaryDto(id = "1", cursor = "cursor-1")
+            val second = createSummaryDto(id = "2", cursor = "cursor-2")
+            val third = createSummaryDto(id = "3", cursor = "cursor-3")
             every {
                 getListUseCase.execute(
                     GetDymitStudyRecruitmentListQuery(cursor = null, size = 2, mine = false, memberId = "")
@@ -190,7 +190,7 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
                     )
                     response.items.map { it.content } shouldBe listOf("소개", "소개")
                     response.items.map { it.url } shouldBe listOf(null, null)
-                    response._links["next"]?.href?.contains("cursor=2") shouldBe true
+                    response._links["next"]?.href?.contains("cursor=cursor-2") shouldBe true
                     response._links["next"]?.href?.contains("size=2") shouldBe true
                     response._links["next"]?.href?.contains("type=DYMIT") shouldBe true
                     response._links["next"]?.href?.contains("mine=false") shouldBe true
@@ -456,7 +456,10 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0)
     )
 
-    private fun createSummaryDto(id: String) = DymitStudyRecruitmentSummaryDto(
+    private fun createSummaryDto(
+        id: String,
+        cursor: String = id
+    ) = DymitStudyRecruitmentSummaryDto(
         id = id,
         createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
         title = "테스트 그룹",
@@ -466,7 +469,8 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         type = StudyRecruitmentType.DYMIT,
         status = DymitStudyRecruitmentStatus.RECRUITING,
         content = "소개",
-        url = null
+        url = null,
+        cursor = cursor
     )
 
     private fun createExternalDto(id: String) = StudyRecruitmentDto(

@@ -1,72 +1,31 @@
 # BACKLOG
 ---
-## TASK-90 Dymit 스터디그룹 CRUD 서비스
+## TASK-97 DymitStudyRecruitment 엔티티 기능 추가
 **STATUS** Done
+
 **BACKGROUND**
 
-현재 스터디 그룹 모집 API는 외부 스터디 그룹에 대한 모집만 조회가 가능합니다.
-Dymit StudyGroup 의 채용 공고에 대한 CRUD Feature를 추가하려고 합니다.
-이 작업의 결과물은 /api/v2/study-recruitments 패턴의 엔드포인트만을 사용합니다.
-
-### Base Rules
-- 구조를 [PROJECT_STRUCTURE.md](.agent-dev/PROJECT_STRUCTURE.md)를 참고하여 
-논리적으로만 모듈로 모노리스를 사용합니다.
-- /api/v1/study-recruitments 의 동작은 그대로 유지되어야 합니다.
+스터디 그룹 모집 공고 요구 사항에 다음과 같은 요구사항이 추가되었습니다.
 
 
-### REQUIREMENTS
-- 모든 대상은 DymitStudyRecruitment 를 만들 수 있는 도큐먼트만 대상으로 합니다. 
-- DymitStudyRecruitment Entity의 group 필드는 그냥 없애고 단일 groupId로  
-대체하는게 좋겠습니다. 대신 tags 필드를 추가하십시오(List<String>), type 필드도
-추가하세요.
-- type필드의 경우 StudyRecruitmentType 이란걸 정의하고, DYMIT,INFLEARN을
-정의하세요. 
-- 한 파일에 한 인터페이스 한 클래스 이런식으로 작성하세요 한 파일안에
-때려박지말고 
-- Dymit Study Recruitment 의 Create 엔드포인트를 생성하십시오.
-    - Controller의 입력으로 CreateStudyRecruitmentRequest 를 정의하세요. 
-```json 
-//CreateStudyRecruitmentRequest
-{
-    "groupId": "스터디 모집 대상 study group id",
-    "description": "스터디 모집 설명",
-    "purpose": "스터디 목적",
-    "targetMember": "모집 대상 정보",
-    "studyFormat" : "스터디 진행 방식에 대한 설명",
-    "contact": "url or phone or email",
-    "recruitment_start": Instant?,
-    "recruitment_end": Instant?,
-    "tags": List<String> = emptyList(),
-}
+## REQUIREMENTS 
+1. 모집 공고는 생성 시 공고를 만들려는 StudyGroup Id 를 기준으로 이미 올라간 공고가 존재하면 409 Conflict 에러를  발생시켜야 합니다.
 
-```
-- Dymit Study Recruitment 의 Put 엔드포인트를 생성하십시오. 
-    - UpdateStudyRecruitmentRequest 를 정의하고 사용합니다.
-- groupId를 통해 실제 스터디그룹을 조회하고(DymitStudyRecuritmentLoadStudyGroupPort 정의하여 사용)
-그 이름을 가져와서 title로 사용합니다.
 
-```json
-// UpdateStudyRecruitmentRequest
-{
-    "description": "스터디 모집 설명",
-    "purpose": "스터디 목적",
-    "targetMember": "모집 대상 정보",
-    "studyFormat" : "스터디 진행 방식에 대한 설명",
-    "contact": "url or phone or email",
-    "recruitment_start": Instant?,
-    "recruitment_end": Instant?,
-    "status": "RECRUITING OR DONE",
-    "tags": List<String> = emptyList<>()
-}
-```
-- Dymit Study Recruitment 의 Delete 엔드포인트를 생성하십시오.
-- Dymit Study Recruitment 의 목록조회 GET Endpoint 를 생성하십시오.
-    - RequestParam으로 cursor 를 가지고 있어야하며(required=false) null이 허용됩니다.
-    - cursor가 null이면 그냥 최신순 조회합니다.
-    - cursor가 존재하면 cursor 이전에 생성된 데이터로 최신순 조회합니다.
-    - ListResponse형태로 반환하며, ListResponse.of 로 생성하여 반환합니다. 사용예는 다른 코드들을 참조하세요.
-- Dymit Study Recruitment 의 단건 목록 조회 Get Endpoint 를 생성하십시오.
-- Dymit Study Recruitment의 CUD는 그룹 소유자 한정으로 가능합니다. 
+2. 스터디 모집공고 엔티티에 필드가 추가되어야 합니다.
+bumpAt: Instant,
+bumpCount: Integer
 
-### REFERENCE
-- ./src/main/kotlin/net/noti_me/dymit/dymit_backend_api/study_recruitment/domain/DymitStudyRecuritment.kt
+두 값을 추가하십시오.
+
+도메인 엔티티의 메서드로 bump 를 추가하고 다음 조건을 따르십시오. 
+
+- bump는 최대 5회 가능합니다.
+- bump 호출 시 bumpAt 이 업데이트 되어야 하며, bumpCount 가 1씩 증가합니다.
+- bumpCount >= 5 이면 TooManyRequestException(code="EXCEED_BUMP_COUNT", message="끌어올리기 최대 횟수를 초과하였습니다.") 라고 에러를 반환하십시오. 
+TooManyRequestException 은 common 패키지 내에 에러 정의 패키지가 있으니 거기에 BusinessException을 상속받아 구현하고 그걸 사용하세요
+- bumpCount 는 엔티티 생성 시 0으로 초기화, bumpAt 은  bumpAt = Instant.now() 으로 초기화합니다.
+- 끌어올리기 요청은 /api/v2/study-recruitments/{study-recruitments-id}/bumps 로 POST요청을 받아 처리합니다.
+- usecase 패키지에 BumpStudyRecuritmentUseCase 를 추가하십시오. 
+- 위 유즈케이스의 구현체는 도메인 객체를 조회하여 bump 함수를 호출한 뒤 저장한 뒤, 스터디채용 객체를 반환하고 컨트롤러에서 단건 조회 응답과 같은 응답으로 반환합니다.
+- 스터디모집 목록 조회를 할 때 정렬 조건을 bumpAt기준으로 변경하십시오. 최신순으로 정렬합니다.
