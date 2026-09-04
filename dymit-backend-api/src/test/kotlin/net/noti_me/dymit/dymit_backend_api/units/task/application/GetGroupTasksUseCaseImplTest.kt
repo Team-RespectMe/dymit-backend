@@ -18,7 +18,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.Task
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class GetGroupTasksUseCaseImplTest : BehaviorSpec() {
 
@@ -39,8 +39,8 @@ internal class GetGroupTasksUseCaseImplTest : BehaviorSpec() {
                     nickname = "member",
                     roles = listOf(MemberRole.ROLE_MEMBER.name)
                 )
-                val firstTask = createTask(expireAt = LocalDateTime.of(2026, 8, 24, 10, 0))
-                val secondTask = createTask(expireAt = LocalDateTime.of(2026, 8, 25, 10, 0))
+                val firstTask = createTask(expireAt = Instant.parse("2026-08-24T10:00:00Z"))
+                val secondTask = createTask(expireAt = Instant.parse("2026-08-25T10:00:00Z"))
                 val firstDto = createTaskDto(secondTask)
                 val secondDto = createTaskDto(firstTask)
 
@@ -84,7 +84,7 @@ internal class GetGroupTasksUseCaseImplTest : BehaviorSpec() {
         }
     }
 
-    private fun createTask(expireAt: LocalDateTime): Task {
+    private fun createTask(expireAt: Instant): Task {
         return Task(
             id = ObjectId.get(),
             relatedScheduleId = ObjectId.get(),

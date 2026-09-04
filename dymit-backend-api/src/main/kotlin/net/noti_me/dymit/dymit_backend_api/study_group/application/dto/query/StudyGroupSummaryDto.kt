@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query
 
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.InviteCodeVo
-import java.time.LocalDateTime
+import java.time.Instant
 
 class StudyGroupSummaryDto(
     val id: String,
@@ -10,6 +10,6 @@ class StudyGroupSummaryDto(
     val description: String,
     val membersCount: Long,
     val inviteCode: InviteCodeVo,
-    val createdAt : LocalDateTime
+    val createdAt : Instant
 ) {
 }

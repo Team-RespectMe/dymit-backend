@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document("study_group_posts")
 @TypeAlias("net.noti_me.dymit.dymit_backend_api.domain.board.Post")
@@ -20,8 +20,8 @@ class Post(
     title: String,
     content: String,
     commentCount: Long = 0,
-    createdAt: LocalDateTime?= null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant?= null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     category: PostCategory = PostCategory.QUESTION,
     scheduleId: ObjectId? = null

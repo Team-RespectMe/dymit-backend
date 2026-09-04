@@ -22,7 +22,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskCreatedBroadcastEvent
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
 
@@ -110,7 +110,7 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
             groupId = groupId,
             title = "일정",
             session = 1L,
-            scheduleAt = LocalDateTime.now().plusDays(1)
+            scheduleAt = Instant.now().plusSeconds(1L * 86400L)
         )
     }
 
@@ -150,7 +150,7 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
             title = title,
             description = "설명",
             attachments = emptyList(),
-            expireAt = LocalDateTime.now().plusDays(2)
+            expireAt = Instant.now().plusSeconds(2L * 86400L)
         )
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 관리자 회원 현황 포트를 기존 MongoDB 컬렉션에 연결합니다.
@@ -21,8 +21,8 @@ class MongoAdminMemberStatusAdapter(
      * 생성 시각 범위에 해당하는 회원 현황을 관리자 소유 DTO로 변환합니다.
      */
     override fun findAllByCreatedAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime
+        start: Instant,
+        end: Instant
     ): List<AdminMemberStatusDto> {
         val query = Query(Criteria.where("createdAt").gte(start).lt(end))
         return mongoTemplate.find(
@@ -49,7 +49,7 @@ class MongoAdminMemberStatusAdapter(
         val activeMemberCount: Long = 0L,
         val leaveMemberCount: Long = 0L,
         val totalMemberCount: Long = 0L,
-        val createdAt: LocalDateTime = LocalDateTime.now()
+        val createdAt: Instant = Instant.now()
     )
 
     private companion object {

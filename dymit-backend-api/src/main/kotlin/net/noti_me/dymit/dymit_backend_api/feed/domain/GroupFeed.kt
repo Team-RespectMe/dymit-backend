@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 그룹 구성원에게 전파할 피드입니다.
@@ -32,8 +32,8 @@ class GroupFeed(
     val messages: List<FeedMessage> = emptyList(),
     val associates: List<AssociatedResource> = emptyList(),
     val excludedMemberIds: MutableSet<ObjectId> = mutableSetOf(),
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<GroupFeed>(
     id = id,

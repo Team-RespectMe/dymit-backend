@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.member.dto
 
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class StudyGroupMemberData(
     val id: String,
@@ -10,5 +10,5 @@ data class StudyGroupMemberData(
     val profileImageThumbnail: String,
     val profileImageOriginal: String,
     val roles: List<String>,
-    val createdAt: LocalDateTime?
+    val createdAt: Instant?
 )

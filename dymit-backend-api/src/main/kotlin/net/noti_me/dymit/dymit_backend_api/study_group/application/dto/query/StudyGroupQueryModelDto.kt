@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.memb
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroup
-import java.time.LocalDateTime
+import java.time.Instant
 
 class StudyGroupQueryModelDto(
     val id: String,
@@ -17,7 +17,7 @@ class StudyGroupQueryModelDto(
     var recentPost: PostPreview? = null,
     var recentSchedule: SchedulePreview? = null,
     val inviteCode: InviteCodeVo = InviteCodeVo(),
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {
@@ -35,7 +35,7 @@ class StudyGroupQueryModelDto(
                 description = entity.description,
                 recentPost = entity.recentPost?.let { PostPreview.from(it) },
                 recentSchedule = entity.recentSchedule?.let { SchedulePreview.from(it) },
-                createdAt = entity.createdAt ?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: Instant.now()
             )
         }
     }

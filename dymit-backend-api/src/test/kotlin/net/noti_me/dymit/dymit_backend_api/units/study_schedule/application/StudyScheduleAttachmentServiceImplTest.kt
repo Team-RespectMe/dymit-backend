@@ -26,7 +26,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.p
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.persistence.ScheduleAttachmentRepository
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.persistence.StudyScheduleRepository
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
 
@@ -72,7 +72,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
             value = "Zoom",
             link = "https://zoom.us/j/123"
         ),
-        scheduleAt = LocalDateTime.now().plusDays(1)
+        scheduleAt = Instant.now().plusSeconds(1L * 86400L)
     )
 
     init {
@@ -283,7 +283,7 @@ internal class StudyScheduleAttachmentServiceImplTest : BehaviorSpec() {
             When("getAttachments를 호출하면") {
                 Then("url, thumbnail, contentType, fileSize가 포함된 DTO를 반환한다") {
                     val fileId = ObjectId.get()
-                    val attachedAt = LocalDateTime.of(2026, 5, 1, 10, 30, 0)
+                    val attachedAt = Instant.parse("2026-05-01T10:30:00Z")
 
                     stubMemberValidation(memberExists = true)
                     every { scheduleAttachmentRepository.findByScheduleId(scheduleId) } returns listOf(

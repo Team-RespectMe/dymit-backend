@@ -45,7 +45,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
 
@@ -87,15 +87,15 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
 
         Given("TASK-68 마감 시각 정책") {
             When("KST 날짜 입력을 POST 마감 시각으로 정규화하면") {
-                Then("해당 날짜의 23:59:59 KST를 UTC LocalDateTime으로 저장한다") {
-                    val requestedExpireAt = LocalDateTime.of(2026, 6, 15, 8, 30, 0)
+                Then("해당 날짜의 23:59:59 KST를 UTC Instant로 저장한다") {
+                    val requestedExpireAt = Instant.parse("2026-06-14T23:30:00Z")
 
-                    mockTaskExpireAtClock(LocalDateTime.of(2026, 6, 15, 14, 59, 58))
+                    mockTaskExpireAtClock(Instant.parse("2026-06-15T14:59:58Z"))
 
                     val normalized = TaskExpireAtNormalizer.normalizePostExpireAt(requestedExpireAt)
 
-                    normalized shouldBe LocalDateTime.of(2026, 6, 15, 14, 59, 59)
-                    TaskExpireAtNormalizer.toKst(normalized) shouldBe LocalDateTime.of(2026, 6, 15, 23, 59, 59)
+                    normalized shouldBe Instant.parse("2026-06-15T14:59:59Z")
+                    TaskExpireAtNormalizer.toKst(normalized) shouldBe Instant.parse("2026-06-15T14:59:59Z")
                 }
             }
 
@@ -114,7 +114,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
                     val savedSubmission = createSubmission(submissionId, taskId, memberId)
                     val command = CreateTaskSubmissionCommand("제목", "본문", emptyList())
 
-                    mockTaskExpireAtClock(LocalDateTime.of(2026, 6, 15, 14, 59, 58))
+                    mockTaskExpireAtClock(Instant.parse("2026-06-15T14:59:58Z"))
                     stubTaskInGroup(task, groupId)
                     every { support.requireGroupMember(groupId, memberId) } returns member
                     every { support.requireTaskAssignee(taskId, memberId) } returns assignee
@@ -151,7 +151,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
                     val assignee = createAssignee(taskId, memberId, TaskAssigneeStatus.SUBMITTED)
                     val submission = createSubmission(submissionId, taskId, memberId)
 
-                    mockTaskExpireAtClock(LocalDateTime.of(2026, 6, 15, 14, 59, 58))
+                    mockTaskExpireAtClock(Instant.parse("2026-06-15T14:59:58Z"))
                     stubTaskInGroup(task, groupId)
                     every { support.requireGroupMember(groupId, memberId) } returns member
                     every { support.requireTaskAssignee(taskId, memberId) } returns assignee
@@ -185,7 +185,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
                     val taskId = ObjectId.get()
                     val task = createTask(taskId, scheduleId)
 
-                    mockTaskExpireAtClock(LocalDateTime.of(2026, 6, 15, 15, 0, 0))
+                    mockTaskExpireAtClock(Instant.parse("2026-06-15T15:00:00Z"))
                     stubTaskInGroup(task, groupId)
                     every { support.requireGroupMember(groupId, memberId) } returns createMember(groupId, memberId)
 
@@ -210,7 +210,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
                     val submissionId = ObjectId.get()
                     val task = createTask(taskId, scheduleId)
 
-                    mockTaskExpireAtClock(LocalDateTime.of(2026, 6, 15, 15, 0, 0))
+                    mockTaskExpireAtClock(Instant.parse("2026-06-15T15:00:00Z"))
                     stubTaskInGroup(task, groupId)
                     every { support.requireGroupMember(groupId, memberId) } returns createMember(groupId, memberId)
 
@@ -236,7 +236,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
                     val submissionId = ObjectId.get()
                     val task = createTask(taskId, scheduleId)
 
-                    mockTaskExpireAtClock(LocalDateTime.of(2026, 6, 15, 15, 0, 0))
+                    mockTaskExpireAtClock(Instant.parse("2026-06-15T15:00:00Z"))
                     stubTaskInGroup(task, groupId)
                     every { support.requireGroupMember(groupId, memberId) } returns createMember(groupId, memberId)
 
@@ -253,7 +253,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
         }
     }
 
-    private fun mockTaskExpireAtClock(currentUtcDateTime: LocalDateTime) {
+    private fun mockTaskExpireAtClock(currentUtcDateTime: Instant) {
         mockkObject(TaskExpireAtNormalizer)
         taskExpireAtNormalizerMocked = true
         every { TaskExpireAtNormalizer.currentUtcDateTime() } returns currentUtcDateTime
@@ -267,7 +267,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
         every { studyScheduleQueryPort.loadById(task.relatedScheduleId) } returns StudySchedule(
             id = task.relatedScheduleId,
             groupId = groupId,
-            scheduleAt = LocalDateTime.of(2026, 6, 15, 0, 0, 0)
+            scheduleAt = Instant.parse("2026-06-15T00:00:00Z")
         )
     }
 
@@ -303,7 +303,7 @@ internal class TaskDeadlineTimezonePolicyTest : BehaviorSpec() {
             title = "과제",
             description = "설명",
             attachments = emptyList(),
-            expireAt = LocalDateTime.of(2026, 6, 15, 14, 59, 59)
+            expireAt = Instant.parse("2026-06-15T14:59:59Z")
         )
     }
 

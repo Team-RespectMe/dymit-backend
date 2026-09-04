@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.PostDto
 import net.noti_me.dymit.dymit_backend_api.board.domain.Post
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "게시글 생성/수정 응답 DTO")
 class PostCommandResponse(
@@ -15,7 +15,7 @@ class PostCommandResponse(
     val content: String,
     val writer: WriterVo,
     @Schema(description = "생성/수정된 게시글의 생성 시각", example = "2023-10-05T14:48:00Z")
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {

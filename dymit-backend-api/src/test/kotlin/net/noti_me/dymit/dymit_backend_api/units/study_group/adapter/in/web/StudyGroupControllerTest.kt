@@ -25,7 +25,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupProfileImageV
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.ProfileImageVo
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class StudyGroupControllerTest : BehaviorSpec() {
 
@@ -48,14 +48,14 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
                 then("it preserves LoginMember, maps the request to a command, and maps the service DTO to the response") {
                     val member = MemberInfo.of(ObjectId.get().toHexString(), "tester", listOf("ROLE_MEMBER"))
                     val request = StudyGroupCreateRequest(name = "Algorithm", description = "Weekly practice")
-                    val createdAt = LocalDateTime.of(2026, 7, 26, 9, 0)
+                    val createdAt = Instant.parse("2026-07-26T09:00:00Z")
                     val result = StudyGroupDto(
                         groupId = ObjectId.get().toHexString(),
                         profileImage = GroupProfileImageVo(),
                         ownerId = member.memberId,
                         name = request.name,
                         description = request.description,
-                        inviteCodeVo = InviteCodeVo("invite", createdAt, createdAt.plusDays(1)),
+                        inviteCodeVo = InviteCodeVo("invite", createdAt, createdAt.plusSeconds(1L * 86400L)),
                         createdAt = createdAt
                     )
                     val command = slot<StudyGroupCreateCommand>()
@@ -80,7 +80,7 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
         given("a study-group detail query") {
             val member = MemberInfo.of(ObjectId.get().toHexString(), "tester", listOf("ROLE_MEMBER"))
             val groupId = ObjectId.get().toHexString()
-            val createdAt = LocalDateTime.of(2026, 8, 31, 10, 0)
+            val createdAt = Instant.parse("2026-08-31T10:00:00Z")
             val owner = MemberPreview(
                 memberId = ObjectId.get().toHexString(),
                 nickname = "owner",
@@ -94,7 +94,7 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
                     val recentPost = PostPreview(
                         postId = ObjectId.get().toHexString(),
                         title = "latest notice",
-                        createdAt = createdAt.plusDays(1)
+                        createdAt = createdAt.plusSeconds(1L * 86400L)
                     )
                     val group = createStudyGroupQueryModel(
                         id = groupId,
@@ -103,9 +103,9 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
                         createdAt = createdAt
                     )
                     val members = listOf(
-                        createMemberQueryDto(groupId, "member", GroupMemberRole.MEMBER, createdAt.plusMinutes(2)),
+                        createMemberQueryDto(groupId, "member", GroupMemberRole.MEMBER, createdAt.plusSeconds(2L * 60L)),
                         createMemberQueryDto(groupId, "owner", GroupMemberRole.OWNER, createdAt),
-                        createMemberQueryDto(groupId, "admin", GroupMemberRole.ADMIN, createdAt.plusMinutes(1))
+                        createMemberQueryDto(groupId, "admin", GroupMemberRole.ADMIN, createdAt.plusSeconds(1L * 60L))
                     )
                     every { queryService.getStudyGroup(member, groupId) } returns group
                     every { loadStudyGroupPostPort.loadLatestPost(noticeBoardId) } returns recentPost
@@ -175,7 +175,7 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
         id: String,
         owner: MemberPreview,
         noticeBoardId: String,
-        createdAt: LocalDateTime
+        createdAt: Instant
     ): StudyGroupQueryModelDto {
         return StudyGroupQueryModelDto(
             id = id,
@@ -184,7 +184,7 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
             owner = owner,
             description = "Weekly practice",
             noticeBoardId = noticeBoardId,
-            inviteCode = InviteCodeVo("invite", createdAt, createdAt.plusDays(1)),
+            inviteCode = InviteCodeVo("invite", createdAt, createdAt.plusSeconds(1L * 86400L)),
             createdAt = createdAt
         )
     }
@@ -193,7 +193,7 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
         groupId: String,
         nickname: String,
         role: GroupMemberRole,
-        createdAt: LocalDateTime
+        createdAt: Instant
     ): StudyGroupMemberQueryDto {
         return StudyGroupMemberQueryDto(
             groupId = groupId,

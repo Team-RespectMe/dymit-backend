@@ -21,7 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.ser
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleServerDto as StudySchedule
 import net.noti_me.dymit.dymit_backend_api.task.domain.Task
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 과제 제출 대상 목록 조회 유즈케이스 단위 테스트입니다.
@@ -49,12 +49,12 @@ internal class GetTaskAssigneesUseCaseImplTest : BehaviorSpec() {
                         title = "과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val schedule = StudySchedule(
                         id = task.relatedScheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().plusDays(1)
+                        scheduleAt = Instant.now().plusSeconds(1L * 86400L)
                     )
                     val memberInfo = MemberInfo(
                         memberId = memberId.toHexString(),
@@ -107,12 +107,12 @@ internal class GetTaskAssigneesUseCaseImplTest : BehaviorSpec() {
                         title = "과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val schedule = StudySchedule(
                         id = task.relatedScheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().plusDays(1)
+                        scheduleAt = Instant.now().plusSeconds(1L * 86400L)
                     )
                     val memberInfo = MemberInfo(
                         memberId = requesterId.toHexString(),

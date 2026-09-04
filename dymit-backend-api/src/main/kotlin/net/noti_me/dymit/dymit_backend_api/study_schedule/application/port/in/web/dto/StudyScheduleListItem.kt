@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.StudyScheduleSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 일정 목록 항목",
@@ -34,7 +34,7 @@ class StudyScheduleListItem(
         description = "스터디 그룹 일정 예정 시간",
         example = "2023-10-01T14:00:00",
     )
-    val scheduleAt: LocalDateTime,
+    val scheduleAt: Instant,
     @field: Schema(
         description = "스터디 그룹 일정 장소 정보",
         example = "{type: 'OFFLINE', value: '서울 강남구 역삼동 123-45', link: null}",

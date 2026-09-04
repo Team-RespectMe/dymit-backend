@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto
 
 import net.noti_me.dymit.dymit_backend_api.board.domain.Post
 import net.noti_me.dymit.dymit_backend_api.board.domain.Writer
-import java.time.LocalDateTime
+import java.time.Instant
 
 class PostDto(
     val id: String,
@@ -12,7 +12,7 @@ class PostDto(
     val title: String,
     val content: String,
     val commentCount: Long = 0,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {
@@ -25,7 +25,7 @@ class PostDto(
                 title = entity.title,
                 content = entity.content,
                 commentCount = entity.commentCount,
-                createdAt = entity.createdAt?: LocalDateTime.now()
+                createdAt = entity.createdAt?: Instant.now()
             )
         }
     }

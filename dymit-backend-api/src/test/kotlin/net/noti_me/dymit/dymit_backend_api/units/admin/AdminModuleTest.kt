@@ -26,7 +26,8 @@ import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.ResponseStatus
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.OffsetDateTime
 
 internal class AdminModuleTest : BehaviorSpec() {
 
@@ -39,17 +40,19 @@ internal class AdminModuleTest : BehaviorSpec() {
         given("a KST daily member status query") {
             `when`("the admin use case executes") {
                 then("it queries UTC and maps the admin-owned port DTO") {
-                    val start = LocalDateTime.of(2026, 7, 26, 9, 0)
-                    val end = start.plusDays(1)
-                    val status = AdminMemberStatusDto(1, 2, 3, 4, start.minusHours(9))
-                    val starts = slot<LocalDateTime>()
-                    val ends = slot<LocalDateTime>()
+                    val start = Instant.parse("2026-07-26T00:00:00Z")
+                    val end = start.plusSeconds(1L * 86400L)
+                    val kstEquivalent = OffsetDateTime.parse("2026-07-26T09:00:00+09:00").toInstant()
+                    val status = AdminMemberStatusDto(1, 2, 3, 4, start)
+                    val starts = slot<Instant>()
+                    val ends = slot<Instant>()
                     every { memberStatusPort.findAllByCreatedAtBetween(capture(starts), capture(ends)) } returns listOf(status)
 
                     val result = GetDailyMemberStatusService(memberStatusPort).execute(GetDailyMemberStatusCommand(start, end))
 
-                    starts.captured shouldBe start.minusHours(9)
-                    ends.captured shouldBe end.minusHours(9)
+                    start shouldBe kstEquivalent
+                    starts.captured shouldBe start
+                    ends.captured shouldBe end
                     result.single().recordedAt shouldBe status.createdAt
                     result.single().totalMemberCount shouldBe 4
                 }

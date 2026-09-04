@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.domain.RecentPostVo
 class PostPreview(
     val postId: String,
     val title: String,
-    val createdAt: java.time.LocalDateTime
+    val createdAt: java.time.Instant
 ) {
 
     companion object {

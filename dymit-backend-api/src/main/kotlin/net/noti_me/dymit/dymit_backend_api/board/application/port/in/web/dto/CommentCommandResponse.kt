@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.CommentDto
+import java.time.Instant
 
 @Schema(description = "댓글 커맨드 응답")
 data class CommentCommandResponse(
@@ -14,7 +15,7 @@ data class CommentCommandResponse(
     @Schema(description = "댓글 내용", example = "이것은 댓글 내용입니다.")
     val content: String,
     @Schema(description = "생성일시", example = "2024-01-01T12:00:00")
-    val createdAt: String
+    val createdAt: Instant?
 ) {
     companion object {
         fun from(commentDto: CommentDto): CommentCommandResponse {

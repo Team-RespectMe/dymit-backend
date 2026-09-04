@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.p
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 class StudyScheduleQueryService(
@@ -24,8 +24,8 @@ class StudyScheduleQueryService(
     }
 
     override fun findByScheduleAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         cursor: ObjectId?,
         limit: Int
     ): List<StudyScheduleServerDto> {

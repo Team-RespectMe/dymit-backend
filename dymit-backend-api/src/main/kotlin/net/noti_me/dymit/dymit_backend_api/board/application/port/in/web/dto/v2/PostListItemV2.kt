@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v2.dto.PostDtoV2
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto.WriterVo
 import net.noti_me.dymit.dymit_backend_api.board.domain.PostCategory
+import java.time.Instant
 
 /**
  * 게시글 V2 목록 아이템 DTO입니다.
@@ -17,7 +18,7 @@ class PostListItemV2(
     val writer: WriterVo,
     val category: PostCategory,
     val scheduleId: String?,
-    val createdAt: String,
+    val createdAt: Instant,
     val commentCount: Long
 ) {
 
@@ -35,7 +36,7 @@ class PostListItemV2(
                 ),
                 category = dto.category,
                 scheduleId = dto.scheduleId,
-                createdAt = dto.createdAt.toString(),
+                createdAt = dto.createdAt,
                 commentCount = dto.commentCount
             )
         }

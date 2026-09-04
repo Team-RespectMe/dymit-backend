@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.board.domain.BoardMemberRole
 import net.noti_me.dymit.dymit_backend_api.board.domain.BoardProfileImage
 import net.noti_me.dymit.dymit_backend_api.board.domain.BoardProfileImageType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 게시판 이벤트 처리에 필요한 그룹 정보입니다.
@@ -59,5 +59,5 @@ data class BoardGroupMemberDto(
 data class BoardRecentPostDto(
     val postId: String,
     val title: String,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 )

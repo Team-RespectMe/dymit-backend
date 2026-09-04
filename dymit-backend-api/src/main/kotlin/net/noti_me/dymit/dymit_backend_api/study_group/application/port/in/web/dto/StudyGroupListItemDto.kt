@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.Sch
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupQueryModelDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 목록 조회 응답 DTO",
@@ -27,7 +27,7 @@ class StudyGroupListItemDto(
     @Schema(description = "스터디 그룹 스케줄 중 가장 가까운 미래 스케줄")
     val schedule: SchedulePreview?,
     @Schema(description = "스터디 그룹 개설 일시")
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
 ): BaseResponse() {
 
     companion object {

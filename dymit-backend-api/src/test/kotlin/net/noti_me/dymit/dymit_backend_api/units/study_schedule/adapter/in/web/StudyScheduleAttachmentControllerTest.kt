@@ -15,7 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.file.dto.StudyScheduleFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class StudyScheduleAttachmentControllerTest : BehaviorSpec() {
 
@@ -40,7 +40,7 @@ internal class StudyScheduleAttachmentControllerTest : BehaviorSpec() {
                     val scheduleId = ObjectId.get().toHexString()
                     val fileIds = listOf(ObjectId.get().toHexString(), ObjectId.get().toHexString())
                     val request = StudyScheduleAttachmentReplaceRequest(fileIds = fileIds)
-                    val attachedAt = LocalDateTime.of(2026, 5, 1, 10, 0, 0)
+                    val attachedAt = Instant.parse("2026-05-01T10:00:00Z")
                     val attachmentDto = createAttachmentDto(
                         fileId = fileIds[0],
                         attachedAt = attachedAt
@@ -104,7 +104,7 @@ internal class StudyScheduleAttachmentControllerTest : BehaviorSpec() {
 
     private fun createAttachmentDto(
         fileId: String,
-        attachedAt: LocalDateTime = LocalDateTime.of(2026, 5, 2, 11, 0, 0)
+        attachedAt: Instant = Instant.parse("2026-05-02T11:00:00Z")
     ): StudyScheduleAttachmentDto {
         return StudyScheduleAttachmentDto(
             fileId = fileId,

@@ -22,7 +22,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskModifiedBroadca
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskModifiedEvent
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskNotificationPreparationEventHandlerTest : BehaviorSpec() {
 
@@ -143,7 +143,7 @@ internal class TaskNotificationPreparationEventHandlerTest : BehaviorSpec() {
             title = title,
             description = "설명",
             attachments = emptyList(),
-            expireAt = LocalDateTime.now().plusDays(2)
+            expireAt = Instant.now().plusSeconds(2L * 86400L)
         )
     }
 }

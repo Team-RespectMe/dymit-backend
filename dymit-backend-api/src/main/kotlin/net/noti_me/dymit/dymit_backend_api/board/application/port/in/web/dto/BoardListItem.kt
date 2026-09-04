@@ -2,14 +2,14 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.BoardDto
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "게시판 목록 조회 응답 DTO")
 class BoardListItem(
     val id: String,
     val groupId: String,
     val name: String,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {

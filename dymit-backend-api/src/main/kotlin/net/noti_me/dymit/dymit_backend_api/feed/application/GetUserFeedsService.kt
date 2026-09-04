@@ -15,8 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.feed.domain.UserFeed
 import net.noti_me.dymit.dymit_backend_api.feed.domain.UserFeedQueryHistory
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Instant
 import java.util.Date
 
 /**
@@ -64,8 +63,8 @@ class GetUserFeedsService(
 
         if (history.lastFeedId == null) {
             val createdAt = loadFeedMemberPort.loadById(memberId.toHexString())?.createdAt
-                ?: LocalDateTime.now()
-            val createdDate = Date.from(createdAt.atZone(ZoneId.systemDefault()).toInstant())
+                ?: Instant.now()
+            val createdDate = Date.from(createdAt)
             history.updateLastGroupQueryId(ObjectId.getSmallestWithDate(createdDate))
             queryHistoryPersistencePort.save(history)
         }
@@ -121,7 +120,7 @@ class GetUserFeedsService(
                     resourceId = it.resourceId
                 )
             },
-            createdAt = userFeed.createdAt ?: LocalDateTime.now(),
+            createdAt = userFeed.createdAt ?: Instant.now(),
             isRead = userFeed.isRead
         )
     }

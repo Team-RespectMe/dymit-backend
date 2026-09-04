@@ -1,13 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.domain
 
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 class RecentScheduleVo(
     val scheduleId: ObjectId,
     val title: String,
     val session: Long,
-    val scheduleAt: LocalDateTime
+    val scheduleAt: Instant
 ) {
 
     companion object {
@@ -15,7 +15,7 @@ class RecentScheduleVo(
             scheduleId: String,
             title: String,
             session: Long,
-            scheduleAt: LocalDateTime
+            scheduleAt: Instant
         ): RecentScheduleVo {
             return RecentScheduleVo(
                 scheduleId = ObjectId(scheduleId),

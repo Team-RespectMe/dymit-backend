@@ -66,7 +66,7 @@ class UpdatePostUseCaseImplV2(
                 BoardRecentPostDto(
                     postId = updatedPost.identifier,
                     title = updatedPost.title,
-                    createdAt = updatedPost.createdAt ?: java.time.LocalDateTime.now()
+                    createdAt = updatedPost.createdAt ?: java.time.Instant.now()
                 )
             )
         }

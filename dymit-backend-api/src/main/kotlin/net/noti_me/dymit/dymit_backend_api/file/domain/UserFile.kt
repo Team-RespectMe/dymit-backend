@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.file.domain
 import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 업로드된 사용자 파일 메타데이터를 저장하는 도메인 엔티티입니다.
@@ -31,8 +31,8 @@ class UserFile(
     status: UserFileStatus = UserFileStatus.REQUESTED,
     val contentType: String? = null,
     val fileSize: Long = 0L,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     id: ObjectId? = null
 ) : BaseAggregateRoot<UserFile>(

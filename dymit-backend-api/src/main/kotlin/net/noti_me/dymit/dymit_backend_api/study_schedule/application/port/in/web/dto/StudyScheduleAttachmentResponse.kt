@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.StudyScheduleAttachmentDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.file.dto.StudyScheduleFileStatusDto
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 스터디 일정 첨부 파일 응답 DTO입니다.
@@ -38,7 +38,7 @@ class StudyScheduleAttachmentResponse(
     @Schema(description = "파일 상태")
     val status: StudyScheduleFileStatusDto,
     @Schema(description = "첨부 생성 시각", example = "2030-10-01T10:00:00")
-    val attachedAt: LocalDateTime
+    val attachedAt: Instant
 ): BaseResponse() {
 
     companion object {

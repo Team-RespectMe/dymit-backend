@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document("post_comments")
 @TypeAlias("net.noti_me.dymit.dymit_backend_api.domain.board.PostComment")
@@ -15,8 +15,8 @@ class PostComment(
     val postId: ObjectId,
     val writer: Writer,
     content: String,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<PostComment>(
     id = id,

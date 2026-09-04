@@ -21,7 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class GetTaskDetailUseCaseImplTest : BehaviorSpec() {
 
@@ -136,7 +136,7 @@ internal class GetTaskDetailUseCaseImplTest : BehaviorSpec() {
             title = "과제",
             description = "설명",
             attachments = emptyList(),
-            expireAt = LocalDateTime.of(2026, 8, 23, 12, 0)
+            expireAt = Instant.parse("2026-08-23T12:00:00Z")
         )
     }
 

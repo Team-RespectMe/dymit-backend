@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v2.dto.PostDtoV2
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto.WriterVo
 import net.noti_me.dymit.dymit_backend_api.board.domain.PostCategory
+import java.time.Instant
 
 /**
  * 게시글 V2 상세 응답 DTO입니다.
@@ -19,7 +20,7 @@ class PostDetailResponseV2(
     val category: PostCategory,
     val scheduleId: String?,
     val commentCount: Long,
-    val createdAt: String
+    val createdAt: Instant
 ) {
 
     companion object {
@@ -38,7 +39,7 @@ class PostDetailResponseV2(
                 category = dto.category,
                 scheduleId = dto.scheduleId,
                 commentCount = dto.commentCount,
-                createdAt = dto.createdAt.toString()
+                createdAt = dto.createdAt
             )
         }
     }

@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 한 회원에게 노출되는 개인 피드입니다.
@@ -30,8 +30,8 @@ class UserFeed(
     val messages: List<FeedMessage>,
     val associates: List<AssociatedResource>,
     isRead: Boolean = false,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<UserFeed>(
     id = id,

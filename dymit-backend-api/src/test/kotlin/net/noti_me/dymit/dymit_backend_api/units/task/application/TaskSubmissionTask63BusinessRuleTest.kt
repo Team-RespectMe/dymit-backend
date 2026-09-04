@@ -39,7 +39,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskSubmissionTask63BusinessRuleTest : BehaviorSpec() {
 
@@ -395,7 +395,7 @@ internal class TaskSubmissionTask63BusinessRuleTest : BehaviorSpec() {
             title = "과제 제목",
             description = "과제 설명",
             attachments = emptyList(),
-            expireAt = LocalDateTime.now().plusDays(1),
+            expireAt = Instant.now().plusSeconds(1L * 86400L),
             submissionType = submissionType
         )
     }

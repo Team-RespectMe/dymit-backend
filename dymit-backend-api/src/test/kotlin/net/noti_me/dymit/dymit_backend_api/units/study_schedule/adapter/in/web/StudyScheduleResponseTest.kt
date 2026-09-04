@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dt
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.web.dto.StudyScheduleResponse
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleLocation
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class StudyScheduleResponseTest : BehaviorSpec({
 
@@ -17,7 +17,7 @@ internal class StudyScheduleResponseTest : BehaviorSpec({
             session = 3L,
             title = "자료 공유 세션",
             description = "첨부 링크 확인",
-            scheduleAt = LocalDateTime.of(2026, 5, 3, 19, 30, 0),
+            scheduleAt = Instant.parse("2026-05-03T19:30:00Z"),
             location = LocationVo(
                 type = ScheduleLocation.LocationType.ONLINE,
                 value = "Zoom",

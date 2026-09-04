@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v2.dto
 import net.noti_me.dymit.dymit_backend_api.board.domain.Post
 import net.noti_me.dymit.dymit_backend_api.board.domain.PostCategory
 import net.noti_me.dymit.dymit_backend_api.board.domain.Writer
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 게시글 V2 응답 DTO입니다.
@@ -18,7 +18,7 @@ class PostDtoV2(
     val category: PostCategory,
     val scheduleId: String?,
     val commentCount: Long = 0,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {
@@ -33,7 +33,7 @@ class PostDtoV2(
                 category = entity.category,
                 scheduleId = entity.scheduleId?.toHexString(),
                 commentCount = entity.commentCount,
-                createdAt = entity.createdAt ?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: Instant.now()
             )
         }
     }

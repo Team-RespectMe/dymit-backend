@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.
 
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 interface StudyScheduleRepository {
 
@@ -18,11 +18,11 @@ interface StudyScheduleRepository {
 
     fun countByGroupId(studyGroupId: ObjectId): Long
 
-    fun findFirstAfterByGroupIdsOrderByScheduleAtAsc(groupIds: List<ObjectId>, now: LocalDateTime): Map<ObjectId, StudySchedule?>
+    fun findFirstAfterByGroupIdsOrderByScheduleAtAsc(groupIds: List<ObjectId>, now: Instant): Map<ObjectId, StudySchedule?>
 
     fun findByScheduleAtBetweenCursorPagination(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         cursor: ObjectId?,
         limit: Int = 1000
     ): List<StudySchedule>

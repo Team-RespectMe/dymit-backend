@@ -15,12 +15,12 @@ class GetDailyMemberStatusService(
 ) : GetDailyMemberStatusUseCase {
 
     /**
-     * 한국 표준시 입력을 UTC 기준 조회 범위로 변환해 현황을 반환합니다.
+     * 절대 시각으로 전달된 조회 범위를 그대로 사용해 현황을 반환합니다.
      */
     override fun execute(command: GetDailyMemberStatusCommand): List<DailyMemberStatusDto> {
         val items = adminMemberStatusPort.findAllByCreatedAtBetween(
-            start = command.startDate.minusHours(9),
-            end = command.endDate.minusHours(9)
+            start = command.startDate,
+            end = command.endDate
         )
 
         return items.map {

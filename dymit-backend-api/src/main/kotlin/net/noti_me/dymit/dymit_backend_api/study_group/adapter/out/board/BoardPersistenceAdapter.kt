@@ -8,8 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Instant
 import java.util.Date
 
 @Component
@@ -22,7 +21,7 @@ class BoardPersistenceAdapter(
         boardName: String
     ) {
         val commonActions = listOf("READ_POST", "WRITE_COMMENT", "READ_COMMENT")
-        val now = LocalDateTime.now().toMongoDate()
+        val now = Instant.now().toMongoDate()
         val board = Document()
             .append("_id", ObjectId.get())
             .append("groupId", ObjectId(groupId))
@@ -84,8 +83,8 @@ class BoardPersistenceAdapter(
             .append("enabled", true)
             .append("writePolicy", writePolicy)
 
-    private fun LocalDateTime.toMongoDate(): Date =
-        Date.from(atZone(ZoneId.systemDefault()).toInstant())
+    private fun Instant.toMongoDate(): Date =
+        Date.from(this)
 
     companion object {
         private const val BOARD_COLLECTION = "study_group_boards"

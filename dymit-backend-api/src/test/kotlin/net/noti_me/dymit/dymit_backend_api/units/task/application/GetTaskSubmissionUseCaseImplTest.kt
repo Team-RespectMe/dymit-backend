@@ -29,7 +29,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
 import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
 
@@ -61,7 +61,7 @@ internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
                         title = "과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         id = taskId
                     )
                     val submission = TaskSubmission(
@@ -77,7 +77,7 @@ internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
                             )
                         ),
                         id = submissionId,
-                        createdAt = LocalDateTime.now()
+                        createdAt = Instant.now()
                     )
                     val dto = TaskSubmissionDto(
                         submissionId = submissionId.toHexString(),
@@ -145,7 +145,7 @@ internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
                         title = "과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         id = taskId
                     )
 
@@ -192,7 +192,7 @@ internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
                         title = "체크 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         id = taskId,
                         submissionType = TaskSubmissionType.CHECK
                     )
@@ -249,7 +249,7 @@ internal class GetTaskSubmissionUseCaseImplTest : BehaviorSpec() {
                         title = "체크 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         id = taskId,
                         submissionType = TaskSubmissionType.CHECK
                     )

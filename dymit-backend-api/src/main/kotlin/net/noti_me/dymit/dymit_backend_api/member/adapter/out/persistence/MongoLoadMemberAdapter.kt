@@ -8,7 +8,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Repository
 class MongoLoadMemberAdapter(
@@ -57,8 +57,8 @@ class MongoLoadMemberAdapter(
     }
 
     override fun countByCreatedAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime
+        start: Instant,
+        end: Instant
     ): Long {
         return mongoTemplate.count(
             Query(
@@ -71,8 +71,8 @@ class MongoLoadMemberAdapter(
     }
 
     override fun countByLastAccessedAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         isDeleted: Boolean
     ): Long {
         return mongoTemplate.count(

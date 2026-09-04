@@ -32,7 +32,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
 
@@ -72,7 +72,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = scheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().plusDays(2)
+                        scheduleAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
@@ -80,7 +80,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
                         assigneeMemberIds = listOf(assigneeId1.toHexString(), assigneeId2.toHexString()),
-                        expireAt = LocalDateTime.of(2026, 6, 11, 8, 0, 0)
+                        expireAt = Instant.parse("2026-06-11T08:00:00Z")
                     )
                     val savedTask = createTask(
                         type = TaskType.PRE,
@@ -127,7 +127,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = scheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().plusHours(23)
+                        scheduleAt = Instant.now().plusSeconds(23L * 3600L)
                     )
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
@@ -135,7 +135,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
                         assigneeMemberIds = listOf(ObjectId.get().toHexString()),
-                        expireAt = LocalDateTime.now().plusDays(1)
+                        expireAt = Instant.now().plusSeconds(1L * 86400L)
                     )
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
@@ -167,7 +167,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = scheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().minusDays(1)
+                        scheduleAt = Instant.now().minusSeconds(1L * 86400L)
                     )
                     val command = CreateTaskCommand(
                         relatedScheduleId = scheduleId.toHexString(),
@@ -175,11 +175,11 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
                         assigneeMemberIds = listOf(assigneeId1.toHexString(), assigneeId2.toHexString()),
-                        expireAt = LocalDateTime.now().plusDays(3)
+                        expireAt = Instant.now().plusSeconds(3L * 86400L)
                     )
                     val savedTask = createTask(
                         type = TaskType.POST,
-                        expireAt = LocalDateTime.now().plusDays(3),
+                        expireAt = Instant.now().plusSeconds(3L * 86400L),
                         scheduleId = scheduleId
                     )
 
@@ -221,7 +221,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val groupId = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
+                    val task = createTask(type = TaskType.POST, expireAt = Instant.now().minusSeconds(1L * 60L))
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadTask(task.identifier) } returns task
@@ -236,7 +236,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                                 "제목",
                                 "설명",
                                 emptyList(),
-                                LocalDateTime.now().plusDays(1)
+                                Instant.now().plusSeconds(1L * 86400L)
                             )
                         )
                     }.message shouldBe expiredMessage
@@ -250,12 +250,12 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val assigneeId = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.PRE, expireAt = LocalDateTime.now().plusDays(1))
+                    val task = createTask(type = TaskType.PRE, expireAt = Instant.now().plusSeconds(1L * 86400L))
                     val command = UpdateTaskCommand(
                         title = "수정 제목",
                         description = "수정 설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(3),
+                        expireAt = Instant.now().plusSeconds(3L * 86400L),
                         assigneeMemberIds = listOf(assigneeId.toHexString())
                     )
 
@@ -284,8 +284,8 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val groupId = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().plusDays(1))
-                    val command = UpdateTaskCommand("수정 제목", "수정 설명", emptyList(), LocalDateTime.now().plusDays(2), null)
+                    val task = createTask(type = TaskType.POST, expireAt = Instant.now().plusSeconds(1L * 86400L))
+                    val command = UpdateTaskCommand("수정 제목", "수정 설명", emptyList(), Instant.now().plusSeconds(2L * 86400L), null)
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadTask(task.identifier) } returns task
@@ -316,13 +316,13 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
                     val task = createTask(
                         type = TaskType.POST,
-                        expireAt = LocalDateTime.now().plusDays(1)
+                        expireAt = Instant.now().plusSeconds(1L * 86400L)
                     )
                     val command = UpdateTaskCommand(
                         title = "수정 제목",
                         description = "수정 설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         assigneeMemberIds = listOf(keptMemberId.toHexString(), addedMemberId.toHexString())
                     )
 
@@ -362,7 +362,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val groupId = ObjectId.get()
                     val memberInfo = createMemberInfo(ownerId)
                     val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
+                    val task = createTask(type = TaskType.POST, expireAt = Instant.now().minusSeconds(1L * 60L))
 
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadTask(task.identifier) } returns task
@@ -385,7 +385,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val groupId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
+                    val task = createTask(type = TaskType.POST, expireAt = Instant.now().minusSeconds(1L * 60L))
 
                     every { support.requireGroupMember(groupId, memberId) } returns mockk()
                     every { support.loadTask(task.identifier) } returns task
@@ -407,7 +407,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val groupId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
+                    val task = createTask(type = TaskType.POST, expireAt = Instant.now().minusSeconds(1L * 60L))
 
                     every { support.requireGroupMember(groupId, memberId) } returns mockk()
                     every { support.loadTask(task.identifier) } returns task
@@ -430,7 +430,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     val groupId = ObjectId.get()
                     val memberId = ObjectId.get()
                     val memberInfo = createMemberInfo(memberId)
-                    val task = createTask(type = TaskType.POST, expireAt = LocalDateTime.now().minusMinutes(1))
+                    val task = createTask(type = TaskType.POST, expireAt = Instant.now().minusSeconds(1L * 60L))
 
                     every { support.requireGroupMember(groupId, memberId) } returns mockk()
                     every { support.loadTask(task.identifier) } returns task
@@ -459,7 +459,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
 
     private fun createTask(
         type: TaskType,
-        expireAt: LocalDateTime,
+        expireAt: Instant,
         scheduleId: ObjectId = ObjectId.get()
     ): Task {
         return Task(

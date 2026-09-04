@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 스터디 과제 엔티티입니다.
@@ -26,9 +26,9 @@ class Task(
     title: String,
     description: String,
     attachments: List<TaskAttachment>,
-    expireAt: LocalDateTime,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    expireAt: Instant,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     id: ObjectId? = null,
     submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
@@ -51,7 +51,7 @@ class Task(
     var attachments: MutableList<TaskAttachment> = attachments.toMutableList()
         private set
 
-    var expireAt: LocalDateTime = expireAt
+    var expireAt: Instant = expireAt
         private set
 
     val submissionType: TaskSubmissionType = submissionType
@@ -72,7 +72,7 @@ class Task(
         title: String,
         description: String,
         attachments: List<TaskAttachment>,
-        expireAt: LocalDateTime
+        expireAt: Instant
     ) {
         validate(
             title = title,
@@ -92,7 +92,7 @@ class Task(
         title: String,
         description: String,
         attachments: List<TaskAttachment>,
-        @Suppress("UNUSED_PARAMETER") expireAt: LocalDateTime
+        @Suppress("UNUSED_PARAMETER") expireAt: Instant
     ) {
         if ( title.isBlank() ) {
             throw BadRequestException(message = "과제 제목은 비어 있을 수 없습니다.")

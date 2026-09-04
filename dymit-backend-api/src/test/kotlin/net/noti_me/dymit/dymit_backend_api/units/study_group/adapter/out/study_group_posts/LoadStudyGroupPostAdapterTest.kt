@@ -12,7 +12,7 @@ import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.ZoneId
 import java.util.Date
 
@@ -67,7 +67,7 @@ internal class LoadStudyGroupPostAdapterTest : BehaviorSpec() {
                 then("it maps the document to post preview fields") {
                     val boardId = ObjectId.get().toHexString()
                     val postId = ObjectId.get()
-                    val createdAt = LocalDateTime.of(2026, 8, 31, 9, 30)
+                    val createdAt = Instant.parse("2026-08-31T09:30:00Z")
                     val document = Document("_id", postId)
                         .append("title", "공지 제목")
                         .append(

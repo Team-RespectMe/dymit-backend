@@ -1,18 +1,18 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.domain
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class RecentPostVo(
     val postId: String,
     val title: String,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {
         fun of(
             postId: String,
             title: String,
-            createdAt: LocalDateTime
+            createdAt: Instant
         ): RecentPostVo {
             return RecentPostVo(
                 postId = postId,

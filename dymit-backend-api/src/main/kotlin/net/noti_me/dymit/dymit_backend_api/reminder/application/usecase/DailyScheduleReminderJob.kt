@@ -12,7 +12,8 @@ import org.quartz.JobExecutionContext
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.ZoneId
 
 /**
  * 매일 오전 9시에 당일 15시 이전 예정 일정의 알림과 피드 이벤트를 발생시킵니다.
@@ -36,7 +37,7 @@ class DailyScheduleReminderJob(
             title = "Daily Schedule Reminder Job Started",
             message = "Starting to process study schedules for daily reminders."
         )
-        val now = LocalDateTime.now()
+        val now = Instant.now()
         var cursor: ObjectId? = null
 
         do {
@@ -52,7 +53,7 @@ class DailyScheduleReminderJob(
             }
         } while (schedules.size >= BATCH_SIZE)
 
-        val end = LocalDateTime.now()
+        val end = Instant.now()
         quartzLogger.log(
             title = "Daily Schedule Reminder Job Completed",
             message = "Completed processing study schedules for daily reminders. Started at: $now, ended at: $end"
@@ -60,18 +61,19 @@ class DailyScheduleReminderJob(
     }
 
     private fun pullStudySchedulesForToday(
-        current: LocalDateTime,
+        current: Instant,
         cursor: ObjectId?
     ): List<ReminderStudyScheduleDto> {
         return studySchedulePort.findByScheduleAtBetween(
-            start = current.withHour(0)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0),
-            end = current.withHour(15)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0),
+            start = current.atZone(KOREA_ZONE)
+                .toLocalDate()
+                .atStartOfDay(KOREA_ZONE)
+                .toInstant(),
+            end = current.atZone(KOREA_ZONE)
+                .toLocalDate()
+                .atTime(15, 0)
+                .atZone(KOREA_ZONE)
+                .toInstant(),
             cursor = cursor,
             limit = BATCH_SIZE
         )
@@ -103,5 +105,6 @@ class DailyScheduleReminderJob(
 
     private companion object {
         const val BATCH_SIZE = 1000
+        val KOREA_ZONE: ZoneId = ZoneId.of("Asia/Seoul")
     }
 }

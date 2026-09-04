@@ -1,21 +1,21 @@
 package net.noti_me.dymit.dymit_backend_api.common.daily_statistics
 
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Represents the business fields read from a completed daily-statistics document.
  */
 data class DailyStatisticsReportDocument(
     val statisticDate: LocalDate,
-    val windowStart: LocalDateTime,
-    val windowEnd: LocalDateTime,
+    val windowStart: Instant,
+    val windowEnd: Instant,
     val member: MemberDailyStatisticsReport,
     val studyGroup: StudyGroupDailyStatisticsReport,
     val studySchedule: StudyScheduleDailyStatisticsReport,
     val task: TaskDailyStatisticsReport,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: Instant,
+    val updatedAt: Instant
 )
 
 /**

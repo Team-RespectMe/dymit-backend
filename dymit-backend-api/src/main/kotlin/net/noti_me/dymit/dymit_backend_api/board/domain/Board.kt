@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document("study_group_boards")
 @TypeAlias("net.noti_me.dymit.dymit_backend_api.domain.board.Board")
@@ -30,8 +30,8 @@ class Board(
             actions = mutableListOf()
         )
     ),
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     categoryPolicies: MutableSet<BoardCategoryPolicy>? = null
 ) : BaseAggregateRoot<Board>(

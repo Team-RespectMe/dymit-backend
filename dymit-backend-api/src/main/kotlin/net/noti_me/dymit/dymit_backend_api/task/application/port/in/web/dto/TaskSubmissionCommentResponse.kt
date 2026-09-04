@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskProfileImageType
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "과제 제출 댓글 응답")
 class TaskSubmissionCommentResponse(
@@ -20,7 +20,7 @@ class TaskSubmissionCommentResponse(
     @field:Schema(description = "댓글 내용")
     val content: String,
     @field:Schema(description = "생성 시각")
-    val createdAt: LocalDateTime?
+    val createdAt: Instant?
 ) : BaseResponse() {
 
     @get:JsonIgnore

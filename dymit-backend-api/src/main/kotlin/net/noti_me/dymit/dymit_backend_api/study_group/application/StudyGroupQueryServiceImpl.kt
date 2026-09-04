@@ -21,7 +21,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.pers
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 class StudyGroupQueryServiceImpl(
@@ -60,7 +60,7 @@ class StudyGroupQueryServiceImpl(
             ),
             description = studyGroup.description,
             membersCount = membersCount,
-            createdAt = studyGroup.createdAt?: LocalDateTime.now(),
+            createdAt = studyGroup.createdAt?: Instant.now(),
         )
 
         return studyGroupDto
@@ -142,7 +142,7 @@ class StudyGroupQueryServiceImpl(
     }
 
     private fun isExpiredInviteCode(inviteCode: InviteCodeVo): Boolean {
-        return inviteCode.expireAt <= LocalDateTime.now()
+        return inviteCode.expireAt <= Instant.now()
     }
 
     override fun getOwnedGroupCount(memberInfo: MemberInfo): Long {

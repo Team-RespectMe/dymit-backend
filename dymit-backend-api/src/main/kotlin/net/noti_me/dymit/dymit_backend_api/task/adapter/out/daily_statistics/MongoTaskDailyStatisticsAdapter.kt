@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Collects task metrics and atomically writes only the task daily-statistics section.
@@ -26,8 +26,8 @@ class MongoTaskDailyStatisticsAdapter(
      * Counts every task and submission creation record in the window.
      */
     override fun collect(
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime
+        windowStart: Instant,
+        windowEnd: Instant
     ): TaskDailyStatisticsDto {
         return TaskDailyStatisticsDto(
             createdCount = mongoTemplate.count(
@@ -46,11 +46,11 @@ class MongoTaskDailyStatisticsAdapter(
      */
     override fun upsert(
         statisticDate: LocalDate,
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime,
+        windowStart: Instant,
+        windowEnd: Instant,
         statistics: TaskDailyStatisticsDto
     ): Boolean {
-        val now = LocalDateTime.now(DailyStatisticsWindowCalculator.KOREA_ZONE)
+        val now = Instant.now()
         val query = Query(Criteria.where("statisticDate").`is`(statisticDate))
         val update = Update()
             .set("task.createdCount", statistics.createdCount)

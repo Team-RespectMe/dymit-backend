@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.d
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.file.dto.StudyScheduleFileDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.file.dto.StudyScheduleFileStatusDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleAttachment
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 스터디 일정 첨부 파일 정보를 외부로 전달하는 DTO입니다.
@@ -27,7 +27,7 @@ data class StudyScheduleAttachmentDto(
     val url: String,
     val thumbnail: StudyScheduleFileThumbnailDto? = null,
     val status: StudyScheduleFileStatusDto,
-    val attachedAt: LocalDateTime
+    val attachedAt: Instant
 ) {
 
     companion object {
@@ -61,7 +61,7 @@ data class StudyScheduleAttachmentDto(
                     null
                 },
                 status = userFile.status,
-                attachedAt = attachment.createdAt ?: LocalDateTime.now()
+                attachedAt = attachment.createdAt ?: Instant.now()
             )
         }
     }

@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto
 
 import net.noti_me.dymit.dymit_backend_api.feed.domain.IconType
 import net.noti_me.dymit.dymit_backend_api.feed.domain.ResourceType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 웹 입력 포트가 반환하는 개인 피드 데이터입니다.
@@ -23,7 +23,7 @@ data class UserFeedDto(
     val eventName: String = "",
     val messages: List<FeedMessageDto>,
     val associates: List<AssociatedResourceDto>,
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
     val isRead: Boolean
 )
 

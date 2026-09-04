@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.feed.domain.IconType
 import net.noti_me.dymit.dymit_backend_api.feed.domain.ResourceType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 사용자 피드 HTTP 응답입니다.
@@ -37,7 +37,7 @@ data class UserFeedResponse(
     @Schema(description = "읽은 여부", example = "false")
     val isRead: Boolean,
     @Schema(description = "생성 일자", example = "2025-10-05T14:48:00")
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) : BaseResponse() {
 
     companion object {

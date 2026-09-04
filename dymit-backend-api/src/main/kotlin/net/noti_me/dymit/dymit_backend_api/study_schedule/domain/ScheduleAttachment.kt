@@ -5,7 +5,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.annotation.TypeAlias
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 스터디 일정과 파일의 첨부 관계를 저장하는 도메인 엔티티입니다.
@@ -24,8 +24,8 @@ class ScheduleAttachment(
     val scheduleId: ObjectId,
     @Indexed(name = "schedule_attachment_file_id_idx")
     val fileId: ObjectId,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     id: ObjectId? = null
 ) : BaseAggregateRoot<ScheduleAttachment>(

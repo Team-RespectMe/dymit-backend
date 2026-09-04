@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Dymit 스터디 모집글 목록 요약 응답입니다.
@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 data class DymitStudyRecruitmentSummaryResponse(
     val id: String,
     val groupId: String?,
-    val createdAt: LocalDateTime?,
+    val createdAt: Instant?,
     val title: String,
     val purpose: String,
     val writerId: String,

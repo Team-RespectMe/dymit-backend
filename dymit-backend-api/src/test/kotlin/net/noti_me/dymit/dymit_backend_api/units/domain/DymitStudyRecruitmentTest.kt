@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRe
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.types.ObjectId
 import java.time.Instant
-import java.time.LocalDateTime
+
 
 internal class DymitStudyRecruitmentTest : BehaviorSpec() {
 
@@ -183,7 +183,7 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
                 recruitment.changeTags(listOf("신규", "태그"))
                 recruitment.tags shouldBe listOf("신규", "태그")
 
-                recruitment.updatedAt shouldNotBe LocalDateTime.of(2026, 8, 17, 9, 0)
+                recruitment.updatedAt shouldNotBe Instant.parse("2026-08-17T09:00:00Z")
                 recruitment.writer.nickname shouldBe "작성자"
                 recruitment.groupId shouldBe recruitment.groupId
                 recruitment.type shouldBe StudyRecruitmentType.DYMIT
@@ -245,8 +245,8 @@ internal class DymitStudyRecruitmentTest : BehaviorSpec() {
             studyFormat = studyFormat,
             contact = contact,
             tags = tags,
-            createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
-            updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0)
+            createdAt = Instant.parse("2026-08-17T09:00:00Z"),
+            updatedAt = Instant.parse("2026-08-17T09:00:00Z")
         )
     }
 }

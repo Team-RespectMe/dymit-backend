@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.InviteCodeVo
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroup
-import java.time.LocalDateTime
+import java.time.Instant
 
 class StudyGroupDto(
     val groupId: String,
@@ -12,7 +12,7 @@ class StudyGroupDto(
     val name: String,
     val description: String,
     val inviteCodeVo: InviteCodeVo,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {
@@ -24,7 +24,7 @@ class StudyGroupDto(
                 name = entity.name,
                 description = entity.description,
                 inviteCodeVo = entity.inviteCode,
-                createdAt = entity.createdAt ?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: Instant.now()
             )
         }
     }

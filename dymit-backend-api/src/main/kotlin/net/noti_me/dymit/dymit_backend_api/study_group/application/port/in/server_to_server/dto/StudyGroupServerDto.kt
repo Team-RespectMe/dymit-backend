@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.se
 
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 enum class StudyGroupMemberRoleDto {
     OWNER,
@@ -41,14 +41,14 @@ data class StudyGroupImageDto(
 data class StudyGroupRecentPostDto(
     val postId: String,
     val title: String,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 )
 
 data class StudyGroupRecentScheduleDto(
     val scheduleId: ObjectId,
     val title: String,
     val session: Long,
-    val scheduleAt: LocalDateTime
+    val scheduleAt: Instant
 )
 
 data class StudyGroupDto(
@@ -60,7 +60,7 @@ data class StudyGroupDto(
     val memberCount: Int = 0,
     var recentPost: StudyGroupRecentPostDto? = null,
     var recentSchedule: StudyGroupRecentScheduleDto? = null,
-    val createdAt: LocalDateTime? = null
+    val createdAt: Instant? = null
 ) {
 
     val identifier: String
@@ -82,6 +82,6 @@ data class StudyGroupMemberDto(
     val nickname: String = "",
     val profileImage: StudyGroupProfileImageDto = StudyGroupProfileImageDto(),
     val role: StudyGroupMemberRoleDto = StudyGroupMemberRoleDto.MEMBER,
-    val createdAt: LocalDateTime? = null,
+    val createdAt: Instant? = null,
     val isDeleted: Boolean = false
 )

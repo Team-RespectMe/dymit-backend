@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskSu
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskProfileImageType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmitAttachmentType
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "과제 제출 응답")
 class TaskSubmissionResponse(
@@ -24,7 +24,7 @@ class TaskSubmissionResponse(
     @field:Schema(description = "첨부 목록")
     val attachments: List<TaskSubmissionAttachmentResponse>,
     @field:Schema(description = "생성 시각")
-    val createdAt: LocalDateTime?
+    val createdAt: Instant?
 ) : BaseResponse() {
 
     @get:JsonIgnore

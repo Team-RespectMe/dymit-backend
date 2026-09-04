@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Reminder 일정 조회 포트를 기존 MongoDB 컬렉션에 연결합니다.
@@ -23,8 +23,8 @@ class MongoReminderStudyScheduleAdapter(
      * 일정 문서를 조회해 Reminder 소유 DTO로 변환합니다.
      */
     override fun findByScheduleAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         cursor: ObjectId?,
         limit: Int
     ): List<ReminderStudyScheduleDto> {
@@ -71,7 +71,7 @@ class MongoReminderStudyScheduleAdapter(
         val groupId: ObjectId = ObjectId.get(),
         val title: String = "",
         val session: Long = 1L,
-        val scheduleAt: LocalDateTime = LocalDateTime.now()
+        val scheduleAt: Instant = Instant.now()
     )
 
     private companion object {

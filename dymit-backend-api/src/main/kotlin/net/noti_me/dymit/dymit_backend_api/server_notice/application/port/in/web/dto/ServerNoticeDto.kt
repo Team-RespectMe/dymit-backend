@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.server_notice.domain.Link
 import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNotice
 import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNoticeWriter
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 서버 공지 상세 정보를 애플리케이션 경계 밖으로 전달하는 DTO입니다.
@@ -25,8 +25,8 @@ class ServerNoticeDto(
     val title: String,
     val content: String,
     val link: Link?,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: Instant,
+    val updatedAt: Instant
 ) {
 
     companion object {

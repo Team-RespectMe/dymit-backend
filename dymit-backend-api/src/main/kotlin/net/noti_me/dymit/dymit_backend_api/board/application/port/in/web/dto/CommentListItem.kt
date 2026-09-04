@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.CommentDto
+import java.time.Instant
 
 @Schema(description = "댓글 목록 아이템")
 data class CommentListItem(
@@ -18,7 +19,7 @@ data class CommentListItem(
     val content: String,
 
     @Schema(description = "생성일시", example = "2024-01-01T12:00:00")
-    val createdAt: String
+    val createdAt: Instant?
 ) {
     companion object {
         fun from(commentDto: CommentDto): CommentListItem {

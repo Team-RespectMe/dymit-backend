@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document(collection = "reports")
 class Report(
@@ -16,8 +16,8 @@ class Report(
     title: String,
     content: String,
     status: ProcessStatus,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<Report>(
     id = id,

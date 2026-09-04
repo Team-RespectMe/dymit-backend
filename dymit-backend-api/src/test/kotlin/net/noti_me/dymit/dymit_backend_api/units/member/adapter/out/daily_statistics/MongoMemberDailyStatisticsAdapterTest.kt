@@ -9,7 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.member.adapter.`out`.daily_statistics
 import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class MongoMemberDailyStatisticsAdapterTest : BehaviorSpec({
     Given("member statistics collection") {
@@ -18,8 +18,8 @@ internal class MongoMemberDailyStatisticsAdapterTest : BehaviorSpec({
                 val mongoTemplate = mockk<MongoTemplate>()
                 val queries = mutableListOf<Query>()
                 every { mongoTemplate.count(capture(queries), Member::class.java) } returnsMany listOf(2, 3, 5)
-                val start = LocalDateTime.of(2026, 7, 28, 4, 0)
-                val end = LocalDateTime.of(2026, 7, 29, 4, 0)
+                val start = Instant.parse("2026-07-28T04:00:00Z")
+                val end = Instant.parse("2026-07-29T04:00:00Z")
 
                 val result = MongoMemberDailyStatisticsAdapter(mongoTemplate).collect(start, end)
 

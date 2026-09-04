@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.StudyScheduleDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 일정 생성/수정 응답",
@@ -39,7 +39,7 @@ class StudyScheduleCommandResponse(
         description = "스터디 그룹 일정 시작 시간",
         example = "2030-10-01T10:00:00",
     )
-    val scheduleAt: LocalDateTime,
+    val scheduleAt: Instant,
 ): BaseResponse() {
 
     companion object {

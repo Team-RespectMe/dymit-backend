@@ -7,7 +7,6 @@ import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.Instant
-import java.time.LocalDateTime
 
 /**
  * Dymit 내부 스터디 모집글 도메인 엔티티입니다.
@@ -52,8 +51,8 @@ class DymitStudyRecruitment(
     tags: List<String> = emptyList(),
     bumpAt: Instant = Instant.now(),
     bumpCount: Int = 0,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<DymitStudyRecruitment>(
     id = id,
@@ -232,7 +231,7 @@ class DymitStudyRecruitment(
     }
 
     private fun touchUpdatedAt() {
-        updatedAt = LocalDateTime.now()
+        updatedAt = Instant.now()
     }
 
     private companion object {

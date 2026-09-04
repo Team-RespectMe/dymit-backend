@@ -26,7 +26,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskSubmissionCreat
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskSubmissionEventPublicationTest : BehaviorSpec() {
 
@@ -71,7 +71,7 @@ internal class TaskSubmissionEventPublicationTest : BehaviorSpec() {
                         title = "주차 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val assignee = TaskAssignee(taskId = taskId, memberId = memberId)
                     val savedSubmission = TaskSubmission(

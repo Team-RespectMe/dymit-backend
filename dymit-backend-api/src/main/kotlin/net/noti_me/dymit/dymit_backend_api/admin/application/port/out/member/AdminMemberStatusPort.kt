@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.admin.application.port.`out`.member
 
 import net.noti_me.dymit.dymit_backend_api.admin.application.port.`out`.member.dto.AdminMemberStatusDto
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 관리자 모듈이 일별 회원 현황을 조회하는 출력 포트입니다.
@@ -16,7 +16,7 @@ interface AdminMemberStatusPort {
      * @return 관리자 소유 회원 현황 DTO 목록
      */
     fun findAllByCreatedAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime
+        start: Instant,
+        end: Instant
     ): List<AdminMemberStatusDto>
 }

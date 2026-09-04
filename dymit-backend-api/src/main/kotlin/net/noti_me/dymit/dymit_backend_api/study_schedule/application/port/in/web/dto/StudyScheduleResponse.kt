@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dt
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.common.response.HateoasLink
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 일정 단건 조회 응답",
@@ -30,7 +30,7 @@ class StudyScheduleResponse(
     @field: Schema(
         description = "일정 시작 시간",
     )
-    val scheduleAt: LocalDateTime,
+    val scheduleAt: Instant,
     @field: Schema(
         description = "일정 장소 정보",
     )

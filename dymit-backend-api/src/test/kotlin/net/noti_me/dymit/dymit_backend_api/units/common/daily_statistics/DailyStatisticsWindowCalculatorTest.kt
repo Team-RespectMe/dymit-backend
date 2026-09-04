@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import net.noti_me.dymit.dymit_backend_api.common.daily_statistics.DailyStatisticsWindowCalculator
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class DailyStatisticsWindowCalculatorTest : BehaviorSpec({
     Given("a UTC instant at the Korean business boundary") {
@@ -14,8 +13,8 @@ internal class DailyStatisticsWindowCalculatorTest : BehaviorSpec({
                 val window = DailyStatisticsWindowCalculator.calculate(Instant.parse("2026-07-29T19:00:00Z"))
 
                 window.statisticDate shouldBe LocalDate.of(2026, 7, 29)
-                window.windowStart shouldBe LocalDateTime.of(2026, 7, 29, 4, 0)
-                window.windowEnd shouldBe LocalDateTime.of(2026, 7, 30, 4, 0)
+                window.windowStart shouldBe Instant.parse("2026-07-28T19:00:00Z")
+                window.windowEnd shouldBe Instant.parse("2026-07-29T19:00:00Z")
             }
         }
     }

@@ -73,7 +73,7 @@ class CreatePostUseCaseImplV2(
             BoardRecentPostDto(
                 postId = savedPost.identifier,
                 title = savedPost.title,
-                createdAt = savedPost.createdAt ?: java.time.LocalDateTime.now()
+                createdAt = savedPost.createdAt ?: java.time.Instant.now()
             )
         )
 

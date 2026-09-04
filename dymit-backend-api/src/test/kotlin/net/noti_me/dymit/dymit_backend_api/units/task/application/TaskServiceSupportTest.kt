@@ -34,7 +34,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionCommentRepository
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionRepository
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskServiceSupportTest : BehaviorSpec() {
 
@@ -71,11 +71,11 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         Given("TASK-64.2 과제 타입 자동 결정") {
             When("일정이 아직 시작 전이면") {
                 Then("PRE 타입으로 결정된다") {
-                    val requestedAt = LocalDateTime.of(2026, 6, 11, 10, 0, 0)
+                    val requestedAt = Instant.parse("2026-06-11T10:00:00Z")
                     val upcomingSchedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = requestedAt.plusHours(1)
+                        scheduleAt = requestedAt.plusSeconds(1L * 3600L)
                     )
 
                     support.resolveTaskTypeBySchedule(upcomingSchedule, requestedAt) shouldBe TaskType.PRE
@@ -84,7 +84,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
             When("일정 시작 시각과 요청 시각이 같으면") {
                 Then("POST 타입으로 결정된다") {
-                    val requestedAt = LocalDateTime.of(2026, 6, 11, 10, 0, 0)
+                    val requestedAt = Instant.parse("2026-06-11T10:00:00Z")
                     val startedSchedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
@@ -97,11 +97,11 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
             When("일정이 이미 시작되었으면") {
                 Then("POST 타입으로 결정된다") {
-                    val requestedAt = LocalDateTime.of(2026, 6, 11, 10, 0, 0)
+                    val requestedAt = Instant.parse("2026-06-11T10:00:00Z")
                     val startedSchedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = requestedAt.minusHours(1)
+                        scheduleAt = requestedAt.minusSeconds(1L * 3600L)
                     )
 
                     support.resolveTaskTypeBySchedule(startedSchedule, requestedAt) shouldBe TaskType.POST
@@ -113,11 +113,11 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.of(2026, 6, 12, 10, 0, 0)
+                        scheduleAt = Instant.parse("2026-06-12T10:00:00Z")
                     )
 
                     shouldNotThrowAny {
-                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusHours(24))
+                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusSeconds(24L * 3600L))
                     }
                 }
             }
@@ -127,11 +127,11 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.of(2026, 6, 12, 10, 0, 0)
+                        scheduleAt = Instant.parse("2026-06-12T10:00:00Z")
                     )
 
                     val exception = shouldThrow<BadRequestException> {
-                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusHours(24).plusMinutes(1))
+                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusSeconds(24L * 3600L).plusSeconds(1L * 60L))
                     }
 
                     exception.message shouldBe "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다."
@@ -142,7 +142,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         Given("TASK-62 생성/수정 마감 시각 규칙") {
             When("PRE 생성 요청의 expireAt(KST)이 연관 일정 시간(UTC0)과 일치하면") {
                 Then("정상적으로 일정 시간으로 변환된다") {
-                    val scheduleAtUtc0 = LocalDateTime.of(2026, 6, 10, 0, 0, 0)
+                    val scheduleAtUtc0 = Instant.parse("2026-06-10T00:00:00Z")
                     val schedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
@@ -151,7 +151,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
                     val normalized = support.normalizeExpireAtForCreate(
                         type = TaskType.PRE,
-                        requestedExpireAt = LocalDateTime.of(2026, 6, 10, 9, 0, 0),
+                        requestedExpireAt = Instant.parse("2026-06-10T09:00:00Z"),
                         schedule = schedule
                     )
 
@@ -164,12 +164,12 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.of(2026, 6, 10, 0, 0, 0)
+                        scheduleAt = Instant.parse("2026-06-10T00:00:00Z")
                     )
 
                     val normalized = support.normalizeExpireAtForCreate(
                         type = TaskType.PRE,
-                        requestedExpireAt = LocalDateTime.of(2026, 6, 10, 9, 1, 0),
+                        requestedExpireAt = Instant.parse("2026-06-10T09:01:00Z"),
                         schedule = schedule
                     )
 
@@ -182,26 +182,26 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = ObjectId.get(),
                         groupId = ObjectId.get(),
-                        scheduleAt = LocalDateTime.of(2026, 6, 1, 0, 0, 0)
+                        scheduleAt = Instant.parse("2026-06-01T00:00:00Z")
                     )
 
                     val normalized = support.normalizeExpireAtForCreate(
                         type = TaskType.POST,
-                        requestedExpireAt = LocalDateTime.of(2026, 6, 1, 8, 30, 0),
+                        requestedExpireAt = Instant.parse("2026-06-01T08:30:00Z"),
                         schedule = schedule
                     )
 
-                    normalized shouldBe LocalDateTime.of(2026, 6, 1, 14, 59, 59)
+                    normalized shouldBe Instant.parse("2026-06-01T14:59:59Z")
                 }
             }
 
             When("PRE 수정 요청이 들어오면") {
                 Then("요청 expireAt을 무시하고 기존 마감일을 유지한다") {
-                    val currentExpireAt = LocalDateTime.now().plusDays(3)
+                    val currentExpireAt = Instant.now().plusSeconds(3L * 86400L)
 
                     val normalized = support.normalizeExpireAtForUpdate(
                         type = TaskType.PRE,
-                        requestedExpireAt = LocalDateTime.now().minusDays(1),
+                        requestedExpireAt = Instant.now().minusSeconds(1L * 86400L),
                         currentExpireAt = currentExpireAt
                     )
 
@@ -213,11 +213,11 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                 Then("요청 날짜의 23:59:59(KST)를 UTC0로 정규화한다") {
                     val normalized = support.normalizeExpireAtForUpdate(
                         type = TaskType.POST,
-                        requestedExpireAt = LocalDateTime.of(2026, 7, 4, 10, 0, 0),
-                        currentExpireAt = LocalDateTime.of(2026, 7, 1, 0, 0, 0)
+                        requestedExpireAt = Instant.parse("2026-07-04T10:00:00Z"),
+                        currentExpireAt = Instant.parse("2026-07-01T00:00:00Z")
                     )
 
-                    normalized shouldBe LocalDateTime.of(2026, 7, 4, 14, 59, 59)
+                    normalized shouldBe Instant.parse("2026-07-04T14:59:59Z")
                 }
             }
         }
@@ -225,9 +225,9 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         Given("TASK-62 마감일 잠금 검증") {
             When("과제 마감일이 이미 지났으면") {
                 Then("수정/삭제 제약 예외가 발생한다") {
-                    mockTaskExpireAtNormalizer(LocalDateTime.of(2026, 6, 15, 15, 0, 0))
+                    mockTaskExpireAtNormalizer(Instant.parse("2026-06-15T15:00:00Z"))
 
-                    val task = createTask(expireAt = LocalDateTime.of(2026, 6, 15, 14, 59, 59))
+                    val task = createTask(expireAt = Instant.parse("2026-06-15T14:59:59Z"))
 
                     val exception = shouldThrow<BadRequestException> {
                         support.checkTaskActionAllowedBySchedule(task)
@@ -239,9 +239,9 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
 
             When("과제 마감일이 지나지 않았으면") {
                 Then("잠금 없이 통과한다") {
-                    mockTaskExpireAtNormalizer(LocalDateTime.of(2026, 6, 15, 14, 59, 58))
+                    mockTaskExpireAtNormalizer(Instant.parse("2026-06-15T14:59:58Z"))
 
-                    val task = createTask(expireAt = LocalDateTime.of(2026, 6, 15, 14, 59, 59))
+                    val task = createTask(expireAt = Instant.parse("2026-06-15T14:59:59Z"))
 
                     shouldNotThrowAny {
                         support.checkTaskActionAllowedBySchedule(task)
@@ -296,7 +296,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     val memberId1 = ObjectId.get()
                     val memberId2 = ObjectId.get()
                     val missingMemberId = ObjectId.get()
-                    val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
+                    val task = createTask(expireAt = Instant.now().plusSeconds(2L * 86400L))
                     val assignees = listOf(
                         TaskAssignee(taskId = task.id!!, memberId = memberId1, status = TaskAssigneeStatus.SUBMITTED),
                         TaskAssignee(taskId = task.id!!, memberId = memberId2, status = TaskAssigneeStatus.NOT_SUBMITTED),
@@ -354,7 +354,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
             When("제출 대상자 중 그룹 멤버가 누락되고 기본 경로를 사용하면") {
                 Then("NotFoundException을 유지한다") {
                     val groupId = ObjectId.get()
-                    val task = createTask(expireAt = LocalDateTime.now().plusDays(2))
+                    val task = createTask(expireAt = Instant.now().plusSeconds(2L * 86400L))
                     val missingMemberId = ObjectId.get()
                     val assignees = listOf(
                         TaskAssignee(taskId = task.id!!, memberId = missingMemberId, status = TaskAssigneeStatus.NOT_SUBMITTED)
@@ -410,7 +410,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         }
     }
 
-    private fun mockTaskExpireAtNormalizer(currentUtcDateTime: LocalDateTime) {
+    private fun mockTaskExpireAtNormalizer(currentUtcDateTime: Instant) {
         mockkObject(TaskExpireAtNormalizer)
         taskExpireAtNormalizerMocked = true
         every { TaskExpireAtNormalizer.currentUtcDateTime() } returns currentUtcDateTime
@@ -418,7 +418,7 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
         every { TaskExpireAtNormalizer.toKst(any()) } answers { callOriginal() }
     }
 
-    private fun createTask(expireAt: LocalDateTime): net.noti_me.dymit.dymit_backend_api.task.domain.Task {
+    private fun createTask(expireAt: Instant): net.noti_me.dymit.dymit_backend_api.task.domain.Task {
         return net.noti_me.dymit.dymit_backend_api.task.domain.Task(
             id = ObjectId.get(),
             relatedScheduleId = ObjectId.get(),

@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Collects member metrics and atomically writes only the member daily-statistics section.
@@ -25,8 +25,8 @@ class MongoMemberDailyStatisticsAdapter(
      * Counts joins by creation time and withdrawals/visitors by last access time.
      */
     override fun collect(
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime
+        windowStart: Instant,
+        windowEnd: Instant
     ): MemberDailyStatisticsDto {
         val createdAtCriteria = Criteria.where("createdAt").gte(windowStart).lt(windowEnd)
         val lastAccessCriteria = Criteria.where("lastAccessAt").gte(windowStart).lt(windowEnd)
@@ -51,11 +51,11 @@ class MongoMemberDailyStatisticsAdapter(
      */
     override fun upsert(
         statisticDate: LocalDate,
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime,
+        windowStart: Instant,
+        windowEnd: Instant,
         statistics: MemberDailyStatisticsDto
     ): Boolean {
-        val now = LocalDateTime.now(DailyStatisticsWindowCalculator.KOREA_ZONE)
+        val now = Instant.now()
         val query = Query(Criteria.where("statisticDate").`is`(statisticDate))
         val update = Update()
             .set("member.joinedCount", statistics.joinedCount)

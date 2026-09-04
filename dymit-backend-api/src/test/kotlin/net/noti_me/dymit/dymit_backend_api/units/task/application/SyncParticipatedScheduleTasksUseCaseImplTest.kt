@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.SyncParticipatedSche
 import net.noti_me.dymit.dymit_backend_api.task.domain.Task
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class SyncParticipatedScheduleTasksUseCaseImplTest : BehaviorSpec() {
 
@@ -98,7 +98,7 @@ internal class SyncParticipatedScheduleTasksUseCaseImplTest : BehaviorSpec() {
             title = title,
             description = "설명",
             attachments = emptyList(),
-            expireAt = LocalDateTime.now().plusDays(1)
+            expireAt = Instant.now().plusSeconds(1L * 86400L)
         )
     }
 }

@@ -37,7 +37,7 @@ class RemovePostUseCaseImplV2(
                 BoardRecentPostDto(
                     postId = it.identifier,
                     title = it.title,
-                    createdAt = it.createdAt ?: java.time.LocalDateTime.now()
+                    createdAt = it.createdAt ?: java.time.Instant.now()
                 )
             }
         )

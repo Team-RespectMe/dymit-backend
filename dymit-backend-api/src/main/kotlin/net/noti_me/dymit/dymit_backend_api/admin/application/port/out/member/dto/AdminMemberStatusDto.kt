@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.admin.application.port.`out`.member.dto
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 관리자 모듈이 회원 현황 저장소에서 조회하는 데이터입니다.
@@ -16,5 +16,5 @@ data class AdminMemberStatusDto(
     val activeMemberCount: Long,
     val leaveMemberCount: Long,
     val totalMemberCount: Long,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 )

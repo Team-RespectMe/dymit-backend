@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.UpdateTaskCommand
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "과제 수정 요청")
 class TaskUpdateRequest(
@@ -15,7 +15,7 @@ class TaskUpdateRequest(
     @field:Schema(description = "과제 첨부 파일 ID 목록", example = "[\"682fabc1234567890abcdeff\"]")
     val attachmentFileIds: List<String> = emptyList(),
     @field:Schema(description = "제출 마감 시각", example = "2030-06-01T23:59:59")
-    val expireAt: LocalDateTime,
+    val expireAt: Instant,
     @field:Schema(description = "과제 대상자 멤버 ID 목록. null이면 대상자를 변경하지 않습니다.", example = "[\"682fabc1234567890abcdeff\"]")
     val assigneeMemberIds: List<String>? = null
 ) {

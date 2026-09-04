@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.ScheduleCommentDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "일정 댓글 응답")
 class ScheduleCommentResponse(
@@ -12,7 +12,7 @@ class ScheduleCommentResponse(
     @Schema(description = "댓글 작성자 정보")
     val writer: ScheduleCommentWriterResponse,
     @Schema(description = "댓글 생성 시간", example = "2025-08-29T10:30:00")
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
     @Schema(description = "댓글 내용", example = "이 일정에 참여하고 싶습니다!")
     val content: String,
 ): BaseResponse() {

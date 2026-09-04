@@ -21,7 +21,8 @@ import net.noti_me.dymit.dymit_backend_api.reminder.domain.HourlyScheduleReminde
 import org.bson.types.ObjectId
 import org.quartz.JobExecutionContext
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.ZoneId
 
 internal class ReminderModuleTest : BehaviorSpec() {
 
@@ -52,8 +53,8 @@ internal class ReminderModuleTest : BehaviorSpec() {
             `when`("a schedule has duplicate participants and a group") {
                 then("it uses the daily window and publishes one deduplicated event") {
                     val schedule = schedule()
-                    val starts = slot<LocalDateTime>()
-                    val ends = slot<LocalDateTime>()
+                    val starts = slot<Instant>()
+                    val ends = slot<Instant>()
                     val event = slot<DailyScheduleReminderEvent>()
                     every { quartzLogger.log(any(), any()) } just runs
                     every { schedulePort.findByScheduleAtBetween(capture(starts), capture(ends), null, 1000) } returns listOf(schedule)
@@ -63,9 +64,9 @@ internal class ReminderModuleTest : BehaviorSpec() {
 
                     DailyScheduleReminderJob(groupPort, schedulePort, publisher, quartzLogger).execute(context)
 
-                    starts.captured.hour shouldBe 0
-                    starts.captured.minute shouldBe 0
-                    ends.captured.hour shouldBe 15
+                    starts.captured.atZone(ZoneId.of("Asia/Seoul")).hour shouldBe 0
+                    starts.captured.atZone(ZoneId.of("Asia/Seoul")).minute shouldBe 0
+                    ends.captured.atZone(ZoneId.of("Asia/Seoul")).hour shouldBe 15
                     event.captured.toPersonalPushMessages().size shouldBe 2
                     event.captured.toPersonalFeedData().first().eventName shouldBe "DAILY_SCHEDULE_REMINDER"
                 }
@@ -106,8 +107,8 @@ internal class ReminderModuleTest : BehaviorSpec() {
             `when`("a schedule is within the current-hour batch") {
                 then("it uses a one-hour window and publishes a deduplicated hourly event") {
                     val schedule = schedule()
-                    val starts = slot<LocalDateTime>()
-                    val ends = slot<LocalDateTime>()
+                    val starts = slot<Instant>()
+                    val ends = slot<Instant>()
                     val event = slot<HourlyScheduleReminderEvent>()
                     val memberId = ObjectId.get()
                     every { quartzLogger.log(any(), any()) } just runs
@@ -118,8 +119,8 @@ internal class ReminderModuleTest : BehaviorSpec() {
 
                     HourlyScheduleReminderJob(groupPort, schedulePort, publisher, quartzLogger).execute(context)
 
-                    starts.captured.minute shouldBe 0
-                    ends.captured shouldBe starts.captured.plusHours(1)
+                    starts.captured.atZone(ZoneId.of("Asia/Seoul")).minute shouldBe 0
+                    ends.captured shouldBe starts.captured.plusSeconds(3600)
                     event.captured.memberIds shouldBe listOf(memberId)
                     event.captured.toPersonalPushMessages().single().eventName shouldBe "HOURLY_SCHEDULE_REMINDER"
                 }
@@ -155,6 +156,6 @@ internal class ReminderModuleTest : BehaviorSpec() {
         groupId: ObjectId = ObjectId.get(),
         id: ObjectId = ObjectId.get()
     ): ReminderStudyScheduleDto {
-        return ReminderStudyScheduleDto(id, groupId, "Schedule", 3, LocalDateTime.of(2026, 7, 26, 12, 0))
+        return ReminderStudyScheduleDto(id, groupId, "Schedule", 3, Instant.parse("2026-07-26T03:00:00Z"))
     }
 }

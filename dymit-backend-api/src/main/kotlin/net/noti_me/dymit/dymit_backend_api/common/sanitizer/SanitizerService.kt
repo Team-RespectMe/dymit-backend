@@ -130,7 +130,7 @@ class SanitizerService {
     private fun isSanitizableObject(value: Any): Boolean {
         return when (value) {
             is Number, is Boolean, is Enum<*>, is UUID,
-            is LocalDate, is LocalDateTime, is Instant -> false
+            is LocalDate, is Instant -> false
 
             else -> value::class.hasAnnotation<Sanitize>()
         }

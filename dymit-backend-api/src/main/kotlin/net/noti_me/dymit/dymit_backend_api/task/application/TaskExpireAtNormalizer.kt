@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.task.application
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
 
@@ -17,12 +17,14 @@ object TaskExpireAtNormalizer {
      * @param requestedExpireAt 요청된 마감 시각
      * @return 정규화된 마감 시각
      */
-    fun normalizePostExpireAt(requestedExpireAt: LocalDateTime): LocalDateTime {
-        val endOfDayKst = requestedExpireAt.toLocalDate().atTime(23, 59, 59)
-        return endOfDayKst
+    fun normalizePostExpireAt(requestedExpireAt: Instant): Instant {
+        return requestedExpireAt
+            .atZone(koreaZoneId)
+            .toLocalDate()
+            .atTime(23, 59, 59)
             .atZone(koreaZoneId)
             .withZoneSameInstant(utcZoneId)
-            .toLocalDateTime()
+            .toInstant()
     }
 
     /**
@@ -30,7 +32,7 @@ object TaskExpireAtNormalizer {
      *
      * @return UTC 기준 현재 시각
      */
-    fun currentUtcDateTime(): LocalDateTime = LocalDateTime.now(utcZoneId)
+    fun currentUtcDateTime(): Instant = Instant.now()
 
     /**
      * UTC 기준 저장 값을 KST 기준 시각으로 변환합니다.
@@ -38,10 +40,10 @@ object TaskExpireAtNormalizer {
      * @param utcDateTime UTC 기준 시각
      * @return KST 기준 시각
      */
-    fun toKst(utcDateTime: LocalDateTime): LocalDateTime = utcDateTime
+    fun toKst(utcDateTime: Instant): Instant = utcDateTime
         .atZone(utcZoneId)
         .withZoneSameInstant(koreaZoneId)
-        .toLocalDateTime()
+        .toInstant()
 
     /**
      * 저장된 마감 시각이 현재 기준으로 만료되었는지 확인합니다.
@@ -49,5 +51,5 @@ object TaskExpireAtNormalizer {
      * @param expireAtUtc UTC 기준 저장 마감 시각
      * @return 만료 여부
      */
-    fun isExpired(expireAtUtc: LocalDateTime): Boolean = toKst(expireAtUtc).isBefore(toKst(currentUtcDateTime()))
+    fun isExpired(expireAtUtc: Instant): Boolean = toKst(expireAtUtc).isBefore(toKst(currentUtcDateTime()))
 }

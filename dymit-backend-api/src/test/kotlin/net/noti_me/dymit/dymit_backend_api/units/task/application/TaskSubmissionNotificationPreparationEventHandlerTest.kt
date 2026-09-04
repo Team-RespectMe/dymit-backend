@@ -19,7 +19,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskSubmissionCreat
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskSubmissionCreatedEvent
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskSubmissionNotificationPreparationEventHandlerTest : BehaviorSpec() {
 
@@ -48,7 +48,7 @@ internal class TaskSubmissionNotificationPreparationEventHandlerTest : BehaviorS
                         title = "ERD 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val submitter = StudyGroupMember(
                         groupId = group.id!!,

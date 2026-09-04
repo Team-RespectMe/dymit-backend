@@ -11,7 +11,6 @@ import org.springframework.data.domain.Persistable
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Document
@@ -19,18 +18,18 @@ abstract class BaseAggregateRoot<T : AbstractAggregateRoot<T>>(
     @Id
     @Indexed(unique = true)
     val id: ObjectId? = null,
-    createdAt: LocalDateTime? = LocalDateTime.now(),
-    updatedAt: LocalDateTime? = LocalDateTime.now(),
+    createdAt: Instant? = Instant.now(),
+    updatedAt: Instant? = Instant.now(),
     isDeleted: Boolean = false
 ) : AbstractAggregateRoot<T>() {
 
     val identifier: String
         get() = id?.toHexString() ?: throw IllegalStateException("Entity ID is null")
 
-    var createdAt: LocalDateTime? = createdAt ?: LocalDateTime.now()
+    var createdAt: Instant? = createdAt ?: Instant.now()
         protected set
 
-    var updatedAt: LocalDateTime? = updatedAt ?: LocalDateTime.now()
+    var updatedAt: Instant? = updatedAt ?: Instant.now()
         protected set
 
     var isDeleted: Boolean = isDeleted

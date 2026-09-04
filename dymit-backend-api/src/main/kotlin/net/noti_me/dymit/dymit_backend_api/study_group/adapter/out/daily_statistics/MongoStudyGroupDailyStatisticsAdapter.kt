@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Collects study-group metrics and atomically writes only the study-group section.
@@ -25,8 +25,8 @@ class MongoStudyGroupDailyStatisticsAdapter(
      * Counts every study-group creation record in the window, including later soft deletions.
      */
     override fun collect(
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime
+        windowStart: Instant,
+        windowEnd: Instant
     ): StudyGroupDailyStatisticsDto {
         return StudyGroupDailyStatisticsDto(
             createdCount = mongoTemplate.count(
@@ -41,11 +41,11 @@ class MongoStudyGroupDailyStatisticsAdapter(
      */
     override fun upsert(
         statisticDate: LocalDate,
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime,
+        windowStart: Instant,
+        windowEnd: Instant,
         statistics: StudyGroupDailyStatisticsDto
     ): Boolean {
-        val now = LocalDateTime.now(DailyStatisticsWindowCalculator.KOREA_ZONE)
+        val now = Instant.now()
         val query = Query(Criteria.where("statisticDate").`is`(statisticDate))
         val update = Update()
             .set("studyGroup.createdCount", statistics.createdCount)

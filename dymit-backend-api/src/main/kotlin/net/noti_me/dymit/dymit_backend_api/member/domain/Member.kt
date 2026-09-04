@@ -13,7 +13,6 @@ import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberNicknameCh
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageChangedEvent
 import net.noti_me.dymit.dymit_backend_api.member.domain.events.MemberProfileImageDeletedEvent
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
 
 /**
  * 멤버 도메인 엔티티
@@ -27,12 +26,12 @@ class Member(
     nickname: String = "",
     oidcIdentities: MutableSet<OidcIdentity> = mutableSetOf(),
     profileImage: MemberProfileImageVo = MemberProfileImageVo(),
-    lastAccessAt: LocalDateTime = LocalDateTime.now(),
+    lastAccessAt: Instant = Instant.now(),
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
     refreshTokens: MutableSet<RefreshToken> = mutableSetOf(),
     roles: MutableSet<MemberRole> = mutableSetOf(MemberRole.ROLE_MEMBER),
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     interests: MutableSet<String>? = null
 ) : BaseAggregateRoot<Member>(id, createdAt, updatedAt, isDeleted) {
@@ -53,7 +52,7 @@ class Member(
     var profileImage: MemberProfileImageVo = profileImage
         private set
 
-    var lastAccessAt: LocalDateTime = lastAccessAt
+    var lastAccessAt: Instant = lastAccessAt
         private set
 
     var roles: MutableSet<MemberRole> = roles
@@ -125,7 +124,7 @@ class Member(
     }
 
     fun updateLastAccessedAt() {
-        this.lastAccessAt = LocalDateTime.now()
+        this.lastAccessAt = Instant.now()
     }
 
     private fun removeExpiredToken() {

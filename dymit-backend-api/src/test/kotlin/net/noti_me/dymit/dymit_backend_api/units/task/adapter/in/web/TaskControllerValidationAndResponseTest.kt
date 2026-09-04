@@ -36,7 +36,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
 
@@ -63,7 +63,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         title = "",
                         description = "설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
 
                     TaskCommandRequest::class.java.declaredFields.map { it.name } shouldNotContain "type"
@@ -81,7 +81,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         title = "",
                         description = "설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
 
                     val violations = validator.validate(request)
@@ -119,7 +119,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         title = "사전 과제",
                         description = "설명",
                         attachmentFileIds = listOf(ObjectId.get().toHexString()),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val dto = TaskDto(
                         taskId = ObjectId.get().toHexString(),
@@ -183,7 +183,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         writerProfileImageUrl = "https://example.com/profile.png",
                         writerProfileImageType = ProfileImageType.PRESET,
                         content = "피드백",
-                        createdAt = LocalDateTime.now()
+                        createdAt = Instant.now()
                     )
 
                     every {
@@ -256,7 +256,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                                 originalFileName = null
                             )
                         ),
-                        createdAt = LocalDateTime.now()
+                        createdAt = Instant.now()
                     )
 
                     every { taskService.createSubmission(memberInfo, groupId, taskId, any()) } returns dto
@@ -302,7 +302,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                                 originalFileName = "attachment.pdf"
                             )
                         ),
-                        createdAt = LocalDateTime.now()
+                        createdAt = Instant.now()
                     )
 
                     every {
@@ -341,7 +341,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         title = "수정 과제",
                         description = "수정 설명",
                         attachmentFileIds = listOf(ObjectId.get().toHexString()),
-                        expireAt = LocalDateTime.now().plusDays(3),
+                        expireAt = Instant.now().plusSeconds(3L * 86400L),
                         assigneeMemberIds = listOf(ObjectId.get().toHexString())
                     )
                     val dto = TaskDto(
@@ -401,7 +401,7 @@ internal class TaskControllerValidationAndResponseTest : BehaviorSpec() {
                         title = "목록 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         submittedAssigneeCount = 1,
                         notSubmittedAssigneeCount = 2,
                         assignees = listOf(

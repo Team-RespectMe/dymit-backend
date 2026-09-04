@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 과제 생성 커맨드입니다.
@@ -13,7 +13,7 @@ data class CreateTaskCommand(
     val title: String,
     val description: String,
     val attachmentFileIds: List<String>,
-    val expireAt: LocalDateTime,
+    val expireAt: Instant,
     val assigneeMemberIds: List<String> = emptyList(),
     val submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 )
@@ -25,7 +25,7 @@ data class UpdateTaskCommand(
     val title: String,
     val description: String,
     val attachmentFileIds: List<String>,
-    val expireAt: LocalDateTime,
+    val expireAt: Instant,
     val assigneeMemberIds: List<String>? = null
 )
 

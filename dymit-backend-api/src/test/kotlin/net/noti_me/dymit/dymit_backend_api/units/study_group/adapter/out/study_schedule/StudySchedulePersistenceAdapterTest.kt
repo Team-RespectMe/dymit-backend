@@ -11,7 +11,7 @@ import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.Date
 
 internal class StudySchedulePersistenceAdapterTest : BehaviorSpec() {
@@ -36,7 +36,7 @@ internal class StudySchedulePersistenceAdapterTest : BehaviorSpec() {
                     val secondGroupId = ObjectId.get()
                     val firstScheduleId = ObjectId.get()
                     val secondScheduleId = ObjectId.get()
-                    val scheduleAt = LocalDateTime.of(2026, 7, 27, 10, 0)
+                    val scheduleAt = Instant.parse("2026-07-27T10:00:00Z")
                     val query = slot<Query>()
                     every {
                         mongoTemplate.find(capture(query), Document::class.java, "study_schedules")
@@ -49,7 +49,7 @@ internal class StudySchedulePersistenceAdapterTest : BehaviorSpec() {
                         Document("_id", ObjectId.get())
                             .append("groupId", firstGroupId)
                             .append("title", "Later")
-                            .append("scheduleAt", scheduleAt.plusHours(1)),
+                            .append("scheduleAt", scheduleAt.plusSeconds(1L * 3600L)),
                         Document("_id", secondScheduleId)
                             .append("groupId", secondGroupId)
                             .append("title", "Second")

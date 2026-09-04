@@ -7,7 +7,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.Stu
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.ProfileImageVo
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.RecentPostVo
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 상세 조회 응답 DTO",
@@ -32,7 +32,7 @@ class StudyGroupQueryDetailResponse(
     @field:Schema(description = "최근 공지사항 정보")
     val recentPost: RecentPostVo? = null,
     @field:Schema(description = "스터디 그룹 개설일")
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
 ) : BaseResponse() {
 
     companion object {

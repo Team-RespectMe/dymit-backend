@@ -29,7 +29,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskDeletedEvent
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskModifiedEvent
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskEventPublicationTest : BehaviorSpec() {
 
@@ -58,7 +58,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                     val schedule = StudySchedule(
                         id = scheduleId,
                         groupId = groupId,
-                        scheduleAt = LocalDateTime.now().minusDays(1)
+                        scheduleAt = Instant.now().minusSeconds(1L * 86400L)
                     )
                     val savedTask = createTask(
                         taskId = taskId,
@@ -72,7 +72,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                         description = "과제 설명",
                         attachmentFileIds = emptyList(),
                         assigneeMemberIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(5)
+                        expireAt = Instant.now().plusSeconds(5L * 86400L)
                     )
                     val eventSlot = slot<Any>()
 
@@ -112,12 +112,12 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                     val task = createTask(
                         taskId = taskId,
                         scheduleId = scheduleId,
-                        expireAt = LocalDateTime.now().plusDays(3)
+                        expireAt = Instant.now().plusSeconds(3L * 86400L)
                     )
                     val updatedTask = createTask(
                         taskId = taskId,
                         scheduleId = scheduleId,
-                        expireAt = LocalDateTime.now().plusDays(4),
+                        expireAt = Instant.now().plusSeconds(4L * 86400L),
                         title = "과제 수정",
                         description = "수정된 설명"
                     )
@@ -126,7 +126,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                         title = "과제 수정",
                         description = "수정된 설명",
                         attachmentFileIds = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(6)
+                        expireAt = Instant.now().plusSeconds(6L * 86400L)
                     )
                     val eventSlot = slot<Any>()
 
@@ -168,7 +168,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                         taskId = taskId,
                         scheduleId = scheduleId,
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(3)
+                        expireAt = Instant.now().plusSeconds(3L * 86400L)
                     )
                     val eventSlot = slot<Any>()
 
@@ -212,7 +212,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
                         taskId = taskId,
                         scheduleId = scheduleId,
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(3)
+                        expireAt = Instant.now().plusSeconds(3L * 86400L)
                     )
                     val eventSlot = slot<Any>()
 
@@ -265,7 +265,7 @@ internal class TaskEventPublicationTest : BehaviorSpec() {
     private fun createTask(
         taskId: ObjectId,
         scheduleId: ObjectId,
-        expireAt: LocalDateTime,
+        expireAt: Instant,
         type: TaskType = TaskType.PRE,
         title: String = "과제",
         description: String = "설명",

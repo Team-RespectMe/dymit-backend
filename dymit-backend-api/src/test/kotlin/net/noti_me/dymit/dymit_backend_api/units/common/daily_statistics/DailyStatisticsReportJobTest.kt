@@ -26,12 +26,17 @@ import net.noti_me.dymit.dymit_backend_api.configs.DiscordConfig
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import reactor.core.publisher.Mono
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZoneId
 
 internal class DailyStatisticsReportJobTest : BehaviorSpec({
     val date = LocalDate.of(2026, 7, 28)
-    val window = DailyStatisticsWindow(date, date.atTime(4, 0), date.plusDays(1).atTime(4, 0))
+    val window = DailyStatisticsWindow(
+        date,
+        date.atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+        date.plusDays(1).atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
+    )
 
     beforeTest {
         mockkObject(DailyStatisticsWindowCalculator)
@@ -127,14 +132,14 @@ internal class DailyStatisticsReportJobTest : BehaviorSpec({
     companion object {
         private fun reportDocument(date: LocalDate): DailyStatisticsReportDocument = DailyStatisticsReportDocument(
             statisticDate = date,
-            windowStart = date.atTime(4, 0),
-            windowEnd = date.plusDays(1).atTime(4, 0),
+            windowStart = date.atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            windowEnd = date.plusDays(1).atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
             member = MemberDailyStatisticsReport(1, 2, 3),
             studyGroup = StudyGroupDailyStatisticsReport(4),
             studySchedule = StudyScheduleDailyStatisticsReport(5, 6),
             task = TaskDailyStatisticsReport(7, 8),
-            createdAt = LocalDateTime.of(2026, 7, 29, 5, 1, 2),
-            updatedAt = LocalDateTime.of(2026, 7, 29, 5, 3, 4)
+            createdAt = Instant.parse("2026-07-28T20:01:02Z"),
+            updatedAt = Instant.parse("2026-07-28T20:03:04Z")
         )
     }
 }

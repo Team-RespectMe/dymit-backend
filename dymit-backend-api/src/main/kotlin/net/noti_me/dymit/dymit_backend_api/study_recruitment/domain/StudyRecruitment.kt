@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.study_recruitment.domain
 import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 스터디 모집글 도메인 엔티티입니다.
@@ -28,8 +28,8 @@ class StudyRecruitment(
     content: String,
     url: String,
     writer: String,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<StudyRecruitment>(
     id = id,
@@ -74,7 +74,7 @@ class StudyRecruitment(
         this.content = content
         this.url = url
         this.writer = writer
-        this.updatedAt = LocalDateTime.now()
+        this.updatedAt = Instant.now()
     }
 
     /**

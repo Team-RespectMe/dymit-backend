@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.member.domain.Member
 import net.noti_me.dymit.dymit_backend_api.member.domain.OidcIdentity
 import org.bson.types.ObjectId
 import org.springframework.cglib.core.Local
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 멤버 조회 포트
@@ -36,13 +36,13 @@ interface LoadMemberPort {
 
 
     fun countByCreatedAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime
+        start: Instant,
+        end: Instant
     ): Long
 
     fun countByLastAccessedAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         isDeleted: Boolean = false
     ): Long
 

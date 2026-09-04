@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Repository
 class MongoStudyScheduleRepository(
@@ -51,7 +51,7 @@ class MongoStudyScheduleRepository(
 
     override fun findFirstAfterByGroupIdsOrderByScheduleAtAsc(
         groupIds: List<ObjectId>,
-        now: LocalDateTime
+        now: Instant
     ): Map<ObjectId, StudySchedule?> {
         val matchOperation = Aggregation.match(
             Criteria.where("groupId").`in`(groupIds)
@@ -113,8 +113,8 @@ class MongoStudyScheduleRepository(
     }
 
     override fun findByScheduleAtBetweenCursorPagination(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         cursor: ObjectId?,
         limit: Int
     ): List<StudySchedule> {

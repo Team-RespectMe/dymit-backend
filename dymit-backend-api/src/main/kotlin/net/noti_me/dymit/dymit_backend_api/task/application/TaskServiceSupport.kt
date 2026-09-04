@@ -38,7 +38,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.TaskFileStatusDto
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 과제 서비스 내부 공통 로직 지원 컴포넌트입니다.
@@ -160,7 +160,7 @@ class TaskServiceSupport(
             ?: throw ForbiddenException(message = "과제 대상자만 제출/댓글을 변경할 수 있습니다.")
     }
 
-    fun resolveTaskTypeBySchedule(schedule: StudySchedule, requestedAt: LocalDateTime): TaskType {
+    fun resolveTaskTypeBySchedule(schedule: StudySchedule, requestedAt: Instant): TaskType {
         return if ( TaskExpireAtNormalizer.toKst(schedule.scheduleAt).isAfter(TaskExpireAtNormalizer.toKst(requestedAt)) ) {
             TaskType.PRE
         } else {
@@ -172,17 +172,17 @@ class TaskServiceSupport(
         return resolveTaskTypeBySchedule(schedule, TaskExpireAtNormalizer.currentUtcDateTime())
     }
 
-    fun validatePreTaskCreatable(schedule: StudySchedule, requestedAt: LocalDateTime) {
-        if ( TaskExpireAtNormalizer.toKst(requestedAt).isAfter(TaskExpireAtNormalizer.toKst(schedule.scheduleAt).minusHours(24)) ) {
+    fun validatePreTaskCreatable(schedule: StudySchedule, requestedAt: Instant) {
+        if ( TaskExpireAtNormalizer.toKst(requestedAt).isAfter(TaskExpireAtNormalizer.toKst(schedule.scheduleAt).minusSeconds(24 * 60 * 60)) ) {
             throw BadRequestException(message = "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다.")
         }
     }
 
     fun normalizeExpireAtForCreate(
         type: TaskType,
-        requestedExpireAt: LocalDateTime,
+        requestedExpireAt: Instant,
         schedule: StudySchedule
-    ): LocalDateTime {
+    ): Instant {
         return if ( type == TaskType.PRE ) {
             schedule.scheduleAt
         } else {
@@ -192,9 +192,9 @@ class TaskServiceSupport(
 
     fun normalizeExpireAtForUpdate(
         type: TaskType,
-        requestedExpireAt: LocalDateTime,
-        currentExpireAt: LocalDateTime
-    ): LocalDateTime {
+        requestedExpireAt: Instant,
+        currentExpireAt: Instant
+    ): Instant {
         return if ( type == TaskType.PRE ) {
             currentExpireAt
         } else {

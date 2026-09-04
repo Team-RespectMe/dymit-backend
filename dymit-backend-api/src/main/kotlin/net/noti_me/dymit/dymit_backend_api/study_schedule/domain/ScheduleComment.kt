@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document(collection = "schedule_comments")
 @TypeAlias("net.noti_me.dymit.dymit_backend_api.domain.study_schedule.ScheduleComment")
@@ -21,8 +21,8 @@ class ScheduleComment(
     val scheduleId: ObjectId,
     val writer: ScheduleCommentWriter,
     content: String,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<ScheduleComment>(
     id = id,

@@ -9,14 +9,14 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskAttachment
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskTest : BehaviorSpec({
 
     fun createTask(
         attachments: List<TaskAttachment>,
         description: String,
-        expireAt: LocalDateTime,
+        expireAt: Instant,
         submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
     ): Task {
         return Task(
@@ -39,7 +39,7 @@ internal class TaskTest : BehaviorSpec({
                     createTask(
                         attachments = attachments,
                         description = "설명",
-                        expireAt = LocalDateTime.now().plusHours(1)
+                        expireAt = Instant.now().plusSeconds(1L * 3600L)
                     )
                 }
 
@@ -53,7 +53,7 @@ internal class TaskTest : BehaviorSpec({
                     createTask(
                         attachments = emptyList(),
                         description = "a".repeat(4001),
-                        expireAt = LocalDateTime.now().plusHours(1)
+                        expireAt = Instant.now().plusSeconds(1L * 3600L)
                     )
                 }
 
@@ -66,10 +66,10 @@ internal class TaskTest : BehaviorSpec({
                 val task = createTask(
                     attachments = emptyList(),
                     description = "정상 설명",
-                    expireAt = LocalDateTime.now().minusHours(1)
+                    expireAt = Instant.now().minusSeconds(1L * 3600L)
                 )
 
-                task.expireAt.isBefore(LocalDateTime.now()) shouldBe true
+                task.expireAt.isBefore(Instant.now()) shouldBe true
             }
         }
 
@@ -78,7 +78,7 @@ internal class TaskTest : BehaviorSpec({
                 val task = createTask(
                     attachments = emptyList(),
                     description = "정상 설명",
-                    expireAt = LocalDateTime.now().plusHours(1),
+                    expireAt = Instant.now().plusSeconds(1L * 3600L),
                     submissionType = TaskSubmissionType.CHECK
                 )
 
@@ -91,7 +91,7 @@ internal class TaskTest : BehaviorSpec({
                 val task = createTask(
                     attachments = emptyList(),
                     description = "정상 설명",
-                    expireAt = LocalDateTime.now().plusHours(1),
+                    expireAt = Instant.now().plusSeconds(1L * 3600L),
                     submissionType = TaskSubmissionType.CHECK
                 )
 
@@ -99,7 +99,7 @@ internal class TaskTest : BehaviorSpec({
                     title = "수정 제목",
                     description = "수정 설명",
                     attachments = emptyList(),
-                    expireAt = LocalDateTime.now().plusHours(2)
+                    expireAt = Instant.now().plusSeconds(2L * 3600L)
                 )
 
                 task.submissionType shouldBe TaskSubmissionType.CHECK

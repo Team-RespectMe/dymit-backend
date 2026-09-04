@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.report.application.port.`in`.web.dto
 import net.noti_me.dymit.dymit_backend_api.report.domain.ProcessStatus
 import net.noti_me.dymit.dymit_backend_api.report.domain.Report
 import net.noti_me.dymit.dymit_backend_api.report.domain.ReportedResource
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 신고 정보를 전달하기 위한 데이터 전송 객체(DTO)
@@ -16,7 +16,7 @@ data class ReportDto(
     val title: String,
     val content: String,
     val status: ProcessStatus,
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
 ) {
 
     companion object {
@@ -34,7 +34,7 @@ data class ReportDto(
                 title = entity.title,
                 content = entity.content,
                 status = entity.status,
-                createdAt = entity.createdAt ?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: Instant.now()
             )
         }
     }

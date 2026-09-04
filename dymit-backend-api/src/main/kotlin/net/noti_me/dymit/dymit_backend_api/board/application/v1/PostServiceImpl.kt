@@ -63,7 +63,7 @@ class PostServiceImpl(
             BoardRecentPostDto(
                 postId = savedPost.identifier,
                 title = savedPost.title,
-                createdAt = savedPost.createdAt ?: java.time.LocalDateTime.now()
+                createdAt = savedPost.createdAt ?: java.time.Instant.now()
             )
         )
         val event = PostCreatedEvent(
@@ -106,7 +106,7 @@ class PostServiceImpl(
                 BoardRecentPostDto(
                     postId = updatedPost.identifier,
                     title = updatedPost.title,
-                    createdAt = updatedPost.createdAt ?: java.time.LocalDateTime.now()
+                    createdAt = updatedPost.createdAt ?: java.time.Instant.now()
                 )
             )
         }
@@ -144,7 +144,7 @@ class PostServiceImpl(
                 BoardRecentPostDto(
                     postId = it.identifier,
                     title = it.title,
-                    createdAt = it.createdAt ?: java.time.LocalDateTime.now()
+                    createdAt = it.createdAt ?: java.time.Instant.now()
                 )
             }
         )

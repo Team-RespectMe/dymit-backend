@@ -11,7 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskSubmissionComme
 import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventIconType
 import net.noti_me.dymit.dymit_backend_api.common.event.feed.FeedEventResourceType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskSubmissionCommentBroadcastEventTest : BehaviorSpec({
 
@@ -31,7 +31,7 @@ internal class TaskSubmissionCommentBroadcastEventTest : BehaviorSpec({
                     title = "주차 과제",
                     description = "설명",
                     attachments = emptyList(),
-                    expireAt = LocalDateTime.now().plusDays(2)
+                    expireAt = Instant.now().plusSeconds(2L * 86400L)
                 )
                 val commenter = StudyGroupMember(
                     groupId = group.id!!,

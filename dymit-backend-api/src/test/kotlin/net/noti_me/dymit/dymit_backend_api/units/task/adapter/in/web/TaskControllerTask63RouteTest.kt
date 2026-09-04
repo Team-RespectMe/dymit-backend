@@ -17,7 +17,7 @@ import org.bson.types.ObjectId
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskControllerTask63RouteTest : BehaviorSpec() {
 
@@ -47,7 +47,7 @@ internal class TaskControllerTask63RouteTest : BehaviorSpec() {
                         title = "상세 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2),
+                        expireAt = Instant.now().plusSeconds(2L * 86400L),
                         submittedAssigneeCount = 1,
                         notSubmittedAssigneeCount = 0,
                         assignees = emptyList(),

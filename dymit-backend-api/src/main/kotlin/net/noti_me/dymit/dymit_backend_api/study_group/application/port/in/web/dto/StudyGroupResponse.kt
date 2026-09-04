@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command.S
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.MemberPreview
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupSummaryDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 응답 DTO",
@@ -21,7 +21,7 @@ class StudyGroupResponse(
     @Schema(description = "스터디 그룹 소유자 정보")
     val owner: String,
     @Schema(description = "스터디 그룹 개설 일시")
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
     @Schema(description = "스터디 그룹 초대 코드 정보")
     val inviteCodeVo: InviteCodeVo,
 ): BaseResponse() {

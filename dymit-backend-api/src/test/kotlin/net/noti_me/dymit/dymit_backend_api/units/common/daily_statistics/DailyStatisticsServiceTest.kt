@@ -20,12 +20,14 @@ import net.noti_me.dymit.dymit_backend_api.task.application.TaskDailyStatisticsS
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.daily_statistics.CollectTaskDailyStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.daily_statistics.TaskDailyStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.daily_statistics.TaskDailyStatisticsPort
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 internal class DailyStatisticsServiceTest : BehaviorSpec({
     val date = LocalDate.of(2026, 7, 28)
-    val start = date.atTime(4, 0)
-    val end = date.plusDays(1).atTime(4, 0)
+    val start = date.atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
+    val end = date.plusDays(1).atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
 
     Given("daily-statistics collectors") {
         val memberPort = mockk<MemberDailyStatisticsPort>()

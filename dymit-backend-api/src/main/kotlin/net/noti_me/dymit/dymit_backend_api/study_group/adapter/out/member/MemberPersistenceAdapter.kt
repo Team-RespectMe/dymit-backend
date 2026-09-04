@@ -8,8 +8,6 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Date
 
 @Component
@@ -34,7 +32,7 @@ class MemberPersistenceAdapter(
             roles = (member["roles"] as? Collection<*>)
                 .orEmpty()
                 .mapNotNull { it?.toString() },
-            createdAt = member["createdAt"].toLocalDateTime()
+            createdAt = member["createdAt"].toInstant()
         )
     }
 
@@ -46,11 +44,10 @@ class MemberPersistenceAdapter(
             else -> StudyGroupProfileImageType.PRESET
         }
 
-    private fun Any?.toLocalDateTime(): LocalDateTime? =
+    private fun Any?.toInstant(): Instant? =
         when (this) {
-            is LocalDateTime -> this
-            is Date -> LocalDateTime.ofInstant(toInstant(), ZoneId.systemDefault())
-            is Instant -> LocalDateTime.ofInstant(this, ZoneId.systemDefault())
+            is Instant -> this
+            is Date -> toInstant()
             else -> null
         }
 

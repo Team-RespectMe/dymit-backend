@@ -10,7 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.domain.events.StudyGroupO
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileImageType
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.random.Random
 
 
@@ -45,8 +45,8 @@ class StudyGroup(
     recentSchedule: RecentScheduleVo? = null,
     recentPost: RecentPostVo? = null,
     blacklists: Set<BlackList> = setOf(),
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ): BaseAggregateRoot<StudyGroup>(
     id = id,
@@ -204,8 +204,8 @@ class StudyGroup(
 
         this.inviteCode = InviteCodeVo(
             code = inviteCode,
-            createdAt = LocalDateTime.now(),
-            expireAt = LocalDateTime.now().plusDays(30)
+            createdAt = Instant.now(),
+            expireAt = Instant.now().plusSeconds(30 * 24 * 60 * 60)
         )
     }
 
@@ -226,7 +226,7 @@ class StudyGroup(
             this.recentSchedule = newSchedule
             return
         }
-        val now = LocalDateTime.now()
+        val now = Instant.now()
 
         if (
             newSchedule!!.scheduleAt.isAfter(now) &&

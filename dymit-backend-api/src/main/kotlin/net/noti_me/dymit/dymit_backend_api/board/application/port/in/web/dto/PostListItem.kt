@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v1.dto.PostDto
 import net.noti_me.dymit.dymit_backend_api.board.domain.Post
+import java.time.Instant
 
 @Schema(description = "게시글 목록 아이템 DTO")
 class PostListItem(
@@ -11,7 +12,7 @@ class PostListItem(
     val boardId : String,
     val title: String,
     val writer: WriterVo,
-    val createdAt: String,
+    val createdAt: Instant,
     val commentCount: Long,
 ) {
 
@@ -27,7 +28,7 @@ class PostListItem(
                     nickname = dto.writer.nickname,
                     image = dto.writer.image
                 ),
-                createdAt = dto.createdAt.toString(),
+                createdAt = dto.createdAt,
                 commentCount = dto.commentCount
             )
         }

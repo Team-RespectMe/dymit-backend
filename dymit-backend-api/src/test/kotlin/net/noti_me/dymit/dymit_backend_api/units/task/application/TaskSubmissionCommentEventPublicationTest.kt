@@ -25,7 +25,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskSubmissionCommentCreatedEvent
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskSubmissionCommentEventPublicationTest : BehaviorSpec() {
 
@@ -69,7 +69,7 @@ internal class TaskSubmissionCommentEventPublicationTest : BehaviorSpec() {
                         title = "주차 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val submission = TaskSubmission(
                         id = submissionId,
@@ -153,7 +153,7 @@ internal class TaskSubmissionCommentEventPublicationTest : BehaviorSpec() {
                         title = "주차 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(2)
+                        expireAt = Instant.now().plusSeconds(2L * 86400L)
                     )
                     val submission = TaskSubmission(
                         id = submissionId,

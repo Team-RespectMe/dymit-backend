@@ -6,7 +6,7 @@ import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Represents a member's participation in a study schedule.
@@ -24,7 +24,7 @@ class ScheduleParticipant(
     val scheduleId: ObjectId = ObjectId.get(),
     @Indexed(name = "schedule_participant_member_id_idx")
     val memberId: ObjectId = ObjectId.get(),
-    val createdAt: LocalDateTime? = null,
+    val createdAt: Instant? = null,
 ) {
     val identifier: String
         get() = id.toHexString()

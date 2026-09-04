@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.v2.dto.PostDtoV2
 import net.noti_me.dymit.dymit_backend_api.board.application.port.`in`.web.dto.WriterVo
 import net.noti_me.dymit.dymit_backend_api.board.domain.PostCategory
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 게시글 V2 생성/수정 응답 DTO입니다.
@@ -17,7 +17,7 @@ class PostCommandResponseV2(
     val writer: WriterVo,
     val category: PostCategory,
     val scheduleId: String?,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {

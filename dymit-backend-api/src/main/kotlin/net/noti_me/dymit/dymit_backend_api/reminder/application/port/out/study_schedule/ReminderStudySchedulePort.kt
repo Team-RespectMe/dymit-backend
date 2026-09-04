@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.reminder.application.port.`out`.stud
 
 import net.noti_me.dymit.dymit_backend_api.reminder.application.port.`out`.study_schedule.dto.ReminderStudyScheduleDto
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Reminder 모듈이 일정과 참여자를 조회하는 출력 포트입니다.
@@ -19,8 +19,8 @@ interface ReminderStudySchedulePort {
      * @return Reminder 소유 일정 DTO 목록
      */
     fun findByScheduleAtBetween(
-        start: LocalDateTime,
-        end: LocalDateTime,
+        start: Instant,
+        end: Instant,
         cursor: ObjectId?,
         limit: Int
     ): List<ReminderStudyScheduleDto>

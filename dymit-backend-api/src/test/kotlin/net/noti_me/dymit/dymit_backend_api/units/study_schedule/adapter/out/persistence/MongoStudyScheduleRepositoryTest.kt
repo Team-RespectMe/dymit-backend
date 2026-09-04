@@ -12,7 +12,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class MongoStudyScheduleRepositoryTest : BehaviorSpec() {
 
@@ -43,8 +43,8 @@ internal class MongoStudyScheduleRepositoryTest : BehaviorSpec() {
         given("기간 및 커서 기반 일정 조회 요청이 주어지면") {
             `when`("저장소가 조회하면") {
                 then("기간, 커서, 정렬, 제한 조건을 MongoTemplate에 전달한다") {
-                    val start = LocalDateTime.of(2026, 7, 26, 0, 0)
-                    val end = start.plusHours(15)
+                    val start = Instant.parse("2026-07-26T00:00:00Z")
+                    val end = start.plusSeconds(15L * 3600L)
                     val cursor = ObjectId.get()
                     val query = slot<Query>()
                     every { mongoTemplate.find(capture(query), StudySchedule::class.java) } returns emptyList()

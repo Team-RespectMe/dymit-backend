@@ -34,7 +34,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.task.application.port.out.persistence.TaskSubmissionRepository
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
-import java.time.LocalDateTime
+import java.time.Instant
 
 internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
 
@@ -74,7 +74,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                         title = "체크 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(1),
+                        expireAt = Instant.now().plusSeconds(1L * 86400L),
                         submissionType = TaskSubmissionType.CHECK
                     )
                     val assignee = TaskAssignee(
@@ -141,7 +141,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                         title = "체크 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(1),
+                        expireAt = Instant.now().plusSeconds(1L * 86400L),
                         submissionType = TaskSubmissionType.CHECK
                     )
 
@@ -184,7 +184,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                         title = "체크 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(1),
+                        expireAt = Instant.now().plusSeconds(1L * 86400L),
                         submissionType = TaskSubmissionType.CHECK
                     )
                     val assignee = TaskAssignee(
@@ -237,7 +237,7 @@ internal class TaskSubmissionTask63BehaviorTest : BehaviorSpec() {
                         title = "산출물 과제",
                         description = "설명",
                         attachments = emptyList(),
-                        expireAt = LocalDateTime.now().plusDays(1),
+                        expireAt = Instant.now().plusSeconds(1L * 86400L),
                         submissionType = TaskSubmissionType.OUTPUT
                     )
                     val submission = TaskSubmission(

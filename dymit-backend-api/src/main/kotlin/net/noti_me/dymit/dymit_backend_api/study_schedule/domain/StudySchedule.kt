@@ -13,7 +13,7 @@ import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document(collection="study_schedules")
 @TypeAlias("net.noti_me.dymit.dymit_backend_api.domain.study_schedule.StudySchedule")
@@ -25,11 +25,11 @@ class StudySchedule(
     description: String = "",
     location: ScheduleLocation = ScheduleLocation(),
     val session: Long = 1,
-    scheduleAt: LocalDateTime,
+    scheduleAt: Instant,
     roles: MutableSet<ScheduleRole> = mutableSetOf(),
     nrParticipant: Long = 0L,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false
 ) : BaseAggregateRoot<StudySchedule>(
     id = id,
@@ -49,7 +49,7 @@ class StudySchedule(
         private set
 
     @Indexed(name = "study_schedule_schedule_at_idx")
-    var scheduleAt: LocalDateTime = scheduleAt
+    var scheduleAt: Instant = scheduleAt
         private set
 
     var location: ScheduleLocation = location
@@ -62,7 +62,7 @@ class StudySchedule(
         private set
 
     fun isExpired(): Boolean {
-        return scheduleAt.isBefore(LocalDateTime.now())
+        return scheduleAt.isBefore(Instant.now())
     }
 
     fun changeTitle(
@@ -104,7 +104,7 @@ class StudySchedule(
     fun changeScheduleAt(
         requester: StudyGroupMember,
         group: StudyGroup,
-        newScheduleAt: LocalDateTime
+        newScheduleAt: Instant
     ) {
         checkDefaultPermissions(requester)
 
@@ -112,11 +112,11 @@ class StudySchedule(
             return
         }
 
-        if ( newScheduleAt.isBefore(LocalDateTime.now()) ) {
+        if ( newScheduleAt.isBefore(Instant.now()) ) {
             throw IllegalArgumentException("새로운 시간은 현재 시간 이후여야 합니다.")
         }
 
-        if ( scheduleAt.isBefore(LocalDateTime.now()) ) {
+        if ( scheduleAt.isBefore(Instant.now()) ) {
             throw IllegalArgumentException("이미 지나간 일정의 예정 시간은 변경할 수 없습니다.")
         }
 

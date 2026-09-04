@@ -4,7 +4,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.ou
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentCursor
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Dymit 스터디 모집글 목록 요약 DTO입니다.
@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 data class DymitStudyRecruitmentSummaryDto(
     val id: String,
     val groupId: String? = null,
-    val createdAt: LocalDateTime?,
+    val createdAt: Instant?,
     val title: String,
     val purpose: String,
     val writerId: String,

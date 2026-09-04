@@ -2,7 +2,8 @@ package net.noti_me.dymit.dymit_backend_api.common.logging.discord
 
 import net.noti_me.dymit.dymit_backend_api.common.daily_statistics.DailyStatisticsReportDocument
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -45,11 +46,13 @@ class DailyStatisticsReportFormatter {
         )
     }
 
-    private fun formatDateTime(value: LocalDateTime): String {
+    private fun formatDateTime(value: Instant): String {
         return DATE_TIME_FORMATTER.format(value)
     }
 
     private companion object {
-        val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.of("Asia/Seoul"))
     }
 }

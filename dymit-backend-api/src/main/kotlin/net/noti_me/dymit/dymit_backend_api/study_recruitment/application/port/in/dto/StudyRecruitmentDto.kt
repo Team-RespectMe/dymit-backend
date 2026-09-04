@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 입력 포트가 제공하는 스터디 모집 정보입니다.
@@ -24,6 +24,6 @@ data class StudyRecruitmentDto(
     val content: String,
     val url: String,
     val writer: String,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?
+    val createdAt: Instant?,
+    val updatedAt: Instant?
 )

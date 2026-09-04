@@ -6,7 +6,6 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.Contact
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import java.time.Instant
-import java.time.LocalDateTime
 
 /**
  * Dymit 스터디 모집글 입력 포트 DTO입니다.
@@ -49,8 +48,8 @@ data class DymitStudyRecruitmentDto(
     val studyFormat: String,
     val contact: Contact,
     val tags: List<String>,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?,
+    val createdAt: Instant?,
+    val updatedAt: Instant?,
     val bumpAt: Instant = Instant.EPOCH,
     val bumpCount: Int = 0
 ) {

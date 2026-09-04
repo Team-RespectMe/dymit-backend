@@ -20,12 +20,13 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.ZoneId
 
 internal class DailyStatisticsDuplicateKeyRetryTest : BehaviorSpec({
     val date = LocalDate.of(2026, 7, 28)
-    val start = date.atTime(4, 0)
-    val end = date.plusDays(1).atTime(4, 0)
+    val start = date.atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
+    val end = date.plusDays(1).atTime(4, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
 
     Given("a concurrent first daily-statistics insert") {
         When("the member upsert gets a duplicate key") {

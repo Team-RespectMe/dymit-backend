@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.we
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(
     description = "스터디 그룹 일정 미리보기 응답 DTO",
@@ -13,7 +13,7 @@ class GroupSchedulePreviewResponse(
     @Schema(description = "스터디 그룹 일정 제목")
     val title: String,
     @Schema(description = "스터디 예징 일시")
-    val scheduleAt: LocalDateTime,
+    val scheduleAt: Instant,
     @Schema(description = "스터디 예정 장소")
     val location: String = "",
 ): BaseResponse() {

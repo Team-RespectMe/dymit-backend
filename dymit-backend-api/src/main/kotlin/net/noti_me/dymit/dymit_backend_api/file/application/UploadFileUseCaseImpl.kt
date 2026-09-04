@@ -15,8 +15,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.time.ZoneId
 import java.util.Locale
 import java.util.UUID
 
@@ -262,7 +263,7 @@ class UploadFileUseCaseImpl(
      */
     private fun createStorageSpec(extension: String?): StorageSpec {
         val uuid = UUID.randomUUID().toString().replace("-", "").uppercase(Locale.ROOT)
-        val timestamp = LocalDateTime.now().format(formatter)
+        val timestamp = formatter.format(Instant.now().atZone(ZoneId.systemDefault()))
         val baseName = "${uuid}_${timestamp}"
         val storedFileName = if ( extension.isNullOrBlank() ) {
             baseName

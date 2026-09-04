@@ -47,7 +47,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.time.Instant
-import java.time.LocalDateTime
+
 
 internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
 
@@ -451,8 +451,8 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
             title = "오픈채팅"
         ),
         tags = listOf("kotlin"),
-        createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
-        updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0)
+        createdAt = Instant.parse("2026-08-17T09:00:00Z"),
+        updatedAt = Instant.parse("2026-08-17T09:00:00Z")
     )
 
     private fun createSummaryDto(
@@ -460,7 +460,7 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         cursor: String = id
     ) = DymitStudyRecruitmentSummaryDto(
         id = id,
-        createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
+        createdAt = Instant.parse("2026-08-17T09:00:00Z"),
         title = "테스트 그룹",
         purpose = "목적",
         writerId = memberInfo.memberId,
@@ -480,7 +480,7 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
         content = "외부 본문",
         url = "https://example.com/$id",
         writer = "외부 작성자",
-        createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
-        updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0)
+        createdAt = Instant.parse("2026-08-17T09:00:00Z"),
+        updatedAt = Instant.parse("2026-08-17T09:00:00Z")
     )
 }

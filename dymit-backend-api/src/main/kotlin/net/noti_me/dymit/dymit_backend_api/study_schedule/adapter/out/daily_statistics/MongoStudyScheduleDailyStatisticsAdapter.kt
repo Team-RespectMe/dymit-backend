@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Collects schedule metrics and atomically writes only the study-schedule section.
@@ -43,8 +43,8 @@ class MongoStudyScheduleDailyStatisticsAdapter(
      * Counts schedule creations and distinct members with participant records created in the window.
      */
     override fun collect(
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime
+        windowStart: Instant,
+        windowEnd: Instant
     ): StudyScheduleDailyStatisticsDto {
         val windowQuery = Query(Criteria.where("createdAt").gte(windowStart).lt(windowEnd))
         val participantMemberIds = mongoTemplate.findDistinct(
@@ -67,11 +67,11 @@ class MongoStudyScheduleDailyStatisticsAdapter(
      */
     override fun upsert(
         statisticDate: LocalDate,
-        windowStart: LocalDateTime,
-        windowEnd: LocalDateTime,
+        windowStart: Instant,
+        windowEnd: Instant,
         statistics: StudyScheduleDailyStatisticsDto
     ): Boolean {
-        val now = LocalDateTime.now(DailyStatisticsWindowCalculator.KOREA_ZONE)
+        val now = Instant.now()
         val query = Query(Criteria.where("statisticDate").`is`(statisticDate))
         val update = Update()
             .set("studySchedule.createdCount", statistics.createdCount)

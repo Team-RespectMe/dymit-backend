@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.server_notice.application.port.`in`.
 
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.server_notice.domain.Link
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "서버 공지 요약 응답 DTO")
 data class ServerNoticeSummaryResponse(
@@ -15,7 +15,7 @@ data class ServerNoticeSummaryResponse(
     @Schema(description = "공지 링크, 공지 탭을 클릭하는 경우 해당 페이지로 이동, nullable", example = "{\"url\": \"https://example.com/notice-details\"}")
     val link: Link ? = null,
     @Schema(description = "공지 생성 일시", example = "2024-06-15T14:30:00")
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ) {
 
     companion object {

@@ -2,20 +2,20 @@ package net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.d
 
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
-import java.time.LocalDateTime
+import java.time.Instant
 
 class StudyScheduleSummaryDto(
     val id: String,
     val groupId: String,
     val title: String,
     val description: String,
-    val scheduleAt: LocalDateTime,
+    val scheduleAt: Instant,
     val session:Long,
     val location: LocationVo,
     var participantCount: Long = 0L,
     val roles: List<ScheduleRoleDto> = emptyList(),
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: Instant,
+    val updatedAt: Instant
 ) {
 
     companion object {
@@ -31,8 +31,8 @@ class StudyScheduleSummaryDto(
                 location = LocationVo.from(entity.location),
                 participantCount = entity.nrParticipant,
                 roles = entity.roles.map { ScheduleRoleDto.from(it) },
-                createdAt = entity.createdAt ?: LocalDateTime.now(),
-                updatedAt = entity.updatedAt ?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: Instant.now(),
+                updatedAt = entity.updatedAt ?: Instant.now()
             )
         }
 

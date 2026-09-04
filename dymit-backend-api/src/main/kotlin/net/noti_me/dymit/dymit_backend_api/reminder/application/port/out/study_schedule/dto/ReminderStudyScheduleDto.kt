@@ -1,7 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.reminder.application.port.`out`.study_schedule.dto
 
 import org.bson.types.ObjectId
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * Reminder가 일정 알림을 생성할 때 사용하는 일정 정보입니다.
@@ -17,5 +17,5 @@ data class ReminderStudyScheduleDto(
     val groupId: ObjectId,
     val title: String,
     val session: Long,
-    val scheduleAt: LocalDateTime
+    val scheduleAt: Instant
 )

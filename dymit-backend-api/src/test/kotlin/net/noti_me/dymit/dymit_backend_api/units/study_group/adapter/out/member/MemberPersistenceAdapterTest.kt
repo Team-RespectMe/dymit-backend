@@ -9,7 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupProfileI
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.ZoneId
 import java.util.Date
 
@@ -23,7 +23,7 @@ internal class MemberPersistenceAdapterTest : BehaviorSpec() {
             `when`("the study-group adapter loads it") {
                 then("it maps only study-group-owned port DTO fields") {
                     val id = ObjectId.get()
-                    val createdAt = LocalDateTime.of(2026, 7, 26, 9, 0)
+                    val createdAt = Instant.parse("2026-07-26T09:00:00Z")
                     val member = Document()
                         .append("_id", id)
                         .append("nickname", "member")

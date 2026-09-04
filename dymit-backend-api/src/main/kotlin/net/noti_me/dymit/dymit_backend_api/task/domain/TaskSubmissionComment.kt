@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.common.BaseAggregateRoot
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 과제 제출 댓글 엔티티입니다.
@@ -20,8 +20,8 @@ class TaskSubmissionComment(
     @Indexed(name = "task_submission_comment_writer_id_idx")
     val writerId: ObjectId,
     content: String,
-    createdAt: LocalDateTime? = null,
-    updatedAt: LocalDateTime? = null,
+    createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     id: ObjectId? = null
 ) : BaseAggregateRoot<TaskSubmissionComment>(

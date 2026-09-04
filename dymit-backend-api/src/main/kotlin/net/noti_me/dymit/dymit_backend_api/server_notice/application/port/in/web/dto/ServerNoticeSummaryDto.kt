@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.server_notice.application.port.`in`.
 
 import net.noti_me.dymit.dymit_backend_api.server_notice.domain.Link
 import net.noti_me.dymit.dymit_backend_api.server_notice.domain.ServerNotice
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 서버 공지 요약 정보를 애플리케이션 경계 밖으로 전달하는 DTO입니다.
@@ -18,7 +18,7 @@ class ServerNoticeSummaryDto(
     val category: String,
     val title: String,
     val link : Link? = null,
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
 ) {
 
     companion object {
@@ -35,7 +35,7 @@ class ServerNoticeSummaryDto(
                 category = entity.category,
                 title = entity.title,
                 link = entity.link,
-                createdAt = entity.createdAt ?: LocalDateTime.now()
+                createdAt = entity.createdAt ?: Instant.now()
             )
         }
     }

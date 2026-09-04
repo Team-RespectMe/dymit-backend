@@ -5,7 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.command.S
 import net.noti_me.dymit.dymit_backend_api.study_group.application.dto.query.StudyGroupMemberQueryDto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "스터디 그룹 멤버 응답 DTO")
 data class StudyGroupMemberResponse(
@@ -18,7 +18,7 @@ data class StudyGroupMemberResponse(
     @field:Schema(description = "스터디 그룹 멤버 역할")
     val role: GroupMemberRole,
     @field:Schema(description = "스터디 그룹 멤버 생성 시간")
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ): BaseResponse() {
 
     companion object {

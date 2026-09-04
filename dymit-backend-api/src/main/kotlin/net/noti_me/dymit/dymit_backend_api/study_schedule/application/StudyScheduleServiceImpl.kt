@@ -35,7 +35,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.out.p
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 class StudyScheduleServiceImpl(
@@ -163,7 +163,7 @@ class StudyScheduleServiceImpl(
         }
 
         // 스케줄이 미래의 시점이라면 레코드 자체를 삭제한다.
-        if (schedule.scheduleAt.isAfter(LocalDateTime.now())) {
+        if (schedule.scheduleAt.isAfter(Instant.now())) {
             studyScheduleRepository.delete(schedule)
             val event = createScheduleCanceledEvent(group, schedule)
             eventPublisher.publishEvent(event)
@@ -249,7 +249,7 @@ class StudyScheduleServiceImpl(
         val scheduleMember = ScheduleParticipant(
             memberId = ObjectId(memberInfo.memberId),
             scheduleId = ObjectId(scheduleId),
-            createdAt = LocalDateTime.now(DailyStatisticsWindowCalculator.KOREA_ZONE)
+            createdAt = Instant.now()
         )
 
         val participant = participantRepository.save(scheduleMember)
@@ -286,7 +286,7 @@ class StudyScheduleServiceImpl(
             throw ForbiddenException(message = "해당 그룹의 스케줄이 아닙니다.")
         }
 
-        if (schedule.scheduleAt.isBefore(LocalDateTime.now())) {
+        if (schedule.scheduleAt.isBefore(Instant.now())) {
             throw BadRequestException(message = "과거의 스케줄은 참여를 취소할 수 없습니다.")
         }
 

@@ -1,8 +1,7 @@
 package net.noti_me.dymit.dymit_backend_api.common.daily_statistics
 
-import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 
@@ -11,8 +10,8 @@ import java.time.ZoneId
  */
 data class DailyStatisticsWindow(
     val statisticDate: LocalDate,
-    val windowStart: LocalDateTime,
-    val windowEnd: LocalDateTime
+    val windowStart: Instant,
+    val windowEnd: Instant
 )
 
 /**
@@ -31,8 +30,8 @@ object DailyStatisticsWindowCalculator {
         val statisticDate = currentDate.minusDays(1)
         return DailyStatisticsWindow(
             statisticDate = statisticDate,
-            windowStart = statisticDate.atTime(BOUNDARY_TIME),
-            windowEnd = currentDate.atTime(BOUNDARY_TIME)
+            windowStart = statisticDate.atTime(BOUNDARY_TIME).atZone(KOREA_ZONE).toInstant(),
+            windowEnd = currentDate.atTime(BOUNDARY_TIME).atZone(KOREA_ZONE).toInstant()
         )
     }
 }

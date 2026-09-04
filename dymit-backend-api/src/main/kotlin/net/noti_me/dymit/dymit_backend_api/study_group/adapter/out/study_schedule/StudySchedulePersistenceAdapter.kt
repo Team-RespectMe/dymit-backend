@@ -10,8 +10,6 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Date
 
 @Component
@@ -27,7 +25,7 @@ class StudySchedulePersistenceAdapter(
         }
 
         val groupObjectIds = groupIds.map(::ObjectId)
-        val now = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())
+        val now = Date.from(Instant.now())
         val query = Query(
             Criteria.where("groupId").`in`(groupObjectIds)
                 .and("scheduleAt").gt(now)
@@ -43,7 +41,7 @@ class StudySchedulePersistenceAdapter(
     private fun toScheduleData(document: Document): StudyGroupScheduleData? {
         val id = document.getObjectId("_id") ?: return null
         val groupId = document.getObjectId("groupId") ?: return null
-        val scheduleAt = document["scheduleAt"].toLocalDateTime() ?: return null
+        val scheduleAt = document["scheduleAt"].toInstant() ?: return null
         return StudyGroupScheduleData(
             id = id.toHexString(),
             groupId = groupId.toHexString(),
@@ -53,11 +51,10 @@ class StudySchedulePersistenceAdapter(
         )
     }
 
-    private fun Any?.toLocalDateTime(): LocalDateTime? =
+    private fun Any?.toInstant(): Instant? =
         when (this) {
-            is LocalDateTime -> this
-            is Date -> LocalDateTime.ofInstant(toInstant(), ZoneId.systemDefault())
-            is Instant -> LocalDateTime.ofInstant(this, ZoneId.systemDefault())
+            is Instant -> this
+            is Date -> toInstant()
             else -> null
         }
 

@@ -11,7 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`out`.file.dto.
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "과제 응답")
 class TaskResponse(
@@ -30,7 +30,7 @@ class TaskResponse(
     @field:Schema(description = "첨부 목록")
     val attachments: List<TaskAttachmentResponse>,
     @field:Schema(description = "마감 시각")
-    val expireAt: LocalDateTime,
+    val expireAt: Instant,
     @field:Schema(description = "제출 완료 대상자 수")
     val submittedAssigneeCount: Int,
     @field:Schema(description = "미제출 대상자 수")

@@ -2,7 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.StudyRecruitmentDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 스터디 모집 목록 응답입니다.
@@ -25,8 +25,8 @@ data class StudyRecruitmentResponse(
     val content: String,
     val url: String,
     val writer: String,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?
+    val createdAt: Instant?,
+    val updatedAt: Instant?
 ) {
 
     companion object {

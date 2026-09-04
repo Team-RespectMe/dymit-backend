@@ -10,8 +10,6 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Date
 
 /**
@@ -49,7 +47,7 @@ class LoadStudyGroupPostAdapter(
     private fun Document.toPostPreview(): PostPreview? {
         val postId = getObjectId("_id")?.toHexString() ?: return null
         val title = getString("title") ?: return null
-        val createdAt = this["createdAt"].toLocalDateTime() ?: return null
+        val createdAt = this["createdAt"].toInstant() ?: return null
         return PostPreview(
             postId = postId,
             title = title,
@@ -57,11 +55,10 @@ class LoadStudyGroupPostAdapter(
         )
     }
 
-    private fun Any?.toLocalDateTime(): LocalDateTime? =
+    private fun Any?.toInstant(): Instant? =
         when (this) {
-            is LocalDateTime -> this
-            is Date -> LocalDateTime.ofInstant(toInstant(), ZoneId.systemDefault())
-            is Instant -> LocalDateTime.ofInstant(this, ZoneId.systemDefault())
+            is Instant -> this
+            is Date -> toInstant()
             else -> null
         }
 

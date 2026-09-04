@@ -1,13 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto
 
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleComment
-import java.time.LocalDateTime
+import java.time.Instant
 
 class ScheduleCommentDto(
     val id: String,
     val scheduleId: String,
     val writer: ScheduleCommentWriterDto,
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
     val content: String
 ) {
 
@@ -21,7 +21,7 @@ class ScheduleCommentDto(
                     nickname = entity.writer.nickname,
                     image = entity.writer.image
                 ),
-                createdAt = entity.createdAt ?: LocalDateTime.now(),
+                createdAt = entity.createdAt ?: Instant.now(),
                 content = entity.content
             )
         }

@@ -43,7 +43,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRe
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.types.ObjectId
 import java.time.Instant
-import java.time.LocalDateTime
+
 
 internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
 
@@ -434,8 +434,8 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 title = "오픈채팅"
             ),
             tags = emptyList(),
-            createdAt = LocalDateTime.of(2026, 8, 17, 9, 0),
-            updatedAt = LocalDateTime.of(2026, 8, 17, 9, 0),
+            createdAt = Instant.parse("2026-08-17T09:00:00Z"),
+            updatedAt = Instant.parse("2026-08-17T09:00:00Z"),
             isDeleted = false,
             bumpAt = Instant.parse("2026-08-17T00:00:00Z"),
             bumpCount = 0

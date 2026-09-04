@@ -3,7 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.report.application.port.`in`.web.dto
 import net.noti_me.dymit.dymit_backend_api.common.response.BaseResponse
 import net.noti_me.dymit.dymit_backend_api.report.domain.ProcessStatus
 import net.noti_me.dymit.dymit_backend_api.report.domain.ReportedResource
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 신고 정보 응답 DTO
@@ -16,7 +16,7 @@ data class ReportResponse(
     val title: String,
     val content: String,
     val status: ProcessStatus,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 ): BaseResponse() {
     companion object {
         /**

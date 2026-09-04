@@ -1,6 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.admin.application.port.`in`.web.dto
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 관리자에게 제공하는 일별 회원 현황입니다.
@@ -16,5 +16,5 @@ data class DailyMemberStatusDto(
     val activeMemberCount: Long,
     val leaveMemberCount: Long,
     val totalMemberCount: Long,
-    val recordedAt: LocalDateTime
+    val recordedAt: Instant
 )

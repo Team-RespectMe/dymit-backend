@@ -6,7 +6,7 @@ import net.noti_me.dymit.dymit_backend_api.task.domain.TaskAssigneeStatus
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 과제 조회 DTO입니다.
@@ -18,7 +18,7 @@ data class TaskDto(
     val title: String,
     val description: String,
     val attachments: List<TaskAttachmentDto>,
-    val expireAt: LocalDateTime,
+    val expireAt: Instant,
     val submittedAssigneeCount: Int,
     val notSubmittedAssigneeCount: Int,
     val assignees: List<TaskAssigneeSummaryDto>,
@@ -60,7 +60,7 @@ data class TaskSubmissionDto(
     val title: String,
     val content: String,
     val attachments: List<TaskSubmissionAttachmentDto>,
-    val createdAt: LocalDateTime?
+    val createdAt: Instant?
 )
 
 /**
@@ -87,7 +87,7 @@ data class TaskSubmissionCommentDto(
     val writerProfileImageUrl: String,
     val writerProfileImageType: TaskProfileImageType,
     val content: String,
-    val createdAt: LocalDateTime?
+    val createdAt: Instant?
 )
 
 /**
