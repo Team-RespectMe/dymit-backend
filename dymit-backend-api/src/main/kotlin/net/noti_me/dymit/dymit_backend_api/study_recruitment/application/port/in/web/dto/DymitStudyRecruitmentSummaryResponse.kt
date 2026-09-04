@@ -10,6 +10,7 @@ import java.time.LocalDateTime
  * Dymit 스터디 모집글 목록 요약 응답입니다.
  *
  * @property id 모집글 식별자
+ * @property groupId 그룹 식별자
  * @property createdAt 생성 시각
  * @property title 모집글 제목
  * @property purpose 스터디 목적
@@ -23,6 +24,7 @@ import java.time.LocalDateTime
  */
 data class DymitStudyRecruitmentSummaryResponse(
     val id: String,
+    val groupId: String?,
     val createdAt: LocalDateTime?,
     val title: String,
     val purpose: String,
@@ -49,6 +51,7 @@ data class DymitStudyRecruitmentSummaryResponse(
         ): DymitStudyRecruitmentSummaryResponse {
             return DymitStudyRecruitmentSummaryResponse(
                 id = recruitment.id,
+                groupId = recruitment.groupId,
                 createdAt = recruitment.createdAt,
                 title = recruitment.title,
                 purpose = recruitment.purpose,

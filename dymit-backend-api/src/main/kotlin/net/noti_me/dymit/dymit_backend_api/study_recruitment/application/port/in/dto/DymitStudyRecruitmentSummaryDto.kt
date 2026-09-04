@@ -10,6 +10,7 @@ import java.time.LocalDateTime
  * Dymit 스터디 모집글 목록 요약 DTO입니다.
  *
  * @property id 모집글 식별자
+ * @property groupId 그룹 식별자
  * @property createdAt 생성 시각
  * @property title 모집글 제목
  * @property purpose 스터디 목적
@@ -23,6 +24,7 @@ import java.time.LocalDateTime
  */
 data class DymitStudyRecruitmentSummaryDto(
     val id: String,
+    val groupId: String? = null,
     val createdAt: LocalDateTime?,
     val title: String,
     val purpose: String,
@@ -48,6 +50,7 @@ data class DymitStudyRecruitmentSummaryDto(
         ): DymitStudyRecruitmentSummaryDto {
             return DymitStudyRecruitmentSummaryDto(
                 id = recruitment.id.toHexString(),
+                groupId = recruitment.groupId.toHexString(),
                 createdAt = recruitment.createdAt,
                 title = recruitment.title,
                 purpose = recruitment.purpose,
@@ -76,6 +79,7 @@ data class DymitStudyRecruitmentSummaryDto(
         ): DymitStudyRecruitmentSummaryDto {
             return DymitStudyRecruitmentSummaryDto(
                 id = recruitment.id,
+                groupId = null,
                 createdAt = recruitment.createdAt,
                 title = recruitment.title,
                 purpose = "",

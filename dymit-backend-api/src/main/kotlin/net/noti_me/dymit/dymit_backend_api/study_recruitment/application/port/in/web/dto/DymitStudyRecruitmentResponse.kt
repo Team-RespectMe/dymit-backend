@@ -32,8 +32,8 @@ import java.time.LocalDateTime
  */
 data class DymitStudyRecruitmentResponse(
     val id: String,
-    val writer: DymitStudyRecruitmentWriterResponse,
     val groupId: String,
+    val writer: DymitStudyRecruitmentWriterResponse,
     val type: StudyRecruitmentType,
     val title: String,
     val description: String,

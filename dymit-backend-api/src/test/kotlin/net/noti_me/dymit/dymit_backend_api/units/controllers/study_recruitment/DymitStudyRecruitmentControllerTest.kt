@@ -376,9 +376,8 @@ internal class DymitStudyRecruitmentControllerTest : BehaviorSpec() {
 
             Then("v2 목록 응답 DTO는 summary 필드만 가진다") {
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldContainAll
-                    listOf("id", "createdAt", "title", "purpose", "writerId", "tags", "type", "status", "content", "url")
+                    listOf("id", "groupId", "createdAt", "title", "purpose", "writerId", "tags", "type", "status", "content", "url")
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "writer"
-                DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "groupId"
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "description"
                 DymitStudyRecruitmentSummaryResponse::class.java.declaredFields.map { it.name } shouldNotContain "contact"
             }
