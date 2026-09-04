@@ -122,10 +122,10 @@ internal class MongoDymitStudyRecruitmentAdapterTest : BehaviorSpec() {
             When("복합 커서로 조회하면") {
                 adapter.loadByCursorOrderByBumpAtDesc(cursor, 5, writerId)
 
-                Then("bumpAt 내림차순과 _id 보조 정렬, 커서 OR 조건, 작성자 필터를 사용한다") {
+                Then("updatedAt 내림차순과 _id 보조 정렬, 커서 OR 조건, 작성자 필터를 사용한다") {
                     val queryObject = query.captured.queryObject
                     query.captured.limit shouldBe 5
-                    query.captured.sortObject shouldBe Document("bumpAt", -1).append("_id", -1)
+                    query.captured.sortObject shouldBe Document("updatedAt", -1).append("_id", -1)
                     queryObject["_class"] shouldBe DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
                     queryObject["type"] shouldBe StudyRecruitmentType.DYMIT
                     queryObject["isDeleted"] shouldBe false
@@ -165,7 +165,7 @@ internal class MongoDymitStudyRecruitmentAdapterTest : BehaviorSpec() {
                     verify(exactly = 1) {
                         mongoTemplate.findOne(any(), Document::class.java, "study_recruitments")
                     }
-                    query.captured.sortObject shouldBe Document("bumpAt", -1).append("_id", -1)
+                    query.captured.sortObject shouldBe Document("updatedAt", -1).append("_id", -1)
                     (query.captured.queryObject["\$or"] as List<*>).size shouldBe 3
                 }
             }

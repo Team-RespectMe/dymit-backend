@@ -103,7 +103,9 @@ class MongoDymitStudyRecruitmentAdapter(
             .limit(size)
             .with(
                 Sort.by(
-                    Sort.Order.desc("bumpAt"),
+                    Sort.Order.desc("updatedAt"),
+                    // TODO: 프론트엔드에서 bump 기능을 포함하면 bumpAt 기준으로 변경
+                    // Sort.Order.desc("bumpAt"),
                     Sort.Order.desc("_id")
                 )
             )
