@@ -10,6 +10,7 @@ import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.CheckDymitStudyRecruitmentExistenceService
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.CheckDymitStudyRecruitmentExistenceCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentExistenceDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.CheckDymitStudyRecruitmentExistencePort
 import org.bson.types.ObjectId
 
@@ -58,6 +59,26 @@ internal class CheckDymitStudyRecruitmentExistenceServiceTest : BehaviorSpec() {
                         )
                     )
                 }.message shouldBe "올바르지 않은 그룹 식별자입니다."
+            }
+        }
+
+        Given("모집글이 없는 유효한 그룹 식별자") {
+            val groupId = ObjectId.get()
+            every { existencePort.existsActiveByGroupId(groupId) } returns false
+
+            Then("전체 조회를 실패시키지 않고 해당 그룹의 exists를 false로 반환한다") {
+                val result = service.execute(
+                    CheckDymitStudyRecruitmentExistenceCommand(
+                        groupIds = listOf(groupId.toHexString())
+                    )
+                )
+
+                result shouldBe listOf(
+                    DymitStudyRecruitmentExistenceDto(
+                        groupId = groupId.toHexString(),
+                        exists = false
+                    )
+                )
             }
         }
     }
