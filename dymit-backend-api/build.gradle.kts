@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "net.noti-me.dymit-backend"
-version = "0.15.6"
+version = "0.15.7"
 val kotestVersion = "5.9.1"
 val springDocVersion = "2.8.9"
 val dockerExecutable = providers.environmentVariable("DYMIT_DOCKER_EXECUTABLE")

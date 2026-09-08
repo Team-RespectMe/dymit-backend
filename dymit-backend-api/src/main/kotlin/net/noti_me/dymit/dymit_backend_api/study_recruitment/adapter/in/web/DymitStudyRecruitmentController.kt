@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.UnauthorizedException
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.BumpStudyRecruitmentUseCase
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.CheckDymitStudyRecruitmentExistenceUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.CreateDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.DeleteDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.GetDymitStudyRecruitmentListUseCase
@@ -16,6 +17,7 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.QueryStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.UpdateDymitStudyRecruitmentUseCase
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.BumpStudyRecruitmentCommand
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.CheckDymitStudyRecruitmentExistenceCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DeleteDymitStudyRecruitmentCommand
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.DymitStudyRecruitmentSummaryDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentListQuery
@@ -26,8 +28,10 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentSummaryResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentRequestType
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentExistenceResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.UpdateStudyRecruitmentRequest
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -48,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController
  * @property updateUseCase 모집글 수정 유즈케이스
  * @property bumpUseCase 모집글 끌어올리기 유즈케이스
  * @property deleteUseCase 모집글 삭제 유즈케이스
+ * @property checkExistenceUseCase 그룹별 모집글 존재 여부 확인 유즈케이스
  */
 @RestController
 class DymitStudyRecruitmentController(
@@ -57,7 +62,8 @@ class DymitStudyRecruitmentController(
     private val getUseCase: GetDymitStudyRecruitmentUseCase,
     private val updateUseCase: UpdateDymitStudyRecruitmentUseCase,
     private val deleteUseCase: DeleteDymitStudyRecruitmentUseCase,
-    private val bumpUseCase: BumpStudyRecruitmentUseCase? = null
+    private val bumpUseCase: BumpStudyRecruitmentUseCase? = null,
+    private val checkExistenceUseCase: CheckDymitStudyRecruitmentExistenceUseCase? = null
 ) : DymitStudyRecruitmentApi {
 
     /**
@@ -79,7 +85,7 @@ class DymitStudyRecruitmentController(
      * Dymit 모집글 목록 조회 요청을 처리합니다.
      */
     @GetMapping
-    @PermitAll
+    @RolesAllowed("MEMBER", "ADMIN")
     override fun getStudyRecruitmentList(
         @RequestParam(required = false) cursor: String?,
         @RequestParam(defaultValue = "20") size: Int,
@@ -113,6 +119,22 @@ class DymitStudyRecruitmentController(
                 put("mine") { mine }
             }
         )
+    }
+
+    /**
+     * 그룹별 Dymit 모집글 존재 여부 조회 요청을 처리합니다.
+     */
+    @GetMapping("/existence")
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getStudyRecruitmentExistence(
+        @RequestParam(name = "groupIds") groupIds: List<String>
+    ): List<StudyRecruitmentExistenceResponse> {
+        val useCase = requireNotNull(checkExistenceUseCase) {
+            "모집글 존재 여부 확인 유즈케이스가 구성되지 않았습니다."
+        }
+        return useCase.execute(
+            CheckDymitStudyRecruitmentExistenceCommand(groupIds)
+        ).map(StudyRecruitmentExistenceResponse::from)
     }
 
     private fun queryDymitRecruitments(

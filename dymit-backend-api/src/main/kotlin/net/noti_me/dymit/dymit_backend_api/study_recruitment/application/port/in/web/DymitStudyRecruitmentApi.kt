@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.CreateStudyRecruitmentRequest
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.DymitStudyRecruitmentSummaryResponse
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentExistenceResponse
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.StudyRecruitmentRequestType
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.web.dto.UpdateStudyRecruitmentRequest
 import org.springframework.web.bind.annotation.RequestMapping
@@ -55,6 +56,18 @@ interface DymitStudyRecruitmentApi {
         mine: Boolean = false,
         memberInfo: MemberInfo? = null
     ): ListResponse<DymitStudyRecruitmentSummaryResponse>
+
+    /**
+     * 그룹별 Dymit 스터디 모집글 존재 여부를 조회합니다.
+     *
+     * @param groupIds 확인할 그룹 식별자 목록
+     * @return 그룹별 모집글 존재 여부 목록
+     */
+    @ApiResponse(responseCode = "200", description = "그룹별 모집글 존재 여부를 조회했습니다.")
+    @Operation(method = "GET", summary = "그룹별 Dymit 스터디 모집글 존재 여부 조회")
+    fun getStudyRecruitmentExistence(
+        groupIds: List<String>
+    ): List<StudyRecruitmentExistenceResponse>
 
     /**
      * Dymit 스터디 모집글을 단건 조회합니다.
