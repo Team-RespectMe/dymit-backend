@@ -1,12 +1,14 @@
 package net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.out.persistence.mongo
 
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.CheckDymitStudyRecruitmentExistencePort
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.DeleteExpiredDymitStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.LoadDymitStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.SaveDymitStudyRecruitmentPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentCursor
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.dto.DymitStudyRecruitmentPersistenceDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitment
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.DymitStudyRecruitmentStatus
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.domain.StudyRecruitmentType
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -28,7 +30,8 @@ class MongoDymitStudyRecruitmentAdapter(
     private val mongoTemplate: MongoTemplate
 ) : LoadDymitStudyRecruitmentPort,
     SaveDymitStudyRecruitmentPort,
-    CheckDymitStudyRecruitmentExistencePort {
+    CheckDymitStudyRecruitmentExistencePort,
+    DeleteExpiredDymitStudyRecruitmentPort {
 
     /**
      * 그룹의 미삭제 Dymit 모집글 존재 여부를 조회합니다.
@@ -132,6 +135,22 @@ class MongoDymitStudyRecruitmentAdapter(
             "Dymit 모집글은 DYMIT 유형으로만 저장할 수 있습니다."
         }
         return DymitStudyRecruitmentPersistenceDto.from(mongoTemplate.save(recruitment))
+    }
+
+    /**
+     * 기준 시각 이전에 수정된 Dymit 모집 종료 글을 MongoDB에서 물리 삭제합니다.
+     *
+     * @param cutoff 삭제 대상에 포함되는 마지막 수정 시각
+     * @return 삭제된 모집글 수
+     */
+    override fun deleteExpired(cutoff: Instant): Long {
+        val query = Query()
+            .addCriteria(Criteria.where("_class").`is`(DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS))
+            .addCriteria(Criteria.where("type").`is`(StudyRecruitmentType.DYMIT))
+            .addCriteria(Criteria.where("recruitment_status").ne(DymitStudyRecruitmentStatus.RECRUITING))
+            .addCriteria(Criteria.where("updatedAt").lte(cutoff))
+
+        return mongoTemplate.remove(query, COLLECTION_NAME).deletedCount
     }
 
     private fun Document.toPersistenceDto(): DymitStudyRecruitmentPersistenceDto {

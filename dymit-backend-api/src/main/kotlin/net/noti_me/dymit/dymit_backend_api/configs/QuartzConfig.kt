@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.member.adapter.`in`.daily_statistics.
 import net.noti_me.dymit.dymit_backend_api.reminder.application.usecase.DailyScheduleReminderJob
 import net.noti_me.dymit.dymit_backend_api.reminder.application.usecase.HourlyScheduleReminderJob
 import net.noti_me.dymit.dymit_backend_api.study_group.adapter.`in`.daily_statistics.StudyGroupDailyStatisticsJob
+import net.noti_me.dymit.dymit_backend_api.study_recruitment.adapter.`in`.quartz.DymitStudyRecruitmentCleanupJob
 import net.noti_me.dymit.dymit_backend_api.study_schedule.adapter.`in`.daily_statistics.StudyScheduleDailyStatisticsJob
 import net.noti_me.dymit.dymit_backend_api.task.adapter.`in`.daily_statistics.TaskDailyStatisticsJob
 import org.quartz.CronScheduleBuilder
@@ -101,6 +102,19 @@ class QuartzConfig {
     }
 
     /**
+     * 만료된 Dymit 스터디 모집글 정리 작업을 등록합니다.
+     *
+     * @return Quartz 작업 상세 정보
+     */
+    @Bean
+    fun dymitStudyRecruitmentCleanupJobDetail(): JobDetail {
+        return JobBuilder.newJob(DymitStudyRecruitmentCleanupJob::class.java)
+            .withIdentity("dymitStudyRecruitmentCleanupJob")
+            .storeDurably()
+            .build()
+    }
+
+    /**
      * Runs member statistics every day at 04:00 Asia/Seoul.
      */
     @Bean
@@ -181,6 +195,26 @@ class QuartzConfig {
         return TriggerBuilder.newTrigger()
             .forJob(jobDetail)
             .withIdentity("hourlyScheduleReminderTrigger")
+            .withSchedule(
+                CronScheduleBuilder.cronSchedule("0 0 * * * ?")
+                    .inTimeZone(TimeZone.getTimeZone("Asia/Seoul"))
+            )
+            .build()
+    }
+
+    /**
+     * 만료된 Dymit 스터디 모집글 정리 작업을 서울 시간 기준 매 정각 실행합니다.
+     *
+     * @param jobDetail 만료 모집글 정리 작업 상세 정보
+     * @return 매 정각 실행되는 Quartz 트리거
+     */
+    @Bean
+    fun dymitStudyRecruitmentCleanupTrigger(
+        @Qualifier("dymitStudyRecruitmentCleanupJobDetail") jobDetail: JobDetail
+    ): Trigger {
+        return TriggerBuilder.newTrigger()
+            .forJob(jobDetail)
+            .withIdentity("dymitStudyRecruitmentCleanupTrigger")
             .withSchedule(
                 CronScheduleBuilder.cronSchedule("0 0 * * * ?")
                     .inTimeZone(TimeZone.getTimeZone("Asia/Seoul"))
