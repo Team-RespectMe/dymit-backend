@@ -1,10 +1,13 @@
 package net.noti_me.dymit.dymit_backend_api.task.application
 
 import net.noti_me.dymit.dymit_backend_api.task.application.TaskServiceSupport
+import net.noti_me.dymit.dymit_backend_api.task.application.TaskUseCaseObjectIdParser
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleCanceledEventDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleModifiedEventDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipatedEventDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipationCanceledEventDto
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskCreatedBroadcastEvent
+import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
@@ -20,6 +23,22 @@ class TaskScheduleSyncEventHandler(
     private val support: TaskServiceSupport,
     private val eventPublisher: ApplicationEventPublisher
 ) {
+
+    /**
+     * 일정 시작 시각 변경을 연결된 사전 과제의 마감 시각에 반영합니다.
+     *
+     * @param event 일정 수정 이벤트
+     */
+    @EventListener
+    fun onScheduleModified(event: StudyScheduleModifiedEventDto) {
+        val scheduleId = TaskUseCaseObjectIdParser.parse(event.schedule.id, "scheduleId")
+        support.loadTasksBySchedule(scheduleId, TaskType.PRE)
+            .filter { it.expireAt != event.scheduleAt }
+            .forEach { task ->
+                task.synchronizeExpireAt(event.scheduleAt)
+                support.saveTask(task)
+            }
+    }
 
     /**
      * 일정 참여 시 기존 사전 과제 대상자를 동기화하고 신규 참여자에게 과제 알림을 발행합니다.

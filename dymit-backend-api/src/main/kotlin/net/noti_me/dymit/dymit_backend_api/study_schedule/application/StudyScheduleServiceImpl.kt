@@ -139,6 +139,7 @@ class StudyScheduleServiceImpl(
                 StudyScheduleModifiedEventDto(
                     group = group.toEventDto(),
                     schedule = schedule.toEventDto(),
+                    scheduleAt = schedule.scheduleAt,
                     memberIds = participants.map(ObjectId::toHexString)
                 )
             )

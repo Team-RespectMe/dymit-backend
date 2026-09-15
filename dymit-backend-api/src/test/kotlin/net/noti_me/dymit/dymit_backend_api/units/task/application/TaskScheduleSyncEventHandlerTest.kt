@@ -17,6 +17,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventMemberDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleEventScheduleDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipatedEventDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleModifiedEventDto
 import net.noti_me.dymit.dymit_backend_api.task.domain.Task
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskType
 import net.noti_me.dymit.dymit_backend_api.task.domain.event.TaskCreatedBroadcastEvent
@@ -93,6 +94,45 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
                 }
             }
         }
+
+        Given("일정 수정 이벤트 핸들러") {
+            When("연결된 사전 과제와 사후 과제가 함께 있으면") {
+                Then("사전 과제의 마감 시각만 새 일정 시작 시각으로 동기화한다") {
+                    val scheduleId = ObjectId.get()
+                    val oldExpireAt = Instant.parse("2026-09-20T00:00:00Z")
+                    val newScheduleAt = Instant.parse("2026-09-21T00:00:00Z")
+                    val preTask = createTask(scheduleId, "사전 과제", oldExpireAt)
+                    val postTask = createTask(scheduleId, "사후 과제", oldExpireAt, TaskType.POST)
+                    val event = StudyScheduleModifiedEventDto(
+                        group = StudyScheduleEventGroupDto(
+                            id = ObjectId.get().toHexString(),
+                            ownerId = ObjectId.get().toHexString(),
+                            name = "스터디",
+                            profileImageThumbnail = ""
+                        ),
+                        schedule = StudyScheduleEventScheduleDto(
+                            id = scheduleId.toHexString(),
+                            groupId = ObjectId.get().toHexString(),
+                            session = 1L
+                        ),
+                        scheduleAt = newScheduleAt,
+                        memberIds = emptyList()
+                    )
+
+                    every { support.loadTasksBySchedule(scheduleId, TaskType.PRE) } returns listOf(preTask)
+                    every { support.saveTask(preTask) } returns preTask
+
+                    handler.onScheduleModified(event)
+
+                    preTask.expireAt shouldBe newScheduleAt
+                    postTask.expireAt shouldBe oldExpireAt
+                    verify(exactly = 1) { support.loadTasksBySchedule(scheduleId, TaskType.PRE) }
+                    verify(exactly = 0) { support.loadTasksBySchedule(scheduleId, TaskType.POST) }
+                    verify(exactly = 1) { support.saveTask(preTask) }
+                    verify(exactly = 0) { support.saveTask(postTask) }
+                }
+            }
+        }
     }
 
     private fun createGroup(name: String): StudyGroup {
@@ -142,15 +182,20 @@ internal class TaskScheduleSyncEventHandlerTest : BehaviorSpec() {
         )
     }
 
-    private fun createTask(scheduleId: ObjectId, title: String): Task {
+    private fun createTask(
+        scheduleId: ObjectId,
+        title: String,
+        expireAt: Instant = Instant.now().plusSeconds(2L * 86400L),
+        type: TaskType = TaskType.PRE
+    ): Task {
         return Task(
             id = ObjectId.get(),
             relatedScheduleId = scheduleId,
-            type = TaskType.PRE,
+            type = type,
             title = title,
             description = "설명",
             attachments = emptyList(),
-            expireAt = Instant.now().plusSeconds(2L * 86400L)
+            expireAt = expireAt
         )
     }
 }

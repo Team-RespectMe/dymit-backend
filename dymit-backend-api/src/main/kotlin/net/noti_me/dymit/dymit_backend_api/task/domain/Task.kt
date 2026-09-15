@@ -66,6 +66,16 @@ class Task(
     }
 
     /**
+     * 연결된 일정 시작 시각에 맞춰 과제 마감 시각을 동기화합니다.
+     *
+     * @param scheduleAt 연결된 일정의 시작 시각
+     */
+    fun synchronizeExpireAt(scheduleAt: Instant) {
+        expireAt = scheduleAt
+        modified = true
+    }
+
+    /**
      * 과제 내용을 수정합니다.
      */
     fun update(
