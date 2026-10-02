@@ -6,6 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
@@ -90,18 +91,22 @@ internal class StudyScheduleModifiedEventPublicationTest : BehaviorSpec() {
                 every { participantRepository.getByScheduleId(scheduleId) } returns emptyList()
                 justRun { eventPublisher.publishEvent(any()) }
 
-                service.updateSchedule(
-                    memberInfo = memberInfo,
-                    groupId = groupId.toHexString(),
-                    scheduleId = scheduleId.toHexString(),
-                    command = StudyScheduleUpdateCommand(
-                        title = schedule.title,
-                        description = schedule.description,
-                        scheduleAt = updatedScheduleAt,
-                        location = LocationVo.from(schedule.location),
-                        roles = emptyList()
+                val now = Instant.parse("2026-09-19T00:00:00Z")
+                mockkStatic(Instant::class) {
+                    every { Instant.now() } returns now
+                    service.updateSchedule(
+                        memberInfo = memberInfo,
+                        groupId = groupId.toHexString(),
+                        scheduleId = scheduleId.toHexString(),
+                        command = StudyScheduleUpdateCommand(
+                            title = schedule.title,
+                            description = schedule.description,
+                            scheduleAt = updatedScheduleAt,
+                            location = LocationVo.from(schedule.location),
+                            roles = emptyList()
+                        )
                     )
-                )
+                }
 
                 verify(exactly = 1) { eventPublisher.publishEvent(capture(eventSlot)) }
                 val event = eventSlot.captured as StudyScheduleModifiedEventDto
