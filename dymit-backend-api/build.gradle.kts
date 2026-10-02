@@ -20,7 +20,7 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
-}
+}1
 
 repositories {
 	mavenCentral()

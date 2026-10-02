@@ -21,7 +21,6 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.core.convert.NoOpDbRefResolver
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 import org.springframework.data.mongodb.core.query.Query
-import com.mongodb.client.result.DeleteResult
 import java.time.Instant
 
 internal class MongoDymitStudyRecruitmentAdapterTest : BehaviorSpec() {
@@ -138,28 +137,6 @@ internal class MongoDymitStudyRecruitmentAdapterTest : BehaviorSpec() {
                     (tieBreaker[0] as Document)["bumpAt"] shouldBe cursor.bumpAt
                     (tieBreaker[1] as Document)["_id"] shouldBe Document("\$lt", cursor.recruitmentId)
                     (orConditions[2] as Document)["bumpAt"] shouldBe Document("\$exists", false)
-                }
-            }
-        }
-
-        Given("만료된 Dymit 모집글 물리 삭제") {
-            val cutoff = Instant.parse("2026-09-14T03:00:00Z")
-            val query = slot<Query>()
-            val deleteResult = mockk<DeleteResult>()
-            every { deleteResult.deletedCount } returns 2L
-            every { mongoTemplate.remove(capture(query), "study_recruitments") } returns deleteResult
-
-            When("24시간 경계 시각을 cutoff로 삭제하면") {
-                val deletedCount = adapter.deleteExpired(cutoff)
-
-                Then("cutoff 시각을 포함하고 DYMIT 및 모집 중이 아닌 조건으로 물리 삭제한다") {
-                    deletedCount shouldBe 2L
-                    val queryObject = query.captured.queryObject
-                    queryObject["_class"] shouldBe DYMIT_STUDY_RECRUITMENT_TYPE_ALIAS
-                    queryObject["type"] shouldBe StudyRecruitmentType.DYMIT
-                    queryObject["recruitment_status"] shouldBe Document("\$ne", DymitStudyRecruitmentStatus.RECRUITING)
-                    queryObject["updatedAt"] shouldBe Document("\$lte", cutoff)
-                    verify(exactly = 1) { mongoTemplate.remove(any<Query>(), "study_recruitments") }
                 }
             }
         }

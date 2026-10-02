@@ -9,11 +9,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
-import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
-import net.noti_me.dymit.dymit_backend_api.member.domain.MemberRole
+import net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity
+import net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.BumpStudyRecruitmentService
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.CreateDymitStudyRecruitmentService
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.DeleteDymitStudyRecruitmentService
@@ -27,7 +27,6 @@ import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`i
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentListQuery
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.GetDymitStudyRecruitmentQuery
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.`in`.dto.UpdateDymitStudyRecruitmentCommand
-import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.CheckDymitStudyRecruitmentExistencePort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.member.LoadDymitStudyRecruitmentMemberPort
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.member.dto.DymitStudyRecruitmentMemberDto
 import net.noti_me.dymit.dymit_backend_api.study_recruitment.application.port.out.persistence.LoadDymitStudyRecruitmentPort
@@ -51,13 +50,11 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
     private val saveRecruitmentPort = mockk<SaveDymitStudyRecruitmentPort>()
     private val loadRecruitmentPort = mockk<LoadDymitStudyRecruitmentPort>()
     private val loadMemberPort = mockk<LoadDymitStudyRecruitmentMemberPort>()
-    private val checkRecruitmentExistencePort = mockk<CheckDymitStudyRecruitmentExistencePort>()
 
     private val createService = CreateDymitStudyRecruitmentService(
         loadStudyGroupPort,
         saveRecruitmentPort,
-        loadMemberPort,
-        checkRecruitmentExistencePort
+        loadMemberPort
     )
     private val getService = GetDymitStudyRecruitmentService(loadRecruitmentPort, loadMemberPort)
     private val getListService = GetDymitStudyRecruitmentListService(loadRecruitmentPort)
@@ -66,11 +63,7 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
     private val bumpService = BumpStudyRecruitmentService(loadRecruitmentPort, loadStudyGroupPort, saveRecruitmentPort, loadMemberPort)
 
     private val ownerId = ObjectId.get()
-    private val memberInfo = MemberInfo(
-        memberId = ownerId.toHexString(),
-        nickname = "owner",
-        roles = listOf(MemberRole.ROLE_MEMBER.name)
-    )
+    private val memberInfo = createMemberInfo(createMemberEntity(id = ownerId, nickname = "owner"))
     private val groupDto = DymitStudyRecruitmentStudyGroupDto(
         id = ObjectId.get(),
         ownerId = ownerId,
@@ -105,7 +98,6 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
 
             Then("생성 시 command title과 writer, DYMIT type, 기본 tags를 저장하고 그룹 소유자만 허용한다") {
                 val captured = slot<DymitStudyRecruitment>()
-                every { checkRecruitmentExistencePort.existsActiveByGroupId(groupDto.id) } returns false
                 every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
                 every { saveRecruitmentPort.save(capture(captured)) } answers { persistenceDtoFrom(captured.captured) }
                 every { loadMemberPort.loadById(ownerId) } returns writerMemberDto
@@ -125,7 +117,6 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
             }
 
             Then("그룹 소유자가 아니면 생성할 수 없다") {
-                every { checkRecruitmentExistencePort.existsActiveByGroupId(groupDto.id) } returns false
                 every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
 
                 shouldThrow<ForbiddenException> {
@@ -133,20 +124,23 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 }.message shouldBe "그룹 소유자만 모집글을 생성할 수 있습니다."
             }
 
-            Then("동일 그룹의 미삭제 모집글이 이미 있으면 ConflictException을 던지고 저장하지 않는다") {
-                every { checkRecruitmentExistencePort.existsActiveByGroupId(groupDto.id) } returns true
+            Then("같은 그룹에 모집 중 글을 반복 생성하여 각각 저장한다") {
+                val saved = mutableListOf<DymitStudyRecruitment>()
+                every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
+                every { saveRecruitmentPort.save(capture(saved)) } answers { persistenceDtoFrom(firstArg()) }
+                every { loadMemberPort.loadById(ownerId) } returns writerMemberDto
 
-                shouldThrow<ConflictException> {
-                    createService.execute(memberInfo, command)
-                }.message shouldBe "해당 스터디 그룹의 모집 공고가 이미 존재합니다."
+                val results = List(3) { createService.execute(memberInfo, command) }
 
-                verify(exactly = 0) { loadStudyGroupPort.loadById(any()) }
-                verify(exactly = 0) { saveRecruitmentPort.save(any()) }
+                saved.size shouldBe 3
+                saved.all { it.groupId == groupDto.id } shouldBe true
+                saved.all { it.recruitmentStatus == DymitStudyRecruitmentStatus.RECRUITING } shouldBe true
+                results.map { it.id }.distinct().size shouldBe 3
+                verify(exactly = 3) { saveRecruitmentPort.save(any()) }
             }
 
             Then("작성자 회원 정보가 없으면 실패한다") {
                 val captured = slot<DymitStudyRecruitment>()
-                every { checkRecruitmentExistencePort.existsActiveByGroupId(groupDto.id) } returns false
                 every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
                 every { saveRecruitmentPort.save(capture(captured)) } answers { persistenceDtoFrom(captured.captured) }
                 every { loadMemberPort.loadById(ownerId) } returns null
@@ -368,12 +362,45 @@ internal class DymitStudyRecruitmentServiceTest : BehaviorSpec() {
                 result.writerProfileImageUrl shouldBe "https://example.com/profile-thumb.png"
             }
 
+            Then("같은 그룹의 다른 모집 중 글이 있어도 완료 글을 다시 모집 중으로 저장한다") {
+                val active = createPersistenceDto(ObjectId.get())
+                val completed = persistenceDto.copy(recruitmentStatus = DymitStudyRecruitmentStatus.DONE)
+                val stored = mutableMapOf(active.id to active, completed.id to completed)
+                every { loadRecruitmentPort.loadById(any()) } answers { stored[firstArg<ObjectId>()] }
+                every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
+                every { loadMemberPort.loadById(ownerId) } returns writerMemberDto
+                every { saveRecruitmentPort.save(any()) } answers {
+                    persistenceDtoFrom(firstArg()).also { stored[it.id] = it }
+                }
+
+                val result = updateService.execute(
+                    memberInfo,
+                    command.copy(status = DymitStudyRecruitmentStatus.RECRUITING)
+                )
+
+                result.recruitmentStatus shouldBe DymitStudyRecruitmentStatus.RECRUITING
+                stored[recruitmentId]!!.recruitmentStatus shouldBe DymitStudyRecruitmentStatus.RECRUITING
+                stored[active.id] shouldBe active
+                verify(exactly = 1) { loadRecruitmentPort.loadById(recruitmentId) }
+                verify(exactly = 1) { saveRecruitmentPort.save(any()) }
+            }
+
             Then("외부 모집글은 수정 대상이 아니다") {
                 every { loadRecruitmentPort.loadById(recruitmentId) } returns null
 
                 shouldThrow<NotFoundException> {
                     updateService.execute(memberInfo, command)
                 }.message shouldBe "존재하지 않는 Dymit 스터디 모집글입니다."
+            }
+
+            Then("그룹 소유자가 아니면 수정 내용을 저장하지 않는다") {
+                every { loadRecruitmentPort.loadById(recruitmentId) } returns persistenceDto
+                every { loadStudyGroupPort.loadById(groupDto.id) } returns groupDto
+
+                shouldThrow<ForbiddenException> {
+                    updateService.execute(MemberInfo(ObjectId.get().toHexString(), "other", memberInfo.roles), command)
+                }.message shouldBe "그룹 소유자만 모집글을 수정할 수 있습니다."
+                verify(exactly = 0) { saveRecruitmentPort.save(any()) }
             }
 
             Then("수정 후 작성자 회원 정보가 없으면 NotFoundException을 던진다") {
