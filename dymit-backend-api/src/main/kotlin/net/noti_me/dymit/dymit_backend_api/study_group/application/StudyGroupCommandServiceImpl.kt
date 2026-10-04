@@ -227,7 +227,17 @@ class StudyGroupCommandServiceImpl(
             memberId = ObjectId(loginMember.memberId)
         ) ?: throw NotFoundException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
 
-        studyGroupMemberRepository.delete(loginMembership)
+        if (loginMembership.role == GroupMemberRole.MEMBER) {
+            throw ForbiddenException(message = "스터디 그룹 관리자만 멤버를 내보낼 수 있습니다.")
+        }
+        val targetMembership = studyGroupMemberRepository.findByGroupIdAndMemberId(
+            groupId = ObjectId(groupId),
+            memberId = ObjectId(targetMemberId)
+        ) ?: throw NotFoundException(message = "해당 스터디 그룹의 멤버가 아닙니다.")
+        if (targetMembership.role == GroupMemberRole.OWNER) {
+            throw ForbiddenException(message = "스터디 그룹 소유자는 내보낼 수 없습니다.")
+        }
+        studyGroupMemberRepository.delete(targetMembership)
     }
 
     override fun enlistBlacklist(

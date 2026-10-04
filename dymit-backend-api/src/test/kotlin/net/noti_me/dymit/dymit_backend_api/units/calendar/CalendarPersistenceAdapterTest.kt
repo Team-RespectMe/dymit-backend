@@ -68,6 +68,7 @@ internal class CalendarPersistenceAdapterTest : BehaviorSpec() {
                 captured.captured.queryObject.keys shouldBe setOf("groupId", "_id", "scheduleAt", "isDeleted")
                 captured.captured.queryObject["_id"] shouldBe mapOf("${'$'}in" to listOf(schedule.id))
                 participants.captured.queryObject shouldBe org.bson.Document("memberId", memberId)
+                    .append("isDeleted", mapOf("${'$'}ne" to true))
                 participants.captured.limit shouldBe 0
                 captured.captured.sortObject.isEmpty() shouldBe true
                 participants.captured.sortObject.isEmpty() shouldBe true

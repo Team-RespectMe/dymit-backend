@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
+import java.time.Instant
 
 @Repository
 class MongoStudyGroupMemberRepository(
@@ -49,8 +50,20 @@ class MongoStudyGroupMemberRepository(
     }
 
     override fun delete(member: StudyGroupMember): Boolean {
-        val query = Query(Criteria.where("_id").`is`(member.id))
-        return mongoTemplate.remove(query, StudyGroupMember::class.java).deletedCount > 0
+        val id = member.id ?: return false
+        val now = Instant.now()
+        val result = mongoTemplate.updateFirst(
+            Query(
+                Criteria.where("_id").`is`(id)
+                    .and("isDeleted").ne(true)
+            ),
+            Update()
+                .set("isDeleted", true)
+                .set("deletedAt", now)
+                .set("updatedAt", now),
+            StudyGroupMember::class.java
+        )
+        return result.modifiedCount > 0
     }
 
     override fun findByMemberId(
@@ -58,7 +71,7 @@ class MongoStudyGroupMemberRepository(
         cursor: ObjectId?,
         limit: Int
     ): List<StudyGroupMember> {
-        val criteria = Criteria.where("memberId").`is`(memberId)
+        val criteria = Criteria.where("memberId").`is`(memberId).and("isDeleted").ne(true)
         if (cursor != null) {
             criteria.and("_id").lt(cursor)
         }
@@ -72,8 +85,14 @@ class MongoStudyGroupMemberRepository(
         groupId: ObjectId,
         memberId: ObjectId
     ): StudyGroupMember? {
-        val query = Query(Criteria.where("groupId").`is`(groupId).and("memberId").`is`(memberId))
+        val query = Query(Criteria.where("groupId").`is`(groupId)
+            .and("memberId").`is`(memberId)
+            .and("isDeleted").ne(true))
         return mongoTemplate.findOne(query, StudyGroupMember::class.java)
+    }
+
+    override fun findByIdIncludingDeleted(membershipId: ObjectId): StudyGroupMember? {
+        return mongoTemplate.findById(membershipId, StudyGroupMember::class.java)
     }
 
     override fun findByGroupId(groupId: ObjectId): List<StudyGroupMember> {
@@ -86,8 +105,42 @@ class MongoStudyGroupMemberRepository(
         return mongoTemplate.find(query, StudyGroupMember::class.java)
     }
 
+    override fun findByGroupIdIncludingDeleted(
+        groupId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<StudyGroupMember> {
+        val criteria = Criteria.where("groupId").`is`(groupId)
+        if (cursor != null) {
+            criteria.and("_id").gt(cursor)
+        }
+        return mongoTemplate.find(
+            Query(criteria)
+                .with(Sort.by(Sort.Direction.ASC, "_id"))
+                .limit(limit),
+            StudyGroupMember::class.java
+        )
+    }
+
+    override fun findActiveByGroupId(
+        groupId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<StudyGroupMember> {
+        val criteria = Criteria.where("groupId").`is`(groupId).and("isDeleted").ne(true)
+        if (cursor != null) {
+            criteria.and("_id").gt(cursor)
+        }
+        return mongoTemplate.find(
+            Query(criteria)
+                .with(Sort.by(Sort.Direction.ASC, "_id"))
+                .limit(limit),
+            StudyGroupMember::class.java
+        )
+    }
+
     override fun countByGroupId(groupId: ObjectId): Long {
-        val query = Query(Criteria.where("groupId").`is`(groupId))
+        val query = Query(Criteria.where("groupId").`is`(groupId).and("isDeleted").ne(true))
         return mongoTemplate.count(query, StudyGroupMember::class.java)
     }
 
@@ -95,7 +148,7 @@ class MongoStudyGroupMemberRepository(
         groupIds: List<ObjectId>,
         limit: Int
     ): Map<String, List<StudyGroupMember>> {
-        val query = Query(Criteria.where("groupId").`in`(groupIds))
+        val query = Query(Criteria.where("groupId").`in`(groupIds).and("isDeleted").ne(true))
             .with(Sort.by(Sort.Direction.DESC, "createdAt"))
             .limit(limit)
 
@@ -106,7 +159,7 @@ class MongoStudyGroupMemberRepository(
     }
 
     override fun findGroupIdsByMemberId(memberId: ObjectId): List<String> {
-        val query = Query(Criteria.where("memberId").`is`(memberId))
+        val query = Query(Criteria.where("memberId").`is`(memberId).and("isDeleted").ne(true))
         return mongoTemplate.find(query, StudyGroupMember::class.java)
             .map { it.groupId.toHexString() }
             .distinct()
@@ -117,14 +170,18 @@ class MongoStudyGroupMemberRepository(
         memberIds: List<ObjectId>
     ): List<StudyGroupMember> {
         return mongoTemplate.find(
-            Query(Criteria.where("groupId").`is`(groupId).and("memberId").`in`(memberIds)),
+            Query(Criteria.where("groupId").`is`(groupId)
+                .and("memberId").`in`(memberIds)
+                .and("isDeleted").ne(true)),
             StudyGroupMember::class.java
         )
     }
 
     override fun countByMemberIdAndRole(memberId: ObjectId, role: GroupMemberRole): Long {
         return mongoTemplate.count(
-            Query(Criteria.where("memberId").`is`(memberId).and("role").`is`(role)),
+            Query(Criteria.where("memberId").`is`(memberId)
+                .and("role").`is`(role)
+                .and("isDeleted").ne(true)),
             StudyGroupMember::class.java
         )
     }

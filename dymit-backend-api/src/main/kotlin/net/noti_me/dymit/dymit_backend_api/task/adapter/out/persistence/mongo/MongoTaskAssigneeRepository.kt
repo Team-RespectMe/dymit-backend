@@ -6,7 +6,9 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
+import java.time.Instant
 
 /**
  * TaskAssignee Mongo 저장소 구현체입니다.
@@ -28,27 +30,50 @@ class MongoTaskAssigneeRepository(
     }
 
     override fun findByTaskId(taskId: ObjectId): List<TaskAssignee> {
-        val query = Query(Criteria.where("taskId").`is`(taskId))
+        val query = Query(Criteria.where("taskId").`is`(taskId).and("isDeleted").ne(true))
         return mongoTemplate.find(query, TaskAssignee::class.java)
     }
 
     override fun findByTaskIdAndMemberId(taskId: ObjectId, memberId: ObjectId): TaskAssignee? {
-        val query = Query(Criteria.where("taskId").`is`(taskId).and("memberId").`is`(memberId))
+        val query = Query(Criteria.where("taskId").`is`(taskId)
+            .and("memberId").`is`(memberId)
+            .and("isDeleted").ne(true))
         return mongoTemplate.findOne(query, TaskAssignee::class.java)
     }
 
     override fun existsByTaskIdAndMemberId(taskId: ObjectId, memberId: ObjectId): Boolean {
-        val query = Query(Criteria.where("taskId").`is`(taskId).and("memberId").`is`(memberId))
+        val query = Query(Criteria.where("taskId").`is`(taskId)
+            .and("memberId").`is`(memberId)
+            .and("isDeleted").ne(true))
         return mongoTemplate.exists(query, TaskAssignee::class.java)
     }
 
     override fun deleteByTaskId(taskId: ObjectId): Long {
-        val query = Query(Criteria.where("taskId").`is`(taskId))
-        return mongoTemplate.remove(query, TaskAssignee::class.java).deletedCount
+        val now = Instant.now()
+        return mongoTemplate.updateMulti(
+            Query(Criteria.where("taskId").`is`(taskId).and("isDeleted").ne(true)),
+            Update()
+                .set("isDeleted", true)
+                .set("deletedAt", now)
+                .set("updatedAt", now),
+            TaskAssignee::class.java
+        ).modifiedCount
     }
 
     override fun deleteByTaskIdAndMemberId(taskId: ObjectId, memberId: ObjectId): Boolean {
-        val query = Query(Criteria.where("taskId").`is`(taskId).and("memberId").`is`(memberId))
-        return mongoTemplate.remove(query, TaskAssignee::class.java).deletedCount > 0
+        val now = Instant.now()
+        val result = mongoTemplate.updateFirst(
+            Query(
+                Criteria.where("taskId").`is`(taskId)
+                    .and("memberId").`is`(memberId)
+                    .and("isDeleted").ne(true)
+            ),
+            Update()
+                .set("isDeleted", true)
+                .set("deletedAt", now)
+                .set("updatedAt", now),
+            TaskAssignee::class.java
+        )
+        return result.modifiedCount > 0
     }
 }

@@ -29,6 +29,7 @@ class StudySchedulePersistenceAdapter(
         val query = Query(
             Criteria.where("groupId").`in`(groupObjectIds)
                 .and("scheduleAt").gt(now)
+                .and("isDeleted").ne(true)
         ).with(Sort.by(Sort.Direction.ASC, "scheduleAt"))
 
         return buildMap {

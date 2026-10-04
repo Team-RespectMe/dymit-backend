@@ -15,6 +15,36 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web
 interface StudyGroupApi {
 
     /**
+     * 그룹의 전주 누적 통계와 전전주 비율을 조회합니다.
+     */
+    @Operation(summary = "스터디 그룹 통계 조회", description = "그룹 소유자 또는 관리자가 전주까지의 통계를 조회합니다.")
+    fun getGroupStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        groupId: String
+    ): GroupStatisticsResponse
+
+    /**
+     * 그룹 구성원 통계를 페이지 단위로 조회합니다.
+     */
+    @Operation(summary = "스터디 그룹 구성원 통계 목록 조회", description = "그룹 소유자 또는 관리자가 현재 구성원의 통계를 조회합니다.")
+    fun getGroupMemberStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        groupId: String,
+        cursor: String?,
+        size: Int
+    ): ListResponse<MemberStatisticsResponse>
+
+    /**
+     * 구성원 개인 통계를 조회합니다.
+     */
+    @Operation(summary = "스터디 그룹 구성원 통계 조회", description = "본인 또는 그룹 소유자·관리자가 구성원 통계를 조회합니다.")
+    fun getMemberStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        groupId: String,
+        memberId: String
+    ): MemberStatisticsResponse
+
+    /**
      * 스터디 그룹 생성 API
      * @param memberInfo 로그인한 멤버의 정보
      * @param request 스터디 그룹 생성 요청 정보

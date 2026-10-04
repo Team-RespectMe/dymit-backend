@@ -29,6 +29,7 @@ class MongoReminderStudyScheduleAdapter(
         limit: Int
     ): List<ReminderStudyScheduleDto> {
         val criteria = Criteria.where("scheduleAt").gte(start).lt(end)
+            .and("isDeleted").ne(true)
         if (cursor != null) {
             criteria.and("_id").gt(cursor)
         }
@@ -54,7 +55,10 @@ class MongoReminderStudyScheduleAdapter(
      * 일정 참여 문서에서 회원 식별자만 조회합니다.
      */
     override fun getParticipantMemberIds(scheduleId: ObjectId): List<ObjectId> {
-        val query = Query(Criteria.where("scheduleId").`is`(scheduleId))
+        val query = Query(
+            Criteria.where("scheduleId").`is`(scheduleId)
+                .and("isDeleted").ne(true)
+        )
         query.fields().include("memberId")
         return mongoTemplate.find(
             query,

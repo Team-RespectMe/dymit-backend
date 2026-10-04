@@ -25,6 +25,9 @@ class ScheduleParticipant(
     @Indexed(name = "schedule_participant_member_id_idx")
     val memberId: ObjectId = ObjectId.get(),
     val createdAt: Instant? = null,
+    val updatedAt: Instant? = createdAt,
+    val isDeleted: Boolean = false,
+    val deletedAt: Instant? = null
 ) {
     val identifier: String
         get() = id.toHexString()

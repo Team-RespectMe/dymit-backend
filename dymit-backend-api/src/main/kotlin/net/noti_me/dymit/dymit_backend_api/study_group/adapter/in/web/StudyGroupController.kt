@@ -14,6 +14,12 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web.StudyGroupApi
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web.dto.*
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupMemberStatisticsUseCase
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupStatisticsUseCase
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetMemberStatisticsUseCase
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupMemberStatisticsCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupStatisticsCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetMemberStatisticsCommand
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -26,8 +32,72 @@ class StudyGroupController(
     private val studyGroupCommandService: StudyGroupCommandService,
     private val studyGroupQueryService: StudyGroupQueryService,
     private val studyGroupSchedulePort: StudyGroupSchedulePort,
+    private val getGroupStatisticsUseCase: GetGroupStatisticsUseCase,
+    private val getGroupMemberStatisticsUseCase: GetGroupMemberStatisticsUseCase,
+    private val getMemberStatisticsUseCase: GetMemberStatisticsUseCase,
     private val loadStudyGroupPostPort: LoadStudyGroupPostPort = LoadStudyGroupPostPort { null }
 ): StudyGroupApi {
+
+    @GetMapping("/{groupId}/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getGroupStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String
+    ): GroupStatisticsResponse {
+        return GroupStatisticsResponse.from(
+            getGroupStatisticsUseCase.execute(
+                GetGroupStatisticsCommand(memberInfo.memberId, groupId)
+            )
+        )
+    }
+
+    @GetMapping("/{groupId}/statistics/members")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getGroupMemberStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ListResponse<MemberStatisticsResponse> {
+        val page = ListResponse.of(
+            size = size,
+            items = getGroupMemberStatisticsUseCase.execute(
+                GetGroupMemberStatisticsCommand(
+                    requesterId = memberInfo.memberId,
+                    groupId = groupId,
+                    cursor = cursor,
+                    size = size
+                )
+            ),
+            extractors = buildMap {
+                put("cursor") { it.membershipId }
+                put("size") { size }
+            }
+        )
+
+        return ListResponse(
+            count = page.count,
+            items = page.items.map(MemberStatisticsResponse::from),
+            _links = page._links
+        )
+    }
+
+    @GetMapping("/{groupId}/members/{memberId}/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getMemberStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        @PathVariable groupId: String,
+        @PathVariable memberId: String
+    ): MemberStatisticsResponse {
+        return MemberStatisticsResponse.from(
+            getMemberStatisticsUseCase.execute(
+                GetMemberStatisticsCommand(memberInfo.memberId, groupId, memberId)
+            )
+        )
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

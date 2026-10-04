@@ -8,7 +8,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
+import java.time.Instant
 
 /**
  * Task Mongo 저장소 구현체입니다.
@@ -23,11 +25,12 @@ class MongoTaskRepository(
     }
 
     override fun findById(id: ObjectId): Task? {
-        return mongoTemplate.findById(id, Task::class.java)
+        val query = Query(Criteria.where("_id").`is`(id).and("isDeleted").ne(true))
+        return mongoTemplate.findOne(query, Task::class.java)
     }
 
     override fun findByRelatedScheduleId(scheduleId: ObjectId): List<Task> {
-        val query = Query(Criteria.where("relatedScheduleId").`is`(scheduleId))
+        val query = Query(Criteria.where("relatedScheduleId").`is`(scheduleId).and("isDeleted").ne(true))
             .with(Sort.by(Sort.Direction.DESC, "createdAt"))
         return mongoTemplate.find(query, Task::class.java)
     }
@@ -39,6 +42,7 @@ class MongoTaskRepository(
         val query = Query(
             Criteria.where("relatedScheduleId").`is`(scheduleId)
                 .and("type").`is`(type)
+                .and("isDeleted").ne(true)
         )
         return mongoTemplate.find(query, Task::class.java)
     }
@@ -47,14 +51,22 @@ class MongoTaskRepository(
         if ( scheduleIds.isEmpty() ) {
             return emptyList()
         }
-        val query = Query(Criteria.where("relatedScheduleId").`in`(scheduleIds))
+        val query = Query(Criteria.where("relatedScheduleId").`in`(scheduleIds).and("isDeleted").ne(true))
             .with(Sort.by(Sort.Direction.DESC, "createdAt"))
         return mongoTemplate.find(query, Task::class.java)
     }
 
     override fun deleteById(id: ObjectId): Boolean {
-        val query = Query(Criteria.where("_id").`is`(id))
-        return mongoTemplate.remove(query, Task::class.java).deletedCount > 0
+        val now = Instant.now()
+        val result = mongoTemplate.updateFirst(
+            Query(Criteria.where("_id").`is`(id).and("isDeleted").ne(true)),
+            Update()
+                .set("isDeleted", true)
+                .set("deletedAt", now)
+                .set("updatedAt", now),
+            Task::class.java
+        )
+        return result.modifiedCount > 0
     }
 
     override fun findAttachedFileIds(fileIds: List<ObjectId>): Set<ObjectId> {

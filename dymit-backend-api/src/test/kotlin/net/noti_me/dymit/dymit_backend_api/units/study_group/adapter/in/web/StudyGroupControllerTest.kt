@@ -37,6 +37,9 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
         commandService,
         queryService,
         schedulePort,
+        mockk(),
+        mockk(),
+        mockk(),
         loadStudyGroupPostPort
     )
 

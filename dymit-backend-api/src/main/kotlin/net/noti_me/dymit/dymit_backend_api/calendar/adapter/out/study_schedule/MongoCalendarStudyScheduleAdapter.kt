@@ -41,7 +41,10 @@ class MongoCalendarStudyScheduleAdapter(
         }
 
         val participatedScheduleIds = mongoTemplate.find(
-            Query(Criteria.where("memberId").`is`(ObjectId(memberId))),
+            Query(
+                Criteria.where("memberId").`is`(ObjectId(memberId))
+                    .and("isDeleted").ne(true)
+            ),
             ScheduleParticipant::class.java
         ).map { it.scheduleId }.distinct()
         if (participatedScheduleIds.isEmpty()) {

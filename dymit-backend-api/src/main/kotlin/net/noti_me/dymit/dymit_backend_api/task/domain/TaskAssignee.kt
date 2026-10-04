@@ -19,15 +19,21 @@ class TaskAssignee(
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
     isDeleted: Boolean = false,
-    id: ObjectId? = null
+    id: ObjectId? = null,
+    deletedAt: Instant? = null,
+    statusHistory: List<TaskAssigneeStatusChange> = emptyList()
 ) : BaseAggregateRoot<TaskAssignee>(
     id = id,
     createdAt = createdAt,
     updatedAt = updatedAt,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    deletedAt = deletedAt
 ) {
 
     var status: TaskAssigneeStatus = status
+        private set
+
+    var statusHistory: MutableList<TaskAssigneeStatusChange> = statusHistory.toMutableList()
         private set
 
     /**
@@ -37,7 +43,14 @@ class TaskAssignee(
         if ( status == TaskAssigneeStatus.SUBMITTED ) {
             return
         }
+        appendLegacyBaselineIfNecessary()
         status = TaskAssigneeStatus.SUBMITTED
+        statusHistory.add(
+            TaskAssigneeStatusChange(
+                status = TaskAssigneeStatus.SUBMITTED,
+                changedAt = Instant.now()
+            )
+        )
         modified = true
     }
 
@@ -48,7 +61,45 @@ class TaskAssignee(
         if ( status == TaskAssigneeStatus.NOT_SUBMITTED ) {
             return
         }
+        appendLegacyBaselineIfNecessary()
         status = TaskAssigneeStatus.NOT_SUBMITTED
+        statusHistory.add(
+            TaskAssigneeStatusChange(
+                status = TaskAssigneeStatus.NOT_SUBMITTED,
+                changedAt = Instant.now()
+            )
+        )
         modified = true
+    }
+
+    /**
+     * 지정 시각 직전의 제출 상태를 반환합니다.
+     *
+     * @param cutoff 배타적 조회 상한
+     * @return 상한 직전의 제출 상태
+     */
+    fun statusAt(cutoff: Instant): TaskAssigneeStatus {
+        return statusHistory.withIndex()
+            .filter { it.value.changedAt < cutoff }
+            .maxWithOrNull(compareBy({ it.value.changedAt }, { it.index }))
+            ?.value
+            ?.status
+            ?: if (statusHistory.isEmpty() && updatedAt?.let { it < cutoff } == true) {
+                status
+            } else {
+                TaskAssigneeStatus.NOT_SUBMITTED
+            }
+    }
+
+    private fun appendLegacyBaselineIfNecessary() {
+        if (statusHistory.isNotEmpty()) {
+            return
+        }
+        statusHistory.add(
+            TaskAssigneeStatusChange(
+                status = status,
+                changedAt = updatedAt ?: createdAt ?: Instant.EPOCH
+            )
+        )
     }
 }

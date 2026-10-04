@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.stereotype.Repository
@@ -25,27 +26,40 @@ class MongoStudyScheduleRepository(
     }
 
     override fun delete(schedule: StudySchedule): Boolean {
-        return mongoTemplate.remove(schedule).deletedCount > 0
+        val id = schedule.id ?: return false
+        return softDeleteById(id)
     }
 
     override fun deleteById(id: ObjectId): Boolean {
-        val query = Query(Criteria.where("_id").`is`(id))
-        val result = mongoTemplate.remove(query, StudySchedule::class.java)
-        return result.deletedCount > 0
+        return softDeleteById(id)
+    }
+
+    private fun softDeleteById(id: ObjectId): Boolean {
+        val now = Instant.now()
+        val result = mongoTemplate.updateFirst(
+            Query(Criteria.where("_id").`is`(id).and("isDeleted").ne(true)),
+            Update()
+                .set("isDeleted", true)
+                .set("deletedAt", now)
+                .set("updatedAt", now),
+            StudySchedule::class.java
+        )
+        return result.modifiedCount > 0
     }
 
     override fun loadByGroupIdOrderByScheduleAtDesc(studyGroupId: ObjectId): List<StudySchedule> {
-        val query = Query(Criteria.where("groupId").`is`(studyGroupId))
+        val query = Query(Criteria.where("groupId").`is`(studyGroupId).and("isDeleted").ne(true))
             .with(Sort.by(Sort.Direction.DESC, "scheduleAt"))
         return mongoTemplate.find(query, StudySchedule::class.java)
     }
 
     override fun loadById(id: ObjectId): StudySchedule? {
-        return mongoTemplate.findById(id, StudySchedule::class.java)
+        val query = Query(Criteria.where("_id").`is`(id).and("isDeleted").ne(true))
+        return mongoTemplate.findOne(query, StudySchedule::class.java)
     }
 
     override fun countByGroupId(studyGroupId: ObjectId): Long {
-        val query = Query(Criteria.where("groupId").`is`(studyGroupId))
+        val query = Query(Criteria.where("groupId").`is`(studyGroupId).and("isDeleted").ne(true))
         return mongoTemplate.count(query, StudySchedule::class.java)
     }
 
@@ -56,6 +70,7 @@ class MongoStudyScheduleRepository(
         val matchOperation = Aggregation.match(
             Criteria.where("groupId").`in`(groupIds)
                 .and("scheduleAt").gt(now)
+                .and("isDeleted").ne(true)
         )
         val sortOperation = Aggregation.sort(Sort.Direction.ASC, "scheduleAt")
         val groupOperation = Aggregation.group("groupId")
@@ -118,7 +133,7 @@ class MongoStudyScheduleRepository(
         cursor: ObjectId?,
         limit: Int
     ): List<StudySchedule> {
-        val criteria = Criteria.where("scheduleAt").gte(start).lt(end)
+        val criteria = Criteria.where("scheduleAt").gte(start).lt(end).and("isDeleted").ne(true)
         if (cursor != null) {
             criteria.and("_id").gt(cursor)
         }

@@ -31,12 +31,15 @@ class Task(
     updatedAt: Instant? = null,
     isDeleted: Boolean = false,
     id: ObjectId? = null,
-    submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
+    submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT,
+    deletedAt: Instant? = null,
+    expireAtHistory: List<TaskExpireAtChange> = emptyList()
 ) : BaseAggregateRoot<Task>(
     id = id,
     createdAt = createdAt,
     updatedAt = updatedAt,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    deletedAt = deletedAt
 ) {
 
     var type: TaskType = type
@@ -52,6 +55,9 @@ class Task(
         private set
 
     var expireAt: Instant = expireAt
+        private set
+
+    var expireAtHistory: MutableList<TaskExpireAtChange> = expireAtHistory.toMutableList()
         private set
 
     val submissionType: TaskSubmissionType = submissionType
@@ -71,6 +77,16 @@ class Task(
      * @param scheduleAt 연결된 일정의 시작 시각
      */
     fun synchronizeExpireAt(scheduleAt: Instant) {
+        if (expireAt == scheduleAt) {
+            return
+        }
+        expireAtHistory.add(
+            TaskExpireAtChange(
+                previousExpireAt = expireAt,
+                expireAt = scheduleAt,
+                changedAt = Instant.now()
+            )
+        )
         expireAt = scheduleAt
         modified = true
     }
@@ -94,8 +110,36 @@ class Task(
         this.title = title
         this.description = description
         this.attachments = attachments.toMutableList()
-        this.expireAt = expireAt
+        if (this.expireAt != expireAt) {
+            expireAtHistory.add(
+                TaskExpireAtChange(
+                    previousExpireAt = this.expireAt,
+                    expireAt = expireAt,
+                    changedAt = Instant.now()
+                )
+            )
+            this.expireAt = expireAt
+        }
         modified = true
+    }
+
+    /**
+     * 지정 시각 직전 기준의 마감 시각을 반환합니다.
+     *
+     * @param cutoff 배타적 조회 상한
+     * @return 상한 직전 유효했던 마감 시각
+     */
+    fun expireAtAt(cutoff: Instant): Instant {
+        val ordered = expireAtHistory.sortedBy { it.changedAt }
+        val firstAfterCutoff = ordered.firstOrNull { it.changedAt >= cutoff }
+        if (firstAfterCutoff != null) {
+            return firstAfterCutoff.previousExpireAt
+        }
+        return expireAtHistory.withIndex()
+            .maxWithOrNull(compareBy({ it.value.changedAt }, { it.index }))
+            ?.value
+            ?.expireAt
+            ?: expireAt
     }
 
     private fun validate(

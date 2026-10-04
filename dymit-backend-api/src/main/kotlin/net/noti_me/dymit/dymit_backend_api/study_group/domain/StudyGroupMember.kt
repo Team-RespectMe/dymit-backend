@@ -18,12 +18,14 @@ class StudyGroupMember(
     role: GroupMemberRole = GroupMemberRole.MEMBER,
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
-    isDeleted: Boolean = false
+    isDeleted: Boolean = false,
+    deletedAt: Instant? = null
 ): BaseAggregateRoot<StudyGroupMember>(
     id = id,
     createdAt = createdAt,
     updatedAt = updatedAt,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    deletedAt = deletedAt
 ) {
 
 //    val identifier: String

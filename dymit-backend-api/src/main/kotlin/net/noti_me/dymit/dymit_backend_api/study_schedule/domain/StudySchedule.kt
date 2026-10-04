@@ -30,12 +30,14 @@ class StudySchedule(
     nrParticipant: Long = 0L,
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
-    isDeleted: Boolean = false
+    isDeleted: Boolean = false,
+    deletedAt: Instant? = null
 ) : BaseAggregateRoot<StudySchedule>(
     id = id,
     createdAt = createdAt,
     updatedAt = updatedAt,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    deletedAt = deletedAt
 ) {
 
     @Indexed(name = "study_schedule_group_id_idx")

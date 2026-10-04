@@ -18,9 +18,23 @@ interface StudyGroupMemberRepository {
 
     fun findByGroupIdAndMemberId(groupId: ObjectId, memberId: ObjectId): StudyGroupMember?
 
+    fun findByIdIncludingDeleted(membershipId: ObjectId): StudyGroupMember?
+
     fun countByGroupId(groupId: ObjectId): Long
 
     fun findByGroupId(groupId: ObjectId): List<StudyGroupMember>
+
+    fun findByGroupIdIncludingDeleted(
+        groupId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<StudyGroupMember>
+
+    fun findActiveByGroupId(
+        groupId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<StudyGroupMember>
 
     fun findByGroupIdsOrderByCreatedAt(groupIds: List<ObjectId>, limit: Int): Map<String, List<StudyGroupMember>>
 
