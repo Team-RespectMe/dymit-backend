@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.calendar.application.port.out.task.dto
 
+import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import java.time.Instant
 
 /**
@@ -14,5 +15,6 @@ data class CalendarTaskDto(
     val id: String,
     val groupId: String,
     val title: String,
-    val eventAt: Instant
+    val eventAt: Instant,
+    val submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 )

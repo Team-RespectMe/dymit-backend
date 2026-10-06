@@ -1,10 +1,14 @@
 package net.noti_me.dymit.dymit_backend_api.calendar.application.port.`in`.web.dto
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
 import net.noti_me.dymit.dymit_backend_api.calendar.application.usecase.dto.CalendarDayPresenceDto
 import net.noti_me.dymit.dymit_backend_api.calendar.application.usecase.dto.CalendarEventDto
 import net.noti_me.dymit.dymit_backend_api.calendar.application.usecase.dto.CalendarEventGroupDto
 import net.noti_me.dymit.dymit_backend_api.calendar.domain.CalendarEventType
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
+import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleLocation
+import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import java.time.Instant
 import java.time.LocalDate
 
@@ -35,6 +39,28 @@ data class CalendarEventGroupItem(
     }
 }
 
+/** 일별 캘린더 스터디 일정의 장소 응답 항목입니다. */
+@Schema(description = "스터디 일정 장소 정보")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class CalendarEventLocationItem(
+    @field:Schema(description = "장소 유형", example = "ONLINE")
+    val type: ScheduleLocation.LocationType,
+    @field:Schema(description = "장소 이름 또는 접속 정보", example = "화상 회의")
+    val value: String,
+    @field:Schema(description = "온라인 회의 URL", example = "https://example.com/meeting", nullable = true)
+    val link: String?
+) {
+    companion object {
+        fun from(location: LocationVo): CalendarEventLocationItem {
+            return CalendarEventLocationItem(
+                type = location.type,
+                value = location.value,
+                link = location.link
+            )
+        }
+    }
+}
+
 /**
  * 일별 캘린더 이벤트 응답 항목입니다.
  *
@@ -43,8 +69,11 @@ data class CalendarEventGroupItem(
  * @property title 이벤트 제목
  * @property eventAt 이벤트 발생 시각
  * @property group 이벤트가 속한 그룹
+ * @property submissionType 과제 제출 유형 (TASK일 때만 포함)
+ * @property location 장소 정보 (STUDY_SCHEDULE일 때만 포함)
  */
 @Schema(description = "일별 캘린더 이벤트")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class CalendarEventItem(
     @field:Schema(description = "이벤트 유형", example = "TASK")
     val type: CalendarEventType,
@@ -55,7 +84,11 @@ data class CalendarEventItem(
     @field:Schema(description = "이벤트 시각", example = "2026-10-02T10:00:00Z")
     val eventAt: Instant,
     @field:Schema(description = "이벤트가 속한 그룹")
-    val group: CalendarEventGroupItem
+    val group: CalendarEventGroupItem,
+    @field:Schema(description = "과제 제출 유형. TASK 이벤트에만 포함됩니다.", example = "OUTPUT", nullable = true)
+    val submissionType: TaskSubmissionType? = null,
+    @field:Schema(description = "장소 정보. STUDY_SCHEDULE 이벤트에만 포함됩니다.", nullable = true)
+    val location: CalendarEventLocationItem? = null
 ) {
     companion object {
 
@@ -71,7 +104,9 @@ data class CalendarEventItem(
                 id = dto.id,
                 title = dto.title,
                 eventAt = dto.eventAt,
-                group = CalendarEventGroupItem.from(dto.group)
+                group = CalendarEventGroupItem.from(dto.group),
+                submissionType = dto.submissionType,
+                location = dto.location?.let(CalendarEventLocationItem::from)
             )
         }
     }

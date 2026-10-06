@@ -110,7 +110,8 @@ class CalendarEventQueryService(
             id = id,
             title = title,
             eventAt = eventAt,
-            group = groupsById.getValue(groupId).toEventGroup()
+            group = groupsById.getValue(groupId).toEventGroup(),
+            location = location
         )
     }
 
@@ -122,7 +123,8 @@ class CalendarEventQueryService(
             id = id,
             title = title,
             eventAt = eventAt,
-            group = groupsById.getValue(groupId).toEventGroup()
+            group = groupsById.getValue(groupId).toEventGroup(),
+            submissionType = submissionType
         )
     }
 

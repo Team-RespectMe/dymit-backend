@@ -3,6 +3,7 @@ package net.noti_me.dymit.dymit_backend_api.calendar.adapter.out.study_schedule
 import net.noti_me.dymit.dymit_backend_api.calendar.application.port.out.study_schedule.LoadCalendarStudySchedulePort
 import net.noti_me.dymit.dymit_backend_api.calendar.application.port.out.study_schedule.dto.CalendarStudyScheduleDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleParticipant
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -60,7 +61,8 @@ class MongoCalendarStudyScheduleAdapter(
                 id = schedule.identifier,
                 groupId = schedule.groupId.toHexString(),
                 title = schedule.title,
-                eventAt = schedule.scheduleAt
+                eventAt = schedule.scheduleAt,
+                location = LocationVo.from(schedule.location)
             )
         }
     }
