@@ -1,6 +1,8 @@
 package net.noti_me.dymit.dymit_backend_api.calendar.application.usecase.dto
 
 import net.noti_me.dymit.dymit_backend_api.calendar.domain.CalendarEventType
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
+import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import java.time.Instant
 import java.time.LocalDate
 
@@ -29,7 +31,9 @@ data class CalendarEventDto(
     val id: String,
     val title: String,
     val eventAt: Instant,
-    val group: CalendarEventGroupDto
+    val group: CalendarEventGroupDto,
+    val submissionType: TaskSubmissionType? = null,
+    val location: LocationVo? = null
 )
 
 /**

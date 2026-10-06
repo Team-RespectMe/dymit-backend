@@ -1,5 +1,6 @@
 package net.noti_me.dymit.dymit_backend_api.calendar.application.port.out.study_schedule.dto
 
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
 import java.time.Instant
 
 /**
@@ -14,5 +15,6 @@ data class CalendarStudyScheduleDto(
     val id: String,
     val groupId: String,
     val title: String,
-    val eventAt: Instant
+    val eventAt: Instant,
+    val location: LocationVo = LocationVo()
 )

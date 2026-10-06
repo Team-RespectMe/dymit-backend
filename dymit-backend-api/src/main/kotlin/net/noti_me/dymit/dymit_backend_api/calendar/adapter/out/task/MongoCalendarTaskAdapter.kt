@@ -79,7 +79,8 @@ class MongoCalendarTaskAdapter(
                     id = task.identifier,
                     groupId = schedule.groupId.toHexString(),
                     title = task.title,
-                    eventAt = task.expireAt
+                    eventAt = task.expireAt,
+                    submissionType = task.submissionType
                 )
             }
         }
