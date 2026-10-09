@@ -8,19 +8,40 @@ data class MemberStatisticsDto(
     val groupId: String,
     val membershipId: String,
     val memberId: String,
-    val weekEnd: Instant,
+    val latestSession: Long?,
+    val statisticsAt: Instant?,
     val counts: StatisticsCounts,
     val taskSubmissionRate: Double,
     val scheduleAttendanceRate: Double
 )
 
-/** 그룹 주간 통계 DTO입니다. */
+/** 통계 응답에 포함할 현재 그룹 요약입니다. */
+data class StatisticsGroupDto(
+    val id: String,
+    val name: String
+)
+
+/** 그룹 회차 통계 DTO입니다. */
 data class GroupStatisticsDto(
-    val groupId: String,
-    val weekEnd: Instant,
+    val group: StatisticsGroupDto,
+    val latestSession: Long?,
+    val previousSession: Long?,
+    val statisticsAt: Instant?,
+    val activeMemberCount: Long,
     val counts: StatisticsCounts,
     val taskSubmissionRate: Double,
     val scheduleAttendanceRate: Double,
     val previousTaskSubmissionRate: Double,
     val previousScheduleAttendanceRate: Double
+)
+
+/** 관리 중인 그룹의 통계 목록 항목입니다. */
+data class ManagedGroupStatisticsDto(
+    val group: StatisticsGroupDto,
+    val latestSession: Long?,
+    val statisticsAt: Instant?,
+    val activeMemberCount: Long,
+    val taskSubmissionRate: Double,
+    val scheduleAttendanceRate: Double,
+    val hasSchedule: Boolean
 )

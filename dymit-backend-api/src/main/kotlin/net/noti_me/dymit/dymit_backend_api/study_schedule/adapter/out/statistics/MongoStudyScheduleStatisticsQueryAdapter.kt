@@ -2,6 +2,7 @@ package net.noti_me.dymit.dymit_backend_api.study_schedule.adapter.out.statistic
 
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleStatisticsQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleParticipationStatisticsDto
+import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsBoundaryDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsChanges
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsQuery
@@ -21,6 +22,50 @@ class MongoStudyScheduleStatisticsQueryAdapter(
     private val mongoTemplate: MongoTemplate
 ) : StudyScheduleStatisticsQueryPort {
 
+    override fun loadSessionBoundaries(
+        groupIds: List<ObjectId>,
+        observedAt: Instant
+    ): List<StudyScheduleStatisticsBoundaryDto> {
+        if (groupIds.isEmpty()) {
+            return emptyList()
+        }
+        return mongoTemplate.find(
+            Query(
+                Criteria.where("groupId").`in`(groupIds)
+                    .and("isDeleted").ne(true)
+                    .and("scheduleAt").lt(observedAt)
+            ).with(
+                org.springframework.data.domain.Sort.by(
+                    org.springframework.data.domain.Sort.Order.asc("scheduleAt"),
+                    org.springframework.data.domain.Sort.Order.asc("_id")
+                )
+            ),
+            StudySchedule::class.java
+        ).map { schedule ->
+            StudyScheduleStatisticsBoundaryDto(
+                groupId = schedule.groupId,
+                scheduleId = requireNotNull(schedule.id),
+                session = schedule.session,
+                scheduleAt = schedule.scheduleAt
+            )
+        }
+    }
+
+    override fun loadGroupIdsHavingSchedule(groupIds: List<ObjectId>): Set<ObjectId> {
+        if (groupIds.isEmpty()) {
+            return emptySet()
+        }
+        return mongoTemplate.findDistinct(
+            Query(
+                Criteria.where("groupId").`in`(groupIds)
+                    .and("isDeleted").ne(true)
+            ),
+            "groupId",
+            StudySchedule::class.java,
+            ObjectId::class.java
+        ).toSet()
+    }
+
     override fun loadChanged(query: StudyScheduleStatisticsQuery): StudyScheduleStatisticsChanges {
         if (query.previousCutoff == null || query.mutationAfter == null) {
             return StudyScheduleStatisticsChanges(emptyList(), requiresReplay = true)
@@ -35,7 +80,7 @@ class MongoStudyScheduleStatisticsQueryAdapter(
             Query(
                 Criteria.where("groupId").`is`(query.groupId)
                     .and("createdAt").gte(query.joinedAt)
-                    .and("scheduleAt").gte(query.previousCutoff).lt(query.cutoff)
+                    .and("scheduleAt").gt(query.previousCutoff).lte(query.cutoff)
             ),
             StudySchedule::class.java
         )
@@ -66,10 +111,14 @@ class MongoStudyScheduleStatisticsQueryAdapter(
                 StudySchedule::class.java
             )
         }
+        val maturedIds = matured.mapNotNull { it.id }.toSet()
+        val correctionIds = (changedSchedules + participantSchedules)
+            .mapNotNull { it.id }
+            .filterNot(maturedIds::contains)
         val schedules = (matured + changedSchedules + participantSchedules).distinctBy { it.id }
         return StudyScheduleStatisticsChanges(
             sources = mapSources(schedules, query.memberId),
-            requiresReplay = false
+            requiresReplay = correctionIds.isNotEmpty()
         )
     }
 
@@ -121,6 +170,7 @@ class MongoStudyScheduleStatisticsQueryAdapter(
             val createdAt = schedule.createdAt ?: return@mapNotNull null
             StudyScheduleStatisticsDto(
                 scheduleId = requireNotNull(schedule.id),
+                session = schedule.session,
                 createdAt = createdAt,
                 scheduleAt = schedule.scheduleAt,
                 deletedAt = schedule.deletedAt,

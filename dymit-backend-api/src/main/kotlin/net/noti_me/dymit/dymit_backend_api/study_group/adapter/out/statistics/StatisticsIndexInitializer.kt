@@ -2,6 +2,9 @@ package net.noti_me.dymit.dymit_backend_api.study_group.adapter.out.statistics
 
 import jakarta.annotation.PostConstruct
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupWeeklyStatistics
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupSessionStatistics
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatistics
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatisticsLedger
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberStatisticsLedger
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberWeeklyStatistics
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupMember
@@ -25,6 +28,7 @@ class StatisticsIndexInitializer(
      */
     @PostConstruct
     fun ensureIndexes() {
+        ensureSessionIndexes()
         mongoTemplate.indexOps(MemberStatisticsLedger::class.java).ensureIndex(
             Index().on("membershipId", Sort.Direction.ASC).unique()
                 .named("member_statistics_membership_uq")
@@ -45,6 +49,33 @@ class StatisticsIndexInitializer(
             ).unique().named("group_weekly_statistics_group_week_uq")
         )
         ensureSourceIndexes()
+    }
+
+    private fun ensureSessionIndexes() {
+        mongoTemplate.indexOps(MemberSessionStatisticsLedger::class.java).ensureIndex(
+            Index().on("membershipId", Sort.Direction.ASC).unique()
+                .named("member_session_statistics_ledger_membership_uq")
+        )
+        mongoTemplate.indexOps(MemberSessionStatistics::class.java).ensureIndex(
+            compound(
+                "member_session_statistics_membership_schedule_uq",
+                "membershipId" to 1,
+                "scheduleId" to 1
+            ).let { (it as CompoundIndexDefinition).unique() }
+        )
+        mongoTemplate.indexOps(MemberSessionStatistics::class.java).ensureIndex(compound(
+            "member_session_statistics_group_schedule_idx",
+            "groupId" to 1,
+            "scheduleId" to 1,
+            "membershipId" to 1
+        ))
+        mongoTemplate.indexOps(GroupSessionStatistics::class.java).ensureIndex(
+            compound(
+                "group_session_statistics_group_schedule_uq",
+                "groupId" to 1,
+                "scheduleId" to 1
+            ).let { (it as CompoundIndexDefinition).unique() }
+        )
     }
 
     private fun ensureSourceIndexes() {
@@ -79,6 +110,13 @@ class StatisticsIndexInitializer(
             "scheduleAt" to 1
         ))
         mongoTemplate.indexOps("study_schedules").ensureIndex(compound(
+            "statistics_schedule_group_active_time_id_idx",
+            "groupId" to 1,
+            "isDeleted" to 1,
+            "scheduleAt" to 1,
+            "_id" to 1
+        ))
+        mongoTemplate.indexOps("study_schedules").ensureIndex(compound(
             "statistics_schedule_group_updated_idx",
             "groupId" to 1,
             "updatedAt" to 1
@@ -109,6 +147,13 @@ class StatisticsIndexInitializer(
             "groupId" to 1,
             "memberId" to 1,
             "isDeleted" to 1
+        ))
+        mongoTemplate.indexOps(StudyGroupMember::class.java).ensureIndex(compound(
+            "statistics_membership_manager_page_idx",
+            "memberId" to 1,
+            "isDeleted" to 1,
+            "role" to 1,
+            "groupId" to 1
         ))
     }
 

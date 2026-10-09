@@ -10,11 +10,11 @@ import net.noti_me.dymit.dymit_backend_api.study_group.domain.*
 import org.bson.types.ObjectId
 import java.time.Instant
 
-internal class StatisticsTestFixture {
-
-    val groupId = ObjectId()
-    val membershipId = ObjectId()
-    val memberId = ObjectId()
+internal class StatisticsTestFixture(
+    val groupId: ObjectId = ObjectId(),
+    val membershipId: ObjectId = ObjectId(),
+    val memberId: ObjectId = ObjectId()
+) {
     val joinedAt: Instant = Instant.parse("2026-09-07T00:00:00Z")
     val cutoff: Instant = Instant.parse("2026-09-27T15:00:00Z")
     val observedAt: Instant = Instant.parse("2026-10-03T01:00:00Z")
@@ -22,8 +22,13 @@ internal class StatisticsTestFixture {
     val members = mockk<StudyGroupMemberRepository>()
     val tasks = mockk<TaskStatisticsSourcePort>()
     val schedules = mockk<ScheduleStatisticsSourcePort>()
-    var ledger: MemberStatisticsLedger? = null
-    val weeks = mutableListOf<MemberWeeklyStatistics>()
+    var ledger: MemberSessionStatisticsLedger? = null
+    val sessions = mutableListOf<MemberSessionStatistics>()
+    var boundaries = listOf(
+        boundary(joinedAt.plusSeconds(86400), 3),
+        boundary(cutoff.minusSeconds(604800), 8),
+        boundary(cutoff, 12)
+    )
     var allTasks = emptyList<TaskStatisticsSourceData>()
     var allSchedules = emptyList<ScheduleStatisticsSourceData>()
     var taskChanges = StatisticsSourceChanges<TaskStatisticsSourceData>(emptyList(), false)
@@ -35,8 +40,8 @@ internal class StatisticsTestFixture {
             id = membershipId, groupId = groupId, memberId = memberId, createdAt = joinedAt
         )
         every { repository.findLedger(membershipId) } answers { ledger }
-        every { repository.findMemberWeeks(membershipId, any()) } answers {
-            weeks.filter { it.weekEnd <= secondArg<Instant>() }
+        every { repository.findMemberSessions(membershipId) } answers {
+            sessions.toList()
         }
         every { repository.compareAndSetLedger(any(), any()) } answers {
             val expected = firstArg<Long?>()
@@ -47,12 +52,12 @@ internal class StatisticsTestFixture {
                 true
             }
         }
-        every { repository.saveMemberWeeks(any()) } answers {
-            firstArg<List<MemberWeeklyStatistics>>().forEach { next ->
-                val previous = weeks.firstOrNull { it.weekEnd == next.weekEnd }
+        every { repository.saveMemberSessions(any()) } answers {
+            firstArg<List<MemberSessionStatistics>>().forEach { next ->
+                val previous = sessions.firstOrNull { it.scheduleId == next.scheduleId }
                 if (previous == null || next.ledgerVersion >= previous.ledgerVersion) {
-                    weeks.removeAll { it.weekEnd == next.weekEnd }
-                    weeks.add(next)
+                    sessions.removeAll { it.scheduleId == next.scheduleId }
+                    sessions.add(next)
                 }
             }
         }
@@ -65,7 +70,21 @@ internal class StatisticsTestFixture {
     fun command(
         end: Instant = cutoff,
         observed: Instant = observedAt
-    ) = RefreshMemberStatisticsCommand(groupId.toHexString(), membershipId.toHexString(), end, observed)
+    ): RefreshMemberStatisticsCommand {
+        if (boundaries.none { it.scheduleAt == end }) {
+            boundaries = boundaries + boundary(end, (boundaries.maxOfOrNull { it.session } ?: 0) + 1)
+        }
+        return RefreshMemberStatisticsCommand(
+            groupId.toHexString(), membershipId.toHexString(),
+            boundaries.filter { it.scheduleAt <= end }, observed
+        )
+    }
+
+    fun boundary(
+        starts: Instant,
+        session: Long = 1,
+        id: ObjectId = ObjectId()
+    ) = StatisticsSessionBoundary(groupId, id, session, starts)
 
     fun task(
         expires: Instant,
@@ -83,9 +102,10 @@ internal class StatisticsTestFixture {
         starts: Instant,
         created: Instant = joinedAt,
         attendedAt: Instant? = starts.minusSeconds(1),
-        deletedAt: Instant? = null
+        deletedAt: Instant? = null,
+        id: ObjectId = ObjectId()
     ) = ScheduleStatisticsSourceData(
-        ObjectId(), created, starts, deletedAt,
+        id, 1, created, starts, deletedAt,
         attendedAt?.let { listOf(ScheduleParticipationData(it, null)) } ?: emptyList()
     )
 }

@@ -1,12 +1,12 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.application
 
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
-import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.persistence.StudyGroupMemberRepository
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.ScheduleStatisticsSourceData
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.ScheduleStatisticsSourcePort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsSessionBoundary
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsSourceQuery
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.TaskAssignmentData
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.TaskStatisticsSourceData
@@ -14,17 +14,16 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.stat
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.RefreshMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.MemberStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.RefreshMemberStatisticsCommand
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberStatisticsLedger
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberWeeklyStatistics
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatistics
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatisticsLedger
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StatisticsCounts
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupMember
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID
 
-/**
- * 구성원 통계 원장과 누적 주간 스냅샷을 갱신합니다.
- */
+/** 구성원 통계 원장과 일정 회차별 누적 투영을 갱신합니다. */
 @Service
 class RefreshMemberStatisticsService(
     private val repository: StatisticsRepository,
@@ -33,9 +32,7 @@ class RefreshMemberStatisticsService(
     private val scheduleSourcePort: ScheduleStatisticsSourcePort
 ) : RefreshMemberStatisticsUseCase {
 
-    /**
-     * 고정된 업무 상한과 관측 시각으로 통계를 갱신합니다.
-     */
+    /** 고정된 진행 회차 목록과 관측 시각으로 통계를 갱신합니다. */
     override fun execute(command: RefreshMemberStatisticsCommand): MemberStatisticsDto {
         val membershipId = ObjectId(command.membershipId)
         val membership = memberRepository.findByIdIncludingDeleted(membershipId)
@@ -43,209 +40,240 @@ class RefreshMemberStatisticsService(
         if (membership.groupId != ObjectId(command.groupId)) {
             throw NotFoundException(message = "해당 그룹의 가입 관계가 아닙니다.")
         }
-        val joinedAt = requireNotNull(membership.createdAt)
-        val targetCutoff = membership.deletedAt
-            ?.let(StatisticsWeekWindow::firstWeekEndAfter)
-            ?.coerceAtMost(command.cutoff)
-            ?: command.cutoff
+        val boundaries = command.boundaries
+            .distinctBy { it.scheduleId }
+            .sortedWith(BOUNDARY_COMPARATOR)
+        if (boundaries.isEmpty()) {
+            return emptyDto(membership)
+        }
+        return refreshWithRetry(membership, boundaries, command.observedAt)
+    }
 
+    private fun refreshWithRetry(
+        membership: StudyGroupMember,
+        boundaries: List<StatisticsSessionBoundary>,
+        observedAt: Instant
+    ): MemberStatisticsDto {
+        val membershipId = requireNotNull(membership.id)
+        val joinedAt = requireNotNull(membership.createdAt)
+        val target = boundaries.last()
         repeat(MAX_CAS_ATTEMPTS) {
             val current = repository.findLedger(membershipId)
-            val weekEnds = StatisticsWeekWindow.weekEnds(joinedAt, targetCutoff)
-            val existingWeeks = repository.findMemberWeeks(membershipId, targetCutoff)
-            if (current != null && targetCutoff < current.taskCalculatedThrough) {
-                throw BadRequestException(message = "최신 통계 원장을 과거 상한으로 되돌릴 수 없습니다.")
+            val existing = repository.findMemberSessions(membershipId)
+            val currentIndex = current?.let { ledger ->
+                boundaries.indexOfFirst { it.scheduleId == ledger.latestScheduleId }
+            } ?: -1
+            val validSnapshots = if (current == null) {
+                emptyList()
+            } else {
+                existing.filter { isValid(it, current) }
             }
-            val missingWeeks = weekEnds.filter { weekEnd ->
-                existingWeeks.none { snapshot ->
-                    snapshot.weekEnd == weekEnd && current != null &&
-                        (snapshot.weekEnd < current.projectionStartWeekEnd &&
-                            snapshot.ledgerVersion < current.version ||
-                            snapshot.ledgerVersion == current.version &&
-                            snapshot.projectionId == current.projectionId)
+            val expectedPrefix = if (currentIndex >= 0) boundaries.take(currentIndex + 1) else emptyList()
+            val storedPrefix = current?.let { ledger ->
+                validSnapshots
+                    .filter {
+                        compareBoundary(
+                            it.scheduleAt,
+                            it.scheduleId,
+                            ledger.latestScheduleAt,
+                            ledger.latestScheduleId
+                        ) <= 0
+                    }
+                    .sortedWith(compareBy({ it.scheduleAt }, { it.scheduleId }))
+            }.orEmpty()
+            val prefixComplete = current != null && currentIndex >= 0 &&
+                current.latestScheduleAt == boundaries[currentIndex].scheduleAt &&
+                current.latestSession == boundaries[currentIndex].session &&
+                storedPrefix.size == expectedPrefix.size &&
+                storedPrefix.zip(expectedPrefix).all { (snapshot, boundary) ->
+                    snapshot.scheduleId == boundary.scheduleId &&
+                        snapshot.scheduleAt == boundary.scheduleAt &&
+                        snapshot.session == boundary.session
                 }
-            }
-            val taskQuery = StatisticsSourceQuery(
-                groupId = membership.groupId,
-                memberId = membership.memberId,
+            val sourceCutoff = membership.deletedAt?.coerceAtMost(target.scheduleAt) ?: target.scheduleAt
+            val mutationThrough = membership.deletedAt?.coerceAtMost(observedAt) ?: observedAt
+            val taskQuery = sourceQuery(
+                membership = membership,
                 joinedAt = joinedAt,
-                previousCutoff = current?.taskCalculatedThrough,
-                cutoff = targetCutoff,
-                mutationAfter = current?.taskMutationWatermark,
-                mutationThrough = command.observedAt
+                previousCutoff = current?.taskCalculatedThrough.takeIf { prefixComplete },
+                cutoff = sourceCutoff,
+                mutationAfter = current?.taskMutationWatermark.takeIf { prefixComplete },
+                mutationThrough = mutationThrough
             )
             val scheduleQuery = taskQuery.copy(
-                previousCutoff = current?.scheduleCalculatedThrough,
-                mutationAfter = current?.scheduleMutationWatermark
+                previousCutoff = current?.scheduleCalculatedThrough.takeIf { prefixComplete },
+                mutationAfter = current?.scheduleMutationWatermark.takeIf { prefixComplete }
             )
             val taskChanges = taskSourcePort.loadChanged(taskQuery)
             val scheduleChanges = scheduleSourcePort.loadChanged(scheduleQuery)
-            val needsReplay = current == null || taskChanges.requiresReplay ||
-                scheduleChanges.requiresReplay || missingWeeks.any { it <= current.taskCalculatedThrough }
+            val appended = if (prefixComplete) boundaries.drop(currentIndex + 1) else emptyList()
+            val targetSnapshot = validSnapshots.firstOrNull { it.scheduleId == target.scheduleId }
+            val sameTimeAppend = current != null && appended.firstOrNull()?.scheduleAt == current.latestScheduleAt
+            val needsReplay = current == null || !prefixComplete || taskChanges.requiresReplay ||
+                scheduleChanges.requiresReplay || sameTimeAppend ||
+                appended.isEmpty() && (taskChanges.sources.isNotEmpty() || scheduleChanges.sources.isNotEmpty())
 
-            if (current != null && targetCutoff == current.taskCalculatedThrough &&
-                targetCutoff == current.scheduleCalculatedThrough && !needsReplay &&
-                missingWeeks.isEmpty() && taskChanges.sources.isEmpty() &&
-                scheduleChanges.sources.isEmpty()) {
-                return current.toDto(targetCutoff)
+            if (!needsReplay && appended.isEmpty() && targetSnapshot != null) {
+                return targetSnapshot.toDto()
             }
 
             val nextVersion = (current?.version ?: 0L) + 1L
             val projectionId = UUID.randomUUID().toString()
             val snapshots = if (needsReplay) {
-                replaySnapshots(
-                    taskQuery = taskQuery,
-                    scheduleQuery = scheduleQuery,
-                    membershipId = membershipId,
-                    groupId = membership.groupId,
-                    memberId = membership.memberId,
-                    joinedAt = joinedAt,
-                    leftAt = membership.deletedAt,
-                    weekEnds = weekEnds,
+                replay(
+                    taskQuery = taskQuery.copy(previousCutoff = null, mutationAfter = null),
+                    scheduleQuery = scheduleQuery.copy(previousCutoff = null, mutationAfter = null),
+                    membership = membership,
+                    boundaries = boundaries,
                     version = nextVersion,
                     projectionId = projectionId,
-                    observedAt = command.observedAt
+                    observedAt = observedAt
                 )
             } else {
-                incrementalSnapshots(
+                append(
                     current = requireNotNull(current),
                     taskSources = taskChanges.sources,
                     scheduleSources = scheduleChanges.sources,
-                    membershipId = membershipId,
-                    groupId = membership.groupId,
-                    memberId = membership.memberId,
-                    joinedAt = joinedAt,
-                    leftAt = membership.deletedAt,
-                    weekEnds = weekEnds.filter { it > current.taskCalculatedThrough },
+                    membership = membership,
+                    previousBoundary = boundaries[currentIndex],
+                    boundaries = appended,
                     version = nextVersion,
                     projectionId = projectionId,
-                    observedAt = command.observedAt
+                    observedAt = observedAt
                 )
             }
-            val counts = snapshots.lastOrNull()?.counts ?: current?.counts ?: StatisticsCounts()
-            val projectionStartWeekEnd = snapshots.firstOrNull()?.weekEnd
-                ?: targetCutoff.plusSeconds(WEEK_SECONDS)
-            val replacement = MemberStatisticsLedger(
+            val projectionStartScheduleId = snapshots.firstOrNull()?.scheduleId ?: target.scheduleId
+            val projectionStartAt = snapshots.firstOrNull()?.scheduleAt ?: target.scheduleAt
+            val counts = snapshots.lastOrNull()?.counts ?: requireNotNull(current).counts
+            val replacement = MemberSessionStatisticsLedger(
                 id = current?.id,
                 groupId = membership.groupId,
                 membershipId = membershipId,
                 memberId = membership.memberId,
                 counts = counts,
-                taskCalculatedThrough = targetCutoff,
-                scheduleCalculatedThrough = targetCutoff,
-                taskMutationWatermark = command.observedAt,
-                scheduleMutationWatermark = command.observedAt,
+                latestScheduleId = target.scheduleId,
+                latestSession = target.session,
+                latestScheduleAt = target.scheduleAt,
+                taskCalculatedThrough = sourceCutoff,
+                scheduleCalculatedThrough = sourceCutoff,
+                taskMutationWatermark = mutationThrough,
+                scheduleMutationWatermark = mutationThrough,
                 version = nextVersion,
                 projectionId = projectionId,
-                projectionStartWeekEnd = projectionStartWeekEnd,
-                updatedAt = command.observedAt
+                projectionStartScheduleId = projectionStartScheduleId,
+                projectionStartAt = projectionStartAt,
+                updatedAt = observedAt
             )
-
             if (repository.compareAndSetLedger(current?.version, replacement)) {
-                repository.saveMemberWeeks(snapshots)
-                return replacement.toDto(targetCutoff)
+                repository.saveMemberSessions(snapshots)
+                return snapshots.lastOrNull()?.toDto() ?: replacement.toDto()
             }
         }
         throw ConflictException(message = "통계가 동시에 갱신되어 다시 시도해야 합니다.")
     }
 
-    private fun replaySnapshots(
+    private fun replay(
         taskQuery: StatisticsSourceQuery,
         scheduleQuery: StatisticsSourceQuery,
-        membershipId: ObjectId,
-        groupId: ObjectId,
-        memberId: ObjectId,
-        joinedAt: Instant,
-        leftAt: Instant?,
-        weekEnds: List<Instant>,
+        membership: StudyGroupMember,
+        boundaries: List<StatisticsSessionBoundary>,
         version: Long,
         projectionId: String,
         observedAt: Instant
-    ): List<MemberWeeklyStatistics> {
+    ): List<MemberSessionStatistics> {
         val tasks = taskSourcePort.loadAll(taskQuery)
         val schedules = scheduleSourcePort.loadAll(scheduleQuery)
-        return weekEnds.map { weekEnd ->
-            MemberWeeklyStatistics(
-                groupId = groupId,
-                membershipId = membershipId,
-                memberId = memberId,
-                weekEnd = weekEnd,
-                counts = calculateCounts(tasks, schedules, joinedAt, leftAt, weekEnd),
-                ledgerVersion = version,
+        return boundaries.map { boundary ->
+            snapshot(
+                membership = membership,
+                boundary = boundary,
+                counts = calculateCounts(tasks, schedules, membership, boundary),
+                version = version,
                 projectionId = projectionId,
-                updatedAt = observedAt
+                observedAt = observedAt
             )
         }
     }
 
-    private fun incrementalSnapshots(
-        current: MemberStatisticsLedger,
+    private fun append(
+        current: MemberSessionStatisticsLedger,
         taskSources: List<TaskStatisticsSourceData>,
         scheduleSources: List<ScheduleStatisticsSourceData>,
-        membershipId: ObjectId,
-        groupId: ObjectId,
-        memberId: ObjectId,
-        joinedAt: Instant,
-        leftAt: Instant?,
-        weekEnds: List<Instant>,
+        membership: StudyGroupMember,
+        previousBoundary: StatisticsSessionBoundary,
+        boundaries: List<StatisticsSessionBoundary>,
         version: Long,
         projectionId: String,
         observedAt: Instant
-    ): List<MemberWeeklyStatistics> {
-        val previousSourceCounts = calculateCounts(
-            taskSources,
-            scheduleSources,
-            joinedAt,
-            leftAt,
-            current.taskCalculatedThrough
-        )
-        return weekEnds.map { weekEnd ->
-            MemberWeeklyStatistics(
-                groupId = groupId,
-                membershipId = membershipId,
-                memberId = memberId,
-                weekEnd = weekEnd,
+    ): List<MemberSessionStatistics> {
+        val previousSourceCounts = calculateCounts(taskSources, scheduleSources, membership, previousBoundary)
+        return boundaries.map { boundary ->
+            snapshot(
+                membership = membership,
+                boundary = boundary,
                 counts = current.counts +
-                    calculateCounts(taskSources, scheduleSources, joinedAt, leftAt, weekEnd) -
+                    calculateCounts(taskSources, scheduleSources, membership, boundary) -
                     previousSourceCounts,
-                ledgerVersion = version,
+                version = version,
                 projectionId = projectionId,
-                updatedAt = observedAt
+                observedAt = observedAt
             )
         }
+    }
+
+    private fun snapshot(
+        membership: StudyGroupMember,
+        boundary: StatisticsSessionBoundary,
+        counts: StatisticsCounts,
+        version: Long,
+        projectionId: String,
+        observedAt: Instant
+    ): MemberSessionStatistics {
+        return MemberSessionStatistics(
+            groupId = membership.groupId,
+            membershipId = requireNotNull(membership.id),
+            memberId = membership.memberId,
+            scheduleId = boundary.scheduleId,
+            session = boundary.session,
+            scheduleAt = boundary.scheduleAt,
+            statisticsAt = boundary.scheduleAt,
+            counts = counts,
+            ledgerVersion = version,
+            projectionId = projectionId,
+            updatedAt = observedAt
+        )
     }
 
     private fun calculateCounts(
         tasks: List<TaskStatisticsSourceData>,
         schedules: List<ScheduleStatisticsSourceData>,
-        joinedAt: Instant,
-        leftAt: Instant?,
-        cutoff: Instant
+        membership: StudyGroupMember,
+        boundary: StatisticsSessionBoundary
     ): StatisticsCounts {
-        val sourceStateCutoff = leftAt?.coerceAtMost(cutoff) ?: cutoff
+        val joinedAt = requireNotNull(membership.createdAt)
+        val leftAt = membership.deletedAt
+        val stateAt = leftAt?.coerceAtMost(boundary.scheduleAt) ?: boundary.scheduleAt
         val eligibleTasks = tasks.mapNotNull { task ->
-            val expireAt = task.expireAtAt(sourceStateCutoff)
-            val withinMembership = expireAt < cutoff && (leftAt == null || expireAt < leftAt)
-            val validTask = task.taskDeletedAt == null || !task.taskDeletedAt.isBefore(sourceStateCutoff)
-            val validSchedule = task.relatedScheduleDeletedAt == null ||
-                !task.relatedScheduleDeletedAt.isBefore(sourceStateCutoff)
-            if (!withinMembership || !validTask || !validSchedule) {
+            val expireAt = task.expireAtAt(stateAt)
+            val withinBoundary = expireAt <= boundary.scheduleAt
+            val withinMembership = expireAt >= joinedAt && (leftAt == null || expireAt < leftAt)
+            val validTask = task.taskDeletedAt == null || task.taskDeletedAt > stateAt
+            val validSchedule = task.relatedScheduleDeletedAt == null || task.relatedScheduleDeletedAt > stateAt
+            if (!withinBoundary || !withinMembership || !validTask || !validSchedule) {
                 return@mapNotNull null
             }
-            val assignment = task.assignments
-                .filter { it.assignedAt >= joinedAt && it.assignedAt < sourceStateCutoff }
-                .filter { it.deletedAt == null || !it.deletedAt.isBefore(sourceStateCutoff) }
+            task.assignments
+                .filter { it.assignedAt >= joinedAt && it.assignedAt <= stateAt }
+                .filter { it.deletedAt == null || it.deletedAt > stateAt }
                 .maxByOrNull { it.assignedAt }
-                ?: return@mapNotNull null
-            assignment
         }
         val eligibleSchedules = schedules.filter { schedule ->
-            schedule.createdAt >= joinedAt && schedule.scheduleAt < cutoff &&
+            schedule.createdAt >= joinedAt && schedule.scheduleAt >= joinedAt && includes(boundary, schedule) &&
                 (leftAt == null || schedule.scheduleAt < leftAt) &&
-                (schedule.scheduleDeletedAt == null || !schedule.scheduleDeletedAt.isBefore(sourceStateCutoff))
+                (schedule.scheduleDeletedAt == null || schedule.scheduleDeletedAt > stateAt)
         }
         return StatisticsCounts(
-            submittedTaskCount = eligibleTasks.count { it.submittedAt(sourceStateCutoff) }.toLong(),
+            submittedTaskCount = eligibleTasks.count { it.submittedAt(stateAt) }.toLong(),
             assignedTaskCount = eligibleTasks.size.toLong(),
             attendedScheduleCount = eligibleSchedules.count { schedule ->
                 schedule.participations.any { participation ->
@@ -257,9 +285,17 @@ class RefreshMemberStatisticsService(
         )
     }
 
+    private fun includes(
+        boundary: StatisticsSessionBoundary,
+        schedule: ScheduleStatisticsSourceData
+    ): Boolean {
+        return schedule.scheduleAt < boundary.scheduleAt ||
+            schedule.scheduleAt == boundary.scheduleAt && schedule.scheduleId <= boundary.scheduleId
+    }
+
     private fun TaskStatisticsSourceData.expireAtAt(cutoff: Instant): Instant {
         val firstLaterChange = expireAtHistory.sortedBy { it.changedAt }
-            .firstOrNull { it.changedAt >= cutoff }
+            .firstOrNull { it.changedAt > cutoff }
         return firstLaterChange?.previousExpireAt
             ?: expireAtHistory.withIndex()
                 .maxWithOrNull(compareBy({ it.value.changedAt }, { it.index }))
@@ -270,27 +306,97 @@ class RefreshMemberStatisticsService(
 
     private fun TaskAssignmentData.submittedAt(cutoff: Instant): Boolean {
         return statusHistory.withIndex()
-            .filter { it.value.changedAt < cutoff }
+            .filter { it.value.changedAt <= cutoff }
             .maxWithOrNull(compareBy({ it.value.changedAt }, { it.index }))
             ?.value
             ?.submitted
-            ?: (legacySubmitted && legacyStatusUpdatedAt?.let { it < cutoff } == true)
+            ?: (legacySubmitted && legacyStatusUpdatedAt?.let { it <= cutoff } == true)
     }
 
-    private fun MemberStatisticsLedger.toDto(weekEnd: Instant): MemberStatisticsDto {
+    private fun sourceQuery(
+        membership: StudyGroupMember,
+        joinedAt: Instant,
+        previousCutoff: Instant?,
+        cutoff: Instant,
+        mutationAfter: Instant?,
+        mutationThrough: Instant
+    ): StatisticsSourceQuery {
+        return StatisticsSourceQuery(
+            groupId = membership.groupId,
+            memberId = membership.memberId,
+            joinedAt = joinedAt,
+            previousCutoff = previousCutoff,
+            cutoff = cutoff,
+            mutationAfter = mutationAfter,
+            mutationThrough = mutationThrough
+        )
+    }
+
+    private fun isValid(
+        snapshot: MemberSessionStatistics,
+        ledger: MemberSessionStatisticsLedger
+    ): Boolean {
+        val beforeProjection = compareBoundary(
+            snapshot.scheduleAt,
+            snapshot.scheduleId,
+            ledger.projectionStartAt,
+            ledger.projectionStartScheduleId
+        ) < 0
+        return beforeProjection && snapshot.ledgerVersion < ledger.version ||
+            snapshot.ledgerVersion == ledger.version && snapshot.projectionId == ledger.projectionId
+    }
+
+    private fun MemberSessionStatistics.toDto(): MemberStatisticsDto {
         return MemberStatisticsDto(
             groupId = groupId.toHexString(),
             membershipId = membershipId.toHexString(),
             memberId = memberId.toHexString(),
-            weekEnd = weekEnd,
+            latestSession = session,
+            statisticsAt = statisticsAt,
             counts = counts,
             taskSubmissionRate = counts.taskSubmissionRate(),
             scheduleAttendanceRate = counts.scheduleAttendanceRate()
         )
     }
 
+    private fun MemberSessionStatisticsLedger.toDto(): MemberStatisticsDto {
+        return MemberStatisticsDto(
+            groupId = groupId.toHexString(),
+            membershipId = membershipId.toHexString(),
+            memberId = memberId.toHexString(),
+            latestSession = latestSession,
+            statisticsAt = latestScheduleAt,
+            counts = counts,
+            taskSubmissionRate = counts.taskSubmissionRate(),
+            scheduleAttendanceRate = counts.scheduleAttendanceRate()
+        )
+    }
+
+    private fun emptyDto(membership: StudyGroupMember): MemberStatisticsDto {
+        return MemberStatisticsDto(
+            groupId = membership.groupId.toHexString(),
+            membershipId = membership.identifier,
+            memberId = membership.memberId.toHexString(),
+            latestSession = null,
+            statisticsAt = null,
+            counts = StatisticsCounts(),
+            taskSubmissionRate = 0.0,
+            scheduleAttendanceRate = 0.0
+        )
+    }
+
+    private fun compareBoundary(
+        leftAt: Instant,
+        leftId: ObjectId,
+        rightAt: Instant,
+        rightId: ObjectId
+    ): Int {
+        val timeComparison = leftAt.compareTo(rightAt)
+        return if (timeComparison != 0) timeComparison else leftId.compareTo(rightId)
+    }
+
     private companion object {
         const val MAX_CAS_ATTEMPTS = 5
-        const val WEEK_SECONDS = 7L * 24L * 60L * 60L
+        val BOUNDARY_COMPARATOR = compareBy<StatisticsSessionBoundary>({ it.scheduleAt }, { it.scheduleId })
     }
 }

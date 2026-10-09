@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.study_group.application.StatisticsQueryService
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.persistence.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.ScheduleStatisticsSourcePort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsRepository
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.RefreshMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupMemberStatisticsCommand
@@ -29,8 +30,10 @@ internal class StatisticsQueryPaginationTest : BehaviorSpec({
                 val members = mockk<StudyGroupMemberRepository>()
                 val repository = mockk<StatisticsRepository>()
                 val refresh = mockk<RefreshMemberStatisticsUseCase>()
+                val schedules = mockk<ScheduleStatisticsSourcePort>()
+                every { schedules.loadBoundaries(any(), any()) } returns emptyMap()
                 shouldThrow<BadRequestException> {
-                    StatisticsQueryService(members, repository, refresh).execute(
+                    StatisticsQueryService(members, mockk(), repository, schedules, refresh).execute(
                         GetGroupMemberStatisticsCommand(ObjectId().toHexString(), ObjectId().toHexString(), size = size)
                     )
                 }
@@ -46,6 +49,8 @@ internal class StatisticsQueryPaginationTest : BehaviorSpec({
                 val members = mockk<StudyGroupMemberRepository>()
                 val repository = mockk<StatisticsRepository>()
                 val refresh = mockk<RefreshMemberStatisticsUseCase>()
+                val schedules = mockk<ScheduleStatisticsSourcePort>()
+                every { schedules.loadBoundaries(any(), any()) } returns emptyMap()
                 val group = ObjectId()
                 val requester = ObjectId()
                 val cursor = if (size == 20) null else ObjectId()
@@ -58,13 +63,13 @@ internal class StatisticsQueryPaginationTest : BehaviorSpec({
                 every { refresh.execute(capture(commands)) } answers {
                     val command = firstArg<RefreshMemberStatisticsCommand>()
                     MemberStatisticsDto(group.toHexString(), command.membershipId, requester.toHexString(),
-                        command.cutoff, StatisticsCounts(), 0.0, 0.0)
+                        null, null, StatisticsCounts(), 0.0, 0.0)
                 }
-                val result = StatisticsQueryService(members, repository, refresh).execute(
+                val result = StatisticsQueryService(members, mockk(), repository, schedules, refresh).execute(
                     GetGroupMemberStatisticsCommand(requester.toHexString(), group.toHexString(), cursor?.toHexString(), size)
                 )
                 result.map { it.membershipId } shouldBe page.map { it.identifier }
-                commands.map { it.cutoff }.distinct().size shouldBe 1
+                commands.map { it.boundaries }.distinct().size shouldBe 1
                 commands.map { it.observedAt }.distinct().size shouldBe 1
                 verify(exactly = 1) { members.findActiveByGroupId(group, cursor, size + 1) }
                 verify(exactly = 0) { members.findByGroupIdIncludingDeleted(any(), any(), any()) }
@@ -77,9 +82,11 @@ internal class StatisticsQueryPaginationTest : BehaviorSpec({
         Then("목록 조회와 갱신 전에 접근을 거부한다") {
             val members = mockk<StudyGroupMemberRepository>()
             val refresh = mockk<RefreshMemberStatisticsUseCase>()
+                val schedules = mockk<ScheduleStatisticsSourcePort>()
+                every { schedules.loadBoundaries(any(), any()) } returns emptyMap()
             every { members.findByGroupIdAndMemberId(any(), any()) } returns null
             shouldThrow<NotFoundException> {
-                StatisticsQueryService(members, mockk(), refresh).execute(
+                StatisticsQueryService(members, mockk(), mockk(), schedules, refresh).execute(
                     GetGroupMemberStatisticsCommand(ObjectId().toHexString(), ObjectId().toHexString())
                 )
             }

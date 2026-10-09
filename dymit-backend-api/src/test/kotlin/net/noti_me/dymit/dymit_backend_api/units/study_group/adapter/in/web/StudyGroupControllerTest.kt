@@ -40,6 +40,7 @@ internal class StudyGroupControllerTest : BehaviorSpec() {
         mockk(),
         mockk(),
         mockk(),
+        mockk(),
         loadStudyGroupPostPort
     )
 

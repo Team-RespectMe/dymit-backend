@@ -8,6 +8,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -184,5 +185,55 @@ class MongoStudyGroupMemberRepository(
                 .and("isDeleted").ne(true)),
             StudyGroupMember::class.java
         )
+    }
+
+    override fun findManagedGroupIds(
+        memberId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<ObjectId> {
+        val criteria = Criteria.where("memberId").`is`(memberId)
+            .and("role").`in`(GroupMemberRole.OWNER, GroupMemberRole.ADMIN)
+            .and("isDeleted").ne(true)
+        if (cursor != null) {
+            criteria.and("groupId").gt(cursor)
+        }
+        val aggregation = Aggregation.newAggregation(
+            Aggregation.match(criteria),
+            Aggregation.group("groupId"),
+            Aggregation.lookup("study_groups", "_id", "_id", "group"),
+            Aggregation.unwind("group"),
+            Aggregation.match(Criteria.where("group.isDeleted").ne(true)),
+            Aggregation.sort(Sort.Direction.ASC, "_id"),
+            Aggregation.limit(limit.toLong())
+        )
+        return mongoTemplate.aggregate(
+            aggregation,
+            "study_group_members",
+            Document::class.java
+        ).mappedResults.mapNotNull { it["_id"] as? ObjectId }
+    }
+
+    override fun countDistinctActiveMembers(groupIds: List<ObjectId>): Map<ObjectId, Long> {
+        if (groupIds.isEmpty()) {
+            return emptyMap()
+        }
+        val aggregation = Aggregation.newAggregation(
+            Aggregation.match(
+                Criteria.where("groupId").`in`(groupIds)
+                    .and("isDeleted").ne(true)
+            ),
+            Aggregation.group("groupId", "memberId"),
+            Aggregation.group("_id.groupId").count().`as`("count")
+        )
+        return mongoTemplate.aggregate(
+            aggregation,
+            "study_group_members",
+            Document::class.java
+        ).mappedResults.mapNotNull { document ->
+            val groupId = document["_id"] as? ObjectId ?: return@mapNotNull null
+            val count = (document["count"] as? Number)?.toLong() ?: 0L
+            groupId to count
+        }.toMap()
     }
 }

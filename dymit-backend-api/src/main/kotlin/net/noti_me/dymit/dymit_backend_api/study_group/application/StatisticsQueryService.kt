@@ -4,33 +4,49 @@ import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ConflictException
 import net.noti_me.dymit.dymit_backend_api.common.errors.ForbiddenException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.persistence.LoadStudyGroupPort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.persistence.StudyGroupMemberRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.ScheduleStatisticsSourcePort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsRepository
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsSessionBoundary
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupStatisticsUseCase
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetManagedGroupStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.RefreshMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupMemberStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupStatisticsCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetManagedGroupStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetMemberStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GroupStatisticsDto
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.ManagedGroupStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.MemberStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.RefreshMemberStatisticsCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.StatisticsGroupDto
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupMemberRole
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupWeeklyStatistics
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberStatisticsLedger
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupSessionStatistics
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatisticsLedger
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StatisticsCounts
+import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroup
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupMember
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.time.Instant
 
-/** 개인 및 그룹 통계 조회를 공통 구성원 갱신 경로로 처리합니다. */
+/** 개인·그룹·관리 목록 통계를 동일한 회차 갱신 경로로 처리합니다. */
 @Service
 class StatisticsQueryService(
     private val memberRepository: StudyGroupMemberRepository,
+    private val loadStudyGroupPort: LoadStudyGroupPort,
     private val statisticsRepository: StatisticsRepository,
+    private val scheduleSourcePort: ScheduleStatisticsSourcePort,
     private val refreshMemberStatistics: RefreshMemberStatisticsUseCase
-) : GetMemberStatisticsUseCase, GetGroupStatisticsUseCase, GetGroupMemberStatisticsUseCase {
+) : GetMemberStatisticsUseCase,
+    GetGroupStatisticsUseCase,
+    GetGroupMemberStatisticsUseCase,
+    GetManagedGroupStatisticsUseCase {
 
     override fun execute(command: GetMemberStatisticsCommand): MemberStatisticsDto {
         val groupId = ObjectId(command.groupId)
@@ -40,47 +56,22 @@ class StatisticsQueryService(
             throw ForbiddenException(message = "본인 또는 그룹 관리자만 구성원 통계를 조회할 수 있습니다.")
         }
         val observedAt = Instant.now()
-        return refresh(target, StatisticsWeekWindow.cutoffAt(observedAt), observedAt)
+        val boundaries = loadBoundaries(listOf(groupId), observedAt)[groupId].orEmpty()
+        return refresh(target, boundaries, observedAt)
     }
 
     override fun execute(command: GetGroupStatisticsCommand): GroupStatisticsDto {
         val groupId = ObjectId(command.groupId)
         requireManager(groupId, ObjectId(command.requesterId))
+        val group = requireActiveGroup(command.groupId)
         val observedAt = Instant.now()
-        val cutoff = StatisticsWeekWindow.cutoffAt(observedAt)
-        val memberships = refreshAllMemberships(groupId, cutoff, observedAt)
-        val firstWeek = memberships.mapNotNull { it.createdAt }
-            .minOrNull()
-            ?.let(StatisticsWeekWindow::firstWeekEndAfter)
-            ?: cutoff
-        val latestStored = statisticsRepository.findLatestGroupWeek(groupId, cutoff)
-        var weekEnd = latestStored?.weekEnd?.plusSeconds(WEEK_SECONDS) ?: firstWeek
-        while (weekEnd <= cutoff) {
-            saveGroupWeek(groupId, weekEnd, observedAt)
-            weekEnd = weekEnd.plusSeconds(WEEK_SECONDS)
-        }
-        val current = saveGroupWeek(groupId, cutoff, observedAt)
-        val previousWeekEnd = cutoff.minusSeconds(WEEK_SECONDS)
-        val previous = saveGroupWeek(groupId, previousWeekEnd, observedAt)
-        val currentTaskRate = current.counts.taskSubmissionRate()
-        val currentScheduleRate = current.counts.scheduleAttendanceRate()
-        val previousTaskRate = previous.counts.taskSubmissionRate()
-        val previousScheduleRate = previous.counts.scheduleAttendanceRate()
-        return GroupStatisticsDto(
-            groupId = command.groupId,
-            weekEnd = cutoff,
-            counts = current.counts,
-            taskSubmissionRate = currentTaskRate,
-            scheduleAttendanceRate = currentScheduleRate,
-            previousTaskSubmissionRate = previousTaskRate,
-            previousScheduleAttendanceRate = previousScheduleRate
-        )
+        val boundaries = loadBoundaries(listOf(groupId), observedAt)[groupId].orEmpty()
+        val activeCount = memberRepository.countDistinctActiveMembers(listOf(groupId))[groupId] ?: 0L
+        return refreshGroup(group.toStatisticsGroupDto(), groupId, boundaries, observedAt, activeCount)
     }
 
     override fun execute(command: GetGroupMemberStatisticsCommand): List<MemberStatisticsDto> {
-        if (command.size !in 1..MAX_PAGE_SIZE) {
-            throw BadRequestException(message = "size는 1 이상 $MAX_PAGE_SIZE 이하여야 합니다.")
-        }
+        validateSize(command.size)
         val groupId = ObjectId(command.groupId)
         requireManager(groupId, ObjectId(command.requesterId))
         val memberships = memberRepository.findActiveByGroupId(
@@ -89,90 +80,198 @@ class StatisticsQueryService(
             limit = command.size + 1
         )
         val observedAt = Instant.now()
-        val cutoff = StatisticsWeekWindow.cutoffAt(observedAt)
-        return memberships.map { refresh(it, cutoff, observedAt) }
+        val boundaries = loadBoundaries(listOf(groupId), observedAt)[groupId].orEmpty()
+        return memberships.map { refresh(it, boundaries, observedAt) }
+    }
+
+    override fun execute(command: GetManagedGroupStatisticsCommand): List<ManagedGroupStatisticsDto> {
+        validateSize(command.size)
+        val observedAt = Instant.now()
+        val groupIds = memberRepository.findManagedGroupIds(
+            memberId = ObjectId(command.requesterId),
+            cursor = command.cursor?.let(::ObjectId),
+            limit = command.size + 1
+        )
+        val groupsById = loadActiveGroups(groupIds)
+        val responseGroupIds = groupIds.take(command.size)
+        val boundaries = loadBoundaries(responseGroupIds, observedAt)
+        val activeCounts = memberRepository.countDistinctActiveMembers(responseGroupIds)
+        val groupsHavingSchedule = scheduleSourcePort.loadGroupIdsHavingSchedule(responseGroupIds)
+        val responses = responseGroupIds.map { groupId ->
+            refreshGroup(
+                group = requireNotNull(groupsById[groupId]),
+                groupId = groupId,
+                boundaries = boundaries[groupId].orEmpty(),
+                observedAt = observedAt,
+                activeMemberCount = activeCounts[groupId] ?: 0L
+            ).toManaged(hasSchedule = groupId in groupsHavingSchedule)
+        }.toMutableList()
+        if (groupIds.size > command.size) {
+            responses += ManagedGroupStatisticsDto(
+                group = requireNotNull(groupsById[groupIds.last()]),
+                latestSession = null,
+                statisticsAt = null,
+                activeMemberCount = 0L,
+                taskSubmissionRate = 0.0,
+                scheduleAttendanceRate = 0.0,
+                hasSchedule = false
+            )
+        }
+        return responses
+    }
+
+    private fun refreshGroup(
+        group: StatisticsGroupDto,
+        groupId: ObjectId,
+        boundaries: List<StatisticsSessionBoundary>,
+        observedAt: Instant,
+        activeMemberCount: Long
+    ): GroupStatisticsDto {
+        if (boundaries.isEmpty()) {
+            return emptyGroupDto(group, activeMemberCount)
+        }
+        repeat(MAX_CAS_ATTEMPTS) {
+            refreshAllMemberships(groupId, boundaries, observedAt)
+            val ledgers = statisticsRepository.findLedgersByGroupId(groupId)
+            val sourceProjectionToken = sourceProjectionToken(ledgers)
+            val storedByScheduleId = statisticsRepository.findGroupSessions(groupId)
+                .associateBy { it.scheduleId }
+                .toMutableMap()
+            val latestStored = storedByScheduleId[boundaries.last().scheduleId]
+            val rebuildAll = latestStored?.sourceProjectionToken != sourceProjectionToken
+            var projectionComplete = true
+            boundaries.forEach { boundary ->
+                val stored = storedByScheduleId[boundary.scheduleId]
+                val needsSave = rebuildAll || stored == null ||
+                    stored.sourceProjectionToken != sourceProjectionToken ||
+                    stored.scheduleAt != boundary.scheduleAt || stored.session != boundary.session
+                if (needsSave && projectionComplete) {
+                    val saved = saveGroupSession(
+                        groupId = groupId,
+                        boundary = boundary,
+                        current = stored,
+                        ledgers = ledgers,
+                        sourceProjectionToken = sourceProjectionToken,
+                        observedAt = observedAt
+                    )
+                    projectionComplete = saved != null
+                    saved?.let { storedByScheduleId[boundary.scheduleId] = it }
+                }
+            }
+            if (projectionComplete && sourceProjectionToken == sourceProjectionToken(groupId)) {
+                return groupDto(group, boundaries, storedByScheduleId, activeMemberCount)
+            }
+        }
+        throw ConflictException(message = "그룹 통계 원장 투영이 완료되지 않아 다시 시도해야 합니다.")
+    }
+
+    private fun groupDto(
+        group: StatisticsGroupDto,
+        boundaries: List<StatisticsSessionBoundary>,
+        storedByScheduleId: Map<ObjectId, GroupSessionStatistics>,
+        activeMemberCount: Long
+    ): GroupStatisticsDto {
+        val currentBoundary = boundaries.last()
+        val previousBoundary = boundaries.getOrNull(boundaries.lastIndex - 1)
+        val current = requireNotNull(storedByScheduleId[currentBoundary.scheduleId])
+        val previous = previousBoundary?.let { storedByScheduleId[it.scheduleId] }
+        return GroupStatisticsDto(
+            group = group,
+            latestSession = currentBoundary.session,
+            previousSession = previousBoundary?.session,
+            statisticsAt = currentBoundary.scheduleAt,
+            activeMemberCount = activeMemberCount,
+            counts = current.counts,
+            taskSubmissionRate = current.counts.taskSubmissionRate(),
+            scheduleAttendanceRate = current.counts.scheduleAttendanceRate(),
+            previousTaskSubmissionRate = previous?.counts?.taskSubmissionRate() ?: 0.0,
+            previousScheduleAttendanceRate = previous?.counts?.scheduleAttendanceRate() ?: 0.0
+        )
     }
 
     private fun refreshAllMemberships(
         groupId: ObjectId,
-        cutoff: Instant,
+        boundaries: List<StatisticsSessionBoundary>,
         observedAt: Instant
-    ): List<StudyGroupMember> {
-        val result = mutableListOf<StudyGroupMember>()
+    ) {
         var cursor: ObjectId? = null
         do {
             val page = memberRepository.findByGroupIdIncludingDeleted(groupId, cursor, INTERNAL_PAGE_SIZE)
-            page.filter { it.createdAt?.let { joinedAt -> joinedAt < cutoff } == true }
-                .filter { membership ->
-                    val terminalCutoff = membership.deletedAt
-                        ?.let(StatisticsWeekWindow::firstWeekEndAfter)
-                    val ledger = membership.id?.let(statisticsRepository::findLedger)
-                    terminalCutoff == null || ledger == null ||
-                        ledger.taskCalculatedThrough < terminalCutoff ||
-                        ledger.scheduleCalculatedThrough < terminalCutoff ||
-                        !hasCompleteFrozenProjection(membership, ledger, terminalCutoff)
-                }
-                .forEach { refresh(it, cutoff, observedAt) }
-            result.addAll(page)
+            page.forEach { refresh(it, boundaries, observedAt) }
             cursor = page.lastOrNull()?.id
         } while (page.size == INTERNAL_PAGE_SIZE)
-        return result
     }
 
-    private fun hasCompleteFrozenProjection(
-        membership: StudyGroupMember,
-        ledger: MemberStatisticsLedger,
-        terminalCutoff: Instant
-    ): Boolean {
-        val membershipId = membership.id ?: return false
-        val joinedAt = membership.createdAt ?: return false
-        val snapshots = statisticsRepository.findMemberWeeks(membershipId, terminalCutoff)
-        return StatisticsWeekWindow.weekEnds(joinedAt, terminalCutoff).all { weekEnd ->
-            snapshots.any { snapshot ->
-                snapshot.weekEnd == weekEnd &&
-                    (snapshot.weekEnd < ledger.projectionStartWeekEnd &&
-                        snapshot.ledgerVersion < ledger.version ||
-                        snapshot.ledgerVersion == ledger.version &&
-                        snapshot.projectionId == ledger.projectionId)
-            }
-        }
-    }
-
-    private fun saveGroupWeek(
+    private fun saveGroupSession(
         groupId: ObjectId,
-        weekEnd: Instant,
+        boundary: StatisticsSessionBoundary,
+        current: GroupSessionStatistics?,
+        ledgers: List<MemberSessionStatisticsLedger>,
+        sourceProjectionToken: String,
         observedAt: Instant
-    ): GroupWeeklyStatistics {
+    ): GroupSessionStatistics? {
+        var expected = current
         repeat(MAX_CAS_ATTEMPTS) {
-            val current = statisticsRepository.findGroupWeek(groupId, weekEnd)
-            val replacement = GroupWeeklyStatistics(
-                id = current?.id,
+            val counts = statisticsRepository.sumMemberCounts(groupId, boundary.scheduleId, ledgers)
+                ?: return null
+            val replacement = GroupSessionStatistics(
+                id = expected?.id,
                 groupId = groupId,
-                weekEnd = weekEnd,
-                counts = statisticsRepository.sumLatestMemberCounts(groupId, weekEnd),
-                version = (current?.version ?: 0L) + 1L,
+                scheduleId = boundary.scheduleId,
+                session = boundary.session,
+                scheduleAt = boundary.scheduleAt,
+                statisticsAt = boundary.scheduleAt,
+                counts = counts,
+                sourceProjectionToken = sourceProjectionToken,
+                version = (expected?.version ?: 0L) + 1L,
                 updatedAt = observedAt
             )
-            if (statisticsRepository.compareAndSetGroupWeek(current?.version, replacement)) {
+            if (statisticsRepository.compareAndSetGroupSession(expected?.version, replacement)) {
                 return replacement
             }
+            expected = statisticsRepository.findGroupSession(groupId, boundary.scheduleId)
         }
         throw ConflictException(message = "그룹 통계가 동시에 갱신되어 다시 시도해야 합니다.")
     }
 
     private fun refresh(
         membership: StudyGroupMember,
-        cutoff: Instant,
+        boundaries: List<StatisticsSessionBoundary>,
         observedAt: Instant
     ): MemberStatisticsDto {
         return refreshMemberStatistics.execute(
             RefreshMemberStatisticsCommand(
                 groupId = membership.groupId.toHexString(),
                 membershipId = membership.identifier,
-                cutoff = cutoff,
+                boundaries = boundaries,
                 observedAt = observedAt
             )
         )
+    }
+
+    private fun loadBoundaries(
+        groupIds: List<ObjectId>,
+        observedAt: Instant
+    ): Map<ObjectId, List<StatisticsSessionBoundary>> {
+        return scheduleSourcePort.loadBoundaries(groupIds, observedAt)
+            .mapValues { (_, values) -> values.sortedWith(BOUNDARY_COMPARATOR) }
+    }
+
+    private fun sourceProjectionToken(groupId: ObjectId): String {
+        return sourceProjectionToken(statisticsRepository.findLedgersByGroupId(groupId))
+    }
+
+    private fun sourceProjectionToken(
+        ledgers: List<MemberSessionStatisticsLedger>
+    ): String {
+        val source = ledgers
+            .sortedBy { it.membershipId }
+            .joinToString("|") {
+                "${it.membershipId.toHexString()}:${it.version}:${it.projectionId}"
+            }
+        return MessageDigest.getInstance("SHA-256")
+            .digest(source.toByteArray(StandardCharsets.UTF_8))
+            .joinToString("") { byte -> "%02x".format(byte) }
     }
 
     private fun requireManager(groupId: ObjectId, memberId: ObjectId): StudyGroupMember {
@@ -192,10 +291,66 @@ class StatisticsQueryService(
         return role == GroupMemberRole.OWNER || role == GroupMemberRole.ADMIN
     }
 
+    private fun GroupStatisticsDto.toManaged(hasSchedule: Boolean): ManagedGroupStatisticsDto {
+        return ManagedGroupStatisticsDto(
+            group = group,
+            latestSession = latestSession,
+            statisticsAt = statisticsAt,
+            activeMemberCount = activeMemberCount,
+            taskSubmissionRate = taskSubmissionRate,
+            scheduleAttendanceRate = scheduleAttendanceRate,
+            hasSchedule = hasSchedule
+        )
+    }
+
+    private fun emptyGroupDto(group: StatisticsGroupDto, activeMemberCount: Long): GroupStatisticsDto {
+        return GroupStatisticsDto(
+            group = group,
+            latestSession = null,
+            previousSession = null,
+            statisticsAt = null,
+            activeMemberCount = activeMemberCount,
+            counts = StatisticsCounts(),
+            taskSubmissionRate = 0.0,
+            scheduleAttendanceRate = 0.0,
+            previousTaskSubmissionRate = 0.0,
+            previousScheduleAttendanceRate = 0.0
+        )
+    }
+
+    private fun requireActiveGroup(groupId: String): StudyGroup {
+        return loadStudyGroupPort.loadByGroupId(groupId)
+            ?.takeUnless { it.isDeleted }
+            ?: throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+    }
+
+    private fun loadActiveGroups(groupIds: List<ObjectId>): Map<ObjectId, StatisticsGroupDto> {
+        if (groupIds.isEmpty()) {
+            return emptyMap()
+        }
+        val groups = loadStudyGroupPort.loadByGroupIds(groupIds.map(ObjectId::toHexString))
+            .filterNot { it.isDeleted }
+            .associateBy { requireNotNull(it.id) }
+        if (groups.size != groupIds.size || groupIds.any { it !in groups }) {
+            throw NotFoundException(message = "존재하지 않는 스터디 그룹입니다.")
+        }
+        return groups.mapValues { (_, group) -> group.toStatisticsGroupDto() }
+    }
+
+    private fun StudyGroup.toStatisticsGroupDto(): StatisticsGroupDto {
+        return StatisticsGroupDto(id = identifier, name = name)
+    }
+
+    private fun validateSize(size: Int) {
+        if (size !in 1..MAX_PAGE_SIZE) {
+            throw BadRequestException(message = "size는 1 이상 $MAX_PAGE_SIZE 이하여야 합니다.")
+        }
+    }
+
     private companion object {
-        const val WEEK_SECONDS = 7L * 24L * 60L * 60L
         const val INTERNAL_PAGE_SIZE = 200
         const val MAX_PAGE_SIZE = 100
         const val MAX_CAS_ATTEMPTS = 5
+        val BOUNDARY_COMPARATOR = compareBy<StatisticsSessionBoundary>({ it.scheduleAt }, { it.scheduleId })
     }
 }

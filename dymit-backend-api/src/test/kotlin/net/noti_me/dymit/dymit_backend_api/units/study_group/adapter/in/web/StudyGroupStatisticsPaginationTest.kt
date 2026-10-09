@@ -13,6 +13,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetMe
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupMemberStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetMemberStatisticsCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.StatisticsGroupDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GroupStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.MemberStatisticsDto
@@ -50,14 +51,14 @@ internal class StudyGroupStatisticsPaginationTest : BehaviorSpec({
     Given("가입 이력 식별자가 사용자 식별자와 다른 개인 통계") {
         Then("개인 통계 envelop JSON은 사용자 ID를 유지하고 membershipId 필드를 노출하지 않는다") {
             val useCase = mockk<GetMemberStatisticsUseCase>()
-            val controller = StudyGroupController(mockk(), mockk(), mockk(), mockk(), mockk(), useCase, mockk())
+            val controller = StudyGroupController(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), useCase, mockk())
             val member = createMemberInfo(createMemberEntity())
             val group = ObjectId().toHexString()
             val membershipId = "000000000000000000000001"
             val memberId = "100000000000000000000001"
             val command = GetMemberStatisticsCommand(member.memberId, group, memberId)
             every { useCase.execute(command) } returns MemberStatisticsDto(
-                group, membershipId, memberId, Instant.EPOCH, StatisticsCounts(1, 2), 50.0, 0.0
+                group, membershipId, memberId, 12, Instant.EPOCH, StatisticsCounts(1, 2), 50.0, 0.0
             )
             val result = controller.getMemberStatistics(member, group, memberId)
             val personalMethod = StudyGroupController::class.java.methods.single { it.name == "getMemberStatistics" }
@@ -72,6 +73,8 @@ internal class StudyGroupStatisticsPaginationTest : BehaviorSpec({
             json["data"].has("membershipId") shouldBe false
             json["data"]["memberId"].asText() shouldBe memberId
             json["data"]["groupId"].asText() shouldBe group
+            json["data"].has("weekEnd") shouldBe false
+            json["data"]["latestSession"].asLong() shouldBe 12
             json["data"]["counts"]["submittedTaskCount"].asInt() shouldBe 1
             json["data"]["taskSubmissionRate"].asDouble() shouldBe 50.0
             verify(exactly = 1) { useCase.execute(command) }
@@ -82,13 +85,16 @@ internal class StudyGroupStatisticsPaginationTest : BehaviorSpec({
     Given("현재 및 이전 주 비율을 가진 그룹 통계") {
         Then("그룹 envelop JSON은 네 비율을 유지하고 서버 차이 필드를 노출하지 않는다") {
             val useCase = mockk<GetGroupStatisticsUseCase>()
-            val controller = StudyGroupController(mockk(), mockk(), mockk(), useCase, mockk(), mockk(), mockk())
+            val controller = StudyGroupController(mockk(), mockk(), mockk(), useCase, mockk(), mockk(), mockk(), mockk())
             val member = createMemberInfo(createMemberEntity())
             val group = ObjectId().toHexString()
             val command = GetGroupStatisticsCommand(member.memberId, group)
             every { useCase.execute(command) } returns GroupStatisticsDto(
-                groupId = group,
-                weekEnd = Instant.EPOCH,
+                group = StatisticsGroupDto(group, "현재 그룹 이름"),
+                latestSession = 12,
+                previousSession = 7,
+                statisticsAt = Instant.EPOCH,
+                activeMemberCount = 3,
                 counts = StatisticsCounts(2, 3, 1, 3),
                 taskSubmissionRate = 66.67,
                 scheduleAttendanceRate = 33.33,
@@ -105,9 +111,16 @@ internal class StudyGroupStatisticsPaginationTest : BehaviorSpec({
                 MappingJackson2HttpMessageConverter::class.java, mockk(), response)
             val json = jacksonObjectMapper().findAndRegisterModules().valueToTree<com.fasterxml.jackson.databind.JsonNode>(envelop)
             json["status"].asInt() shouldBe 200
-            json["data"]["groupId"].asText() shouldBe group
+            json["data"].has("groupId") shouldBe false
+            json["data"]["group"]["id"].asText() shouldBe group
+            json["data"]["group"]["name"].asText() shouldBe "현재 그룹 이름"
+            json["data"]["group"].fieldNames().asSequence().toSet() shouldBe setOf("id", "name")
+            json["data"].has("weekEnd") shouldBe false
+            json["data"]["latestSession"].asLong() shouldBe 12
             json["data"]["taskSubmissionRate"].asDouble() shouldBe 66.67
             json["data"]["scheduleAttendanceRate"].asDouble() shouldBe 33.33
+            json["data"]["previousSession"].asLong() shouldBe 7
+            json["data"]["activeMemberCount"].asLong() shouldBe 3
             json["data"]["previousTaskSubmissionRate"].asDouble() shouldBe 50.0
             json["data"]["previousScheduleAttendanceRate"].asDouble() shouldBe 25.0
             json["data"].has("taskSubmissionRateDifferencePp") shouldBe false
@@ -121,14 +134,14 @@ internal class StudyGroupStatisticsPaginationTest : BehaviorSpec({
         Given("size 2 요청에 통계 $returnedCount 개가 조회된 경우") {
             Then("응답 개수와 항목 및 다음 페이지 링크를 공통 envelop 형식으로 반환한다") {
                 val useCase = mockk<GetGroupMemberStatisticsUseCase>()
-                val controller = StudyGroupController(mockk(), mockk(), mockk(), mockk(), useCase, mockk(), mockk())
+                val controller = StudyGroupController(mockk(), mockk(), mockk(), mockk(), mockk(), useCase, mockk(), mockk())
                 val member = createMemberInfo(createMemberEntity())
                 val group = ObjectId().toHexString()
                 val cursor = ObjectId().toHexString()
                 val items = (1..returnedCount).map { index ->
                     MemberStatisticsDto(group, ObjectId("00000000000000000000000$index").toHexString(),
                         ObjectId("10000000000000000000000$index").toHexString(),
-                        Instant.EPOCH, StatisticsCounts(1, 2), 50.0, 0.0)
+                        12, Instant.EPOCH, StatisticsCounts(1, 2), 50.0, 0.0)
                 }
                 every { useCase.execute(GetGroupMemberStatisticsCommand(member.memberId, group, cursor, 2)) } returns items
                 val request = MockHttpServletRequest("GET", "/api/v1/study-groups/$group/statistics/members")

@@ -53,7 +53,7 @@ class MongoTaskStatisticsQueryAdapter(
         val matured = mongoTemplate.find(
             Query(
                 Criteria.where("relatedScheduleId").`in`(scheduleIds)
-                    .and("expireAt").gte(query.previousCutoff).lt(query.cutoff)
+                    .and("expireAt").gt(query.previousCutoff).lte(query.cutoff)
             ),
             Task::class.java
         )
@@ -84,10 +84,14 @@ class MongoTaskStatisticsQueryAdapter(
             Query(Criteria.where("relatedScheduleId").`in`(changedScheduleIds)),
             Task::class.java
         )
+        val maturedIds = matured.mapNotNull { it.id }.toSet()
+        val correctionIds = (changedTasks + assignmentTasks + scheduleChangedTasks)
+            .mapNotNull { it.id }
+            .filterNot(maturedIds::contains)
         val tasks = (matured + changedTasks + assignmentTasks + scheduleChangedTasks).distinctBy { it.id }
         return TaskStatisticsChanges(
             sources = mapSources(tasks, query.memberId, scheduleReferences.associateBy { it.scheduleId }),
-            requiresReplay = false
+            requiresReplay = correctionIds.isNotEmpty()
         )
     }
 

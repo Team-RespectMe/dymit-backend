@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.stat
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.ScheduleStatisticsSourcePort
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsSourceChanges
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsSourceQuery
+import net.noti_me.dymit.dymit_backend_api.study_group.application.port.out.statistics.StatisticsSessionBoundary
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.StudyScheduleStatisticsQueryPort
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsQuery
@@ -15,6 +16,28 @@ import org.springframework.stereotype.Component
 class ScheduleStatisticsSourceAdapter(
     private val queryPort: StudyScheduleStatisticsQueryPort
 ) : ScheduleStatisticsSourcePort {
+
+    override fun loadBoundaries(
+        groupIds: List<org.bson.types.ObjectId>,
+        observedAt: java.time.Instant
+    ): Map<org.bson.types.ObjectId, List<StatisticsSessionBoundary>> {
+        return queryPort.loadSessionBoundaries(groupIds, observedAt)
+            .map {
+                StatisticsSessionBoundary(
+                    groupId = it.groupId,
+                    scheduleId = it.scheduleId,
+                    session = it.session,
+                    scheduleAt = it.scheduleAt
+                )
+            }
+            .groupBy { it.groupId }
+    }
+
+    override fun loadGroupIdsHavingSchedule(
+        groupIds: List<org.bson.types.ObjectId>
+    ): Set<org.bson.types.ObjectId> {
+        return queryPort.loadGroupIdsHavingSchedule(groupIds)
+    }
 
     override fun loadChanged(query: StatisticsSourceQuery): StatisticsSourceChanges<ScheduleStatisticsSourceData> {
         val changes = queryPort.loadChanged(query.toScheduleQuery())
@@ -40,6 +63,7 @@ class ScheduleStatisticsSourceAdapter(
 
     private fun StudyScheduleStatisticsDto.toSourceData() = ScheduleStatisticsSourceData(
         scheduleId = scheduleId,
+        session = session,
         createdAt = createdAt,
         scheduleAt = scheduleAt,
         scheduleDeletedAt = deletedAt,

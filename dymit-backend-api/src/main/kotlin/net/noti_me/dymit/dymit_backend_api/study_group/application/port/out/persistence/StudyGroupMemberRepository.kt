@@ -43,4 +43,14 @@ interface StudyGroupMemberRepository {
     fun findByGroupIdAndMemberIdsIn(groupId: ObjectId, memberIds: List<ObjectId>): List<StudyGroupMember>
 
     fun countByMemberIdAndRole(memberId: ObjectId, role: GroupMemberRole): Long
+
+    /** 현재 소유자 또는 관리자인 활성 그룹 ID를 커서 순서로 조회합니다. */
+    fun findManagedGroupIds(
+        memberId: ObjectId,
+        cursor: ObjectId?,
+        limit: Int
+    ): List<ObjectId>
+
+    /** 그룹별 현재 활성 사용자 수를 중복 없이 집계합니다. */
+    fun countDistinctActiveMembers(groupIds: List<ObjectId>): Map<ObjectId, Long>
 }

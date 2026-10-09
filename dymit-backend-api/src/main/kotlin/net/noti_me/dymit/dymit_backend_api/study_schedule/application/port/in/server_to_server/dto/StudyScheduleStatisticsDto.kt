@@ -3,6 +3,14 @@ package net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`
 import org.bson.types.ObjectId
 import java.time.Instant
 
+/** 통계 회차를 식별하는 일정 경계입니다. */
+data class StudyScheduleStatisticsBoundaryDto(
+    val groupId: ObjectId,
+    val scheduleId: ObjectId,
+    val session: Long,
+    val scheduleAt: Instant
+)
+
 /** 일정 통계 원천 조회 범위입니다. */
 data class StudyScheduleStatisticsQuery(
     val groupId: ObjectId,
@@ -23,6 +31,7 @@ data class StudyScheduleParticipationStatisticsDto(
 /** 일정 통계 원천 값입니다. */
 data class StudyScheduleStatisticsDto(
     val scheduleId: ObjectId,
+    val session: Long,
     val createdAt: Instant,
     val scheduleAt: Instant,
     val deletedAt: Instant?,

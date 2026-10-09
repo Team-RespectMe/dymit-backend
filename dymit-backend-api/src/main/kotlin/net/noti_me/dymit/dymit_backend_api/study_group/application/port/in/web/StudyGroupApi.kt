@@ -14,10 +14,18 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web
 @Tag(name = "스터디 그룹 API", description = "스터디 그룹 관련 API")
 interface StudyGroupApi {
 
+    /** 현재 소유자 또는 관리자인 그룹의 통계 목록을 조회합니다. */
+    @Operation(summary = "관리 그룹 통계 목록 조회", description = "현재 관리 권한이 있는 그룹의 최근 진행 회차 통계를 조회합니다.")
+    fun getManagedGroupStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        cursor: String?,
+        size: Int
+    ): ListResponse<ManagedGroupStatisticsResponse>
+
     /**
-     * 그룹의 전주 누적 통계와 전전주 비율을 조회합니다.
+     * 그룹의 최근 진행 회차와 직전 진행 회차 누적 비율을 조회합니다.
      */
-    @Operation(summary = "스터디 그룹 통계 조회", description = "그룹 소유자 또는 관리자가 전주까지의 통계를 조회합니다.")
+    @Operation(summary = "스터디 그룹 통계 조회", description = "그룹 소유자 또는 관리자가 최근·직전 진행 회차 통계를 조회합니다.")
     fun getGroupStatistics(
         @LoginMember memberInfo: MemberInfo,
         groupId: String

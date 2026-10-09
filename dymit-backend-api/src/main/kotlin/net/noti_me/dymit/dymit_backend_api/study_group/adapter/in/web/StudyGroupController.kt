@@ -16,9 +16,11 @@ import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web
 import net.noti_me.dymit.dymit_backend_api.study_group.application.port.`in`.web.dto.*
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetGroupStatisticsUseCase
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetManagedGroupStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.GetMemberStatisticsUseCase
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupMemberStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetGroupStatisticsCommand
+import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetManagedGroupStatisticsCommand
 import net.noti_me.dymit.dymit_backend_api.study_group.application.usecase.dto.GetMemberStatisticsCommand
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -33,10 +35,36 @@ class StudyGroupController(
     private val studyGroupQueryService: StudyGroupQueryService,
     private val studyGroupSchedulePort: StudyGroupSchedulePort,
     private val getGroupStatisticsUseCase: GetGroupStatisticsUseCase,
+    private val getManagedGroupStatisticsUseCase: GetManagedGroupStatisticsUseCase,
     private val getGroupMemberStatisticsUseCase: GetGroupMemberStatisticsUseCase,
     private val getMemberStatisticsUseCase: GetMemberStatisticsUseCase,
     private val loadStudyGroupPostPort: LoadStudyGroupPostPort = LoadStudyGroupPostPort { null }
 ): StudyGroupApi {
+
+    @GetMapping("/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getManagedGroupStatistics(
+        @LoginMember memberInfo: MemberInfo,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ListResponse<ManagedGroupStatisticsResponse> {
+        val responses = getManagedGroupStatisticsUseCase.execute(
+            GetManagedGroupStatisticsCommand(
+                requesterId = memberInfo.memberId,
+                cursor = cursor,
+                size = size
+            )
+        ).map(ManagedGroupStatisticsResponse::from)
+        return ListResponse.of(
+            size = size,
+            items = responses,
+            extractors = buildMap {
+                put("cursor") { it.group.id }
+                put("size") { size }
+            }
+        )
+    }
 
     @GetMapping("/{groupId}/statistics")
     @ResponseStatus(HttpStatus.OK)

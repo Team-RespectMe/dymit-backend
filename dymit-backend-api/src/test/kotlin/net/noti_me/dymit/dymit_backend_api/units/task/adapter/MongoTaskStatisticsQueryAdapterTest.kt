@@ -16,8 +16,8 @@ import org.springframework.data.mongodb.core.query.Query
 import java.time.Instant
 
 internal class MongoTaskStatisticsQueryAdapterTest : BehaviorSpec({
-    Given("과거 상태 이력이 있지만 이번 주에 새로 제출한 과제") {
-        Then("과거 기준 상태만으로 불필요한 전체 이력 재계산을 요청하지 않는다") {
+    Given("과거 상태 이력이 있지만 이전 회차 이후에 새로 제출한 과제") {
+        Then("기존 과제 변경을 재투영 대상으로 반환하고 관측 커서와 업무 상한을 유지한다") {
             val mongo = mockk<MongoTemplate>()
             val schedules = mockk<StudyScheduleStatisticsQueryPort>()
             val previous = Instant.parse("2026-09-20T15:00:00Z")
@@ -54,7 +54,7 @@ internal class MongoTaskStatisticsQueryAdapterTest : BehaviorSpec({
             val result = adapter.loadChanged(
                 TaskStatisticsQuery(groupId, memberId, previous.minusSeconds(604800), previous, cutoff, previous, observed)
             )
-            result.requiresReplay shouldBe false
+            result.requiresReplay shouldBe true
             result.sources.single().assignments.single().statusHistory.size shouldBe 2
             assignmentQueries.clear()
             adapter.loadChanged(
@@ -63,8 +63,35 @@ internal class MongoTaskStatisticsQueryAdapterTest : BehaviorSpec({
             )
             val mutationQuery = assignmentQueries.single { it.queryObject.containsKey("updatedAt") }
             val timestampBounds = mutationQuery.queryObject["updatedAt"] as Document
-            // 같은 주 조회로 관측 커서가 전진해도 업무 상한부터 변경을 다시 확인합니다.
+            // 같은 회차 조회로 관측 커서가 전진해도 업무 상한부터 변경을 다시 확인합니다.
             timestampBounds["\$gte"] shouldBe previous
+        }
+    }
+
+    Given("두 실제 회차 시작 사이에 마감되는 과제 조회") {
+        Then("이전 시각은 제외하고 현재 시작 시각은 포함하며 수정 시각과 독립적으로 조회한다") {
+            val mongo = mockk<MongoTemplate>()
+            val schedules = mockk<StudyScheduleStatisticsQueryPort>()
+            val previous = Instant.parse("2026-09-20T10:00:00Z")
+            val cutoff = Instant.parse("2026-09-22T13:30:00Z")
+            val group = ObjectId()
+            val schedule = ObjectId()
+            every { schedules.loadScheduleReferences(group) } returns listOf(
+                StudyScheduleStatisticsReferenceDto(schedule, null, null)
+            )
+            val queries = mutableListOf<Query>()
+            every { mongo.find(any<Query>(), Task::class.java) } answers {
+                queries.add(firstArg())
+                emptyList()
+            }
+            every { mongo.find(any<Query>(), TaskAssignee::class.java) } returns emptyList()
+            MongoTaskStatisticsQueryAdapter(mongo, schedules).loadChanged(
+                TaskStatisticsQuery(group, ObjectId(), previous.minusSeconds(60), previous, cutoff, previous, cutoff)
+            )
+            val matured = queries.single { it.queryObject.containsKey("expireAt") }.queryObject
+            matured.containsKey("updatedAt") shouldBe false
+            (matured["expireAt"] as Document)["\$gt"] shouldBe previous
+            (matured["expireAt"] as Document)["\$lte"] shouldBe cutoff
         }
     }
 })
