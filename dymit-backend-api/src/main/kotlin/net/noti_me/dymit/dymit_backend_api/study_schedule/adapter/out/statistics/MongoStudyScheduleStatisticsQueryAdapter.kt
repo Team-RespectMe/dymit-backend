@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.port.`in`.server_to_server.dto.StudyScheduleStatisticsReferenceDto
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
+import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -138,15 +139,14 @@ class MongoStudyScheduleStatisticsQueryAdapter(
             Query(Criteria.where("groupId").`is`(groupId)).apply {
                 fields().include("_id").include("deletedAt").include("updatedAt")
             },
-            StudySchedule::class.java
-        ).mapNotNull { schedule ->
-            schedule.id?.let {
-                StudyScheduleStatisticsReferenceDto(
-                    scheduleId = it,
-                    deletedAt = schedule.deletedAt,
-                    updatedAt = schedule.updatedAt
-                )
-            }
+            Document::class.java,
+            "study_schedules"
+        ).map { document ->
+            StudyScheduleStatisticsReferenceDto(
+                scheduleId = requireNotNull(document.getObjectId("_id")),
+                deletedAt = document.getDate("deletedAt")?.toInstant(),
+                updatedAt = document.getDate("updatedAt")?.toInstant()
+            )
         }
     }
 

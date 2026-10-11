@@ -1,36 +1,22 @@
 # BACKLOG
 ---
-## TASK-107 스터디 그룹 관리 지표 생성
+## HOTFIX-107 통계 API 오류 수정
 상태: Done
 
 ## OBJECTIVE
 
-스터디 그룹 관리자가 볼 그룹룹의 지표와 스터디 구성원의 지표를 생성하려고 합니다.
-지표는 다음과 같습니다.
+스터디 그룹 지표 조회의 오류 원인을 파악하십시오
 
-1. 구성원 개인의 경우 일정 참여율과 과제 제출율을 보여주며, 가장 최근에 진행된 일정 회차의 시작 시점까지 누적 계산합니다. 해당 일정 참여는 포함합니다.
-   단, 일정 참여율 같은 경우 그룹 가입 시점 이후에 예정되었던 일정에 대해서만 계산합니다.
-
-2. 그룹의 지표는 마찬가지로 전체 그룹원을 대상으로 참여율과 과제 제출율을 계산합니다. 평균을 내는것이 아님에 유의하세요.
-   그룹의 지표는 달력 주 대신 실제 진행된 일정 회차를 기준으로 조회 시 갱신합니다.
-   최신 진행 회차와 직전 진행 회차의 시작 시점까지의 누적 참여율 / 제출율을 각각 반환하며 차이는 서버에서 계산하지 않습니다.
-   여러 회차 동안 조회하지 않은 경우 누락된 각 회차의 통계 레코드를 모두 생성합니다. 회차는 일정 시각순으로 판단합니다.
-
-3. 그룹원들의 참여율 / 제출율도 조회할 수 있어야합니다.
-
-4. 내 그룹 관리 지표 목록 조회 시 그룹 별 데이터 필드는 사항이 필요합니다.
-- 가장 최근에 진행 된 주차(전체 주차가 아닙니다.)
-- 전체 (활성)인원
-- 참석률
-- 제출률
-- 스터디 일정이 존재하는 그룹인지 여부
-
-5. 그룹 관리지표 상세에도 기존 스펙에 가장 최근에 진행된 주차 + 활성 인원 정보가 포함되어야 합니다.  
-
-
-## REQUIREMENTS
-- 통계 수치를 나타내는 데이터이므로 효율적인 업데이트가 필요합니다. 매 주 배치작업으로 모든 사용자나 모든 그룹에 대해 진행하는 것은 지양하고자 합니다.
-- OBJECTIVE에 제시한 기능들이 어떤 도메인에 속해야 할 지 판단해주세요. 
+URI: /api/v1/study-groups/statistics
+HTTP METHOD: GET
+```json
+{
+   "traceId":"6acb31e1882a993fd5add21416ae3435",
+   "status":500,"code":"INTERNAL_SERVER_ERROR",
+   "message":"Failed to instantiate net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule using constructor fun <init>(org.bson.types.ObjectId?, org.bson.types.ObjectId, kotlin.String, kotlin.String, net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleLocation, kotlin.Long, java.time.Instant, kotlin.collections.MutableSet<net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleRole>, kotlin.Long, java.time.Instant?, java.time.Instant?, kotlin.Boolean, java.time.Instant?): net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule with arguments 6905dafd81aa60d7a035a3cc,null,null,null,null,0,null,null,0,null,2025-11-01T10:03:41.067Z,false,null,7102,null",
+   "errors":[]
+}
+```
 
 ## Important
 - 쓸데없이 복잡도 높이는 오버 엔지니어링 하지 마십시오.
