@@ -11,6 +11,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.TaskApi
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskCommandRequest
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskResponse
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.ManagedTaskResponse
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskSubmissionCommandRequest
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskSubmissionCommentCommandRequest
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskSubmissionCommentResponse
@@ -33,6 +34,29 @@ import org.springframework.web.bind.annotation.RestController
 class TaskController(
     private val taskService: TaskService
 ) : TaskApi {
+
+    @GetMapping("/managed/tasks")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    override fun getManagedTasks(
+        @LoginMember memberInfo: MemberInfo,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ListResponse<ManagedTaskResponse> {
+        val page = ListResponse.of(
+            size = size,
+            items = taskService.getManagedTasks(memberInfo, cursor, size),
+            extractors = buildMap {
+                put("cursor") { it.cursor }
+                put("size") { size }
+            }
+        )
+        return ListResponse(
+            count = page.count,
+            items = page.items.map(ManagedTaskResponse::from),
+            _links = page._links
+        )
+    }
 
     @PostMapping("/{groupId}/tasks")
     @ResponseStatus(HttpStatus.CREATED)

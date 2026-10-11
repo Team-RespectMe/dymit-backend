@@ -4,6 +4,8 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmitAttachmentType
 import net.noti_me.dymit.dymit_backend_api.task.domain.TaskSubmissionType
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * 과제 생성 커맨드입니다.
@@ -98,6 +100,18 @@ data class GetGroupTasksQuery(
     val memberInfo: MemberInfo,
     val groupId: String
 )
+
+/** 소유 그룹의 오늘 마감 과제 목록 조회 입력입니다. */
+data class GetManagedTasksQuery(
+    val memberInfo: MemberInfo,
+    val cursor: String? = null,
+    val size: Int = 20,
+    val today: LocalDate = LocalDate.now(KOREA_ZONE)
+) {
+    companion object {
+        private val KOREA_ZONE: ZoneId = ZoneId.of("Asia/Seoul")
+    }
+}
 
 /** 과제 상세 조회 입력입니다. */
 data class GetTaskDetailQuery(

@@ -18,7 +18,7 @@ internal class TaskServiceFacadeTest : BehaviorSpec({
     Given("a submission creation request") {
         val createSubmission = mockk<CreateSubmissionUseCase>()
         val facade = TaskServiceFacade(
-            mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), createSubmission, mockk(), mockk(), mockk(),
+            mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), createSubmission, mockk(), mockk(), mockk(),
             mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk()
         )
         val member = MemberInfo(ObjectId.get().toHexString(), "tester", listOf(MemberRole.ROLE_MEMBER.name))
@@ -35,4 +35,18 @@ internal class TaskServiceFacadeTest : BehaviorSpec({
             }
         }
     }
+    Given("관리 과제 파사드 요청") {
+        Then("현재 사용자의 커서와 size를 전용 유스케이스에 전달한다") {
+            val managed = mockk<GetManagedTasksUseCase>()
+            val facade = TaskServiceFacade(
+                mockk(), mockk(), mockk(), mockk(), managed, mockk(), mockk(), mockk(), mockk(), mockk(),
+                mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk()
+            )
+            val member = net.noti_me.dymit.dymit_backend_api.supports.createMemberInfo(net.noti_me.dymit.dymit_backend_api.supports.createMemberEntity())
+            every { managed.execute(any()) } returns emptyList()
+            facade.getManagedTasks(member, "opaque", 7)
+            verify(exactly = 1) { managed.execute(match { it.memberInfo == member && it.cursor == "opaque" && it.size == 7 }) }
+        }
+    }
+
 })

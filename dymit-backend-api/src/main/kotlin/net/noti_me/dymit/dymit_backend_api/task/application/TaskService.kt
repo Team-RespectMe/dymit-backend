@@ -5,6 +5,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.Create
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.CreateTaskSubmissionCommentCommand
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskDto
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.ManagedTaskDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskSubmissionDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.SyncedTaskDto
@@ -25,6 +26,13 @@ interface TaskService {
     fun removeTask(memberInfo: MemberInfo, groupId: String, taskId: String)
 
     fun getGroupTasks(memberInfo: MemberInfo, groupId: String): List<TaskDto>
+
+    /** 소유 그룹의 오늘 마감 과제를 커서로 조회합니다. */
+    fun getManagedTasks(
+        memberInfo: MemberInfo,
+        cursor: String?,
+        size: Int
+    ): List<ManagedTaskDto>
 
     fun getTaskDetail(memberInfo: MemberInfo, groupId: String, taskId: String): TaskDto
 

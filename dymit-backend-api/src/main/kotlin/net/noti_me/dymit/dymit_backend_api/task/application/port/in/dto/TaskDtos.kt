@@ -25,6 +25,22 @@ data class TaskDto(
     val submissionType: TaskSubmissionType = TaskSubmissionType.OUTPUT
 )
 
+/** 소유 그룹의 오늘 마감 과제 목록 항목입니다. */
+data class ManagedTaskDto(
+    val group: ManagedTaskGroupDto,
+    val taskId: String,
+    val title: String,
+    val expireAt: Instant,
+    val notSubmittedAssigneeCount: Long,
+    val cursor: String
+)
+
+/** 관리 과제 목록의 그룹 요약입니다. */
+data class ManagedTaskGroupDto(
+    val id: String,
+    val name: String
+)
+
 /**
  * 과제 첨부 조회 DTO입니다.
  */

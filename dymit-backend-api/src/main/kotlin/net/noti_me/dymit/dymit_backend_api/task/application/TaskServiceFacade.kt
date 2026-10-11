@@ -10,6 +10,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.Create
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.CreateTaskSubmissionCommentCommand
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.DeleteSubmissionCommentCommand
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.GetGroupTasksQuery
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.GetManagedTasksQuery
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.GetSubmissionCommentsQuery
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.GetTaskAssigneesQuery
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.GetTaskDetailQuery
@@ -22,6 +23,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.SyncPa
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.SyncedTaskDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskAssigneeDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskDto
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.ManagedTaskDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskSubmissionCommentDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.TaskSubmissionDto
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.dto.UpdateTaskCommand
@@ -38,6 +40,7 @@ import net.noti_me.dymit.dymit_backend_api.task.application.usecase.CreateSubmis
 import net.noti_me.dymit.dymit_backend_api.task.application.usecase.CreateTaskUseCase
 import net.noti_me.dymit.dymit_backend_api.task.application.usecase.DeleteSubmissionCommentUseCase
 import net.noti_me.dymit.dymit_backend_api.task.application.usecase.GetGroupTasksUseCase
+import net.noti_me.dymit.dymit_backend_api.task.application.usecase.GetManagedTasksUseCase
 import net.noti_me.dymit.dymit_backend_api.task.application.usecase.GetSubmissionCommentsUseCase
 import net.noti_me.dymit.dymit_backend_api.task.application.usecase.GetTaskAssigneesUseCase
 import net.noti_me.dymit.dymit_backend_api.task.application.usecase.GetTaskDetailUseCase
@@ -64,6 +67,7 @@ class TaskServiceFacade(
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val removeTaskUseCase: RemoveTaskUseCase,
     private val getGroupTasksUseCase: GetGroupTasksUseCase,
+    private val getManagedTasksUseCase: GetManagedTasksUseCase,
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val getTaskAssigneesUseCase: GetTaskAssigneesUseCase,
     private val createSubmissionUseCase: CreateSubmissionUseCase,
@@ -96,6 +100,14 @@ class TaskServiceFacade(
 
     override fun getGroupTasks(memberInfo: MemberInfo, groupId: String): List<TaskDto> {
         return getGroupTasksUseCase.execute(GetGroupTasksQuery(memberInfo, groupId))
+    }
+
+    override fun getManagedTasks(
+        memberInfo: MemberInfo,
+        cursor: String?,
+        size: Int
+    ): List<ManagedTaskDto> {
+        return getManagedTasksUseCase.execute(GetManagedTasksQuery(memberInfo, cursor, size))
     }
 
     override fun getTaskDetail(memberInfo: MemberInfo, groupId: String, taskId: String): TaskDto {

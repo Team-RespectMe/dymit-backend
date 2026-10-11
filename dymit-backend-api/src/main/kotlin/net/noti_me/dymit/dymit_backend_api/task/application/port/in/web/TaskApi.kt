@@ -9,6 +9,7 @@ import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskCommandRequest
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskResponse
+import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.ManagedTaskResponse
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskUpdateRequest
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskSubmissionCommandRequest
 import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.TaskSubmissionCommentCommandRequest
@@ -18,6 +19,14 @@ import net.noti_me.dymit.dymit_backend_api.task.application.port.`in`.web.dto.Ta
 @Tag(name = "과제 API", description = "스터디 그룹 과제 관리 API")
 @SecurityRequirement(name = "bearer-jwt")
 interface TaskApi {
+
+    @Operation(summary = "관리 그룹의 오늘 마감 과제 조회", description = "내가 소유한 그룹의 오늘 마감 과제를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "관리 과제 목록 조회 성공")
+    fun getManagedTasks(
+        memberInfo: MemberInfo,
+        cursor: String?,
+        size: Int
+    ): ListResponse<ManagedTaskResponse>
 
     @Operation(summary = "과제 생성", description = "스터디 그룹 소유자가 과제를 생성합니다.")
     @ApiResponse(responseCode = "201", description = "과제가 생성되었습니다.")
