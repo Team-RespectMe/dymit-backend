@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.Instant
+import kotlin.math.roundToLong
 
 /** 개인·그룹·관리 목록 통계를 동일한 회차 갱신 경로로 처리합니다. */
 @Service
@@ -74,14 +75,23 @@ class StatisticsQueryService(
         validateSize(command.size)
         val groupId = ObjectId(command.groupId)
         requireManager(groupId, ObjectId(command.requesterId))
-        val memberships = memberRepository.findActiveByGroupId(
-            groupId = groupId,
-            cursor = command.cursor?.let(::ObjectId),
-            limit = command.size + 1
-        )
+        val cursorId = command.cursor?.let(::parseMembershipCursor)
+        val memberships = loadAllActiveMemberships(groupId)
+        if (cursorId != null && memberships.none { it.id == cursorId }) {
+            throw BadRequestException(message = "cursor는 이 그룹의 활성 가입 관계 ID여야 합니다.")
+        }
         val observedAt = Instant.now()
         val boundaries = loadBoundaries(listOf(groupId), observedAt)[groupId].orEmpty()
-        return memberships.map { refresh(it, boundaries, observedAt) }
+        val ranked = memberships
+            .map { refresh(it, boundaries, observedAt) }
+            .sortedWith(
+                compareByDescending<MemberStatisticsDto> { it.totalRateHundredths() }
+                    .thenByDescending { it.attendanceRateHundredths() }
+            )
+        val startIndex = cursorId?.let { id ->
+            ranked.indexOfFirst { it.membershipId == id.toHexString() } + 1
+        } ?: 0
+        return ranked.drop(startIndex).take(command.size + 1)
     }
 
     override fun execute(command: GetManagedGroupStatisticsCommand): List<ManagedGroupStatisticsDto> {
@@ -200,6 +210,17 @@ class StatisticsQueryService(
             page.forEach { refresh(it, boundaries, observedAt) }
             cursor = page.lastOrNull()?.id
         } while (page.size == INTERNAL_PAGE_SIZE)
+    }
+
+    private fun loadAllActiveMemberships(groupId: ObjectId): List<StudyGroupMember> {
+        val memberships = mutableListOf<StudyGroupMember>()
+        var cursor: ObjectId? = null
+        do {
+            val page = memberRepository.findActiveByGroupId(groupId, cursor, INTERNAL_PAGE_SIZE)
+            memberships += page
+            cursor = page.lastOrNull()?.id
+        } while (page.size == INTERNAL_PAGE_SIZE)
+        return memberships
     }
 
     private fun saveGroupSession(
@@ -345,6 +366,21 @@ class StatisticsQueryService(
         if (size !in 1..MAX_PAGE_SIZE) {
             throw BadRequestException(message = "size는 1 이상 $MAX_PAGE_SIZE 이하여야 합니다.")
         }
+    }
+
+    private fun parseMembershipCursor(cursor: String): ObjectId {
+        if (!ObjectId.isValid(cursor)) {
+            throw BadRequestException(message = "cursor는 24자리 16진수 가입 관계 ID여야 합니다.")
+        }
+        return ObjectId(cursor)
+    }
+
+    private fun MemberStatisticsDto.totalRateHundredths(): Long {
+        return attendanceRateHundredths() + (taskSubmissionRate * 100.0).roundToLong()
+    }
+
+    private fun MemberStatisticsDto.attendanceRateHundredths(): Long {
+        return (scheduleAttendanceRate * 100.0).roundToLong()
     }
 
     private companion object {

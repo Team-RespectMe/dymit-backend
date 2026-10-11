@@ -7,6 +7,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import net.noti_me.dymit.dymit_backend_api.supports.MemberStatisticsRankingFixture
 import net.noti_me.dymit.dymit_backend_api.common.errors.BadRequestException
 import net.noti_me.dymit.dymit_backend_api.common.errors.NotFoundException
 import net.noti_me.dymit.dymit_backend_api.study_group.application.StatisticsQueryService
@@ -45,35 +46,18 @@ internal class StatisticsQueryPaginationTest : BehaviorSpec({
 
     listOf(1, 20, 100).forEach { size ->
         Given("관리자가 size $size 로 구성원 통계 목록을 요청") {
-            Then("현재 구성원 저장소에 cursor와 size+1을 전달하고 추가 항목도 반환한다") {
-                val members = mockk<StudyGroupMemberRepository>()
-                val repository = mockk<StatisticsRepository>()
-                val refresh = mockk<RefreshMemberStatisticsUseCase>()
-                val schedules = mockk<ScheduleStatisticsSourcePort>()
-                every { schedules.loadBoundaries(any(), any()) } returns emptyMap()
-                val group = ObjectId()
-                val requester = ObjectId()
-                val cursor = if (size == 20) null else ObjectId()
-                val manager = StudyGroupMember(id = ObjectId(), groupId = group, memberId = requester,
-                    role = if (size == 100) GroupMemberRole.ADMIN else GroupMemberRole.OWNER)
-                val page = List(size + 1) { StudyGroupMember(id = ObjectId(), groupId = group, memberId = ObjectId()) }
-                every { members.findByGroupIdAndMemberId(group, requester) } returns manager
-                every { members.findActiveByGroupId(group, cursor, size + 1) } returns page
-                val commands = mutableListOf<RefreshMemberStatisticsCommand>()
-                every { refresh.execute(capture(commands)) } answers {
-                    val command = firstArg<RefreshMemberStatisticsCommand>()
-                    MemberStatisticsDto(group.toHexString(), command.membershipId, requester.toHexString(),
-                        null, null, StatisticsCounts(), 0.0, 0.0)
-                }
-                val result = StatisticsQueryService(members, mockk(), repository, schedules, refresh).execute(
-                    GetGroupMemberStatisticsCommand(requester.toHexString(), group.toHexString(), cursor?.toHexString(), size)
-                )
-                result.map { it.membershipId } shouldBe page.map { it.identifier }
-                commands.map { it.boundaries }.distinct().size shouldBe 1
-                commands.map { it.observedAt }.distinct().size shouldBe 1
-                verify(exactly = 1) { members.findActiveByGroupId(group, cursor, size + 1) }
-                verify(exactly = 0) { members.findByGroupIdIncludingDeleted(any(), any(), any()) }
-                verify { repository wasNot Called }
+            Then("활성 구성원 전체를 갱신한 뒤 외부 커서 다음부터 size+1개를 반환한다") {
+                val f = MemberStatisticsRankingFixture()
+                val entries = List(size + 2) { f.addMember() }
+                val cursor = if (size == 20) null else entries.first().identifier
+                val result = f.execute(cursor, size)
+                val start = if (cursor == null) 0 else 1
+                result.map { it.membershipId } shouldBe entries.drop(start).take(size + 1).map { it.identifier }
+                f.commands.map { it.membershipId } shouldBe entries.map { it.identifier }
+                f.commands.map { it.boundaries }.distinct() shouldBe listOf(f.boundaries)
+                f.commands.map { it.observedAt }.distinct().size shouldBe 1
+                f.internalQueries shouldBe listOf(null to 200)
+                verify(exactly = 0) { f.members.findByGroupIdIncludingDeleted(any(), any(), any()) }
             }
         }
     }
