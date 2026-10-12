@@ -130,7 +130,7 @@ internal class FeedModuleTest : BehaviorSpec() {
                     val getUseCase = mockk<GetUserFeedsUseCase>()
                     val deleteUseCase = mockk<DeleteUserFeedUseCase>()
                     val readUseCase = mockk<MarkUserFeedAsReadUseCase>()
-                    val controller = UserFeedController(getUseCase, deleteUseCase, readUseCase)
+                    val controller = UserFeedController(getUseCase, deleteUseCase, readUseCase, mockk(), mockk())
                     val command = slot<DeleteUserFeedCommand>()
                     every { deleteUseCase.execute(capture(command)) } just runs
 

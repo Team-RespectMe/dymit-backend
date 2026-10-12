@@ -34,3 +34,21 @@ data class MarkUserFeedAsReadCommand(
     val memberId: String,
     val feedId: String
 )
+
+/**
+ * 읽지 않은 개인 피드 수 조회 명령입니다.
+ *
+ * @param memberId 요청 회원 식별자
+ */
+data class GetUnreadUserFeedCountCommand(
+    val memberId: String
+)
+
+/**
+ * 모든 개인 피드 읽음 처리 명령입니다.
+ *
+ * @param memberId 요청 회원 식별자
+ */
+data class MarkAllUserFeedsAsReadCommand(
+    val memberId: String
+)

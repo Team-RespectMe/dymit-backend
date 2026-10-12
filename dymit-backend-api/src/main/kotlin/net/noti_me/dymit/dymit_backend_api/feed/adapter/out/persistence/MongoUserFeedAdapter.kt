@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
+import java.time.Instant
 
 /**
  * MongoDB를 사용하는 개인 피드 출력 어댑터입니다.
@@ -93,6 +94,36 @@ class MongoUserFeedAdapter(
             .with(Sort.by(Sort.Direction.DESC, "createdAt"))
             .limit(size.toInt())
         return mongoTemplate.find(query, UserFeed::class.java)
+    }
+
+    /**
+     * 회원의 읽지 않은 개인 피드 수를 조회합니다.
+     *
+     * @param memberId 회원 식별자
+     * @return 읽지 않은 개인 피드 수
+     */
+    override fun countUnreadByMemberId(memberId: String): Long {
+        val query = Query(
+            Criteria.where("memberId").`is`(ObjectId(memberId))
+                .and("isRead").`is`(false)
+        )
+        return mongoTemplate.count(query, UserFeed::class.java)
+    }
+
+    /**
+     * 회원의 읽지 않은 개인 피드를 단일 다건 갱신으로 읽음 처리합니다.
+     *
+     * @param memberId 회원 식별자
+     */
+    override fun markAllUnreadAsReadByMemberId(memberId: String) {
+        val query = Query(
+            Criteria.where("memberId").`is`(ObjectId(memberId))
+                .and("isRead").`is`(false)
+        )
+        val update = Update()
+            .set("isRead", true)
+            .set("updatedAt", Instant.now())
+        mongoTemplate.updateMulti(query, update, UserFeed::class.java)
     }
 
     /**

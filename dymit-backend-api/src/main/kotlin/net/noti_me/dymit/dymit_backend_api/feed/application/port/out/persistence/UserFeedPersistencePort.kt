@@ -45,6 +45,21 @@ interface UserFeedPersistencePort {
     ): List<UserFeed>
 
     /**
+     * 회원의 읽지 않은 개인 피드 수를 조회합니다.
+     *
+     * @param memberId 회원 식별자
+     * @return 읽지 않은 개인 피드 수
+     */
+    fun countUnreadByMemberId(memberId: String): Long
+
+    /**
+     * 회원의 읽지 않은 개인 피드를 모두 읽음 처리합니다.
+     *
+     * @param memberId 회원 식별자
+     */
+    fun markAllUnreadAsReadByMemberId(memberId: String)
+
+    /**
      * 식별자로 개인 피드를 삭제합니다.
      *
      * @param id 피드 식별자

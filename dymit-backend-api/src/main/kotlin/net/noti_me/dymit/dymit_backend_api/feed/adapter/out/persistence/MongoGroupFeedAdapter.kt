@@ -40,14 +40,14 @@ class MongoGroupFeedAdapter(
     }
 
     /**
-     * 그룹 목록의 피드를 기존 커서 조건과 최신순 정렬로 조회합니다.
+     * 그룹 목록의 피드를 커서 이후부터 오래된 순으로 조회합니다.
      *
      * @param groupIds 그룹 식별자 목록
      * @param cursor 조회 커서
      * @param size 조회 개수
      * @return 그룹 피드 목록
      */
-    override fun findByGroupIdsOrderByIdDesc(
+    override fun findByGroupIdsOrderByIdAsc(
         groupIds: List<ObjectId>,
         cursor: ObjectId?,
         size: Long
@@ -55,7 +55,7 @@ class MongoGroupFeedAdapter(
         val query = Query()
             .addCriteria(Criteria.where("groupId").`in`(groupIds))
             .limit(size.toInt())
-            .with(Sort.by(Sort.Direction.DESC, "_id"))
+            .with(Sort.by(Sort.Direction.ASC, "_id"))
 
         cursor?.let { query.addCriteria(Criteria.where("_id").gt(it)) }
         return mongoTemplate.find(query, GroupFeed::class.java)

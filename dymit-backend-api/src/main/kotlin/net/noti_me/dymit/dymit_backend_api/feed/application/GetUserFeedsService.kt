@@ -5,35 +5,21 @@ import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.As
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.FeedMessageDto
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.GetUserFeedsCommand
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.UserFeedDto
-import net.noti_me.dymit.dymit_backend_api.feed.application.port.out.persistence.GroupFeedPersistencePort
-import net.noti_me.dymit.dymit_backend_api.feed.application.port.out.persistence.LoadFeedGroupMembershipPort
-import net.noti_me.dymit.dymit_backend_api.feed.application.port.out.persistence.LoadFeedMemberPort
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.out.persistence.UserFeedPersistencePort
-import net.noti_me.dymit.dymit_backend_api.feed.application.port.out.persistence.UserFeedQueryHistoryPersistencePort
-import net.noti_me.dymit.dymit_backend_api.feed.domain.GroupFeed
 import net.noti_me.dymit.dymit_backend_api.feed.domain.UserFeed
-import net.noti_me.dymit.dymit_backend_api.feed.domain.UserFeedQueryHistory
-import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.Date
 
 /**
  * 개인 피드 목록 조회 유스케이스 구현입니다.
  *
- * @param loadFeedMemberPort Feed 회원 조회 포트
- * @param loadFeedGroupMembershipPort Feed 그룹 가입 조회 포트
+ * @param pullUserFeedsService 그룹 피드 반영 서비스
  * @param userFeedPersistencePort 개인 피드 영속성 포트
- * @param groupFeedPersistencePort 그룹 피드 영속성 포트
- * @param queryHistoryPersistencePort 조회 이력 영속성 포트
  */
 @Service
 class GetUserFeedsService(
-    private val loadFeedMemberPort: LoadFeedMemberPort,
-    private val loadFeedGroupMembershipPort: LoadFeedGroupMembershipPort,
-    private val userFeedPersistencePort: UserFeedPersistencePort,
-    private val groupFeedPersistencePort: GroupFeedPersistencePort,
-    private val queryHistoryPersistencePort: UserFeedQueryHistoryPersistencePort
+    private val pullUserFeedsService: PullUserFeedsService,
+    private val userFeedPersistencePort: UserFeedPersistencePort
 ) : GetUserFeedsUseCase {
 
     /**
@@ -43,62 +29,13 @@ class GetUserFeedsService(
      * @return 개인 피드 목록
      */
     override fun execute(command: GetUserFeedsCommand): List<UserFeedDto> {
-        pullUnreadGroupFeeds(ObjectId(command.memberId))
+        pullUserFeedsService.pull(command.memberId)
 
         return userFeedPersistencePort.findByMemberIdOrderByCreatedAtDesc(
             memberId = command.memberId,
             cursor = command.cursorId,
             size = command.size.toLong()
         ).map(::toDto)
-    }
-
-    private fun pullUnreadGroupFeeds(memberId: ObjectId) {
-        val history = queryHistoryPersistencePort.findByMemberId(memberId)
-            ?: queryHistoryPersistencePort.save(
-                UserFeedQueryHistory(
-                    memberId = memberId,
-                    lastFeedId = null
-                )
-            )
-
-        if (history.lastFeedId == null) {
-            val createdAt = loadFeedMemberPort.loadById(memberId.toHexString())?.createdAt
-                ?: Instant.now()
-            val createdDate = Date.from(createdAt)
-            history.updateLastGroupQueryId(ObjectId.getSmallestWithDate(createdDate))
-            queryHistoryPersistencePort.save(history)
-        }
-
-        val groupIds = loadFeedGroupMembershipPort.loadByMemberId(memberId.toHexString())
-            .groupIds
-            .map(::ObjectId)
-
-        do {
-            var groupFeeds = groupFeedPersistencePort.findByGroupIdsOrderByIdDesc(
-                groupIds = groupIds,
-                cursor = history.lastFeedId,
-                size = DEFAULT_BATCH_SIZE + 1L
-            )
-            val hasNext = groupFeeds.size > DEFAULT_BATCH_SIZE
-            groupFeeds = groupFeeds.take(DEFAULT_BATCH_SIZE.toInt())
-            val firstId = groupFeeds.firstOrNull()?.id
-
-            val targets = groupFeeds
-                .asSequence()
-                .filterNot { groupFeed -> groupFeed.excludedMemberIds.contains(memberId) }
-                .map { groupFeed -> UserFeed.create(memberId, groupFeed) }
-                .sortedByDescending { it.createdAt }
-                .toList()
-
-            if (targets.isEmpty()) return
-
-            userFeedPersistencePort.saveAll(targets)
-
-            if (history.lastFeedId!! < firstId) {
-                history.updateLastGroupQueryId(firstId!!)
-                queryHistoryPersistencePort.save(history)
-            }
-        } while (hasNext)
     }
 
     private fun toDto(userFeed: UserFeed): UserFeedDto {
@@ -123,9 +60,5 @@ class GetUserFeedsService(
             createdAt = userFeed.createdAt ?: Instant.now(),
             isRead = userFeed.isRead
         )
-    }
-
-    private companion object {
-        const val DEFAULT_BATCH_SIZE: Long = 100L
     }
 }

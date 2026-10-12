@@ -10,11 +10,16 @@ import net.noti_me.dymit.dymit_backend_api.common.annotation.LoginMember
 import net.noti_me.dymit.dymit_backend_api.common.response.ListResponse
 import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.DeleteUserFeedUseCase
+import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.GetUnreadUserFeedCountUseCase
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.GetUserFeedsUseCase
+import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.MarkAllUserFeedsAsReadUseCase
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.MarkUserFeedAsReadUseCase
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.DeleteUserFeedCommand
+import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.GetUnreadUserFeedCountCommand
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.GetUserFeedsCommand
+import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.MarkAllUserFeedsAsReadCommand
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.MarkUserFeedAsReadCommand
+import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.UnreadUserFeedCountResponse
 import net.noti_me.dymit.dymit_backend_api.feed.application.port.`in`.web.dto.UserFeedResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -32,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController
  * @param getUserFeedsUseCase 개인 피드 조회 유스케이스
  * @param deleteUserFeedUseCase 개인 피드 삭제 유스케이스
  * @param markUserFeedAsReadUseCase 개인 피드 읽음 처리 유스케이스
+ * @param getUnreadUserFeedCountUseCase 미읽음 개인 피드 수 조회 유스케이스
+ * @param markAllUserFeedsAsReadUseCase 모든 개인 피드 읽음 처리 유스케이스
  */
 @Tag(name = "사용자 피드 API", description = "사용자 피드 관련 API")
 @RestController
@@ -39,7 +46,9 @@ import org.springframework.web.bind.annotation.RestController
 class UserFeedController(
     private val getUserFeedsUseCase: GetUserFeedsUseCase,
     private val deleteUserFeedUseCase: DeleteUserFeedUseCase,
-    private val markUserFeedAsReadUseCase: MarkUserFeedAsReadUseCase
+    private val markUserFeedAsReadUseCase: MarkUserFeedAsReadUseCase,
+    private val getUnreadUserFeedCountUseCase: GetUnreadUserFeedCountUseCase,
+    private val markAllUserFeedsAsReadUseCase: MarkAllUserFeedsAsReadUseCase
 ) {
 
     /**
@@ -83,6 +92,54 @@ class UserFeedController(
                 put("cursor") { it.id }
                 put("size") { size }
             }
+        )
+    }
+
+    /**
+     * 로그인 회원의 읽지 않은 피드 수를 조회합니다.
+     *
+     * @param loginMember 인증 회원 정보
+     * @return 읽지 않은 피드 수 응답
+     */
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(
+        method = "GET",
+        summary = "읽지 않은 사용자 피드 수 조회",
+        description = "미반영 그룹 피드를 반영한 뒤 로그인 사용자의 읽지 않은 피드 수를 조회합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "읽지 않은 피드 수 조회 성공")
+    @GetMapping("/unread-count")
+    @ResponseStatus(HttpStatus.OK)
+    @RolesAllowed("MEMBER", "ADMIN")
+    fun getUnreadUserFeedCount(
+        @LoginMember loginMember: MemberInfo
+    ): UnreadUserFeedCountResponse {
+        val unreadCount = getUnreadUserFeedCountUseCase.execute(
+            GetUnreadUserFeedCountCommand(loginMember.memberId)
+        )
+        return UnreadUserFeedCountResponse(unreadCount)
+    }
+
+    /**
+     * 로그인 회원의 읽지 않은 피드를 모두 읽음 처리합니다.
+     *
+     * @param loginMember 인증 회원 정보
+     */
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(
+        method = "PATCH",
+        summary = "모든 사용자 피드 읽음 처리",
+        description = "미반영 그룹 피드를 반영한 뒤 로그인 사용자의 읽지 않은 모든 피드를 읽음 처리합니다."
+    )
+    @ApiResponse(responseCode = "204", description = "모든 피드 읽음 처리 성공")
+    @PatchMapping("/read")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @RolesAllowed("MEMBER", "ADMIN")
+    fun markAllUserFeedsAsRead(
+        @LoginMember loginMember: MemberInfo
+    ) {
+        markAllUserFeedsAsReadUseCase.execute(
+            MarkAllUserFeedsAsReadCommand(loginMember.memberId)
         )
     }
 

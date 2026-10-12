@@ -25,14 +25,14 @@ interface GroupFeedPersistencePort {
     fun findById(id: ObjectId): GroupFeed?
 
     /**
-     * 그룹 목록의 피드를 커서 이후부터 최신순으로 조회합니다.
+     * 그룹 목록의 피드를 커서 이후부터 오래된 순으로 조회합니다.
      *
      * @param groupIds 그룹 식별자 목록
      * @param cursor 조회 커서
      * @param size 조회 개수
      * @return 그룹 피드 목록
      */
-    fun findByGroupIdsOrderByIdDesc(
+    fun findByGroupIdsOrderByIdAsc(
         groupIds: List<ObjectId>,
         cursor: ObjectId?,
         size: Long
