@@ -9,13 +9,13 @@ import java.time.Instant
 interface LoadCalendarStudySchedulePort {
 
     /**
-     * 회원이 참가 등록한 일정 중 지정한 그룹과 반개구간에 속한 활성 일정을 불러옵니다.
+     * 지정한 그룹과 반개구간에 속한 활성 일정 및 회원의 참가 정보를 불러옵니다.
      *
      * @param memberId 회원 식별자
      * @param groupIds 그룹 식별자 목록
      * @param startInclusive 조회 시작 시각
      * @param endExclusive 조회 종료 시각
-     * @return 스터디 일정 목록
+     * @return 스터디 일정과 참가 정보 목록
      */
     fun loadActiveSchedules(
         memberId: String,

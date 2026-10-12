@@ -15,7 +15,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 /**
- * 캘린더 출력 포트의 회원별 일정과 과제를 캘린더 이벤트로 조합합니다.
+ * 캘린더 출력 포트의 소속 그룹 일정과 회원별 과제를 캘린더 이벤트로 조합합니다.
  *
  * @property loadStudyGroupPort 캘린더 그룹 조회 포트
  * @property loadStudySchedulePort 캘린더 일정 조회 포트
@@ -29,7 +29,7 @@ class CalendarEventQueryService(
 ) {
 
     /**
-     * 회원의 참가 일정과 제출 대상 과제가 존재하는 서울 날짜를 조회합니다.
+     * 회원의 소속 그룹 일정과 제출 대상 과제가 존재하는 서울 날짜를 조회합니다.
      *
      * @param memberId 회원 식별자
      * @param period 조회 기간
@@ -46,7 +46,7 @@ class CalendarEventQueryService(
     }
 
     /**
-     * 회원의 참가 일정과 제출 대상 과제를 일별 응답 정렬로 조회합니다.
+     * 회원의 소속 그룹 일정과 제출 대상 과제를 일별 응답 정렬로 조회합니다.
      *
      * @param memberId 회원 식별자
      * @param period 조회 기간
@@ -111,7 +111,9 @@ class CalendarEventQueryService(
             title = title,
             eventAt = eventAt,
             group = groupsById.getValue(groupId).toEventGroup(),
-            location = location
+            location = location,
+            participantCount = participantCount,
+            isParticipant = isParticipant
         )
     }
 
@@ -137,7 +139,7 @@ class CalendarEventQueryService(
  * 포트에서 조회한 캘린더 원천 이벤트 묶음입니다.
  *
  * @property groupsById 활성 그룹 조회 결과
- * @property schedules 회원 참가 일정
+ * @property schedules 소속 그룹 일정
  * @property tasks 회원 제출 대상 과제
  */
 private data class CalendarSourceEvents(

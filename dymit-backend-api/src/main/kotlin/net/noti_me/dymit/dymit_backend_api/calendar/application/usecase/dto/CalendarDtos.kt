@@ -25,6 +25,10 @@ data class CalendarEventGroupDto(
  * @property title 이벤트 제목
  * @property eventAt 이벤트 발생 시각
  * @property group 이벤트가 속한 그룹
+ * @property submissionType 과제 제출 유형
+ * @property location 일정 장소
+ * @property participantCount 일정의 활성 참가 등록 회원 수
+ * @property isParticipant 조회 회원의 활성 참가 등록 여부
  */
 data class CalendarEventDto(
     val type: CalendarEventType,
@@ -33,7 +37,9 @@ data class CalendarEventDto(
     val eventAt: Instant,
     val group: CalendarEventGroupDto,
     val submissionType: TaskSubmissionType? = null,
-    val location: LocationVo? = null
+    val location: LocationVo? = null,
+    val participantCount: Long? = null,
+    val isParticipant: Boolean? = null
 )
 
 /**

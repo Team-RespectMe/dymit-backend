@@ -15,7 +15,7 @@ import net.noti_me.dymit.dymit_backend_api.common.security.jwt.MemberInfo
 /**
  * 로그인 회원의 캘린더 조회 웹 API입니다.
  */
-@Tag(name = "캘린더 API", description = "로그인 회원의 참가 일정과 제출 대상 과제 캘린더 API")
+@Tag(name = "캘린더 API", description = "로그인 회원의 소속 그룹 일정과 제출 대상 과제 캘린더 API")
 @SecurityRequirement(name = "bearer-jwt")
 interface CalendarApi {
 
@@ -28,7 +28,7 @@ interface CalendarApi {
      */
     @Operation(
         summary = "주간 캘린더 이벤트 존재 여부 조회",
-        description = "서울 시간 기준으로 본인이 참가한 일정과 제출 대상 과제를 일요일부터 다음 일요일 직전까지 조회합니다."
+        description = "서울 시간 기준으로 현재 소속된 활성 그룹의 일정과 제출 대상 과제를 일요일부터 다음 일요일 직전까지 조회합니다. 일정 참가 등록 여부는 일정 노출에 영향을 주지 않습니다."
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @ApiResponse(responseCode = "400", description = "날짜 형식 또는 조회 범위 오류")
@@ -47,7 +47,7 @@ interface CalendarApi {
      */
     @Operation(
         summary = "일별 캘린더 이벤트 조회",
-        description = "서울 시간 기준 하루의 참가 일정과 제출 대상 과제를 그룹 오름차순, 이벤트 시각 내림차순으로 조회합니다."
+        description = "서울 시간 기준 하루의 현재 소속 활성 그룹 일정과 제출 대상 과제를 그룹 오름차순, 이벤트 시각 내림차순으로 조회합니다. 일정 참가 등록은 출석 확인을 의미하지 않습니다."
     )
     @ApiResponse(
         responseCode = "200",
@@ -65,7 +65,7 @@ interface CalendarApi {
                         "type": "TASK",
                         "id": "66fdb34705af234c41b32d10",
                         "title": "주간 과제",
-                        "eventAt": "2026-10-02T10:00:00Z",
+                        "eventAt": "2026-10-02T12:00:00Z",
                         "group": { "id": "66fdb34705af234c41b32d01", "name": "알고리즘 스터디" },
                         "submissionType": "OUTPUT"
                       },
@@ -75,7 +75,9 @@ interface CalendarApi {
                         "title": "정기 모임",
                         "eventAt": "2026-10-02T11:00:00Z",
                         "group": { "id": "66fdb34705af234c41b32d01", "name": "알고리즘 스터디" },
-                        "location": { "type": "ONLINE", "value": "화상 회의", "link": "https://example.com/meeting" }
+                        "location": { "type": "ONLINE", "value": "화상 회의", "link": "https://example.com/meeting" },
+                        "participantCount": 3,
+                        "isParticipant": true
                       }
                     ],
                     "_links": {}

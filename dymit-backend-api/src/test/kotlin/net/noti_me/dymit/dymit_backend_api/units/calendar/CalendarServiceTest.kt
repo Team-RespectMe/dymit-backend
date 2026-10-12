@@ -62,6 +62,32 @@ internal class CalendarServiceTest : BehaviorSpec() {
             }
         }
 
+        Given("참가하지 않은 소속 그룹 일정과 본인 대상 과제") {
+            Then("일별과 주간 모두 일정 날짜를 포함하며 등록 정보는 일정에만 매핑한다") {
+                val date = LocalDate.parse("2026-10-02")
+                val period = CalendarPeriod.weekly(date)
+                every { groups.loadActiveGroupsByMemberId(memberId) } returns listOf(CalendarStudyGroupDto("a", "가입 그룹"))
+                every { schedules.loadActiveSchedules(any(), any(), any(), any()) } returns listOf(
+                    CalendarStudyScheduleDto("others", "a", "다른 회원만 등록", period.startInclusive, participantCount = 2, isParticipant = false),
+                    CalendarStudyScheduleDto("mine", "a", "본인 등록", period.startInclusive.plusSeconds(86400), participantCount = 3, isParticipant = true),
+                    CalendarStudyScheduleDto("empty", "a", "등록자 없음", period.startInclusive.plusSeconds(172800))
+                )
+                every { tasks.loadActiveTasks(any(), any(), any(), any()) } returns listOf(CalendarTaskDto("task", "a", "본인 과제", period.startInclusive))
+                val events = query.loadEvents(memberId, period)
+                val schedulesById = events.filter { it.type == CalendarEventType.STUDY_SCHEDULE }.associateBy { it.id }
+                schedulesById["others"]!!.participantCount shouldBe 2L
+                schedulesById["others"]!!.isParticipant shouldBe false
+                schedulesById["mine"]!!.participantCount shouldBe 3L
+                schedulesById["mine"]!!.isParticipant shouldBe true
+                schedulesById["empty"]!!.participantCount shouldBe 0L
+                schedulesById["empty"]!!.isParticipant shouldBe false
+                val task = events.single { it.type == CalendarEventType.TASK }
+                task.participantCount shouldBe null
+                task.isParticipant shouldBe null
+                query.loadEventDates(memberId, period) shouldBe setOf(LocalDate.parse("2026-09-27"), LocalDate.parse("2026-09-28"), LocalDate.parse("2026-09-29"))
+            }
+        }
+
         Given("참가 일정 없이 본인 제출 대상 과제만 있는 날") {
             Then("과제만으로 날짜와 그룹을 만들고 본인 및 동일 기간을 두 포트에 전달한다") {
                 val date = LocalDate.parse("2026-10-02")

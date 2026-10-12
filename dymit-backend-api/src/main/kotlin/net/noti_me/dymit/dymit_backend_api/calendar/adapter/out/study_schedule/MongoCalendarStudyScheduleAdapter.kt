@@ -2,8 +2,8 @@ package net.noti_me.dymit.dymit_backend_api.calendar.adapter.out.study_schedule
 
 import net.noti_me.dymit.dymit_backend_api.calendar.application.port.out.study_schedule.LoadCalendarStudySchedulePort
 import net.noti_me.dymit.dymit_backend_api.calendar.application.port.out.study_schedule.dto.CalendarStudyScheduleDto
-import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.study_schedule.application.usecase.dto.LocationVo
+import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.ScheduleParticipant
 import net.noti_me.dymit.dymit_backend_api.study_schedule.domain.StudySchedule
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -23,13 +23,13 @@ class MongoCalendarStudyScheduleAdapter(
 ) : LoadCalendarStudySchedulePort {
 
     /**
-     * 회원의 참가 관계를 조회한 뒤 그룹과 반개구간 조건에 맞는 활성 일정을 조회합니다.
+     * 그룹과 반개구간 조건에 맞는 활성 일정과 활성 참가 관계를 일괄 조회합니다.
      *
      * @param memberId 회원 식별자
      * @param groupIds 그룹 식별자 목록
      * @param startInclusive 조회 시작 시각
      * @param endExclusive 조회 종료 시각
-     * @return 참가 일정 목록
+     * @return 소속 그룹의 일정과 참가 정보 목록
      */
     override fun loadActiveSchedules(
         memberId: String,
@@ -41,31 +41,40 @@ class MongoCalendarStudyScheduleAdapter(
             return emptyList()
         }
 
-        val participatedScheduleIds = mongoTemplate.find(
+        val schedules = mongoTemplate.find(
             Query(
-                Criteria.where("memberId").`is`(ObjectId(memberId))
-                    .and("isDeleted").ne(true)
+                Criteria.where("groupId").`in`(groupIds.map(::ObjectId))
+                    .and("scheduleAt").gte(startInclusive).lt(endExclusive)
+                    .and("isDeleted").`is`(false)
             ),
-            ScheduleParticipant::class.java
-        ).map { it.scheduleId }.distinct()
-        if (participatedScheduleIds.isEmpty()) {
+            StudySchedule::class.java
+        )
+        if (schedules.isEmpty()) {
             return emptyList()
         }
 
-        val criteria = Criteria.where("groupId").`in`(groupIds.map(::ObjectId))
-            .and("_id").`in`(participatedScheduleIds)
-            .and("scheduleAt").gte(startInclusive).lt(endExclusive)
-            .and("isDeleted").`is`(false)
-        return mongoTemplate.find(
-            Query(criteria),
-            StudySchedule::class.java
-        ).map { schedule ->
+        val participantsByScheduleId = mongoTemplate.find(
+            Query(
+                Criteria.where("scheduleId").`in`(schedules.mapNotNull { it.id })
+                    .and("isDeleted").ne(true)
+            ),
+            ScheduleParticipant::class.java
+        ).groupBy { it.scheduleId }
+        val requesterId = ObjectId(memberId)
+
+        return schedules.map { schedule ->
+            val participantIds = participantsByScheduleId[schedule.id]
+                .orEmpty()
+                .map { it.memberId }
+                .toSet()
             CalendarStudyScheduleDto(
                 id = schedule.identifier,
                 groupId = schedule.groupId.toHexString(),
                 title = schedule.title,
                 eventAt = schedule.scheduleAt,
-                location = LocationVo.from(schedule.location)
+                location = LocationVo.from(schedule.location),
+                participantCount = participantIds.size.toLong(),
+                isParticipant = requesterId in participantIds
             )
         }
     }

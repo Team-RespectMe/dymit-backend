@@ -74,10 +74,10 @@ internal class CalendarControllerTest : BehaviorSpec() {
         Given("일별 API의 여러 그룹에 세 이벤트가 있으면") {
             Then("flat items와 각 이벤트의 group 객체 및 이벤트 수 count를 반환한다") {
                 val at = Instant.parse("2026-10-02T00:00:00Z")
-                val schedule = CalendarEventDto(CalendarEventType.STUDY_SCHEDULE, "event", "일정", at, CalendarEventGroupDto("a", "첫 그룹"))
+                val schedule = CalendarEventDto(CalendarEventType.STUDY_SCHEDULE, "event", "일정", at, CalendarEventGroupDto("a", "첫 그룹"), participantCount = 3, isParticipant = true)
                 every { daily.execute(any()) } returns listOf(
                     schedule, schedule.copy(type = CalendarEventType.TASK, id = "task", title = "과제"),
-                    schedule.copy(id = "third", group = CalendarEventGroupDto("b", "둘째 그룹"))
+                    schedule.copy(id = "third", group = CalendarEventGroupDto("b", "둘째 그룹"), participantCount = null, isParticipant = null)
                 )
                 val result = mvc.perform(get("/api/v1/members/me/calendar/events").param("date", "2026-10-02"))
                     .andExpect(status().isOk).andExpect(jsonPath("$.data.count").value(3))
@@ -89,10 +89,20 @@ internal class CalendarControllerTest : BehaviorSpec() {
                     .andExpect(jsonPath("$.data.items[1].id").value("task"))
                     .andExpect(jsonPath("$.data.items[1].title").value("과제"))
                     .andExpect(jsonPath("$.data.items[1].eventAt").value("2026-10-02T00:00:00Z"))
+                    .andExpect(jsonPath("$.data.items[0].participantCount").value(3))
+                    .andExpect(jsonPath("$.data.items[0].isParticipant").value(true))
+                    .andExpect(jsonPath("$.data.items[1].participantCount").doesNotExist())
+                    .andExpect(jsonPath("$.data.items[1].isParticipant").doesNotExist())
+                    .andExpect(jsonPath("$.data.items[2].participantCount").value(0))
+                    .andExpect(jsonPath("$.data.items[2].isParticipant").value(false))
                     .andExpect(jsonPath("$.data.items[2].group.id").value("b"))
                     .andExpect(jsonPath("$.data.items[*].events").doesNotExist()).andReturn()
                 mapper.readTree(result.response.contentAsString)["data"]["items"].forEach {
-                    it.fieldNames().asSequence().toSet() shouldBe setOf("type", "id", "title", "eventAt", "group")
+                    if (it["type"].asText() == "STUDY_SCHEDULE") {
+                        it.fieldNames().asSequence().toSet() shouldBe setOf("type", "id", "title", "eventAt", "group", "participantCount", "isParticipant")
+                    } else {
+                        it.fieldNames().asSequence().toSet() shouldBe setOf("type", "id", "title", "eventAt", "group")
+                    }
                     it["group"].fieldNames().asSequence().toSet() shouldBe setOf("id", "name")
                 }
             }

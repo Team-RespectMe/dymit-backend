@@ -71,6 +71,8 @@ data class CalendarEventLocationItem(
  * @property group 이벤트가 속한 그룹
  * @property submissionType 과제 제출 유형 (TASK일 때만 포함)
  * @property location 장소 정보 (STUDY_SCHEDULE일 때만 포함)
+ * @property participantCount 활성 참가 등록 회원 수 (STUDY_SCHEDULE일 때만 포함)
+ * @property isParticipant 로그인 회원의 활성 참가 등록 여부 (STUDY_SCHEDULE일 때만 포함)
  */
 @Schema(description = "일별 캘린더 이벤트")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -88,7 +90,11 @@ data class CalendarEventItem(
     @field:Schema(description = "과제 제출 유형. TASK 이벤트에만 포함됩니다.", example = "OUTPUT", nullable = true)
     val submissionType: TaskSubmissionType? = null,
     @field:Schema(description = "장소 정보. STUDY_SCHEDULE 이벤트에만 포함됩니다.", nullable = true)
-    val location: CalendarEventLocationItem? = null
+    val location: CalendarEventLocationItem? = null,
+    @field:Schema(description = "활성 참가 등록 회원 수. STUDY_SCHEDULE 이벤트에만 포함됩니다.", example = "3", nullable = true)
+    val participantCount: Long? = null,
+    @field:Schema(description = "로그인 회원의 활성 참가 등록 여부. STUDY_SCHEDULE 이벤트에만 포함됩니다.", example = "true", nullable = true)
+    val isParticipant: Boolean? = null
 ) {
     companion object {
 
@@ -99,14 +105,19 @@ data class CalendarEventItem(
          * @return 이벤트 응답 항목
          */
         fun from(dto: CalendarEventDto): CalendarEventItem {
+            val isStudySchedule = dto.type == CalendarEventType.STUDY_SCHEDULE
             return CalendarEventItem(
                 type = dto.type,
                 id = dto.id,
                 title = dto.title,
                 eventAt = dto.eventAt,
                 group = CalendarEventGroupItem.from(dto.group),
-                submissionType = dto.submissionType,
-                location = dto.location?.let(CalendarEventLocationItem::from)
+                submissionType = dto.submissionType.takeIf { !isStudySchedule },
+                location = dto.location
+                    ?.takeIf { isStudySchedule }
+                    ?.let(CalendarEventLocationItem::from),
+                participantCount = if (isStudySchedule) dto.participantCount ?: 0L else null,
+                isParticipant = if (isStudySchedule) dto.isParticipant ?: false else null
             )
         }
     }
