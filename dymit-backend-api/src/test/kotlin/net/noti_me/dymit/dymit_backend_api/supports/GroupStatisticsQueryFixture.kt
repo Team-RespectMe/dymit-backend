@@ -36,6 +36,7 @@ internal class GroupStatisticsQueryFixture {
             role = GroupMemberRole.OWNER, createdAt = Instant.parse("2026-01-01T00:00:00Z"))
         every { members.findByGroupIdAndMemberId(group, requester) } returns membership
         every { members.findByGroupIdIncludingDeleted(group, null, any()) } returns listOf(membership)
+        every { members.findActiveByGroupId(group, null, any()) } returns listOf(membership)
         every { members.countDistinctActiveMembers(listOf(group)) } answers { mapOf(group to activeCount) }
         every { schedules.loadBoundaries(listOf(group), any()) } answers { mapOf(group to boundaries) }
         every { refresh.execute(any()) } answers {

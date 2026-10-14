@@ -27,11 +27,11 @@ internal class RefreshMemberStatisticsServiceTest : BehaviorSpec({
                 f.schedule(old), f.schedule(f.cutoff, id = f.boundaries.last().scheduleId), f.schedule(f.cutoff.plusSeconds(1)),
                 f.schedule(old, created = f.joinedAt.minusSeconds(1))
             )
-            f.service.execute(f.command()).counts shouldBe StatisticsCounts(3, 3, 2, 2)
+            f.service.execute(f.command()).counts shouldBe StatisticsCounts(4, 4, 3, 3)
             f.sessions.map { it.scheduleAt }.sorted() shouldBe listOf(
                 f.joinedAt.plusSeconds(86400), old, f.cutoff
             )
-            f.sessions.sortedBy { it.scheduleAt }.map { it.counts.assignedTaskCount } shouldBe listOf(0L, 2L, 3L)
+            f.sessions.sortedBy { it.scheduleAt }.map { it.counts.assignedTaskCount } shouldBe listOf(0L, 3L, 4L)
         }
     }
 
@@ -224,4 +224,32 @@ internal class RefreshMemberStatisticsServiceTest : BehaviorSpec({
             verify(exactly = 1) { f.repository.saveMemberSessions(any()) }
         }
     }
+    Given("구형 계산 규칙으로 저장된 개인 원장") {
+        Then("새 규칙으로 가입 전 생성 일정과 배정 과제를 재계산하고 다음 조회는 캐시를 재사용한다") {
+            val f = StatisticsTestFixture()
+            f.service.execute(f.command())
+            f.ledger = f.ledger!!.copy(calculationVersion = 1)
+            f.allTasks = listOf(f.task(f.cutoff, f.cutoff, assignedAt = f.joinedAt.minusSeconds(1)))
+            f.allSchedules = listOf(f.schedule(f.cutoff, created = f.joinedAt.minusSeconds(1), id = f.boundaries.last().scheduleId))
+            f.service.execute(f.command()).counts shouldBe StatisticsCounts(1, 1, 1, 1)
+            f.ledger!!.calculationVersion shouldBe 2
+            val version = f.ledger!!.version
+            f.service.execute(f.command(observed = f.observedAt.plusSeconds(1))).counts shouldBe StatisticsCounts(1, 1, 1, 1)
+            f.ledger!!.version shouldBe version
+            verify(exactly = 2) { f.tasks.loadAll(any()) }
+        }
+    }
+    Given("마감이 가입 이전이거나 회차 이후이고 배정이 회차 이후 또는 해제된 과제") {
+        Then("마감과 회차 시점의 배정 유효성을 모두 만족한 과제만 계산한다") {
+            val f = StatisticsTestFixture()
+            val valid = f.task(f.cutoff, f.cutoff.minusSeconds(1), assignedAt = f.joinedAt.minusSeconds(1))
+            f.allTasks = listOf(valid,
+                f.task(f.joinedAt.minusSeconds(1)),
+                f.task(f.cutoff.plusSeconds(1)),
+                f.task(f.cutoff, assignedAt = f.cutoff.plusSeconds(1)),
+                valid.copy(taskId = org.bson.types.ObjectId(), assignments = valid.assignments.map { it.copy(deletedAt = f.cutoff) }))
+            f.service.execute(f.command()).counts shouldBe StatisticsCounts(1, 1)
+        }
+    }
+
 })

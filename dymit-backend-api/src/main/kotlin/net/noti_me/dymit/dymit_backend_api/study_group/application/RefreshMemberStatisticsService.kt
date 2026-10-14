@@ -81,7 +81,9 @@ class RefreshMemberStatisticsService(
                     }
                     .sortedWith(compareBy({ it.scheduleAt }, { it.scheduleId }))
             }.orEmpty()
-            val prefixComplete = current != null && currentIndex >= 0 &&
+            val prefixComplete = current != null &&
+                current.calculationVersion == CURRENT_CALCULATION_VERSION &&
+                currentIndex >= 0 &&
                 current.latestScheduleAt == boundaries[currentIndex].scheduleAt &&
                 current.latestSession == boundaries[currentIndex].session &&
                 storedPrefix.size == expectedPrefix.size &&
@@ -91,7 +93,7 @@ class RefreshMemberStatisticsService(
                         snapshot.session == boundary.session
                 }
             val sourceCutoff = membership.deletedAt?.coerceAtMost(target.scheduleAt) ?: target.scheduleAt
-            val mutationThrough = membership.deletedAt?.coerceAtMost(observedAt) ?: observedAt
+            val mutationThrough = observedAt
             val taskQuery = sourceQuery(
                 membership = membership,
                 joinedAt = joinedAt,
@@ -162,7 +164,8 @@ class RefreshMemberStatisticsService(
                 projectionId = projectionId,
                 projectionStartScheduleId = projectionStartScheduleId,
                 projectionStartAt = projectionStartAt,
-                updatedAt = observedAt
+                updatedAt = observedAt,
+                calculationVersion = CURRENT_CALCULATION_VERSION
             )
             if (repository.compareAndSetLedger(current?.version, replacement)) {
                 repository.saveMemberSessions(snapshots)
@@ -263,12 +266,12 @@ class RefreshMemberStatisticsService(
                 return@mapNotNull null
             }
             task.assignments
-                .filter { it.assignedAt >= joinedAt && it.assignedAt <= stateAt }
+                .filter { it.assignedAt <= stateAt }
                 .filter { it.deletedAt == null || it.deletedAt > stateAt }
                 .maxByOrNull { it.assignedAt }
         }
         val eligibleSchedules = schedules.filter { schedule ->
-            schedule.createdAt >= joinedAt && schedule.scheduleAt >= joinedAt && includes(boundary, schedule) &&
+            schedule.scheduleAt >= joinedAt && includes(boundary, schedule) &&
                 (leftAt == null || schedule.scheduleAt < leftAt) &&
                 (schedule.scheduleDeletedAt == null || schedule.scheduleDeletedAt > stateAt)
         }
@@ -397,6 +400,7 @@ class RefreshMemberStatisticsService(
 
     private companion object {
         const val MAX_CAS_ATTEMPTS = 5
+        const val CURRENT_CALCULATION_VERSION = 2
         val BOUNDARY_COMPARATOR = compareBy<StatisticsSessionBoundary>({ it.scheduleAt }, { it.scheduleId })
     }
 }

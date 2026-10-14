@@ -26,7 +26,8 @@ data class MemberSessionStatisticsLedger(
     val projectionId: String,
     val projectionStartScheduleId: ObjectId,
     val projectionStartAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val calculationVersion: Int = 1
 )
 
 /** 가입 구간의 일정 회차 시작 시점 누적 통계입니다. */
@@ -68,5 +69,6 @@ data class GroupSessionStatistics(
     val counts: StatisticsCounts,
     val sourceProjectionToken: String,
     val version: Long,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val membershipIds: List<ObjectId>? = null
 )

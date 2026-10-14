@@ -140,19 +140,42 @@ class StatisticsQueryService(
         if (boundaries.isEmpty()) {
             return emptyGroupDto(group, activeMemberCount)
         }
+        val initialRoster = loadAllActiveMemberships(groupId)
+        val initialRosterIds = initialRoster.map { requireNotNull(it.id) }
         repeat(MAX_CAS_ATTEMPTS) {
-            refreshAllMemberships(groupId, boundaries, observedAt)
-            val ledgers = statisticsRepository.findLedgersByGroupId(groupId)
-            val sourceProjectionToken = sourceProjectionToken(ledgers)
             val storedByScheduleId = statisticsRepository.findGroupSessions(groupId)
                 .associateBy { it.scheduleId }
                 .toMutableMap()
-            val latestStored = storedByScheduleId[boundaries.last().scheduleId]
-            val rebuildAll = latestStored?.sourceProjectionToken != sourceProjectionToken
+            val requiredMembershipIds = boundaries.flatMap { boundary ->
+                val stored = storedByScheduleId[boundary.scheduleId]
+                when {
+                    stored == null -> initialRosterIds
+                    stored.membershipIds == null -> emptyList()
+                    else -> stored.membershipIds
+                }
+            }.toSet()
+            val memberships = loadAllMemberships(groupId)
+                .filter { it.id in requiredMembershipIds }
+            if (memberships.size != requiredMembershipIds.size) {
+                return@repeat
+            }
+            memberships.forEach { refresh(it, boundaries, observedAt) }
+            val ledgersByMembershipId = statisticsRepository.findLedgersByGroupId(groupId)
+                .associateBy { it.membershipId }
             var projectionComplete = true
             boundaries.forEach { boundary ->
                 val stored = storedByScheduleId[boundary.scheduleId]
-                val needsSave = rebuildAll || stored == null ||
+                if (stored != null && stored.membershipIds == null) {
+                    return@forEach
+                }
+                val membershipIds = stored?.membershipIds ?: initialRosterIds
+                val ledgers = membershipIds.mapNotNull(ledgersByMembershipId::get)
+                if (ledgers.size != membershipIds.size) {
+                    projectionComplete = false
+                    return@forEach
+                }
+                val sourceProjectionToken = sourceProjectionToken(ledgers)
+                val needsSave = stored == null ||
                     stored.sourceProjectionToken != sourceProjectionToken ||
                     stored.scheduleAt != boundary.scheduleAt || stored.session != boundary.session
                 if (needsSave && projectionComplete) {
@@ -162,14 +185,28 @@ class StatisticsQueryService(
                         current = stored,
                         ledgers = ledgers,
                         sourceProjectionToken = sourceProjectionToken,
+                        membershipIds = membershipIds,
                         observedAt = observedAt
                     )
                     projectionComplete = saved != null
                     saved?.let { storedByScheduleId[boundary.scheduleId] = it }
                 }
             }
-            if (projectionComplete && sourceProjectionToken == sourceProjectionToken(groupId)) {
-                return groupDto(group, boundaries, storedByScheduleId, activeMemberCount)
+            if (projectionComplete) {
+                val persistedByScheduleId = statisticsRepository.findGroupSessions(groupId)
+                    .associateBy { it.scheduleId }
+                val currentLedgersByMembershipId = statisticsRepository.findLedgersByGroupId(groupId)
+                    .associateBy { it.membershipId }
+                val stable = boundaries.all { boundary ->
+                    val persisted = persistedByScheduleId[boundary.scheduleId] ?: return@all false
+                    val membershipIds = persisted.membershipIds ?: return@all true
+                    val ledgers = membershipIds.mapNotNull(currentLedgersByMembershipId::get)
+                    ledgers.size == membershipIds.size &&
+                        persisted.sourceProjectionToken == sourceProjectionToken(ledgers)
+                }
+                if (stable) {
+                    return groupDto(group, boundaries, persistedByScheduleId, activeMemberCount)
+                }
             }
         }
         throw ConflictException(message = "그룹 통계 원장 투영이 완료되지 않아 다시 시도해야 합니다.")
@@ -187,9 +224,9 @@ class StatisticsQueryService(
         val previous = previousBoundary?.let { storedByScheduleId[it.scheduleId] }
         return GroupStatisticsDto(
             group = group,
-            latestSession = currentBoundary.session,
-            previousSession = previousBoundary?.session,
-            statisticsAt = currentBoundary.scheduleAt,
+            latestSession = current.session,
+            previousSession = previous?.session,
+            statisticsAt = current.statisticsAt,
             activeMemberCount = activeMemberCount,
             counts = current.counts,
             taskSubmissionRate = current.counts.taskSubmissionRate(),
@@ -199,17 +236,15 @@ class StatisticsQueryService(
         )
     }
 
-    private fun refreshAllMemberships(
-        groupId: ObjectId,
-        boundaries: List<StatisticsSessionBoundary>,
-        observedAt: Instant
-    ) {
+    private fun loadAllMemberships(groupId: ObjectId): List<StudyGroupMember> {
+        val memberships = mutableListOf<StudyGroupMember>()
         var cursor: ObjectId? = null
         do {
             val page = memberRepository.findByGroupIdIncludingDeleted(groupId, cursor, INTERNAL_PAGE_SIZE)
-            page.forEach { refresh(it, boundaries, observedAt) }
+            memberships += page
             cursor = page.lastOrNull()?.id
         } while (page.size == INTERNAL_PAGE_SIZE)
+        return memberships
     }
 
     private fun loadAllActiveMemberships(groupId: ObjectId): List<StudyGroupMember> {
@@ -229,30 +264,28 @@ class StatisticsQueryService(
         current: GroupSessionStatistics?,
         ledgers: List<MemberSessionStatisticsLedger>,
         sourceProjectionToken: String,
+        membershipIds: List<ObjectId>,
         observedAt: Instant
     ): GroupSessionStatistics? {
-        var expected = current
-        repeat(MAX_CAS_ATTEMPTS) {
-            val counts = statisticsRepository.sumMemberCounts(groupId, boundary.scheduleId, ledgers)
-                ?: return null
-            val replacement = GroupSessionStatistics(
-                id = expected?.id,
-                groupId = groupId,
-                scheduleId = boundary.scheduleId,
-                session = boundary.session,
-                scheduleAt = boundary.scheduleAt,
-                statisticsAt = boundary.scheduleAt,
-                counts = counts,
-                sourceProjectionToken = sourceProjectionToken,
-                version = (expected?.version ?: 0L) + 1L,
-                updatedAt = observedAt
-            )
-            if (statisticsRepository.compareAndSetGroupSession(expected?.version, replacement)) {
-                return replacement
-            }
-            expected = statisticsRepository.findGroupSession(groupId, boundary.scheduleId)
+        val counts = statisticsRepository.sumMemberCounts(groupId, boundary.scheduleId, ledgers)
+            ?: return null
+        val replacement = GroupSessionStatistics(
+            id = current?.id,
+            groupId = groupId,
+            scheduleId = boundary.scheduleId,
+            session = boundary.session,
+            scheduleAt = boundary.scheduleAt,
+            statisticsAt = boundary.scheduleAt,
+            counts = counts,
+            sourceProjectionToken = sourceProjectionToken,
+            version = (current?.version ?: 0L) + 1L,
+            updatedAt = observedAt,
+            membershipIds = membershipIds
+        )
+        if (statisticsRepository.compareAndSetGroupSession(current?.version, replacement)) {
+            return replacement
         }
-        throw ConflictException(message = "그룹 통계가 동시에 갱신되어 다시 시도해야 합니다.")
+        return null
     }
 
     private fun refresh(
@@ -276,10 +309,6 @@ class StatisticsQueryService(
     ): Map<ObjectId, List<StatisticsSessionBoundary>> {
         return scheduleSourcePort.loadBoundaries(groupIds, observedAt)
             .mapValues { (_, values) -> values.sortedWith(BOUNDARY_COMPARATOR) }
-    }
-
-    private fun sourceProjectionToken(groupId: ObjectId): String {
-        return sourceProjectionToken(statisticsRepository.findLedgersByGroupId(groupId))
     }
 
     private fun sourceProjectionToken(

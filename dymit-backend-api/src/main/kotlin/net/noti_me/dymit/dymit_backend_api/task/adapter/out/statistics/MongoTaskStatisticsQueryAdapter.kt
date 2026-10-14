@@ -104,7 +104,6 @@ class MongoTaskStatisticsQueryAdapter(
         val assignments = mongoTemplate.find(
             Query(
                 Criteria.where("memberId").`is`(query.memberId)
-                    .and("createdAt").gte(query.joinedAt)
             ),
             TaskAssignee::class.java
         )

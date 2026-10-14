@@ -18,7 +18,7 @@ fun sessionLedger(
     taskCalculatedThrough = at, scheduleCalculatedThrough = at,
     taskMutationWatermark = at, scheduleMutationWatermark = at,
     version = 2, projectionId = "current", projectionStartScheduleId = scheduleId,
-    projectionStartAt = at, updatedAt = at
+    projectionStartAt = at, updatedAt = at, calculationVersion = 2
 )
 
 /** 지정 원장과 일치하는 회차 투영 데이터를 생성합니다. */

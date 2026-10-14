@@ -32,7 +32,7 @@ data class StudyScheduleParticipationStatisticsDto(
 data class StudyScheduleStatisticsDto(
     val scheduleId: ObjectId,
     val session: Long,
-    val createdAt: Instant,
+    val createdAt: Instant?,
     val scheduleAt: Instant,
     val deletedAt: Instant?,
     val participations: List<StudyScheduleParticipationStatisticsDto>

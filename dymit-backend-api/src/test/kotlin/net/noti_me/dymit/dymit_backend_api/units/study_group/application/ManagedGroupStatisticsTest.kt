@@ -47,15 +47,24 @@ internal class ManagedGroupStatisticsTest : BehaviorSpec({
             every { schedules.loadBoundaries(pageIds, any()) } returns mapOf(groups[0] to listOf(boundary))
             every { schedules.loadGroupIdsHavingSchedule(pageIds) } returns pageIds.toSet()
             every { members.findByGroupIdIncludingDeleted(groups[0], null, any()) } returns listOf(membership)
+            every { members.findActiveByGroupId(groups[0], null, any()) } returns listOf(membership)
             every { refresh.execute(capture(commands)) } returns MemberStatisticsDto(
                 groups[0].toHexString(), membership.identifier, requester.toHexString(), 9, boundary.scheduleAt,
                 StatisticsCounts(2, 4, 1, 4), 50.0, 25.0
             )
             every { repository.findGroupSession(groups[0], boundary.scheduleId) } returns null
-            every { repository.findGroupSessions(groups[0]) } returns emptyList()
-            every { repository.findLedgersByGroupId(groups[0]) } returns emptyList()
+            val stored = mutableListOf<GroupSessionStatistics>()
+            every { repository.findGroupSessions(groups[0]) } answers { stored.toList() }
+            every { repository.findLedgersByGroupId(groups[0]) } returns listOf(
+                net.noti_me.dymit.dymit_backend_api.supports.sessionLedger(groupId = groups[0], membershipId = membership.id!!, scheduleId = boundary.scheduleId)
+            )
             every { repository.sumMemberCounts(groups[0], boundary.scheduleId, any()) } returns StatisticsCounts(2, 4, 1, 4)
-            every { repository.compareAndSetGroupSession(any(), any()) } returns true
+            every { repository.compareAndSetGroupSession(any(), any()) } answers {
+                val next = secondArg<GroupSessionStatistics>()
+                stored.removeAll { it.scheduleId == next.scheduleId }
+                stored += next
+                true
+            }
             val service = StatisticsQueryService(members, groupPort, repository, schedules, refresh)
             val command = GetManagedGroupStatisticsCommand(requester.toHexString(), cursor.toHexString(), 2)
             val first = service.execute(command)

@@ -47,6 +47,7 @@ internal class MongoStudyScheduleStatisticsQueryAdapterTest : BehaviorSpec({
             result.sources.single().participations.single().deletedAt shouldBe cutoff.plusSeconds(1)
             val maturation = scheduleQueries.single { it.queryObject.containsKey("scheduleAt") }.queryObject
             maturation.containsKey("updatedAt") shouldBe false
+            maturation.containsKey("createdAt") shouldBe false
             (maturation["scheduleAt"] as Document)["\$gt"] shouldBe previous
             (maturation["scheduleAt"] as Document)["\$lte"] shouldBe cutoff
         }
@@ -107,4 +108,21 @@ internal class MongoStudyScheduleStatisticsQueryAdapterTest : BehaviorSpec({
             (captured.captured.queryObject["isDeleted"] as Document)["\$ne"] shouldBe true
         }
     }
+    Given("가입 전에 생성되고 가입 이후 시작하는 일정의 전체 원천 조회") {
+        Then("생성일 제한 없이 원천을 반환하여 서비스가 예정일 자격을 판정한다") {
+            val mongo = mockk<MongoTemplate>()
+            val joined = Instant.parse("2026-09-01T00:00:00Z")
+            val cutoff = joined.plusSeconds(3600)
+            val captured = io.mockk.slot<Query>()
+            every { mongo.find(capture(captured), StudySchedule::class.java) } returns listOf(
+                StudySchedule(id = ObjectId(), scheduleAt = cutoff, createdAt = joined.minusSeconds(1)))
+            every { mongo.find(any<Query>(), ScheduleParticipant::class.java) } returns emptyList()
+            val result = MongoStudyScheduleStatisticsQueryAdapter(mongo).loadAll(
+                StudyScheduleStatisticsQuery(ObjectId(), ObjectId(), joined, null, cutoff, null, cutoff))
+            captured.captured.queryObject.containsKey("createdAt") shouldBe false
+            result.single().createdAt shouldBe joined.minusSeconds(1)
+            result.single().scheduleAt shouldBe cutoff
+        }
+    }
+
 })

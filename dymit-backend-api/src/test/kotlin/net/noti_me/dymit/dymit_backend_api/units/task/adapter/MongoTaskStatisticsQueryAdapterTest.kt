@@ -56,6 +56,7 @@ internal class MongoTaskStatisticsQueryAdapterTest : BehaviorSpec({
             )
             result.requiresReplay shouldBe true
             result.sources.single().assignments.single().statusHistory.size shouldBe 2
+            assignmentQueries.all { !it.queryObject.containsKey("createdAt") } shouldBe true
             assignmentQueries.clear()
             adapter.loadChanged(
                 TaskStatisticsQuery(groupId, memberId, previous.minusSeconds(604800), previous,

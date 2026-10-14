@@ -80,7 +80,7 @@ data class ScheduleParticipationData(
 data class ScheduleStatisticsSourceData(
     val scheduleId: ObjectId,
     val session: Long,
-    val createdAt: Instant,
+    val createdAt: Instant?,
     val scheduleAt: Instant,
     val scheduleDeletedAt: Instant?,
     val participations: List<ScheduleParticipationData>

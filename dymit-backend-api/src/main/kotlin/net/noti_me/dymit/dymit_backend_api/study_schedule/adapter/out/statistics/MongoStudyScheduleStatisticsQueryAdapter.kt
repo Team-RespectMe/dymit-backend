@@ -80,7 +80,6 @@ class MongoStudyScheduleStatisticsQueryAdapter(
         val matured = mongoTemplate.find(
             Query(
                 Criteria.where("groupId").`is`(query.groupId)
-                    .and("createdAt").gte(query.joinedAt)
                     .and("scheduleAt").gt(query.previousCutoff).lte(query.cutoff)
             ),
             StudySchedule::class.java
@@ -107,7 +106,6 @@ class MongoStudyScheduleStatisticsQueryAdapter(
                 Query(
                     Criteria.where("_id").`in`(participantScheduleIds)
                         .and("groupId").`is`(query.groupId)
-                        .and("createdAt").gte(query.joinedAt)
                 ),
                 StudySchedule::class.java
             )
@@ -127,7 +125,6 @@ class MongoStudyScheduleStatisticsQueryAdapter(
         val schedules = mongoTemplate.find(
             Query(
                 Criteria.where("groupId").`is`(query.groupId)
-                    .and("createdAt").gte(query.joinedAt)
             ),
             StudySchedule::class.java
         )
@@ -166,12 +163,11 @@ class MongoStudyScheduleStatisticsQueryAdapter(
                 ScheduleParticipant::class.java
             )
         }.groupBy { it.scheduleId }
-        return schedules.mapNotNull { schedule ->
-            val createdAt = schedule.createdAt ?: return@mapNotNull null
+        return schedules.map { schedule ->
             StudyScheduleStatisticsDto(
                 scheduleId = requireNotNull(schedule.id),
                 session = schedule.session,
-                createdAt = createdAt,
+                createdAt = schedule.createdAt,
                 scheduleAt = schedule.scheduleAt,
                 deletedAt = schedule.deletedAt,
                 participations = participants[schedule.id].orEmpty().mapNotNull { participant ->
