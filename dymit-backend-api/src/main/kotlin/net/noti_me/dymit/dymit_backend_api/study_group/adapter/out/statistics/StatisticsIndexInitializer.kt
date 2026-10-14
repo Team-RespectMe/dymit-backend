@@ -1,12 +1,9 @@
 package net.noti_me.dymit.dymit_backend_api.study_group.adapter.out.statistics
 
 import jakarta.annotation.PostConstruct
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupWeeklyStatistics
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.GroupSessionStatistics
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatistics
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberSessionStatisticsLedger
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberStatisticsLedger
-import net.noti_me.dymit.dymit_backend_api.study_group.domain.MemberWeeklyStatistics
 import net.noti_me.dymit.dymit_backend_api.study_group.domain.StudyGroupMember
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -16,7 +13,7 @@ import org.springframework.data.mongodb.core.index.IndexDefinition
 import org.springframework.stereotype.Component
 
 /**
- * 통계 CAS와 주간 조회에 필요한 MongoDB 인덱스를 보장합니다.
+ * 통계 CAS와 현재 회차 통계 조회에 필요한 MongoDB 인덱스를 보장합니다.
  */
 @Component
 class StatisticsIndexInitializer(
@@ -29,25 +26,6 @@ class StatisticsIndexInitializer(
     @PostConstruct
     fun ensureIndexes() {
         ensureSessionIndexes()
-        mongoTemplate.indexOps(MemberStatisticsLedger::class.java).ensureIndex(
-            Index().on("membershipId", Sort.Direction.ASC).unique()
-                .named("member_statistics_membership_uq")
-        )
-        mongoTemplate.indexOps(MemberWeeklyStatistics::class.java).ensureIndex(
-            CompoundIndexDefinition(
-                org.bson.Document(mapOf("membershipId" to 1, "weekEnd" to 1))
-            ).unique().named("member_weekly_statistics_membership_week_uq")
-        )
-        mongoTemplate.indexOps(MemberWeeklyStatistics::class.java).ensureIndex(
-            CompoundIndexDefinition(
-                org.bson.Document(mapOf("groupId" to 1, "weekEnd" to -1, "membershipId" to 1))
-            ).named("member_weekly_statistics_group_week_idx")
-        )
-        mongoTemplate.indexOps(GroupWeeklyStatistics::class.java).ensureIndex(
-            CompoundIndexDefinition(
-                org.bson.Document(mapOf("groupId" to 1, "weekEnd" to 1))
-            ).unique().named("group_weekly_statistics_group_week_uq")
-        )
         ensureSourceIndexes()
     }
 
