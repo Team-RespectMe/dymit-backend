@@ -16,6 +16,7 @@ interface StudyGroupApi {
 
     /** 현재 소유자 또는 관리자인 그룹의 통계 목록을 조회합니다. */
     @Operation(summary = "관리 그룹 통계 목록 조회", description = "현재 관리 권한이 있는 그룹의 최근 진행 회차 통계를 조회합니다.")
+    @SecurityRequirement(name = "bearer-jwt")
     fun getManagedGroupStatistics(
         @LoginMember memberInfo: MemberInfo,
         cursor: String?,
@@ -26,6 +27,7 @@ interface StudyGroupApi {
      * 그룹의 최근 진행 회차와 직전 진행 회차 누적 비율을 조회합니다.
      */
     @Operation(summary = "스터디 그룹 통계 조회", description = "그룹 소유자 또는 관리자가 최근·직전 진행 회차 통계를 조회합니다.")
+    @SecurityRequirement(name = "bearer-jwt")
     fun getGroupStatistics(
         @LoginMember memberInfo: MemberInfo,
         groupId: String
@@ -35,6 +37,7 @@ interface StudyGroupApi {
      * 그룹 구성원 통계를 페이지 단위로 조회합니다.
      */
     @Operation(summary = "스터디 그룹 구성원 통계 목록 조회", description = "그룹 소유자 또는 관리자가 현재 구성원의 통계를 조회합니다.")
+    @SecurityRequirement(name = "bearer-jwt")
     fun getGroupMemberStatistics(
         @LoginMember memberInfo: MemberInfo,
         groupId: String,
@@ -46,6 +49,7 @@ interface StudyGroupApi {
      * 구성원 개인 통계를 조회합니다.
      */
     @Operation(summary = "스터디 그룹 구성원 통계 조회", description = "본인 또는 그룹 소유자·관리자가 구성원 통계를 조회합니다.")
+    @SecurityRequirement(name = "bearer-jwt")
     fun getMemberStatistics(
         @LoginMember memberInfo: MemberInfo,
         groupId: String,
