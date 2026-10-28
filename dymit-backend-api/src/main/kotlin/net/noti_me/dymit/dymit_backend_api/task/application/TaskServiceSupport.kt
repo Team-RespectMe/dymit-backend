@@ -172,12 +172,6 @@ class TaskServiceSupport(
         return resolveTaskTypeBySchedule(schedule, TaskExpireAtNormalizer.currentUtcDateTime())
     }
 
-    fun validatePreTaskCreatable(schedule: StudySchedule, requestedAt: Instant) {
-        if ( TaskExpireAtNormalizer.toKst(requestedAt).isAfter(TaskExpireAtNormalizer.toKst(schedule.scheduleAt).minusSeconds(24 * 60 * 60)) ) {
-            throw BadRequestException(message = "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다.")
-        }
-    }
-
     fun normalizeExpireAtForCreate(
         type: TaskType,
         requestedExpireAt: Instant,

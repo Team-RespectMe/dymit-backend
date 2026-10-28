@@ -60,7 +60,7 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                 }
             }
 
-            When("연관 일정이 24시간보다 더 남아 있으면") {
+            When("연관 일정이 시작 전이면") {
                 Then("PRE 과제로 저장하고 일정 참여자를 대상자로 초기화한다") {
                     val ownerId = ObjectId.get()
                     val groupId = ObjectId.get()
@@ -91,7 +91,6 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
                     every { support.loadGroup(groupId.toHexString()) } returns group
                     every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
                     every { support.resolveTaskTypeBySchedule(schedule, any()) } returns TaskType.PRE
-                    every { support.validatePreTaskCreatable(schedule, any()) } just runs
                     every {
                         support.normalizeExpireAtForCreate(TaskType.PRE, command.expireAt, schedule)
                     } returns schedule.scheduleAt
@@ -109,49 +108,10 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
 
                     createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
 
-                    verify(exactly = 1) { support.validatePreTaskCreatable(schedule, any()) }
                     verify(exactly = 0) { support.toObjectIds(command.assigneeMemberIds, "assigneeMemberIds") }
                     verify(exactly = 1) { support.initializeAssigneesForPreTask(savedTask.id!!, scheduleId) }
                     verify(exactly = 0) { support.initializeAssignees(any(), any()) }
                     verify(exactly = 0) { support.validateAssigneeMembersInGroup(any(), any()) }
-                }
-            }
-
-            When("연관 일정이 24시간 이내로 남아 있으면") {
-                Then("BadRequestException이 발생하고 저장하지 않는다") {
-                    val ownerId = ObjectId.get()
-                    val groupId = ObjectId.get()
-                    val scheduleId = ObjectId.get()
-                    val memberInfo = createMemberInfo(ownerId)
-                    val group = StudyGroup(id = groupId, ownerId = ownerId)
-                    val schedule = StudySchedule(
-                        id = scheduleId,
-                        groupId = groupId,
-                        scheduleAt = Instant.now().plusSeconds(23L * 3600L)
-                    )
-                    val command = CreateTaskCommand(
-                        relatedScheduleId = scheduleId.toHexString(),
-                        title = "과제 제목",
-                        description = "과제 설명",
-                        attachmentFileIds = emptyList(),
-                        assigneeMemberIds = listOf(ObjectId.get().toHexString()),
-                        expireAt = Instant.now().plusSeconds(1L * 86400L)
-                    )
-
-                    every { support.loadGroup(groupId.toHexString()) } returns group
-                    every { support.loadSchedule(scheduleId.toHexString()) } returns schedule
-                    every { support.resolveTaskTypeBySchedule(schedule, any()) } returns TaskType.PRE
-                    every {
-                        support.validatePreTaskCreatable(schedule, any())
-                    } throws BadRequestException(message = "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다.")
-
-                    shouldThrow<BadRequestException> {
-                        createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
-                    }.message shouldBe "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다."
-
-                    verify(exactly = 0) { support.saveTask(any()) }
-                    verify(exactly = 0) { support.initializeAssigneesForPreTask(any(), any()) }
-                    verify(exactly = 0) { support.initializeAssignees(any(), any()) }
                 }
             }
 
@@ -204,7 +164,6 @@ internal class TaskUseCaseTask62BusinessRuleTest : BehaviorSpec() {
 
                     createTaskUseCase.createTask(memberInfo, groupId.toHexString(), command)
 
-                    verify(exactly = 0) { support.validatePreTaskCreatable(any(), any()) }
                     verify(exactly = 1) { support.validateAssigneeMembersInGroup(groupId, listOf(assigneeId1, assigneeId2)) }
                     verify(exactly = 1) { support.initializeAssignees(savedTask.id!!, listOf(assigneeId1, assigneeId2)) }
                     verify(exactly = 0) { support.initializeAssigneesForPreTask(any(), any()) }

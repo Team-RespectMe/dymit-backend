@@ -33,9 +33,6 @@ class CreateTaskUseCaseImpl(
         support.checkScheduleInGroup(schedule, groupIdObjectId)
         val requestedAt = TaskExpireAtNormalizer.currentUtcDateTime()
         val resolvedType = support.resolveTaskTypeBySchedule(schedule, requestedAt)
-        if ( resolvedType == TaskType.PRE ) {
-            support.validatePreTaskCreatable(schedule, requestedAt)
-        }
         val expireAt = support.normalizeExpireAtForCreate(resolvedType, command.expireAt, schedule)
 
         val attachmentIds = support.toObjectIds(command.attachmentFileIds.distinct(), "attachmentFileIds")

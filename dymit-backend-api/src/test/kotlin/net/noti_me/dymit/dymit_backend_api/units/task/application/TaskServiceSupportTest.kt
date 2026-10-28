@@ -107,36 +107,6 @@ internal class TaskServiceSupportTest : BehaviorSpec() {
                     support.resolveTaskTypeBySchedule(startedSchedule, requestedAt) shouldBe TaskType.POST
                 }
             }
-
-            When("요청 시각이 일정 시작 24시간 전과 정확히 같으면") {
-                Then("사전 과제 생성 검증을 통과한다") {
-                    val schedule = StudySchedule(
-                        id = ObjectId.get(),
-                        groupId = ObjectId.get(),
-                        scheduleAt = Instant.parse("2026-06-12T10:00:00Z")
-                    )
-
-                    shouldNotThrowAny {
-                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusSeconds(24L * 3600L))
-                    }
-                }
-            }
-
-            When("요청 시각이 일정 시작 24시간 전보다 늦으면") {
-                Then("BadRequestException이 발생한다") {
-                    val schedule = StudySchedule(
-                        id = ObjectId.get(),
-                        groupId = ObjectId.get(),
-                        scheduleAt = Instant.parse("2026-06-12T10:00:00Z")
-                    )
-
-                    val exception = shouldThrow<BadRequestException> {
-                        support.validatePreTaskCreatable(schedule, schedule.scheduleAt.minusSeconds(24L * 3600L).plusSeconds(1L * 60L))
-                    }
-
-                    exception.message shouldBe "사전 과제는 일정 시작 24시간 이전에만 생성할 수 있습니다."
-                }
-            }
         }
 
         Given("TASK-62 생성/수정 마감 시각 규칙") {
